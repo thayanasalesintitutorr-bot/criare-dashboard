@@ -370,7 +370,6 @@ async function fetchAllLeadsByPipeline(
     {
       headers: {
         apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
         'Accept-Profile': 'kommo',
       },
     }
@@ -386,7 +385,6 @@ async function fetchAllLeadsByPipeline(
 
   from += pageSize
 }
-
 
   return allData
 }
