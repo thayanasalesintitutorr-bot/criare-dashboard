@@ -364,24 +364,30 @@ async function fetchAllLeadsByPipeline(
   const pageSize = 1000
 
   while (true) {
-    const { data, error } = await supabase
-      .schema('kommo')
-      .from('leads')
-      .select(
-        'id, name, pipeline_id, status_id, faturamento, venda, created_at, updated_at, closed_at, closest_task_at, campanha, source, tag, medico, scheduled_at, Produto, Atendimento, Convênio'
-      )
-      .eq('pipeline_id', pipelineId)
-      .range(from, from + pageSize - 1)
 
-    if (error) throw new Error(error.message)
-    if (!data || data.length === 0) break
+  const response = await fetch(
+    `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convênio&offset=${from}&limit=${pageSize}`,
+    {
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+        'Accept-Profile': 'kommo',
+      },
+    }
+  )
 
-    allData = allData.concat(data as unknown as Lead[])
-    if (data.length < pageSize) break
-    from += pageSize
-  }
+  const data = await response.json()
 
-  
+  if (!data || data.length === 0) break
+
+  allData = allData.concat(data as Lead[])
+
+  if (data.length < pageSize) break
+
+  from += pageSize
+}
+
+
   return allData
 }
 
