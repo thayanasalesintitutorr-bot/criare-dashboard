@@ -332,7 +332,15 @@ export default function DashboardPage() {
         setLoading(true)
         setError(null)
 
-        const res = await fetch(`/api/test?periodo=${periodo}&tipo=${tipoData}`)
+        const token = localStorage.getItem('access_token')
+
+const res = await fetch(`/api/test?periodo=${periodo}&tipo=${tipoData}`, {
+  cache: 'no-store',
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
+
         const json: DashboardResponse = await res.json()
 
         if (!json.ok) {

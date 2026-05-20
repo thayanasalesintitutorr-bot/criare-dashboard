@@ -443,7 +443,15 @@ export default function DashboardPage() {
           url += `&inicio=${dataInicio}&fim=${dataFim}`
         }
 
-        const res = await fetch(url, { cache: 'no-store' })
+        const token = localStorage.getItem('access_token')
+
+const res = await fetch(url, {
+  cache: 'no-store',
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
+
         const json: DashboardResponse = await res.json()
 
         if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')

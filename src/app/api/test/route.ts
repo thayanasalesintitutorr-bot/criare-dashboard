@@ -1,5 +1,3 @@
-
-
 export const dynamic = 'force-dynamic'
 
 type Lead = {
@@ -370,7 +368,7 @@ async function fetchAllLeadsByPipeline(
   {
     headers: {
   apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }
@@ -395,7 +393,7 @@ const data = await response.json()
   return allData
 }
 
-export async function GET(req: Request) {
+    export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
 
@@ -898,7 +896,7 @@ const origensPropostasFechadas = buildOrigens(propostasFechadasLeads)
   {
     headers: {
   apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }
@@ -931,7 +929,7 @@ const noShowResponse = await fetch(
   {
     headers: {
   apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }

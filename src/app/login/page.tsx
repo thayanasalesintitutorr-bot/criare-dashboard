@@ -25,17 +25,20 @@ export default function LoginPage() {
   const senhaDigitada = password.trim()
 
   if (
-    emailDigitado === 'altuusclinic@gmail.com' &&
-    senhaDigitada === 'Altuus@2026#'
-  ) {
-    router.push('/dashboard')
-    return
-  }
+  emailDigitado === 'altuusclinic@gmail.com' &&
+  senhaDigitada === 'Altuus@2026#'
+) {
+  localStorage.setItem('access_token', 'criare-auth')
+
+  document.cookie = 'criare-auth=true; path=/'
+
+  router.push('/dashboard')
+  return
+}
 
   setError('E-mail ou senha incorretos')
   setLoading(false)
 }
-
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f0eeff] via-white to-[#e8e4ff]">
       {/* Animação sutil de fundo */}

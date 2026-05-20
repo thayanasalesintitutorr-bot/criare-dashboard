@@ -90,7 +90,15 @@ export default function ReabordPage() {
           url += `&inicio=${dataInicio}&fim=${dataFim}`
         }
 
-        const res = await fetch(url, { cache: 'no-store' })
+        const token = localStorage.getItem('access_token')
+
+const res = await fetch(url, {
+  cache: 'no-store',
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+})
+
         const json = await res.json()
 
         setLeads(json?.reabordLeads || json?.leadsReabord || [])
