@@ -1,4 +1,4 @@
-import { supabase } from '@/app/lib/supabase'
+
 
 export const dynamic = 'force-dynamic'
 
@@ -366,16 +366,22 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-    `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convênio&offset=${from}&limit=${pageSize}`,
-    {
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        'Accept-Profile': 'kommo',
-      },
-    }
-  )
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convênio&offset=${from}&limit=${pageSize}`,
+  {
+    headers: {
+  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  'Accept-Profile': 'kommo',
+},
+  }
+)
 
-  const data = await response.json()
+if (!response.ok) {
+  const errorText = await response.text()
+  throw new Error(errorText)
+}
+
+const data = await response.json()
 
   if (!data || data.length === 0) break
 
@@ -887,14 +893,23 @@ const origensVendaConsulta = buildOrigens(consultaGanhosLeads)
 
 const origensPropostasFechadas = buildOrigens(propostasFechadasLeads)
 
-   const { data: npsData, error: npsError } = await supabase
-  .schema('kommo')
-  .from('nps')
-  .select('*')
+  const npsResponse = await fetch(
+  'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/nps?select=*',
+  {
+    headers: {
+  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  'Accept-Profile': 'kommo',
+},
+  }
+)
 
-if (npsError) {
-  throw new Error(npsError.message)
+if (!npsResponse.ok) {
+  const errorText = await npsResponse.text()
+  throw new Error(errorText)
 }
+
+const npsData = await npsResponse.json()
 
 const npsFiltrado = (npsData || []).filter((item: any) => {
   return inRange(
@@ -911,14 +926,23 @@ const npsGoogle = npsFiltrado.reduce((total: number, item: any) => {
 const metaNpsGoogle = getMetaNps(range.start, range.end)
 const npsGooglePercent = safePercent(npsGoogle, metaNpsGoogle)
 
-const { data: noShowData, error: noShowError } = await supabase
-  .schema('kommo')
-  .from('noshow')
-  .select('*')
+const noShowResponse = await fetch(
+  'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*',
+  {
+    headers: {
+  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  'Accept-Profile': 'kommo',
+},
+  }
+)
 
-if (noShowError) {
-  throw new Error(noShowError.message)
+if (!noShowResponse.ok) {
+  const errorText = await noShowResponse.text()
+  throw new Error(errorText)
 }
+
+const noShowData = await noShowResponse.json()
 
 const noShowFiltrado = (noShowData || []).filter((item: any) => {
   const dentroDoPeriodo = inRange(
