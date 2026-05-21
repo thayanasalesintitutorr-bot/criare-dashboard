@@ -18,7 +18,7 @@ type Lead = {
   tag?: string | null
   Produto?: string | string[] | null
   Atendimento?: string | null
-'Convênio'?: string | null
+  Convenio?: string | null
 }
 
 function normalize(value: unknown) {
@@ -364,11 +364,11 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convênio&offset=${from}&limit=${pageSize}`,
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convenio&offset=${from}&limit=${pageSize}`,
   {
     headers: {
-  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }
@@ -895,8 +895,8 @@ const origensPropostasFechadas = buildOrigens(propostasFechadasLeads)
   'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/nps?select=*',
   {
     headers: {
-  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }
@@ -928,8 +928,8 @@ const noShowResponse = await fetch(
   'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*',
   {
     headers: {
-  apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`,
+  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
   'Accept-Profile': 'kommo',
 },
   }
@@ -1068,7 +1068,7 @@ const atendimentoConsulta = Object.values(
 
 const conveniosConsulta = Object.values(
   consultaGanhosLeads.reduce((acc: any, lead: any) => {
-    const convenio = String(lead['Convênio'] || '').trim().toUpperCase()
+    const convenio = String(lead['Convenio'] || '').trim().toUpperCase()
 
     if (!convenio || convenio === 'NULL') return acc
 

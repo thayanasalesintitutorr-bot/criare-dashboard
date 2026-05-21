@@ -121,9 +121,9 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!isLoggedIn) router.replace('/login')
-  }, [isLoggedIn])
+useEffect(() => {
+  if (!isLoggedIn) router.replace('/login')
+}, [isLoggedIn, router])
 
   useEffect(() => {
     if (!isLoggedIn) return
