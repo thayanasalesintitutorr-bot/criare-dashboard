@@ -6,30 +6,32 @@ import {
   ChevronRight,
   LayoutDashboard,
   Filter,
-  Phone,
   DollarSign,
-  TrendingUp,
-  MapPin,
-  Stethoscope,
-  ShieldCheck,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const items = [
-  { href: '/dashboard', label: 'Visão Geral', icon: LayoutDashboard },
-  { href: '/marketing', label: 'Marketing', icon: TrendingUp },
-  { href: '/funil', label: 'Consultas', icon: Filter },
-  { href: '/reabord', label: 'Reabord', icon: Phone },
-  { href: '/vendas', label: 'Vendas (Faturamento)', icon: DollarSign },
-  { href: '/origens', label: 'Origens', icon: MapPin },
-  { href: '/medicos', label: 'Médicos', icon: Stethoscope },
-  { href: '/auditoria', label: 'Auditoria', icon: ShieldCheck },
+  {
+    href: '/dashboard',
+    label: 'Visão Geral',
+    icon: LayoutDashboard,
+  },
+  {
+    href: '/funil',
+    label: 'Consultas',
+    icon: Filter,
+  },
+  {
+    href: '/vendas',
+    label: 'Vendas',
+    icon: DollarSign,
+  },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
 
   return (
     <aside

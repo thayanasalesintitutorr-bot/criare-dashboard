@@ -1,7 +1,13 @@
 'use client'
 
 import { ReactNode, useEffect, useState } from 'react'
-import { ClipboardList, Funnel, Star, Stethoscope, Users } from 'lucide-react'
+import {
+  ClipboardList,
+  Funnel,
+  Star,
+  Stethoscope,
+  Users,
+} from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -34,19 +40,31 @@ type DashboardResponse = {
   ok: boolean
   kpis?: {
     marketing: {
-      totalEntradas: number
-      naoQualificados: number
-      naoQualificadosPercent: number
-      leadsAceitos: number
-      leadsAceitosPercent: number
-      agendados: number
-      agendadosPercent: number
-    }
+  totalEntradas: number
+  naoQualificados: number
+  naoQualificadosPercent: number
+  leadsAceitos: number
+  leadsAceitosPercent: number
+  convertidos: number
+  convertidosPercent: number
+  leadA: number
+  leadB: number
+  leadC: number
+  leadD: number
+}
     comercialConsulta: {
-      quantidadeConsulta: number
-      valorTotalConsulta: number
-      ticketMedioConsulta: number
-    }
+  quantidadeConsulta: number
+  valorTotalConsulta: number
+  ticketMedioConsulta: number
+
+  quantidadeReabord: number
+  valorTotalReabord: number
+  ticketMedioReabord: number
+
+  quantidadeTotal: number
+  valorTotal: number
+  ticketMedioTotal: number
+}
     comercialVendas: {
       propostasEnviadas: number
       propostasFechadas: number
@@ -105,7 +123,17 @@ conveniosConsulta?: {
     fechadoPerdido: number
     emConversa: number
     semConversa: number
+    
+    consolidado?: {
+  qtdVendas: number
+  valorVendas: number
+  ticketMedio: number
+  metaValorVendas: number
+  metaTicketMedio: number
+}
+
   }
+
   evolucaoDiaria?: EvolucaoDiariaItem[]
   origens?: OrigemItem[]
   consultaPorMedico?: {
@@ -116,14 +144,7 @@ conveniosConsulta?: {
   quantidadeConsulta: number
   valorConsulta: number
   ticketMedio: number
-}[]
-  vendasPorMedico?: {
-  nome: string
-  valor: number
-  produtos: {
-    produto: string
-    qtd: number
-  }[]
+  proximosAtendimentos: number
 }[]
 campanhasConsulta?: {
   nome: string
@@ -131,6 +152,18 @@ campanhasConsulta?: {
   valor: number
   percentual: number
 }[]
+
+vendasPorMedico?: {
+  nome: string
+  valor: number
+  meta: number
+  percentual: number
+  produtos?: {
+    produto: string
+    qtd: number
+  }[]
+}[]
+
   error?: string
 
 campanhaSiteRodolpho?: {
@@ -199,15 +232,24 @@ function GroupCard({
   icon: React.ReactNode
   children: React.ReactNode
 }) {
+  const { viewMode } = useFilters()
+  const isMobile = viewMode === 'mobile'
+
   return (
     <section className={`rounded-[28px] p-6 ${cardBg()}`}>
       <div className="mb-5 flex items-start gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]">
           {icon}
         </div>
-        <h3 className={`text-[22px] font-black leading-[1.05] tracking-[-0.04em] ${textPrimary()}`}>
-          {title}
-        </h3>
+        <h3
+  className={`
+    ${isMobile ? 'text-[42px]' : 'text-[24px]'}
+    font-black tracking-[-0.05em]
+    ${textPrimary()}
+  `}
+>
+  {title}
+</h3>
       </div>
       <div className="space-y-7">{children}</div>
     </section>
@@ -223,20 +265,26 @@ function SimpleMetric({
   value: number | string
   accent?: 'gold' | 'blue' | 'green'
 }) {
-  const dot =
-    accent === 'blue'
-      ? 'bg-sky-400'
-      : accent === 'green'
-        ? 'bg-emerald-400'
-        : 'bg-[var(--accent)]'
+  const { viewMode } = useFilters()
+  const isMobile = viewMode === 'mobile'
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <span className={`h-3 w-3 rounded-full ${dot}`} />
-        <h4 className={`text-[15px] font-semibold ${textPrimary()}`}>{label}</h4>
+      <h4
+        className={`${
+          isMobile ? 'text-[26px] font-black' : 'text-[18px] font-semibold'
+        } ${textPrimary()}`}
+      >
+        {label}
+      </h4>
+
+      <div
+        className={`${
+          isMobile ? 'text-[64px]' : 'text-5xl'
+        } font-black tracking-[-0.05em] ${textPrimary()}`}
+      >
+        {value}
       </div>
-      <div className={`text-4xl font-black tracking-[-0.05em] ${textPrimary()}`}>{value}</div>
     </div>
   )
 }
@@ -256,31 +304,76 @@ function GoalMetric({
   mode: 'max' | 'min'
   metaLabel?: string
 }) {
+  const { viewMode } = useFilters()
   const s = getMetricStatus(percent, target, mode)
 
+  const isMobile = viewMode === 'mobile'
+
   return (
-    <div className="space-y-2">
-      <h4 className={`text-[15px] font-semibold leading-tight ${textPrimary()}`}>{label}</h4>
-      <div className={`text-4xl font-black tracking-[-0.05em] ${textPrimary()}`}>{value}</div>
-      <div className="flex items-center gap-2 text-sm">
-  <span className={`font-semibold ${s.textClass}`}>
+    <div className={isMobile ? 'space-y-2' : 'space-y-2'}>
+      <h4
+        className={`${
+          isMobile ? 'text-[28px] font-black' : 'text-[18px] font-semibold'
+        } leading-tight ${textPrimary()}`}
+      >
+        {label}
+      </h4>
+
+      <div
+        className={`${
+          isMobile ? 'text-[64px]' : 'text-5xl'
+        } font-black tracking-[-0.05em] ${textPrimary()}`}
+      >
+        {value}
+      </div>
+
+      <div className="flex items-center gap-3">
+  <span
+    className={`${
+      isMobile ? 'text-[28px]' : 'text-lg'
+    } font-black ${s.textClass}`}
+  >
     {formatPercent(percent)}
   </span>
 
-  <span className={textSecondary()}>de</span>
+  <span
+    className={`${
+      isMobile ? 'text-[28px]' : 'text-lg'
+    } font-black ${textSecondary()}`}
+  >
+    de
+  </span>
 
-  <span className={textSecondary()}>
+  <span
+    className={`${
+      isMobile ? 'text-[28px]' : 'text-lg'
+    } font-black ${textSecondary()}`}
+  >
     {target}%
   </span>
 
   {metaLabel && (
-    <span className="text-xs text-slate-400">
+    <span
+      className={`${
+        isMobile ? 'text-[32px]' : 'text-lg'
+      } text-slate-400`}
+    >
       {metaLabel}
     </span>
   )}
 </div>
-      <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-        <div className={`h-3 rounded-full ${s.barClass}`} style={{ width: `${clampPercent(percent)}%` }} />
+
+      <div
+        className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+          isMobile
+  ? 'h-8 w-full rounded-xl'
+  : 'h-3 w-full rounded-full'
+        }`}
+      >
+        <div
+          className={`${isMobile ? 'h-8 rounded-xl' : 'h-3 rounded-full'} ${s.barClass}`}
+          style={{ width: `${clampPercent(percent)}%` }}
+        />
       </div>
     </div>
   )
@@ -289,8 +382,8 @@ function GoalMetric({
 function ExperiencePlaceholder({ label }: { label: string }) {
   return (
     <div className="space-y-2">
-      <h4 className={`text-[15px] font-semibold ${textPrimary()}`}>{label}</h4>
-      <div className={`text-4xl font-black tracking-[-0.05em] ${textPrimary()}`}>—</div>
+      <h4 className={`text-[18px] font-semibold ${textPrimary()}`}>{label}</h4>
+      <div className={`text-5xl font-black tracking-[-0.05em] ${textPrimary()}`}>—</div>
       <p className={`text-sm ${textSecondary()}`}>Em breve com integração Google</p>
       <div className="h-3 rounded-full bg-slate-200 dark:bg-white/10">
         <div className="h-3 w-[32%] rounded-full bg-slate-300 dark:bg-white/15" />
@@ -425,11 +518,14 @@ function FunnelChart({
 }
 
 export default function DashboardPage() {
-  const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode } = useFilters()
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [leadsSelecionados, setLeadsSelecionados] = useState<('A' | 'B' | 'C' | 'D')[]>(['A'])
+
+
 
   useEffect(() => {
     async function loadData() {
@@ -583,10 +679,35 @@ const siteDonutData = siteStatusData.map((item) => ({
   color: item.color,
 }))
 const campanhasConsulta = data?.campanhasConsulta || []
+const leadsPorTipo = {
+  A: marketing?.leadA || 0,
+  B: marketing?.leadB || 0,
+  C: marketing?.leadC || 0,
+  D: marketing?.leadD || 0,
+}
+
+const quantidadeLeadSelecionado = leadsSelecionados.reduce(
+    (total, item) => total + leadsPorTipo[item],
+    0
+  )
+
+  const convertidosFiltradoPercent =
+  quantidadeLeadSelecionado > 0
+    ? (Number(marketing?.convertidos || 0) / quantidadeLeadSelecionado) * 100
+    : 0
+
+
   return (
     <AppShell title="Visão Geral">
       <div className="space-y-8">
-        <div className="grid gap-6 xl:grid-cols-4">
+       
+    <div
+  className={`grid gap-6 ${
+    viewMode === 'mobile'
+  ? 'grid-cols-1 w-full'
+  : 'xl:grid-cols-4'
+  }`}
+>
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>
             <SimpleMetric label="Total de leads recebidos" value={marketing?.totalEntradas || 0} accent="blue" />
             <GoalMetric
@@ -596,39 +717,161 @@ const campanhasConsulta = data?.campanhasConsulta || []
               target={10}
               mode="max"
             />
+            <div className="space-y-3">
+  <h4
+    className={`${
+      viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[18px] font-semibold'
+    } leading-tight ${textPrimary()}`}
+  >
+    Leads aceitos (SAL - lead aceito)
+  </h4>
+
+  <div className="grid grid-cols-4 gap-3">
+    {(['A', 'B', 'C', 'D'] as const).map((item) => (
+      <button
+        key={item}
+        type="button"
+        onClick={() =>
+  setLeadsSelecionados((atual) =>
+    atual.includes(item)
+      ? atual.filter((lead) => lead !== item)
+      : [...atual, item]
+  )
+}
+        className={`rounded-xl border py-2 font-black transition ${
+          leadsSelecionados.includes(item)
+            ? 'border-emerald-400 bg-emerald-50 text-emerald-500'
+            : 'border-slate-200 bg-white text-slate-600'
+        } ${viewMode === 'mobile' ? 'text-[28px]' : 'text-lg'}`}
+      >
+        {item}
+      </button>
+    ))}
+  </div>
+
+  <div
+    className={`${
+      viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+    } font-black tracking-[-0.05em] ${textPrimary()}`}
+  >
+    {quantidadeLeadSelecionado}
+  </div>
+
+  
+</div>
+<div className="space-y-2">
+  <div
+    className={`flex items-center gap-3 ${
+      viewMode === 'mobile'
+        ? 'text-[28px]'
+        : 'text-base'
+    }`}
+  >
+    <span className="font-black text-emerald-500">
+      {formatPercent(
+        marketing?.totalEntradas
+          ? (quantidadeLeadSelecionado / marketing.totalEntradas) * 100
+          : 0
+      )}
+    </span>
+
+    <span className={textSecondary()}>
+      dos leads recebidos
+    </span>
+  </div>
+
+  <div
+    className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+      viewMode === 'mobile'
+        ? 'h-8 rounded-xl'
+        : 'h-3 rounded-full'
+    }`}
+  >
+    <div
+      className={`bg-emerald-400 ${
+        viewMode === 'mobile'
+          ? 'h-8 rounded-xl'
+          : 'h-3 rounded-full'
+      }`}
+      style={{
+        width: `${
+          marketing?.totalEntradas
+            ? (quantidadeLeadSelecionado /
+                marketing.totalEntradas) *
+              100
+            : 0
+        }%`,
+      }}
+    />
+  </div>
+</div>
             <GoalMetric
-              label="Leads aceitos (SAL - lead aceito)"
-              value={marketing?.leadsAceitos || 0}
-              percent={marketing?.leadsAceitosPercent || 0}
-              target={90}
-              mode="min"
-            />
-            <GoalMetric
-              label="Lead SQL (Agendado)"
-              value={marketing?.agendados || 0}
-              percent={marketing?.agendadosPercent || 0}
-              target={30}
-              mode="min"
-            />
+  label="Convertido"
+  value={marketing?.convertidos || 0}
+  percent={convertidosFiltradoPercent}
+  target={30}
+  mode="min"
+/>
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-            <SimpleMetric
-              label="Quantidade de consulta"
-              value={comercialConsulta?.quantidadeConsulta || 0}
-              accent="blue"
-            />
-            <SimpleMetric
-              label="Valor de consulta"
-              value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)}
-              accent="gold"
-            />
-            <SimpleMetric
-              label="Ticket Médio"
-              value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)}
-              accent="green"
-            />
-          </GroupCard>
+  <div className="space-y-4">
+    <div className="flex items-center gap-3">
+  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+  <h4
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[26px]'
+      : 'text-lg'
+  } font-black uppercase tracking-wide ${textSecondary()}`}
+>
+    Consulta
+  </h4>
+</div>
+
+    <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeConsulta || 0} accent="blue" />
+    <SimpleMetric label="Faturamento" value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)} accent="gold" />
+    <SimpleMetric label="Ticket Médio" value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} accent="green" />
+  </div>
+
+  <div className="space-y-4 border-t border-black/10 pt-5 dark:border-white/10">
+    <div className="flex items-center gap-3">
+  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+  <h4
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[26px]'
+      : 'text-lg'
+  } font-black uppercase tracking-wide ${textSecondary()}`}
+>
+    Reabordagem
+  </h4>
+</div>
+
+    <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeReabord || 0} accent="blue" />
+    <SimpleMetric label="Faturamento" value={formatMoney(comercialConsulta?.valorTotalReabord || 0)} accent="gold" />
+    <SimpleMetric label="Ticket Médio" value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)} accent="green" />
+  </div>
+
+  <div className="space-y-4 border-t border-black/10 pt-5 dark:border-white/10">
+    <div className="flex items-center gap-3">
+  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+  <h4
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[26px]'
+      : 'text-lg'
+  } font-black uppercase tracking-wide ${textSecondary()}`}
+>
+    Total semanal
+  </h4>
+</div>
+
+    <SimpleMetric label="Quantidade total" value={comercialConsulta?.quantidadeTotal || 0} accent="blue" />
+    <SimpleMetric label="Faturamento total" value={formatMoney(comercialConsulta?.valorTotal || 0)} accent="gold" />
+    <SimpleMetric label="Ticket médio total" value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} accent="green" />
+  </div>
+</GroupCard>
 
           <GroupCard title="Comercial III" icon={<Users size={26} />}>
             <SimpleMetric
@@ -655,73 +898,146 @@ const campanhasConsulta = data?.campanhasConsulta || []
             />
           </GroupCard>
 
-         <GroupCard title="Experiência do Cliente" icon={<Star size={26} />}>
+         <GroupCard title="Comparecimento" icon={<Star size={26} />}>
   <GoalMetric
-  label="No Show"
-  value={experienciaCliente?.noShow ?? 0}
-  percent={experienciaCliente?.noShowPercent ?? 0}
-  target={experienciaCliente?.metaNoShowPercent ?? 10}
-metaLabel={`ideal até ${experienciaCliente?.metaNoShowQuantidade ?? 0}`}
-  mode="max"
-/>
+    label="No Show"
+    value={experienciaCliente?.noShow ?? 0}
+    percent={experienciaCliente?.noShowPercent ?? 0}
+    target={experienciaCliente?.metaNoShowPercent ?? 10}
+    metaLabel={`ideal até ${experienciaCliente?.metaNoShowQuantidade ?? 0}`}
+    mode="max"
+  />
 
   <GoalMetric
-  label="NPS (Google)"
-  value={experienciaCliente?.npsGoogle ?? 0}
-  percent={experienciaCliente?.npsGooglePercent ?? 0}
-  target={experienciaCliente?.metaNpsGoogle ?? 0}
-  mode="min"
-/>
+    label="Reagendados"
+    value={experienciaCliente?.reagendados ?? 0}
+    percent={experienciaCliente?.reagendadosPercent ?? 0}
+    target={30}
+    mode="max"
+  />
 
+  <GoalMetric
+    label="Cancelados"
+    value={experienciaCliente?.cancelados ?? 0}
+    percent={experienciaCliente?.canceladosPercent ?? 0}
+    target={10}
+    mode="max"
+  />
+
+  <div className="border-t border-black/10 pt-5 dark:border-white/10">
+    <div className="mb-4 flex items-center gap-3">
+  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+  <h4
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[26px]'
+      : 'text-lg'
+  } font-black uppercase tracking-wide ${textSecondary()}`}
+>
+    Experiência do Cliente
+  </h4>
+</div>
+
+    <GoalMetric
+      label="NPS (Google)"
+      value={experienciaCliente?.npsGoogle ?? 0}
+      percent={experienciaCliente?.npsGooglePercent ?? 0}
+      target={experienciaCliente?.metaNpsGoogle ?? 25}
+      mode="min"
+    />
+  </div>
 </GroupCard>
         </div>
 
         <section className={`rounded-[28px] p-6 ${cardBg()}`}>
           <div className="mb-5 flex items-center gap-3">
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-            <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>Consolidado</h3>
+            <h3
+  className={`${
+    viewMode === 'mobile' ? 'text-[42px]' : 'text-[24px]'
+  } font-black tracking-[-0.05em] ${textPrimary()}`}
+>
+  Consolidado
+</h3>
           </div>
 
-          <div className="grid gap-4 xl:grid-cols-3">
+           <div
+  className={`grid gap-4 ${
+    viewMode === 'mobile'
+      ? 'grid-cols-1'
+      : 'xl:grid-cols-3'
+  }`}
+>
             <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-              <div className={`text-sm font-semibold ${textPrimary()}`}>Quantidade total de vendas</div>
-              <div className={`text-4xl font-black tracking-[-0.04em] ${textPrimary()}`}>
+              <div className={`${
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+} ${textPrimary()}`}>Quantidade total de vendas</div>
+              <div className={`${
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+} font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {consolidado?.qtdVendas || 0}
               </div>
-              <div className={`text-sm ${textSecondary()}`}>fechamentos no período</div>
+
             </div>
 
             <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-              <div className={`text-sm font-semibold ${textPrimary()}`}>Total do valor de venda</div>
-              <div className={`text-4xl font-black tracking-[-0.04em] ${textPrimary()}`}>
+              <div className={`${
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+} ${textPrimary()}`}>Total do valor de venda</div>
+              <div className={`${
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+} font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.valorVendas || 0)}
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span
-                  className={
-                    consolidadoVendasOk
-                      ? 'font-semibold text-emerald-500 dark:text-emerald-400'
-                      : 'font-semibold text-rose-500 dark:text-rose-400'
-                  }
-                >
-                  {consolidadoVendasOk ? 'atingido' : 'abaixo'}
-                </span>
-                <span className={textSecondary()}>mín. {formatMoneyShort(metaVendas)}</span>
-              </div>
-              <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+     <div
+  className={`flex items-center gap-3 ${
+    viewMode === 'mobile' ? 'text-[32px]' : 'text-base'
+  }`}
+>
+  <span
+    className={
+      consolidadoVendasOk
+        ? 'font-semibold text-emerald-500 dark:text-emerald-400'
+        : 'font-semibold text-rose-500 dark:text-rose-400'
+    }
+  >
+    {formatPercent(vendasPercent)}
+  </span>
+
+  <span className={textSecondary()}>
+    da meta de {formatMoneyShort(metaVendas)} atingida
+  </span>
+</div>
+              <div
+  className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+  }`}
+>
                 <div
-                  className={`h-3 rounded-full ${consolidadoVendasOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
+                  className={`${
+  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+} ${consolidadoVendasOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
                   style={{ width: `${clampPercent(vendasPercent)}%` }}
                 />
               </div>
             </div>
 
             <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
-              <div className={`text-sm font-semibold ${textPrimary()}`}>Ticket médio total</div>
-              <div className={`text-4xl font-black tracking-[-0.04em] ${textPrimary()}`}>
+             <div className={`${
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+} ${textPrimary()}`}>
+  Ticket médio total
+</div>
+              <div  className={`${
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+} font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.ticketMedio || 0)}
               </div>
-              <div className="flex items-center gap-2 text-sm">
+              <div
+  className={`flex items-center gap-3 ${
+    viewMode === 'mobile' ? 'text-[32px]' : 'text-lg'
+  }`}
+>
                 <span
                   className={
                     consolidadoTicketOk
@@ -733,9 +1049,15 @@ metaLabel={`ideal até ${experienciaCliente?.metaNoShowQuantidade ?? 0}`}
                 </span>
                 <span className={textSecondary()}>mín. {formatMoney(metaTicket)}</span>
               </div>
-              <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+              <div
+  className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+  }`}
+>
                 <div
-                  className={`h-3 rounded-full ${consolidadoTicketOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
+                  className={`${
+  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+} ${consolidadoTicketOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
                   style={{ width: `${clampPercent(ticketPercent)}%` }}
                 />
               </div>
@@ -743,433 +1065,121 @@ metaLabel={`ideal até ${experienciaCliente?.metaNoShowQuantidade ?? 0}`}
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-3">
-          <FunnelChart
-            title="Etapas Funil de Consulta"
-            stages={funilConsultaStages}
-            baseValue={funil?.entrada || 0}
-          />
-
-          <FunnelChart
-            title="Etapas Funil de Vendas"
-            stages={funilVendasStages}
-            baseValue={funilVendas?.total || 0}
-          />
-
-          <div className={`rounded-[28px] p-6 ${cardBg()}`}>
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-              <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>
-                Etapas Funil de Reabord
-              </h3>
-            </div>
-
-            <div className="space-y-4">
-              {funilReabordStages.map((item) => {
-                const base = Math.max(funilReabord?.total || 1, 1)
-                const width = Math.max(12, (item.value / base) * 100)
-
-                return (
-                  <div key={item.label} className="grid grid-cols-[170px_1fr_70px] items-center gap-4">
-                    <div className={`text-sm font-medium ${textSecondary()}`}>{item.label}</div>
-
-                    <div className="h-14 rounded-2xl bg-slate-200 dark:bg-white/8">
-                      <div
-                        className="flex h-14 items-center rounded-2xl px-5 text-lg font-bold text-white"
-                        style={{ width: `${width}%`, backgroundColor: item.color }}
-                      >
-                        {item.value}
-                      </div>
-                    </div>
-
-                    <div className={`text-right text-sm ${textSecondary()}`}>
-                      {formatPercent((item.value / base) * 100)}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="mt-6 flex items-center justify-between rounded-2xl p-4 bg-white/80 dark:!bg-[#102742] dark:border dark:border-white/5">
-              <div className="text-sm">
-                <span className={`font-semibold ${textPrimary()}`}>{funilReabord?.emConversa || 0}</span>
-                <span className={`ml-2 ${textSecondary()}`}>Em conversa</span>
-              </div>
-
-              <div className="text-sm">
-                <span className={`font-semibold ${textPrimary()}`}>{funilReabord?.semConversa || 0}</span>
-                <span className={`ml-2 ${textSecondary()}`}>Sem conversa</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {evolucaoDiaria.length > 0 && (
-          <section className={`rounded-[28px] p-6 ${cardBg()}`}>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-              <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>Evolução Diária</h3>
-            </div>
-
-            <div style={{ width: '100%', height: 320, minWidth: 0 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={evolucaoDiaria} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="gradLeads" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#4f8cff" stopOpacity={0.35} />
-                      <stop offset="100%" stopColor="#4f8cff" stopOpacity={0.02} />
-                    </linearGradient>
-
-                    <linearGradient id="gradVendas" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#34d399" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="#34d399" stopOpacity={0.02} />
-                    </linearGradient>
-
-                    <linearGradient id="gradDesqualificados" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ef4444" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fill: 'rgba(148,163,184,0.7)', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-
-                  <YAxis
-                    yAxisId="left"
-                    tick={{ fill: 'rgba(148,163,184,0.7)', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                    allowDecimals={false}
-                  />
-
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fill: 'rgba(52,211,153,0.7)', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(value) =>
-                      Number(value).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                        maximumFractionDigits: 0,
-                      })
-                    }
-                  />
-
-                  <Tooltip content={<ChartTooltip />} />
-
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="leads"
-                    name="leads"
-                    stroke="#4f8cff"
-                    strokeWidth={2.5}
-                    fill="url(#gradLeads)"
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-
-                  <Area
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="vendasValor"
-                    name="vendasValor"
-                    stroke="#34d399"
-                    strokeWidth={2.5}
-                    fill="url(#gradVendas)"
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="desqualificados"
-                    name="desqualificados"
-                    stroke="#ef4444"
-                    strokeWidth={3}
-                    fill="url(#gradDesqualificados)"
-                    dot={false}
-                    activeDot={{ r: 5 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="mt-4 flex items-center gap-6">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="h-3 w-3 rounded-full bg-[#4f8cff]" />
-                <span className={textSecondary()}>Entradas</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <span className="h-3 w-3 rounded-full bg-[#34d399]" />
-                <span className={textSecondary()}>Vendas Total</span>
-              </div>
-
-              <div className="flex items-center gap-2 text-sm">
-                <span className="h-3 w-3 rounded-full bg-[#ef4444]" />
-                <span className={textSecondary()}>Desqualificados</span>
-              </div>
-            </div>
-          </section>
-        )}
 
         {origensTop.length > 0 && (
           <section className={`rounded-[28px] p-6 ${cardBg()}`}>
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-                <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>Origens dos leads</h3>
-              </div>
-            
-            </div>
+            <div className="mb-8 flex items-center justify-between">
+  <div>
+    <div className="flex items-center gap-4">
+      <span className="h-12 w-[8px] rounded-full bg-[#D7B46A]" />
 
-            <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
+      <div>
+        <h3
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[42px]'
+      : 'text-[24px]'
+  } font-black tracking-[-0.05em] ${textPrimary()}`}
+>
+          Origens dos leads
+        </h3>
+
+      
+      </div>
+    </div>
+  </div>
+
+  <div className="text-right">
+    <p className={`text-[20px] font-bold ${textSecondary()}`}>
+      Total de leads
+    </p>
+
+    <p
+  className={`${
+    viewMode === 'mobile'
+      ? 'text-[64px]'
+      : 'text-5xl'
+  } font-black leading-none ${textPrimary()}`}
+>
+  {origensTotal}
+</p>
+  </div>
+</div>
+
+            <div className="space-y-5">
               <div className="space-y-3">
                 {origensTop.map((item, i) => {
                   const maxQtd = origensTop[0]?.quantidade || 1
-                  const pct = (item.quantidade / maxQtd) * 100
+                  const pct = (item.quantidade / origensTotal) * 100
                   const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
 
                   return (
                     <div key={item.nome}>
-                      <div className="mb-1 flex items-center justify-between text-sm">
-                        <span className={`font-medium ${textPrimary()}`}>{item.nome}</span>
-                        <div className="flex items-center gap-3">
-                          <span className={`font-bold ${textPrimary()}`}>{item.quantidade}</span>
-                          <span className={`min-w-[48px] text-right ${textSecondary()}`}>
-                            {formatPercent((item.quantidade / origensTotal) * 100)}
-                          </span>
-                        </div>
-                      </div>
+                     <div className="mb-3 flex items-start justify-between gap-8">
+  <div className="flex-1">
+    <span
+      className={`${
+        viewMode === 'mobile' ? 'text-[26px]' : 'text-[18px]'
+      } font-black ${textPrimary()}`}
+    >
+      {item.nome}
+    </span>
 
-                      <div className="h-8 overflow-hidden rounded-xl bg-slate-200 dark:bg-white/8">
-                        <div
-                          className="h-8 rounded-xl transition-all duration-500"
-                          style={{ width: `${Math.max(pct, 4)}%`, backgroundColor: color }}
-                        />
-                      </div>
+    <div className="mt-3 relative">
+  <div
+    className={`overflow-hidden bg-slate-200 dark:bg-white/8 ${
+      viewMode === 'mobile'
+        ? 'h-8 rounded-xl'
+        : 'h-6 rounded-xl'
+    }`}
+  >
+    <div
+      className={`transition-all duration-500 ${
+        viewMode === 'mobile'
+          ? 'h-8 rounded-xl'
+          : 'h-6 rounded-xl'
+      }`}
+      style={{
+        width: `${Math.max(pct, 4)}%`,
+        backgroundColor: color,
+      }}
+    />
+  </div>
+
+  <span
+  className={`absolute top-1/2 -translate-y-1/2 font-black text-white ${
+    viewMode === 'mobile'
+      ? 'text-[24px]'
+      : 'text-[16px]'
+  }`}
+  style={{
+    left: `calc(${Math.max(pct, 4)}% - 28px)`,
+  }}
+>
+  {formatPercent(pct)}
+</span>
+</div>
+  </div>
+
+  <span
+    className={`${
+      viewMode === 'mobile' ? 'text-[48px]' : 'text-4xl'
+    } min-w-[90px] text-right font-black leading-none ${textPrimary()}`}
+  >
+    {item.quantidade}
+  </span>
+</div>
                     </div>
                   )
                 })}
               </div>
 
-              <div className="flex flex-col items-center justify-center">
-                <div style={{ width: 360, height: 320 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={origensTop}
-                        dataKey="quantidade"
-                        nameKey="nome"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={70}
-                        outerRadius={115}
-                        paddingAngle={2}
-                        strokeWidth={0}
-                      >
-                        {origensTop.map((_, i) => (
-                          <Cell key={i} fill={ORIGENS_COLORS[i % ORIGENS_COLORS.length]} />
-                        ))}
-                      </Pie>
-                     <Pie
-  data={origensTop}
-  dataKey="quantidade"
-  nameKey="nome"
-  cx="50%"
-  cy="50%"
-  innerRadius={70}
-  outerRadius={115}
-  paddingAngle={2}
-  strokeWidth={0}
-  labelLine
-  label={({ cx, cy, midAngle, innerRadius, outerRadius, index }: any) => {
-    const RADIAN = Math.PI / 180
-    const item = origensTop[index]
-    const pequeno = item.quantidade < 10
-
-    const radius = pequeno
-      ? outerRadius + 18
-      : innerRadius + (outerRadius - innerRadius) * 0.55
-
-    const x = cx + radius * Math.cos(-midAngle * RADIAN)
-    const y = cy + radius * Math.sin(-midAngle * RADIAN)
-
-    return (
-      <text
-        x={x}
-        y={y}
-        fill={pequeno ? ORIGENS_COLORS[index % ORIGENS_COLORS.length] : 'white'}
-        textAnchor="middle"
-        dominantBaseline="central"
-        style={{ fontSize: 13, fontWeight: 700 }}
-      >
-        {item.quantidade}
-      </text>
-    )
-  }}
->
-  {origensTop.map((_, i) => (
-    <Cell
-      key={i}
-      fill={ORIGENS_COLORS[i % ORIGENS_COLORS.length]}
-    />
-  ))}
-</Pie>
-<text
-  x="50%"
-  y="48%"
-  textAnchor="middle"
-  dominantBaseline="middle"
-  className="fill-[var(--foreground)] text-3xl font-black"
->
-  {origensTotal}
-</text>
-
-<text
-  x="50%"
-  y="58%"
-  textAnchor="middle"
-  dominantBaseline="middle"
-  className="fill-[var(--muted-foreground)] text-sm"
->
-  Leads
-</text>
-                      <Tooltip content={<OrigensTooltip />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className={`mt-2 text-center text-sm font-semibold ${textSecondary()}`}>
-                  Distribuição por campanha
-                </div>
-              </div>
+        
             </div>
           </section>
           )}
 
-{campanhaSite && (
-  <section className={`rounded-[28px] p-6 ${cardBg()}`}>
-    <div className="mb-6 flex items-center justify-between">
-      <div>
-        <div className="flex items-center gap-3">
-  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent)]/20 text-[var(--accent)]">
-    <ClipboardList size={20} />
-  </div>
 
-  <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>
-    Formulário Dr. Rodolpho Reis
-  </h3>
-</div>
-        
-      </div>
-
-    </div>
-
-    <div className="grid gap-6 xl:grid-cols-[1fr_320px]">
-      <div className="space-y-4">
-        <div className="rounded-[22px] p-5 bg-white/80 dark:!bg-[#102742] dark:border dark:border-white/5">
-          <div className={`text-sm font-semibold ${textSecondary()}`}>
-  Entradas
-</div>
-
-<div className={`mt-2 text-5xl font-black tracking-[-0.05em] ${textPrimary()}`}>
-  {siteTotal}
-</div>
-
-<div className={`mt-1 text-sm ${textSecondary()}`}>
-  total de leads da campanha
-</div>
-        </div>
-
-        {siteStatusData.map((item) => {
-  const percentual = siteTotal > 0 ? (item.value / siteTotal) * 100 : 0
-
-  return (
-    <div key={item.status}>
-      <div className="mb-1 flex items-center justify-between text-sm">
-        <span className={`font-medium ${textPrimary()}`}>{item.label}</span>
-
-        <div className="flex items-center gap-4">
-          <span className={`font-bold ${textPrimary()}`}>{item.value}</span>
-          <span className={`min-w-[48px] text-right ${textSecondary()}`}>
-            {Math.round(percentual)}%
-          </span>
-        </div>
-      </div>
-
-      <div className="h-8 overflow-hidden rounded-xl bg-slate-200 dark:bg-white/8">
-        <div
-          className="h-8 rounded-xl"
-          style={{
-            width: `${Math.max(percentual, 4)}%`,
-            backgroundColor: item.color,
-          }}
-        />
-      </div>
-    </div>
-  )
-})}
-      </div>
-
-      <div className="flex flex-col items-center justify-center">
-        <div className="relative h-[260px] w-[260px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={siteDonutData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={80}
-                outerRadius={120}
-                startAngle={90}
-                endAngle={-270}
-                strokeWidth={0}
-              >
-                {siteDonutData.map((item, index) => (
-  <Cell key={index} fill={item.color} />
-))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <div className={`text-5xl font-black tracking-[-0.06em] ${textPrimary()}`}>
-              {Math.round(siteAgendadoPercent)}%
-            </div>
-            <div className={`mt-1 text-lg font-semibold ${textSecondary()}`}>
-              Agendado
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center gap-5 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-sm bg-[#FDE047]" />
-            <span className={textSecondary()}>Agendado</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-sm bg-[#3B82F6]" />
-            <span className={textSecondary()}>Restante</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-)}
       </div>
     </AppShell>
   )

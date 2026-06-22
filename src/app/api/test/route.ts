@@ -19,6 +19,7 @@ type Lead = {
   Produto?: string | string[] | null
   Atendimento?: string | null
   Convenio?: string | null
+  Data_de_atendimento?: string | null
 }
 
 function normalize(value: unknown) {
@@ -89,7 +90,8 @@ function parseDateLocal(value?: string | null) {
   const clean = String(value)
     .trim()
     .replace('T', ' ')
-    .replace('Z', '')
+    .replace(/([+-]\d{2}:\d{2})$/, '')
+.replace('Z', '')
 
   const match = clean.match(
     /^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?(?:\.(\d{1,3}))?)?$/
@@ -107,6 +109,28 @@ function parseDateLocal(value?: string | null) {
     Number(mm),
     Number(ss),
     Number(ms.padEnd(3, '0'))
+  )
+}
+
+function parseDataAmplimed(value?: string | null) {
+  if (!value) return null
+
+  const match = String(value).match(
+    /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/
+  )
+
+  if (!match) return null
+
+  const [, dia, mes, ano, hora, minuto] = match
+
+  return new Date(
+    Number(ano),
+    Number(mes) - 1,
+    Number(dia),
+    Number(hora),
+    Number(minuto),
+    0,
+    0
   )
 }
 
@@ -142,6 +166,7 @@ function getWeekRangeSaturdayToFriday(baseDate: Date) {
 
   const end = new Date(start)
   end.setDate(start.getDate() + 6)
+
 
   return { start: startOfDay(start), end: endOfDay(end) }
 }
@@ -234,8 +259,8 @@ function filterBySegmento(leads: Lead[], segmento: string) {
   })
 }
 
-const META_MENSAL_VENDAS = 700000
-const META_SEMANAL_VENDAS = 175000
+const META_MENSAL_VENDAS = 750000
+const META_SEMANAL_VENDAS = META_MENSAL_VENDAS / 4
 const META_DIARIA_VENDAS = META_SEMANAL_VENDAS / 7
 const META_TICKET_MEDIO = 2800
 const META_MENSAL_NPS = 25
@@ -364,7 +389,7 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Convenio&offset=${from}&limit=${pageSize}`,
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio&offset=${from}&limit=${pageSize}`,
   {
     headers: {
   apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -459,9 +484,20 @@ const tarefasProximaSemanaVendas = vendasLeads.filter((l) => {
 }).length
 
     // CONSULTA
-    const consultaBasePeriodo = consultaLeads.filter((l) =>
-      inRange(parseDateLocal(l.created_at), range.start, range.end)
-    )
+    const consultaBasePeriodo = consultaLeads.filter((l) => {
+  const criadoNoPeriodo = inRange(
+    parseDateLocal(l.created_at),
+    range.start,
+    range.end
+  )
+
+  const tag = normalize(l.tag)
+
+  return (
+    criadoNoPeriodo &&
+    !tag.includes('REGISTRO_VENDA')
+  )
+})
 
     // FILTRO NOVO - CAMPANHA SITE DR RODOLPHO
 const leadsSiteRodolpho = consultaBasePeriodo.filter((l) => {
@@ -492,30 +528,42 @@ leadsSiteRodolpho.forEach((l) => {
 
     const leadsAceitos = totalEntradas - naoQualificados
 
-    const agendados = consultaLeads.filter((l) =>
-      statusIs(l, 'AGENDADO') &&
-      inRange(parseDateLocal(l.scheduled_at), range.start, range.end)
-    ).length
+    const leadA = consultaBasePeriodo.filter((l) =>
+  normalize(l.tag).includes('LEAD A')
+).length
+
+const leadB = consultaBasePeriodo.filter((l) =>
+  normalize(l.tag).includes('LEAD B')
+).length
+
+const leadC = consultaBasePeriodo.filter((l) =>
+  normalize(l.tag).includes('LEAD C')
+).length
+
+const leadD = consultaBasePeriodo.filter((l) =>
+  normalize(l.tag).includes('LEAD D')
+).length
+
+    const convertidos = consultaLeads.filter((l) => {
+  return (
+    inRange(parseDateLocal(l.created_at), range.start, range.end) &&
+    (
+      statusIs(l, 'AGENDADO') ||
+      statusIs(l, 'GANHOU')
+    )
+  )
+}).length
 
     const agendadosFunil = consultaBasePeriodo.filter((l) =>
       statusIs(l, 'AGENDADO')
     ).length
 
-    const consultaGanhosLeads = [
-  ...consultaLeads.filter((l) => {
-    return (
-      statusIs(l, 'GANHOU') &&
-      inRange(parseDateLocal(l.closed_at), range.start, range.end)
-    )
-  }),
-
-  ...reabordLeads.filter((l) => {
-    return (
-      statusIs(l, 'FECHADO (GANHO)') &&
-      inRange(parseDateLocal(l.closed_at), range.start, range.end)
-    )
-  }),
-]
+   const consultaGanhosLeads = consultaLeads.filter((l) => {
+  return (
+    statusIs(l, 'GANHOU') &&
+    inRange(parseDateLocal(l.closed_at), range.start, range.end)
+  )
+})
 
     const quantidadeConsulta = consultaGanhosLeads.length
     const valorTotalConsulta = consultaGanhosLeads.reduce(
@@ -696,28 +744,21 @@ const vendasPorMedico = Object.entries(medicosMap)
   function getMetaMedico(nome: string, periodo: string, start: Date, end: Date) {
   const nomeNorm = normalize(nome)
 
-  let metaMensal = 0
+  const metaGeral = getMetaVendas(periodo, start, end)
 
-  if (nomeNorm.includes('BRENO')) {
-    metaMensal = 150000
-  } else if (
-    nomeNorm.includes('RODOLPHO') ||
-    nomeNorm.includes('CLAUDIA')
-  ) {
-    metaMensal = 350000
+  if (nomeNorm.includes('RODOLPHO')) {
+    return metaGeral * 0.45
   }
 
-  // ajuste por período (proporcional dias úteis)
-  const dias = Math.max(
-    1,
-    Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  )
+  if (nomeNorm.includes('CLAUDIA')) {
+    return metaGeral * 0.10
+  }
 
-  const diasUteis = dias * (5 / 7)
+  if (nomeNorm.includes('BRENO')) {
+    return metaGeral * 0.45
+  }
 
-  const metaPeriodo = (metaMensal / 30) * diasUteis
-
-  return metaPeriodo
+  return 0
 }
 
 propostasFechadasLeads.forEach((lead) => {
@@ -837,19 +878,51 @@ const campanhasVendidas = Object.entries(campanhasMap)
       inRange(parseDateLocal(l.created_at), range.start, range.end)
     )
 
-    const emConversa = reabordCriadasPeriodo.filter((l) =>
-      normalize(l.tag).includes('EM CONVERSA')
-    ).length
+   const reabordTags = reabordCriadasPeriodo.filter(
+  (l) => normalize(l.pipeline_id) === 'REABORD'
+)
 
-    const semConversa = reabordCriadasPeriodo.filter((l) =>
-      normalize(l.tag).includes('SEM CONVERSA')
-    ).length
+const emConversa = reabordTags.filter((l) => {
+  const tag = normalize(l.tag)
 
+  return (
+    tag.includes('EM CONVERSA') &&
+    !tag.includes('SEM CONVERSA')
+  )
+}).length
+
+const semConversa = reabordTags.filter((l) => {
+  const tag = normalize(l.tag)
+
+  return tag.includes('SEM CONVERSA')
+}).length
+
+const reabordFechadoGanho = reabordLeads.filter((l) =>
+  statusIs(l, 'FECHADO (GANHO)') &&
+  inRange(parseDateLocal(l.closed_at), range.start, range.end)
+)
+
+const quantidadeReabord = reabordFechadoGanho.length
+
+const valorTotalReabord = reabordFechadoGanho.reduce(
+  (acc, l) => acc + toNumber(l.faturamento),
+  0
+)
+
+const ticketMedioReabord =
+  quantidadeReabord > 0
+    ? valorTotalReabord / quantidadeReabord
+    : 0
+    
     const funilReabord = {
       total: reabordCriadasPeriodo.length,
       contato: reabordCriadasPeriodo.filter((l) => statusIs(l, 'CONTATO')).length,
       oferta: reabordCriadasPeriodo.filter((l) => statusIs(l, 'OFERTA')).length,
-      agendado: reabordCriadasPeriodo.filter((l) => statusIs(l, 'AGENDADO')).length,
+      agendado: reabordLeads.filter((l) =>
+  statusIs(l, 'AGENDADO') &&
+  inRange(parseDateLocal(l.scheduled_at), range.start, range.end)
+).length,
+
       fechadoGanho: reabordCriadasPeriodo.filter((l) =>
         statusIs(l, 'FECHADO (GANHO)')
       ).length,
@@ -860,10 +933,18 @@ const campanhasVendidas = Object.entries(campanhasMap)
       semConversa,
     }
 
-    const consolidadoQtdVendas = quantidadeConsulta + propostasFechadas
-    const consolidadoValorVendas = valorTotalConsulta + valorTotalVendas
-    const consolidadoTicketMedio =
-      consolidadoQtdVendas > 0 ? consolidadoValorVendas / consolidadoQtdVendas : 0
+
+
+    const consolidadoQtdVendas =
+  quantidadeConsulta + quantidadeReabord + propostasFechadas
+
+const consolidadoValorVendas =
+  valorTotalConsulta + valorTotalReabord + valorTotalVendas
+
+const consolidadoTicketMedio =
+  consolidadoQtdVendas > 0
+    ? consolidadoValorVendas / consolidadoQtdVendas
+    : 0
 
     const evolucaoDiaria = buildEvolucaoDiaria(
       vendasLeads,
@@ -943,42 +1024,63 @@ if (!noShowResponse.ok) {
 const noShowData = await noShowResponse.json()
 
 const noShowFiltrado = (noShowData || []).filter((item: any) => {
-  const dentroDoPeriodo = inRange(
-    parseDateLocal(String(item.id)),
-    range.start,
-    range.end
-  )
+  const data = parseDataAmplimed(item['Data e hora Agendada'])
 
-  if (!dentroDoPeriodo) return false
+  if (!inRange(data, range.start, range.end)) return false
 
   if (segmento === 'geral') return true
 
-  const medico = normalize(item.medico)
+  const profissional = normalize(item['Profissional'])
 
   if (segmento === 'vascular') {
-    return MEDICOS_VASCULAR.some((m) => normalize(m) === medico)
+    return MEDICOS_VASCULAR.some((m) =>
+      profissional.includes(normalize(m).split(' ')[1])
+    )
   }
 
   if (segmento === 'emagrecimento') {
-    return MEDICOS_EMAGRECIMENTO.some((m) => normalize(m) === medico)
+    return MEDICOS_EMAGRECIMENTO.some((m) =>
+      profissional.includes(normalize(m).split(' ')[1])
+    )
   }
 
   return true
 })
 
-const totalAtendimentos = noShowFiltrado.reduce((total: number, item: any) => {
-  return total + toNumber(item.atendimento)
-}, 0)
+const totalNoShow = noShowFiltrado.filter((item: any) => {
+  const status = normalize(item['Status'])
 
-const totalNoShow = noShowFiltrado.reduce((total: number, item: any) => {
-  return total + toNumber(item.noshow)
-}, 0)
+  return (
+    status.includes('NAO COMPARECEU') ||
+    status.includes('NO SHOW') ||
+    status.includes('NCOMPARECEU') ||
+    status.includes('N COMPARECEU')
+  )
+}).length
+
+const totalFinalizados = noShowFiltrado.filter((item: any) =>
+  normalize(item['Status']).includes('FINALIZADO')
+).length
+
+const totalAtendimentos = totalFinalizados + totalNoShow
 
 const noShowPercent = safePercent(totalNoShow, totalAtendimentos)
+
 const metaNoShowPercent = 10
+
 const metaNoShowQuantidade = Math.round(
   totalAtendimentos * 0.1
 )
+
+function medicoKey(nome: unknown) {
+  const n = normalize(nome)
+
+  if (n.includes('RODOLPHO')) return 'DR. RODOLPHO REIS'
+  if (n.includes('CLAUDIA')) return 'DRA. CLAUDIA LAMEIRA'
+  if (n.includes('BRENO')) return 'DR. BRENO PITANGUI'
+
+  return n || 'SEM MÉDICO'
+}
 
 const medicosPermitidos: string[] =
   segmento === 'vascular'
@@ -989,24 +1091,298 @@ const medicosPermitidos: string[] =
         new Set<string>([
           ...MEDICOS_VASCULAR,
           ...MEDICOS_EMAGRECIMENTO,
-          ...noShowFiltrado.map((item: any) => String(item.medico || 'Sem médico')),
-          ...consultaGanhosLeads.map((lead) => String(lead.medico || 'Sem médico')),
+          ...noShowFiltrado.map((item: any) =>
+            medicoKey(item['Profissional'] || item.medico)
+          ),
+          ...consultaGanhosLeads.map((lead) =>
+            medicoKey(lead.medico)
+          ),
         ])
       )
 
+  
 const consultaPorMedico = medicosPermitidos.map((medico) => {
   const med = normalize(medico)
+  const medKey = medicoKey(medico)
 
-  const atendimentosMedico = noShowFiltrado
-    .filter((item: any) => normalize(item.medico) === med)
-    .reduce((acc: number, item: any) => acc + toNumber(item.atendimento), 0)
+  const RETORNOS = [
+  'RETORNO',
+  'RETORNO - COMBO LIPEDEMA',
+  'RETORNO - CRIOESCLEROTERAPIA',
+  'RETORNO - DOPPLER (COMBO)',
+  'RETORNO - ESCLEROTERAPIA AMPLIADA',
+  'RETORNO - ESCLEROTERAPIA COM ESPUMA',
+  'RETORNO - ESCLEROTERAPIA CONVENCIONAL',
+  'RETORNO DE LASER TRANSDERMICO',
+  'RETORNO DE LASER TRANSDERMICO - NITROSO',
+  'RETORNO LASER TRANSDERMICO - COM NITROSO',
+  'RETORNO- LASER TRANSDERMICO',
+]
 
-  const noShowMedico = noShowFiltrado
-    .filter((item: any) => normalize(item.medico) === med)
-    .reduce((acc: number, item: any) => acc + toNumber(item.noshow), 0)
+  const atendimentosAgendaMedico = noShowFiltrado.filter((item: any) => {
+    const profissional = normalize(item['Profissional'])
+
+
+    return profissional.includes(med.split(' ')[1] || med)
+  })
+
+
+const canceladosMedico = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+
+  return status.includes('CANCELADO')
+}).length
+
+const reagendadosMedico = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+
+  return status.includes('REAGENDADO')
+}).length
+
+  const atendimentosFinalizadosMedico = atendimentosAgendaMedico.filter((item: any) =>
+    normalize(item['Status']).includes('FINALIZADO')
+  )
+
+  const atendimentosMedico = atendimentosFinalizadosMedico.length
+
+  const manha = atendimentosFinalizadosMedico.filter((item: any) => {
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+    if (!data) return false
+
+    const minutos = data.getHours() * 60 + data.getMinutes()
+    return minutos <= 720
+  }).length
+
+  const tarde = atendimentosFinalizadosMedico.filter((item: any) => {
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+    if (!data) return false
+
+    const minutos = data.getHours() * 60 + data.getMinutes()
+    return minutos >= 721 && minutos <= 1200
+  }).length
+
+  const retornos = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  return RETORNOS.some((retorno) =>
+    procedimento.includes(normalize(retorno))
+  )
+}).length
+
+
+  const consultasProcedimentos = [
+  'COMBO LIPEDEMA',
+  'COMBO VASCULAR',
+  'COMBO VASCULAR CLINICA',
+  'CONSULTA',
+  'CONSULTA - LIPEDEMA',
+  'CONSULTA - VASCULAR',
+  'CONSULTA DE 1ª VEZ',
+  'CONSULTA EM CONSULTÓRIO',
+]
+
+const consultasPrimeiraVezLista = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  return consultasProcedimentos.some((consulta) =>
+    procedimento.includes(normalize(consulta))
+  )
+})
+
+const consultasPrimeiraVez = consultasPrimeiraVezLista.length
+
+const cirurgiasProcedimentos = [
+  'CIRURGIA VARIZES - TRATAMENTO CIRÚRGICO DE DOIS MEMBROS',
+  'CIRURGIA VARIZES - TRATAMENTO CIRÚRGICO ENDOLASER',
+  'CIRURGIA VARIZES - TRATAMENTO CIRÚRGICO DE UM MEMBRO',
+  'MICROCIRURGIA COM NITROSO',
+]
+
+
+const produtosBreno = propostasFechadasLeads.filter((item: any) => {
+  const produtos = String(item.Produto || '')
+    .split(',')
+    .map((p) => normalize(p))
+
+  const possuiProdutoValido = produtos.some((produto) =>
+    produto.includes('INJETAVEL') ||
+    produto.includes('INJETAVEL CUSTO') ||
+    produto.includes('PROTOCOLO RESET METABOLICO MASTER') ||
+    produto.includes('PERNAS PLENAS') ||
+    produto.includes('RESET METABOLICO BRENO') ||
+    produto.includes('EMAGRECIMENTO PLENO') ||
+    produto.includes('IMPLANTE') ||
+    produto.includes('EMAGRECIMENTO PLENO START') ||
+produto.includes('EMAGRECIMENTO PLENO ACELERADOR') ||
+produto.includes('EMAGRECIMENTO PLENO SUPREMO') ||
+produto.includes('PERNAS PLENAS START') ||
+produto.includes('PERNAS PLENAS ACELERADOR') ||
+produto.includes('PERNAS PLENAS SUPREMO') ||
+produto.includes('PLENO TOTAL 3 MESES') ||
+produto.includes('PLENO TOTAL 6 MESES') ||
+produto.includes('HERA') ||
+    produto.includes('SUBCISION COM BIOESTIMULADOR')
+  )
+
+  return (
+    med.includes('BRENO') &&
+    medicoKey(item.medico) === medicoKey(medico) &&
+    statusIs(item, 'VENDA GANHA') &&
+    inRange(parseDateLocal(item.closed_at), range.start, range.end) &&
+    possuiProdutoValido
+  )
+})
+
+
+let qtdInjetaveisVendidos = 0
+let valorInjetaveisVendidos = 0
+
+let qtdProtocolosVendidos = 0
+let valorProtocolosVendidos = 0
+
+produtosBreno.forEach((item: any) => {
+  const produtos = Array.isArray(item.Produto)
+    ? item.Produto
+    : String(item.Produto || '')
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean)
+
+  if (!produtos.length) return
+
+  const venda = toNumber(item.venda)
+  const valorPorProduto = venda / produtos.length
+
+  produtos.forEach((p: string) => {
+    const produto = normalize(p)
+
+    const ehInjetavel =
+      produto.includes('INJETAVEL') ||
+      produto.includes('INJETAVEL CUSTO')
+
+    const ehProtocolo =
+      produto.includes('PROTOCOLO RESET METABOLICO MASTER') ||
+      produto.includes('PERNAS PLENAS') ||
+      produto.includes('IMPLANTE') ||
+      produto.includes('RESET METABOLICO') ||
+produto.includes('EMAGRECIMENTO PLENO START') ||
+produto.includes('EMAGRECIMENTO PLENO ACELERADOR') ||
+produto.includes('EMAGRECIMENTO PLENO SUPREMO') ||
+produto.includes('PERNAS PLENAS START') ||
+produto.includes('PERNAS PLENAS ACELERADOR') ||
+produto.includes('PERNAS PLENAS SUPREMO') ||
+produto.includes('PLENO TOTAL 3 MESES') ||
+produto.includes('HERA') ||
+produto.includes('PLENO TOTAL 6 MESES') ||
+      produto.includes('EMAGRECIMENTO PLENO')
+
+    if (ehInjetavel) {
+      qtdInjetaveisVendidos += 1
+      valorInjetaveisVendidos += valorPorProduto
+    }
+
+    if (ehProtocolo) {
+      qtdProtocolosVendidos += 1
+      valorProtocolosVendidos += valorPorProduto
+    }
+  })
+})
+
+if (med.includes('BRENO')) {
+  console.log('INJETAVEIS', {
+    qtd: qtdInjetaveisVendidos,
+    valor: valorInjetaveisVendidos,
+  })
+
+  console.log('PROTOCOLOS', {
+    qtd: qtdProtocolosVendidos,
+    valor: valorProtocolosVendidos,
+  })
+}
+
+const procedimentosMedicoLista = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  const ehConsulta = consultasProcedimentos.some((consulta) =>
+    procedimento.includes(normalize(consulta))
+  )
+
+  const ehCirurgia = cirurgiasProcedimentos.some((cirurgia) =>
+    procedimento.includes(normalize(cirurgia))
+  )
+
+  const ehRetorno = RETORNOS.some((retorno) =>
+    procedimento.includes(normalize(retorno))
+  )
+
+  return !ehConsulta && !ehCirurgia && !ehRetorno
+})
+
+const procedimentosMedico = procedimentosMedicoLista.length
+
+const cirurgiasMedicoLista = atendimentosAgendaMedico.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  const statusValido =
+    status.includes('FINALIZADO') ||
+    status.includes('CONFIRMADO')
+
+  if (!statusValido) return false
+  if (!procedimento) return false
+
+  return cirurgiasProcedimentos.some((cirurgia) =>
+    procedimento.includes(normalize(cirurgia))
+  )
+})
+
+const cirurgiasMedico = cirurgiasMedicoLista.length
+  
+  const capacidadeSemanal = med.includes('CLAUDIA') ? 28 : 40
+const capacidadeDiaria = med.includes('CLAUDIA') ? 6 : 8
+
+const capacidadeCalculada =
+  periodo === 'hoje' || periodo === 'ontem'
+    ? capacidadeDiaria
+    : periodo === 'semana'
+    ? capacidadeSemanal
+    : periodo === 'mes-atual' || periodo === 'mes-passado'
+    ? capacidadeDiaria * 20
+    : capacidadeDiaria *
+      Math.max(
+        1,
+        Math.floor(
+          (startOfDay(range.end).getTime() -
+            startOfDay(range.start).getTime()) /
+            (1000 * 60 * 60 * 24)
+        ) + 1
+      )
+
+  const noShowMedico = atendimentosAgendaMedico.filter((item: any) => {
+    const status = normalize(item['Status'])
+
+    return (
+      status.includes('NAO COMPARECEU') ||
+      status.includes('NCOMPARECEU') ||
+      status.includes('N COMPARECEU')
+    )
+  }).length
 
   const vendasConsultaMedico = consultaGanhosLeads.filter(
-    (lead) => normalize(lead.medico) === med
+    (lead) => medicoKey(lead.medico) === medicoKey(medico)
   )
 
   const quantidadeConsulta = vendasConsultaMedico.length
@@ -1016,37 +1392,128 @@ const consultaPorMedico = medicosPermitidos.map((medico) => {
     0
   )
 
-const ticketMedio =
-  quantidadeConsulta > 0 ? valorConsulta / quantidadeConsulta : 0
+  const ticketMedio =
+    quantidadeConsulta > 0 ? valorConsulta / quantidadeConsulta : 0
 
-const evolucaoConsulta = evolucaoDiaria.map((dia) => {
+  const evolucaoConsulta = evolucaoDiaria.map((dia) => {
   const diaData = parseLocalDate(dia.data)
 
   return vendasConsultaMedico.filter((lead) => {
     const data = parseDateLocal(lead.closed_at)
 
-    return (
-      data &&
-      data >= startOfDay(diaData) &&
-      data <= endOfDay(diaData)
-    )
+    return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
   }).length
 })
 
+const evolucaoProcedimentos = evolucaoDiaria.map((dia) => {
+  const diaData = parseLocalDate(dia.data)
+
+  return procedimentosMedicoLista.filter((item: any) => {
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+
+    return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
+  }).length
+})
+
+const evolucaoConsultaPrimeiraVez = evolucaoDiaria.map((dia) => {
+  const diaData = parseLocalDate(dia.data)
+
+  return consultasPrimeiraVezLista.filter((item: any) => {
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+
+    return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
+  }).length
+})
+
+const evolucaoCirurgias = evolucaoDiaria.map((dia) => {
+  const diaData = parseLocalDate(dia.data)
+
+  return cirurgiasMedicoLista.filter((item: any) => {
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+
+    return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
+  }).length
+})
+  
+if (med.includes('BRENO')) {
+  console.log('BRENO produtosBreno:', produtosBreno.map((x:any) => ({
+    produto: x.Produto,
+    venda: x.venda,
+    status: x.status_id,
+    closed_at: x.closed_at,
+    medico: x.medico,
+  })))
+}
+
   return {
-  medico: medico || 'Sem médico',
+  medico: medKey,
+
+  consultasPrimeiraVez,
+  evolucaoConsultaPrimeiraVez,
+
   atendimentos: atendimentosMedico,
+  manha,
+  tarde,
+  retornos,
+  capacidadeAgenda:
+    capacidadeCalculada > 0
+  ? Math.min(
+      Math.round((atendimentosMedico / capacidadeCalculada) * 100),
+      100
+    )
+  : 0,
   noShow: noShowMedico,
   noShowPercent:
-    atendimentosMedico > 0
-      ? Math.round((noShowMedico / atendimentosMedico) * 100)
-      : 0,
+  atendimentosAgendaMedico.length > 0
+    ? Math.round((noShowMedico / atendimentosAgendaMedico.length) * 100)
+    : 0,
+
+  procedimentos:
+  med.includes('BRENO')
+    ? 1
+    : procedimentosMedico,
+  cirurgias: cirurgiasMedico,
+
+  injetaveisVendidos: qtdInjetaveisVendidos,
+valorInjetaveisVendidos,
+
+protocolosVendidos: qtdProtocolosVendidos,
+valorProtocolosVendidos,
+
+  cancelados: canceladosMedico,
+reagendados: reagendadosMedico,
+
   quantidadeConsulta,
   valorConsulta,
   ticketMedio,
   evolucaoConsulta,
+  proximosAtendimentos: 0,
+  evolucaoProcedimentos:
+  med.includes('BRENO')
+    ? evolucaoProcedimentos.map((v, i) => {
+        const dia = evolucaoDiaria[i]
+        const diaData = parseLocalDate(dia.data)
+
+        const subcisionDia = produtosBreno.filter((item: any) => {
+          const produto = normalize(item['Produto'])
+          const data = parseDateLocal(item.closed_at)
+
+          return (
+            produto.includes('SUBCISION COM BIOESTIMULADOR') &&
+            data &&
+            data >= startOfDay(diaData) &&
+            data <= endOfDay(diaData)
+          )
+        }).length
+
+        return v + subcisionDia
+      })
+    : evolucaoProcedimentos,
+  evolucaoCirurgias,
+    
 }
 })
+
 const atendimentoConsulta = Object.values(
   consultaGanhosLeads.reduce((acc: any, lead: any) => {
     const tipo = String(lead.Atendimento || '').trim().toUpperCase()
@@ -1085,6 +1552,28 @@ const conveniosConsulta = Object.values(
   }, {})
 ).sort((a: any, b: any) => b.qtd - a.qtd)
 
+const totalReagendados = consultaPorMedico.reduce(
+  (acc, medico) => acc + Number(medico.reagendados || 0),
+  0
+)
+
+const totalCancelados = consultaPorMedico.reduce(
+  (acc, medico) => acc + Number(medico.cancelados || 0),
+  0
+)
+
+const totalAgendamentosExperiencia =
+  totalAtendimentos + totalReagendados + totalCancelados
+
+const reagendadosPercent = safePercent(
+  totalReagendados,
+  totalAgendamentosExperiencia
+)
+
+const canceladosPercent = safePercent(
+  totalCancelados,
+  totalAgendamentosExperiencia
+)
 
 
     return Response.json({
@@ -1097,19 +1586,46 @@ const conveniosConsulta = Object.values(
       },
       kpis: {
         marketing: {
-          totalEntradas,
-          naoQualificados,
-          naoQualificadosPercent: safePercent(naoQualificados, totalEntradas),
-          leadsAceitos,
-          leadsAceitosPercent: safePercent(leadsAceitos, totalEntradas),
-          agendados,
-          agendadosPercent: safePercent(agendados, leadsAceitos),
-        },
+  totalEntradas,
+  naoQualificados,
+  naoQualificadosPercent: safePercent(naoQualificados, totalEntradas),
+  leadsAceitos,
+  leadsAceitosPercent: safePercent(leadsAceitos, totalEntradas),
+  convertidos,
+  convertidosPercent: safePercent(convertidos, leadsAceitos),
+
+  leadA,
+  leadB,
+  leadC,
+  leadD,
+},
         comercialConsulta: {
-          quantidadeConsulta,
-          valorTotalConsulta,
-          ticketMedioConsulta,
-        },
+  quantidadeConsulta,
+  valorTotalConsulta,
+  ticketMedioConsulta,
+
+  quantidadeReabord,
+  valorTotalReabord,
+  ticketMedioReabord,
+
+  quantidadeTotal:
+    quantidadeConsulta + quantidadeReabord,
+
+  valorTotal:
+    valorTotalConsulta + valorTotalReabord,
+
+  ticketMedioTotal:
+    quantidadeConsulta + quantidadeReabord > 0
+      ? (
+          valorTotalConsulta +
+          valorTotalReabord
+        ) /
+        (
+          quantidadeConsulta +
+          quantidadeReabord
+        )
+      : 0,
+},
         comercialVendas: {
   propostasEnviadas,
   propostasFechadas,
@@ -1123,13 +1639,19 @@ const conveniosConsulta = Object.values(
 },
   experienciaCliente: {
   noShow: totalNoShow,
-  totalAtendimentos,
   noShowPercent,
   metaNoShowPercent,
   metaNoShowQuantidade,
+
+  reagendados: totalReagendados,
+  reagendadosPercent,
+
+  cancelados: totalCancelados,
+  canceladosPercent,
+
   npsGoogle,
-  metaNpsGoogle,
   npsGooglePercent,
+  metaNpsGoogle,
 },
       },
         campanhaSiteRodolpho: {
@@ -1148,6 +1670,7 @@ consultaPorMedico,
         ticketMedio: consolidadoTicketMedio,
         metaValorVendas: metaValorTotalVendas,
         metaTicketMedio: META_TICKET_MEDIO,
+    
       },
       funil,
       funilVendas,

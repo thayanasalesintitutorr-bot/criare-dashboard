@@ -17,6 +17,8 @@ import {
   Sun,
   User2,
   X,
+  Monitor,
+  Smartphone,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
@@ -29,17 +31,19 @@ import { ptBR } from 'date-fns/locale'
 export function Topbar({ title }: { title: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   const {
-    periodo,
-    setPeriodo,
-    tipoData,
-    setTipoData,
-    segmento,
-    setSegmento,
-    dataInicio,
-    setDataInicio,
-    dataFim,
-    setDataFim,
-  } = useFilters()
+  periodo,
+  setPeriodo,
+  tipoData,
+  setTipoData,
+  segmento,
+  setSegmento,
+  dataInicio,
+  setDataInicio,
+  dataFim,
+  setDataFim,
+  viewMode,
+  setViewMode,
+} = useFilters()
 
   const { logout } = useAuth()
   const router = useRouter()
@@ -50,6 +54,8 @@ export function Topbar({ title }: { title: string }) {
   const [showCalendarFim, setShowCalendarFim] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [hideNotifications, setHideNotifications] = useState(false)
+  const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
 
   const calendarRef = useRef<HTMLDivElement>(null)
@@ -93,8 +99,8 @@ export function Topbar({ title }: { title: string }) {
   }
 
   const groupClass = 'flex flex-wrap items-center gap-1.5 rounded-[20px] bg-[var(--card)] p-2'
-  const pillBase =
-    'inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[14px] font-medium transition-all whitespace-nowrap'
+ const pillBase =
+  'inline-flex items-center gap-3 rounded-xl px-5 py-3 text-[18px] font-semibold transition-all whitespace-nowrap'
   const pillActive = 'bg-[var(--accent)] text-[var(--background)] shadow-sm'
   const pillInactive = 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
 
@@ -117,7 +123,7 @@ function parseLocalDate(dateString?: string) {
                   onClick={() => setTipoData('criado')}
                   className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
                 >
-                  <Database size={16} />
+                  <Database size={20} />
                   Criado
                 </button>
 
@@ -125,10 +131,28 @@ function parseLocalDate(dateString?: string) {
                   onClick={() => setTipoData('fechado')}
                   className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
                 >
-                  <Database size={16} />
+                  <Database size={20} />
                   Fechado
                 </button>
               </div>
+
+              <div className={groupClass}>
+  <button
+    onClick={() => setViewMode('desktop')}
+    className={`${pillBase} ${viewMode === 'desktop' ? pillActive : pillInactive}`}
+  >
+    <Monitor size={20} />
+    iMac
+  </button>
+
+  <button
+    onClick={() => setViewMode('mobile')}
+    className={`${pillBase} ${viewMode === 'mobile' ? pillActive : pillInactive}`}
+  >
+    <Smartphone size={20} />
+    iPhone
+  </button>
+</div>
 
               <div className={groupClass}>
                 <button
@@ -171,7 +195,7 @@ function parseLocalDate(dateString?: string) {
                     onClick={() => setShowCalendar((v) => !v)}
                     className={`${pillBase} ${periodo === 'personalizado' ? pillActive : pillInactive}`}
                   >
-                    <CalendarDays size={16} />
+                    <CalendarDays size={20} />
                     Personalizado
                   </button>
 
@@ -356,7 +380,7 @@ today:
                   onClick={() => setSegmento('vascular')}
                   className={`${pillBase} ${segmento === 'vascular' ? pillActive : pillInactive}`}
                 >
-                  <Activity size={16} />
+                  <Activity size={20} />
                   Vascular
                 </button>
 
@@ -364,7 +388,7 @@ today:
                   onClick={() => setSegmento('emagrecimento')}
                   className={`${pillBase} ${segmento === 'emagrecimento' ? pillActive : pillInactive}`}
                 >
-                  <Heart size={16} />
+                  <Heart size={20} />
                   Emagrecimento
                 </button>
 
@@ -372,7 +396,7 @@ today:
                   onClick={() => setSegmento('geral')}
                   className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
                 >
-                  <BarChart3 size={16} />
+                  <BarChart3 size={20} />
                   Geral
                 </button>
               </div>
@@ -382,9 +406,9 @@ today:
           <div className="flex shrink-0 items-center gap-3">
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="inline-flex items-center gap-2 rounded-2xl bg-[var(--card)] px-4 py-3"
+              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3"
             >
-              {mounted && (resolvedTheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />)}
+              {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
               <span className="font-medium">
                 {mounted && (resolvedTheme === 'dark' ? 'Claro' : 'Escuro')}
               </span>
@@ -403,34 +427,45 @@ today:
 
             <div ref={notificationRef} className="relative">
               <button
-                onClick={() => setShowNotifications((v) => !v)}
+                onClick={() => {
+  if (!hasNotification) return
+
+  setShowNotifications((v) => !v)
+  setHideNotifications(false)
+}}
                 className="relative rounded-2xl bg-[var(--card)] p-3"
               >
                 <Bell size={18} />
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                  3
-                </span>
+                {hasNotification && (
+  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+    1
+  </span>
+)}
               </button>
 
-              {showNotifications && (
-                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
-                  <div className="mb-4 text-lg font-bold">Notificações</div>
+              {showNotifications && !hideNotifications && (
+  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
+    <div className="mb-4 flex items-center justify-between">
+      <div className="text-lg font-bold">Notificações</div>
 
-                  <div className="space-y-3">
-                    <div className="rounded-2xl bg-cyan-50 p-4 text-cyan-500">
-                      Bem-vindo de volta, usuário! Vamos acompanhar seus resultados.
-                    </div>
+      <button
+        onClick={() => {
+  setHideNotifications(true)
+  setHasNotification(false)
+}}
+        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+      >
+        <X size={18} />
+      </button>
+    </div>
 
-                    <div className="rounded-2xl bg-amber-50 p-4 text-amber-500">
-                      Ticket médio abaixo da meta de R$ 2.830. Atenção ao mix de serviços.
-                    </div>
-
-                    <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-500">
-                      Propostas fechadas acima de 70% da meta. Continue assim!
-                    </div>
-                  </div>
-                </div>
-              )}
+    <div className="space-y-3">
+      <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-500">
+        Propostas fechadas acima de 70% da meta. Continue assim!
+      </div>
+    </div>
+  </div>
+)}
             </div>
 
             <div ref={profileRef} className="relative">
@@ -468,7 +503,7 @@ today:
                   <div className="mb-4 flex items-center justify-between rounded-2xl bg-[var(--background)] px-4 py-3">
                     <span>{showPassword ? 'Altuus@2026#' : '••••••••'}</span>
                     <button onClick={() => setShowPassword((v) => !v)}>
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
 
@@ -478,9 +513,9 @@ today:
 
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2 text-rose-500"
+                    className="flex items-center gap-3 text-rose-500"
                   >
-                    <LogOut size={16} />
+                    <LogOut size={20} />
                     Sair
                   </button>
                 </div>
