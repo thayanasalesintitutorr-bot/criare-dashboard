@@ -559,7 +559,14 @@ const res = await fetch(url, {
       }
     }
 
-    loadData()
+        loadData()
+
+    const interval = setInterval(() => {
+      loadData()
+    }, 10000) // atualiza a cada 10 segundos
+
+    return () => clearInterval(interval)
+
   }, [periodo, tipoData, segmento, dataInicio, dataFim])
 
   const marketing = data?.kpis?.marketing
