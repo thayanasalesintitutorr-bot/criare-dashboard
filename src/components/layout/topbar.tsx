@@ -256,26 +256,26 @@ function parseLocalDate(dateString?: string) {
           className="text-sm"
           classNames={{
   months: 'flex justify-center',
-  month: 'w-[390px] space-y-4',
+  month: 'w-[430px] space-y-4',
 
   month_caption:
-    'flex items-center justify-center gap-6 text-lg font-bold capitalize',
+    'relative flex items-center justify-center text-[28px] font-black capitalize',
 
-  caption_label: 'text-lg font-bold capitalize',
+  caption_label: 'text-[28px] font-black capitalize',
 
   nav:
-      'absolute left-1/2 top-1/2 flex w-[280px] -translate-x-1/2 -translate-y-1/2 items-center justify-between',
+    'absolute left-1/2 top-[145px] z-10 flex w-[520px] -translate-x-1/2 items-center justify-between px-6',
 
   button_previous:
-  'h-10 w-10 flex items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+    'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
 
-button_next:
-  'h-10 w-10 flex items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+  button_next:
+    'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
 
-  chevron: 'h-5 w-5 text-[var(--foreground)]',
+  chevron: 'h-6 w-6 text-black',
 
   weekdays: 'grid grid-cols-7 gap-2 text-center',
-  weekday: 'text-xs font-semibold text-[var(--muted-foreground)]',
+  weekday: 'text-sm font-bold text-[var(--muted-foreground)]',
 
   weeks: 'space-y-2',
   week: 'grid grid-cols-7 gap-2',
@@ -283,23 +283,24 @@ button_next:
   day: 'h-11 w-11',
 
   day_button:
-    'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-medium transition hover:bg-[var(--accent)]/20',
+    'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-semibold text-[#0F172A] transition hover:bg-[var(--accent)]/25',
 
   selected:
-  'bg-[var(--accent)] text-white rounded-2xl',
+    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
 
-range_start:
-  'bg-[var(--accent)] text-white rounded-2xl',
+  range_start:
+    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
 
-range_end:
-  'bg-[var(--accent)] text-white rounded-2xl',
+  range_end:
+    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
 
   range_middle:
-     'bg-[#EFE6D8] text-[var(--foreground)] rounded-2xl',
+    'bg-[#EFE6D8] text-[#0F172A] rounded-2xl',
 
-  today:  'bg-[#F7F1E8] border border-[var(--accent)] rounded-2xl',
+  today:
+    'bg-[#F7F1E8] border border-[#DFBA62] text-[#0F172A] rounded-2xl',
 
-  outside: 'text-gray-400 opacity-50',
+  outside: 'text-gray-300 opacity-40',
 }}
         />
 
