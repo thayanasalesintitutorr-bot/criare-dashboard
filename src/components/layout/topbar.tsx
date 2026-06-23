@@ -255,35 +255,40 @@ function parseLocalDate(dateString?: string) {
           numberOfMonths={1}
           className="text-sm"
           classNames={{
-            months: 'grid grid-cols-1 gap-4',
-            month: 'w-full space-y-6',
-caption: 'relative flex items-center justify-center px-12 text-lg font-bold capitalize',
-nav: 'absolute left-0 right-0 top-0 flex items-center justify-between px-2',
-            button_previous:
-  'absolute left-2 top-0 h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
-button_next:
-  'absolute right-2 top-0 h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
-            chevron: 'h-5 w-5 text-[var(--foreground)]',
-            weekdays: 'grid grid-cols-7 text-center',
-            weekday:
-              'text-xs font-semibold text-[var(--muted-foreground)]',
-            weeks: 'space-y-2',
-            week: 'grid grid-cols-7 gap-1',
-            day: 'h-10 w-10',
-            day_button:
-              'flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium transition hover:bg-[var(--accent)]/20',
-            selected:
-              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
-            range_start:
-              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
-            range_end:
-              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
-            range_middle:
-              'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-xl',
-            today:
-              'border border-[var(--accent)] rounded-xl',
-            outside: 'text-gray-400 opacity-50',
-          }}
+  months: 'flex justify-center',
+  month: 'w-[440px] space-y-5',
+  month_caption: 'flex justify-center text-lg font-bold capitalize',
+  caption_label: 'text-lg font-bold capitalize',
+  nav: 'mb-4 flex w-full items-center justify-between',
+  button_previous:
+    'h-10 w-10 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+  button_next:
+    'h-10 w-10 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+  chevron: 'h-5 w-5 text-[var(--foreground)]',
+
+  weekdays: 'grid grid-cols-7 gap-2 text-center',
+  weekday: 'text-xs font-semibold text-[var(--muted-foreground)]',
+
+  weeks: 'space-y-2',
+  week: 'grid grid-cols-7 gap-2',
+  day: 'h-12 w-12',
+
+  day_button:
+    'flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-medium transition hover:bg-[var(--accent)]/20',
+
+  selected:
+    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+  range_start:
+    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+  range_end:
+    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+  range_middle:
+    'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-2xl',
+
+  today:
+    'border border-[var(--accent)] rounded-2xl',
+  outside: 'text-gray-400 opacity-50',
+}}
         />
 
        <div className="mt-6 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-5">
