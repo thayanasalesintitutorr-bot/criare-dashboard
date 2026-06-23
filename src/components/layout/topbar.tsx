@@ -213,7 +213,7 @@ function parseLocalDate(dateString?: string) {
   </button>
 
   {showCalendar && (
-    <div className="absolute right-0 top-full z-50 mt-4 w-[720px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+    <div className="absolute right-0 top-full z-50 mt-4 w-[420px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
       <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
           <CalendarDays size={20} />
@@ -252,10 +252,10 @@ function parseLocalDate(dateString?: string) {
   
           }}
           
-          numberOfMonths={2}
+          numberOfMonths={1}
           className="text-sm"
           classNames={{
-            months: 'grid grid-cols-2 gap-8',
+            months: 'grid grid-cols-1 gap-4',
             month: 'space-y-4',
             caption: 'flex items-center justify-between px-2 text-lg font-bold capitalize',
             nav: 'flex items-center gap-2',
