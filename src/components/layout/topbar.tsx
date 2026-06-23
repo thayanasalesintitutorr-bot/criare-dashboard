@@ -288,13 +288,16 @@ function parseLocalDate(dateString?: string) {
   selected:
     'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
 
-  range_start: 'bg-[var(--accent)] text-[var(--background)] rounded-xl', 
+ range_start:
+  '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+
+range_end:
+  '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+
+range_middle:
+  '[&>button]:bg-[#EFE6D8] [&>button]:text-[#0F172A]',
   
-  range_end: 'bg-[var(--accent)] text-[var(--background)] rounded-xl', 
-  
-  range_middle: 'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-xl', 
-  
-  today: 'border border-[var(--accent)] rounded-xl', outside: 'text-gray-400 opacity-50',
+  today: '[&>button]:bg-[#F7F1E8] [&>button]:border [&>button]:border-[#DFBA62] [&>button]:text-[#0F172A]',
 }}
         />
 
