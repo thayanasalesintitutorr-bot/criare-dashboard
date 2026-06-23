@@ -19,6 +19,8 @@ import {
   X,
   Monitor,
   Smartphone,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
