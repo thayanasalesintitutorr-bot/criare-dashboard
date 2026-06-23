@@ -30,6 +30,7 @@ import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
 import { ptBR } from 'date-fns/locale'
 
+
 export function Topbar({ title }: { title: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   const {
@@ -52,14 +53,13 @@ export function Topbar({ title }: { title: string }) {
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
-  const [showCalendarInicio, setShowCalendarInicio] = useState(false)
-  const [showCalendarFim, setShowCalendarFim] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [hideNotifications, setHideNotifications] = useState(false)
   const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+
 
   const calendarRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -75,8 +75,6 @@ export function Topbar({ title }: { title: string }) {
 
       if (calendarRef.current && !calendarRef.current.contains(target)) {
         setShowCalendar(false)
-        setShowCalendarInicio(false)
-        setShowCalendarFim(false)
       }
 
       if (profileRef.current && !profileRef.current.contains(target)) {
@@ -204,189 +202,130 @@ function parseLocalDate(dateString?: string) {
                 </button>
 
                 <div ref={calendarRef} className="relative">
-                  <button
-                    onClick={() => setShowCalendar((v) => !v)}
-                    className={`${pillBase} ${periodo === 'personalizado' ? pillActive : pillInactive}`}
-                  >
-                    <CalendarDays size={20} />
-                    Personalizado
-                  </button>
+  <button
+    onClick={() => setShowCalendar((v) => !v)}
+    className={`${pillBase} ${
+      periodo === 'personalizado' ? pillActive : pillInactive
+    }`}
+  >
+    <CalendarDays size={20} />
+    Personalizado
+  </button>
 
-                  {showCalendar && (
-                    <div className="absolute left-0 top-full mt-3 min-w-[320px] rounded-2xl border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
-                      <div className="grid gap-3">
-                        <div>
-                          <label className="mb-1 block text-sm text-[var(--muted-foreground)]">
-                            Data inicial
-                          </label>
+  {showCalendar && (
+    <div className="absolute right-0 top-full z-50 mt-4 w-[720px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+      <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
+          <CalendarDays size={20} />
+        </div>
 
-                          <div className="space-y-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowCalendarInicio((v) => !v)
-                                setShowCalendarFim(false)
-                              }}
-                              className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-transparent px-4 py-3 text-left"
-                            >
-                              <span>
-                                {dataInicio ? parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR') : 'dd/mm/aaaa'}
-                              </span>
-                              <CalendarDays size={18} />
-                            </button>
+        <div>
+          <p className="text-lg font-bold">Selecione o período</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Escolha a data inicial e final no calendário
+          </p>
+        </div>
+      </div>
 
-                            {showCalendarInicio && (
-                              <div
-  className="rounded-2xl border border-white/10 bg-[var(--background)] p-3"
-  style={
-    {
-      '--rdp-accent-color': 'var(--accent)',
-      '--rdp-background-color': 'transparent',
-    } as React.CSSProperties
-  }
->
-                                <DayPicker
-  locale={ptBR}
-  mode="single"
-  selected={parseLocalDate(dataInicio)}
-  onSelect={(date: Date | undefined) => {
-    if (date) {
-      const ano = date.getFullYear()
-      const mes = String(date.getMonth() + 1).padStart(2, '0')
-      const dia = String(date.getDate()).padStart(2, '0')
-      setDataInicio(`${ano}-${mes}-${dia}`)
-      setShowCalendarInicio(false)
-    }
-  }}
-  formatters={{
-    formatCaption: (date) =>
-      date.toLocaleDateString('pt-BR', {
-        month: 'long',
-        year: 'numeric',
-      }),
-  }}
-  className="p-1 text-xs"
-  classNames={{
-    month: 'space-y-3',
-    caption: 'flex items-center justify-between px-2 text-[13px] font-semibold capitalize',
-    nav: 'flex items-center gap-1',
-    button_previous:
-      'h-7 w-7 rounded-md flex items-center justify-center hover:bg-[var(--accent)]/10 transition',
-    button_next:
-      'h-7 w-7 rounded-md flex items-center justify-center hover:bg-[var(--accent)]/10 transition',
-    chevron: 'h-5 w-5 text-[var(--accent)]',
-    weekdays: 'grid grid-cols-7',
-    weekday: 'text-center text-[11px] font-medium text-[var(--muted-foreground)]',
-    weeks: 'space-y-1',
-    week: 'grid grid-cols-7 place-items-center',
-    day_button:
-  'flex h-10 w-10 items-center justify-center rounded-full text-[13px] leading-none transition hover:bg-[var(--muted)]',
-selected:
-  'flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)] shadow-sm',
-today:
-  'flex h-10 w-10 items-center justify-center rounded-full border border-[var(--accent)]',
-    outside: 'text-gray-400',
-  }}
-/>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+      <div className="p-6">
+        <DayPicker
+          locale={ptBR}
+          mode="range"
+          selected={{
+            from: parseLocalDate(dataInicio),
+            to: parseLocalDate(dataFim),
+          }}
+          onSelect={(range) => {
+            if (range?.from) {
+              const ano = range.from.getFullYear()
+              const mes = String(range.from.getMonth() + 1).padStart(2, '0')
+              const dia = String(range.from.getDate()).padStart(2, '0')
+              setDataInicio(`${ano}-${mes}-${dia}`)
+            }
 
-                        <div>
-                          <label className="mb-1 block text-sm text-[var(--muted-foreground)]">
-                            Data final
-                          </label>
+            if (range?.to) {
+              const ano = range.to.getFullYear()
+              const mes = String(range.to.getMonth() + 1).padStart(2, '0')
+              const dia = String(range.to.getDate()).padStart(2, '0')
+              setDataFim(`${ano}-${mes}-${dia}`)
+            }
+  
+          }}
+          
+          numberOfMonths={2}
+          className="text-sm"
+          classNames={{
+            months: 'grid grid-cols-2 gap-8',
+            month: 'space-y-4',
+            caption: 'flex items-center justify-between px-2 text-lg font-bold capitalize',
+            nav: 'flex items-center gap-2',
+            button_previous:
+              'h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+            button_next:
+              'h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+            chevron: 'h-5 w-5 text-[var(--foreground)]',
+            weekdays: 'grid grid-cols-7 text-center',
+            weekday:
+              'text-xs font-semibold text-[var(--muted-foreground)]',
+            weeks: 'space-y-2',
+            week: 'grid grid-cols-7 gap-1',
+            day: 'h-10 w-10',
+            day_button:
+              'flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium transition hover:bg-[var(--accent)]/20',
+            selected:
+              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
+            range_start:
+              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
+            range_end:
+              'bg-[var(--accent)] text-[var(--background)] rounded-xl',
+            range_middle:
+              'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-xl',
+            today:
+              'border border-[var(--accent)] rounded-xl',
+            outside: 'text-gray-400 opacity-50',
+          }}
+        />
 
-                          <div className="space-y-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setShowCalendarFim((v) => !v)
-                                setShowCalendarInicio(false)
-                              }}
-                              className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-transparent px-4 py-3 text-left"
-                            >
-                              <span>
-                                {dataFim ? parseLocalDate(dataFim)?.toLocaleDateString('pt-BR') : 'dd/mm/aaaa'}
-                              </span>
-                              <CalendarDays size={18} />
-                            </button>
+        <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-5">
+          <div>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Período selecionado
+            </p>
+            <p className="font-semibold">
+              {dataInicio && dataFim
+                ? `${parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR')} até ${parseLocalDate(dataFim)?.toLocaleDateString('pt-BR')}`
+                : 'Selecione início e fim'}
+            </p>
+          </div>
 
-                            {showCalendarFim && (
-                              <div
-  className="rounded-2xl border border-white/10 bg-[var(--background)] p-3"
-  style={
-    {
-      '--rdp-accent-color': 'var(--accent)',
-      '--rdp-background-color': 'transparent',
-    } as React.CSSProperties
-  }
->
-                                <DayPicker
-  locale={ptBR}
-  mode="single"
-  selected={parseLocalDate(dataFim)}
-  onSelect={(date: Date | undefined) => {
-    if (date) {
-      const ano = date.getFullYear()
-      const mes = String(date.getMonth() + 1).padStart(2, '0')
-      const dia = String(date.getDate()).padStart(2, '0')
-      setDataFim(`${ano}-${mes}-${dia}`)
-      setShowCalendarFim(false)
-    }
-  }}
-  formatters={{
-    formatCaption: (date) =>
-      date.toLocaleDateString('pt-BR', {
-        month: 'long',
-        year: 'numeric',
-      }),
-  }}
-  className="p-1 text-xs"
-  classNames={{
-    month: 'space-y-3',
-    caption: 'flex items-center justify-between px-2 text-[13px] font-semibold capitalize',
-    nav: 'flex items-center gap-1',
-    button_previous:
-      'h-7 w-7 rounded-md flex items-center justify-center hover:bg-[var(--accent)]/10 transition',
-    button_next:
-      'h-7 w-7 rounded-md flex items-center justify-center hover:bg-[var(--accent)]/10 transition',
-    chevron: 'h-5 w-5 text-[var(--accent)]',
-    weekdays: 'grid grid-cols-7',
-    weekday: 'text-center text-[11px] font-medium text-[var(--muted-foreground)]',
-    weeks: 'space-y-1',
-    week: 'grid grid-cols-7 place-items-center',
-    day_button:
-  'flex h-10 w-10 items-center justify-center rounded-full text-[13px] leading-none transition hover:bg-[var(--muted)]',
-selected:
-  'flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)] shadow-sm',
-today:
-  'flex h-10 w-10 items-center justify-center rounded-full border border-[var(--accent)]',
-    outside: 'text-gray-400',
-  }}
-/>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setDataInicio('')
+                setDataFim('')
+              }}
+              className="rounded-xl border border-black/10 px-6 py-3 font-semibold"
+            >
+              Limpar
+            </button>
 
-                        <button
-                          onClick={() => {
-                            setPeriodo('personalizado')
-                            setShowCalendar(false)
-                            setShowCalendarInicio(false)
-                            setShowCalendarFim(false)
-                          }}
-                          className="mt-2 rounded-xl bg-[var(--accent)] px-4 py-2 font-medium text-[var(--background)]"
-                        >
-                          Aplicar período
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <button
+              onClick={() => {
+                setPeriodo('personalizado')
+                setShowCalendar(false)
+              }}
+              className="rounded-xl bg-[var(--accent)] px-8 py-3 font-semibold text-[var(--background)]"
+            >
+              Aplicar período
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
+</div>
+
 
               <div className={groupClass}>
                 <button

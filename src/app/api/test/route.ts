@@ -294,21 +294,41 @@ function getMetaNps(start: Date, end: Date) {
 }
 
 function getMetaVendas(periodo: string, start: Date, end: Date) {
-  switch (periodo) {
-    case 'mes-atual':
-    case 'mes-passado':
-      return META_MENSAL_VENDAS
-    case 'semana':
-      return META_SEMANAL_VENDAS
-    case 'hoje':
-    case 'ontem':
-      return Math.round(META_DIARIA_VENDAS)
-    default: {
-      const diff = end.getTime() - start.getTime()
-      const days = Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1)
-      return Math.round(META_DIARIA_VENDAS * days)
-    }
+  const startDay = startOfDay(start)
+  const endDay = startOfDay(end)
+
+  const mesCompletoInicio = startOfDay(
+    new Date(startDay.getFullYear(), startDay.getMonth(), 1)
+  )
+
+  const mesCompletoFim = startOfDay(
+    new Date(startDay.getFullYear(), startDay.getMonth() + 1, 0)
+  )
+
+  const selecionouMesInteiro =
+    startDay.getTime() === mesCompletoInicio.getTime() &&
+    endDay.getTime() === mesCompletoFim.getTime()
+
+  if (
+    periodo === 'mes-atual' ||
+    periodo === 'mes-passado' ||
+    selecionouMesInteiro
+  ) {
+    return META_MENSAL_VENDAS
   }
+
+  if (periodo === 'semana') {
+    return META_SEMANAL_VENDAS
+  }
+
+  if (periodo === 'hoje' || periodo === 'ontem') {
+    return Math.round(META_DIARIA_VENDAS)
+  }
+
+  const diff = endDay.getTime() - startDay.getTime()
+  const days = Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1)
+
+  return Math.round(META_DIARIA_VENDAS * days)
 }
 
 function buildEvolucaoDiaria(
