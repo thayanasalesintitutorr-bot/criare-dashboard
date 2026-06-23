@@ -264,7 +264,7 @@ function parseLocalDate(dateString?: string) {
   caption_label: 'text-lg font-bold capitalize',
 
   nav:
-    'absolute left-1/2 top-[104px] z-10 flex w-[390px] -translate-x-1/2 items-center justify-between',
+      'absolute left-8 right-8 top-[104px] z-10 flex items-center justify-between',
 
   button_previous:
     'flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--muted)]',
@@ -286,18 +286,18 @@ function parseLocalDate(dateString?: string) {
     'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-medium transition hover:bg-[var(--accent)]/20',
 
   selected:
-    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+  'bg-[var(--accent)] text-white rounded-2xl',
 
-  range_start:
-    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+range_start:
+  'bg-[var(--accent)] text-white rounded-2xl',
 
-  range_end:
-    'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+range_end:
+  'bg-[var(--accent)] text-white rounded-2xl',
 
   range_middle:
-    'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-2xl',
+     'bg-[#EFE6D8] text-[var(--foreground)] rounded-2xl',
 
-  today: 'border border-[var(--accent)] rounded-2xl',
+  today:  'bg-[#F7F1E8] border border-[var(--accent)] rounded-2xl',
 
   outside: 'text-gray-400 opacity-50',
 }}
