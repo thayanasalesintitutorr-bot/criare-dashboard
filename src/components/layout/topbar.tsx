@@ -264,13 +264,13 @@ function parseLocalDate(dateString?: string) {
   caption_label: 'text-lg font-bold capitalize',
 
   nav:
-      'absolute left-8 right-8 top-[104px] z-10 flex items-center justify-between',
+      'absolute left-1/2 top-1/2 flex w-[280px] -translate-x-1/2 -translate-y-1/2 items-center justify-between',
 
   button_previous:
-    'flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+  'h-10 w-10 flex items-center justify-center rounded-xl hover:bg-[var(--muted)]',
 
-  button_next:
-    'flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+button_next:
+  'h-10 w-10 flex items-center justify-center rounded-xl hover:bg-[var(--muted)]',
 
   chevron: 'h-5 w-5 text-[var(--foreground)]',
 
