@@ -59,6 +59,7 @@ export function Topbar({ title }: { title: string }) {
   const [hideNotifications, setHideNotifications] = useState(false)
   const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const calendarRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -94,6 +95,16 @@ export function Topbar({ title }: { title: string }) {
   function handleRefresh() {
     window.location.reload()
   }
+
+  function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen()
+    setIsFullscreen(true)
+  } else {
+    document.exitFullscreen()
+    setIsFullscreen(false)
+  }
+}
 
   function handleLogout() {
     logout()
@@ -422,6 +433,14 @@ today:
             >
               <RefreshCw size={18} />
             </button>
+
+            <button
+  onClick={toggleFullscreen}
+  title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+  className="rounded-2xl bg-[var(--card)] p-3"
+>
+  {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+</button>
 
             <button className="rounded-2xl bg-[var(--card)] p-3">
               <Search size={18} />
