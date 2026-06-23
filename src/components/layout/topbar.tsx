@@ -256,7 +256,7 @@ function parseLocalDate(dateString?: string) {
           className="text-sm"
           classNames={{
   months: 'flex justify-center',
-  month: 'w-[430px] space-y-4',
+  month: 'w-[430px] space-y-4 pl-4',
 
   month_caption:
     'relative flex items-center justify-center text-[28px] font-black capitalize',
@@ -288,19 +288,13 @@ function parseLocalDate(dateString?: string) {
   selected:
     'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
 
-  range_start:
-    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
-
-  range_end:
-    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
-
-  range_middle:
-    'bg-[#EFE6D8] text-[#0F172A] rounded-2xl',
-
-  today:
-    'bg-[#F7F1E8] border border-[#DFBA62] text-[#0F172A] rounded-2xl',
-
-  outside: 'text-gray-300 opacity-40',
+  range_start: 'bg-[var(--accent)] text-[var(--background)] rounded-xl', 
+  
+  range_end: 'bg-[var(--accent)] text-[var(--background)] rounded-xl', 
+  
+  range_middle: 'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-xl', 
+  
+  today: 'border border-[var(--accent)] rounded-xl', outside: 'text-gray-400 opacity-50',
 }}
         />
 
