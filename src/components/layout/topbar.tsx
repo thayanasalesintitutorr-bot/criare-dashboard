@@ -31,8 +31,6 @@ import 'react-day-picker/dist/style.css'
 import { ptBR } from 'date-fns/locale'
 
 
-
-
 export function Topbar({ title }: { title: string }) {
   const { resolvedTheme, setTheme } = useTheme()
   const {
@@ -61,9 +59,6 @@ export function Topbar({ title }: { title: string }) {
   const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [calendarPosition, setCalendarPosition] = useState({ x: 0, y: 0 })
-const [isDraggingCalendar, setIsDraggingCalendar] = useState(false)
-const dragStartRef = useRef({ x: 0, y: 0 })
 
 
   const calendarRef = useRef<HTMLDivElement>(null)
@@ -90,29 +85,6 @@ const dragStartRef = useRef({ x: 0, y: 0 })
         setShowNotifications(false)
       }
     }
-
-    useEffect(() => {
-  function handleMouseMove(e: MouseEvent) {
-    if (!isDraggingCalendar) return
-
-    setCalendarPosition({
-      x: e.clientX - dragStartRef.current.x,
-      y: e.clientY - dragStartRef.current.y,
-    })
-  }
-
-  function handleMouseUp() {
-    setIsDraggingCalendar(false)
-  }
-
-  document.addEventListener('mousemove', handleMouseMove)
-  document.addEventListener('mouseup', handleMouseUp)
-
-  return () => {
-    document.removeEventListener('mousemove', handleMouseMove)
-    document.removeEventListener('mouseup', handleMouseUp)
-  }
-}, [isDraggingCalendar])
 
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -241,22 +213,8 @@ function parseLocalDate(dateString?: string) {
   </button>
 
   {showCalendar && (
-    <div
-  style={{
-    transform: `translate(${calendarPosition.x}px, ${calendarPosition.y}px)`,
-  }}
-  className="absolute right-0 top-full z-50 mt-4 w-[520px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl"
->
-      <div
-  onMouseDown={(e) => {
-    setIsDraggingCalendar(true)
-    dragStartRef.current = {
-      x: e.clientX - calendarPosition.x,
-      y: e.clientY - calendarPosition.y,
-    }
-  }}
-  className="flex cursor-move items-center gap-3 border-b border-black/5 px-6 py-5"
->
+    <div className="absolute right-0 top-full z-50 mt-4 w-[520px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+      <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
           <CalendarDays size={20} />
         </div>
