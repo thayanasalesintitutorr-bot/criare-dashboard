@@ -256,13 +256,13 @@ function parseLocalDate(dateString?: string) {
           className="text-sm"
           classNames={{
             months: 'grid grid-cols-1 gap-4',
-            month: 'space-y-4',
-            caption: 'flex items-center justify-center px-2 text-lg font-bold capitalize',
-            nav: 'absolute left-0 right-0 top-0 flex items-center justify-between px-2',
+            month: 'w-full space-y-6',
+caption: 'relative flex items-center justify-center px-12 text-lg font-bold capitalize',
+nav: 'absolute left-0 right-0 top-0 flex items-center justify-between px-2',
             button_previous:
-              'h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
-            button_next:
-              'h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+  'absolute left-2 top-0 h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+button_next:
+  'absolute right-2 top-0 h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
             chevron: 'h-5 w-5 text-[var(--foreground)]',
             weekdays: 'grid grid-cols-7 text-center',
             weekday:
