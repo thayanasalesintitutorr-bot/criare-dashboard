@@ -529,26 +529,31 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function loadData() {
-      try {
-        setLoading(true)
-        setError(null)
+  try {
+    console.log(
+      'ATUALIZANDO DASHBOARD',
+      new Date().toLocaleTimeString()
+    )
 
-        let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}`
+    setLoading(true)
+    setError(null)
 
-        if (periodo === 'personalizado' && dataInicio && dataFim) {
-          url += `&inicio=${dataInicio}&fim=${dataFim}`
-        }
+    let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}&t=${Date.now()}`
 
-        const token = localStorage.getItem('access_token')
+    if (periodo === 'personalizado' && dataInicio && dataFim) {
+      url += `&inicio=${dataInicio}&fim=${dataFim}`
+    }
 
-const res = await fetch(url, {
-  cache: 'no-store',
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-})
+    const token = localStorage.getItem('access_token')
 
-        const json: DashboardResponse = await res.json()
+    const res = await fetch(url, {
+      cache: 'no-store',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    const json = await res.json()
 
         if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
         setData(json)
