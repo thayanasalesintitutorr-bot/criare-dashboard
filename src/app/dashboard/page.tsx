@@ -528,51 +528,55 @@ export default function DashboardPage() {
 
 
   useEffect(() => {
-    async function loadData() {
-  try {
-    console.log(
-      'ATUALIZANDO DASHBOARD',
-      new Date().toLocaleTimeString()
-    )
+  async function loadData(showLoading = false) {
+    try {
+      if (showLoading) setLoading(true)
+      setError(null)
 
-    setLoading(true)
-    setError(null)
+      let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}&t=${Date.now()}`
 
-    let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}&t=${Date.now()}`
-
-    if (periodo === 'personalizado' && dataInicio && dataFim) {
-      url += `&inicio=${dataInicio}&fim=${dataFim}`
-    }
-
-    const token = localStorage.getItem('access_token')
-
-    const res = await fetch(url, {
-      cache: 'no-store',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-
-    const json = await res.json()
-
-        if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
-        setData(json)
-      } catch (err: any) {
-        setError(err.message || 'Erro inesperado')
-      } finally {
-        setLoading(false)
+      if (periodo === 'personalizado' && dataInicio && dataFim) {
+        url += `&inicio=${dataInicio}&fim=${dataFim}`
       }
+
+      const token = localStorage.getItem('access_token')
+
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const json: DashboardResponse = await res.json()
+
+      if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
+
+      setData((prev) => {
+        const anterior = JSON.stringify(prev)
+        const novo = JSON.stringify(json)
+
+        if (anterior === novo) {
+          return prev
+        }
+
+        return json
+      })
+    } catch (err: any) {
+      setError(err.message || 'Erro inesperado')
+    } finally {
+      setLoading(false)
     }
+  }
 
-        loadData()
+  loadData(true)
 
-    const interval = setInterval(() => {
-      loadData()
-    }, 10000) // atualiza a cada 10 segundos
+  const interval = setInterval(() => {
+    loadData(false)
+  }, 10000)
 
-    return () => clearInterval(interval)
-
-  }, [periodo, tipoData, segmento, dataInicio, dataFim])
+  return () => clearInterval(interval)
+}, [periodo, tipoData, segmento, dataInicio, dataFim])
 
   const marketing = data?.kpis?.marketing
   const comercialConsulta = data?.kpis?.comercialConsulta
