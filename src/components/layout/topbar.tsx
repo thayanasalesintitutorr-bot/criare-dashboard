@@ -213,7 +213,7 @@ function parseLocalDate(dateString?: string) {
   </button>
 
   {showCalendar && (
-    <div className="absolute right-0 top-full z-50 mt-4 w-[560px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+    <div className="absolute right-0 top-full z-50 mt-4 w-[520px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
       <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
           <CalendarDays size={20} />
@@ -227,7 +227,7 @@ function parseLocalDate(dateString?: string) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center p-6">
+      <div className="relative flex flex-col items-center px-5 py-4">
         <DayPicker
           locale={ptBR}
           mode="range"
@@ -256,14 +256,22 @@ function parseLocalDate(dateString?: string) {
           className="text-sm"
           classNames={{
   months: 'flex justify-center',
-  month: 'w-[440px] space-y-5',
-  month_caption: 'flex justify-center text-lg font-bold capitalize',
+  month: 'w-[390px] space-y-4',
+
+  month_caption:
+    'flex items-center justify-center gap-6 text-lg font-bold capitalize',
+
   caption_label: 'text-lg font-bold capitalize',
-  nav: 'mb-4 flex w-full items-center justify-between',
+
+  nav:
+    'absolute left-1/2 top-[104px] z-10 flex w-[390px] -translate-x-1/2 items-center justify-between',
+
   button_previous:
-    'h-10 w-10 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+    'flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+
   button_next:
-    'h-10 w-10 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
+    'flex h-10 w-10 items-center justify-center rounded-xl hover:bg-[var(--muted)]',
+
   chevron: 'h-5 w-5 text-[var(--foreground)]',
 
   weekdays: 'grid grid-cols-7 gap-2 text-center',
@@ -271,27 +279,31 @@ function parseLocalDate(dateString?: string) {
 
   weeks: 'space-y-2',
   week: 'grid grid-cols-7 gap-2',
-  day: 'h-12 w-12',
+
+  day: 'h-11 w-11',
 
   day_button:
-    'flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-medium transition hover:bg-[var(--accent)]/20',
+    'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-medium transition hover:bg-[var(--accent)]/20',
 
   selected:
     'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+
   range_start:
     'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+
   range_end:
     'bg-[var(--accent)] text-[var(--background)] rounded-2xl',
+
   range_middle:
     'bg-[var(--accent)]/15 text-[var(--foreground)] rounded-2xl',
 
-  today:
-    'border border-[var(--accent)] rounded-2xl',
+  today: 'border border-[var(--accent)] rounded-2xl',
+
   outside: 'text-gray-400 opacity-50',
 }}
         />
 
-       <div className="mt-6 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-5">
+       <div className="mt-5 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-4">
           <div>
             <p className="text-sm text-[var(--muted-foreground)]">
               Período selecionado
