@@ -213,7 +213,7 @@ function parseLocalDate(dateString?: string) {
   </button>
 
   {showCalendar && (
-    <div className="absolute right-0 top-full z-50 mt-4 w-[420px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+    <div className="absolute right-0 top-full z-50 mt-4 w-[560px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
       <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
           <CalendarDays size={20} />
@@ -227,7 +227,7 @@ function parseLocalDate(dateString?: string) {
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="flex flex-col items-center p-6">
         <DayPicker
           locale={ptBR}
           mode="range"
@@ -257,8 +257,8 @@ function parseLocalDate(dateString?: string) {
           classNames={{
             months: 'grid grid-cols-1 gap-4',
             month: 'space-y-4',
-            caption: 'flex items-center justify-between px-2 text-lg font-bold capitalize',
-            nav: 'flex items-center gap-2',
+            caption: 'flex items-center justify-center px-2 text-lg font-bold capitalize',
+            nav: 'absolute left-0 right-0 top-0 flex items-center justify-between px-2',
             button_previous:
               'h-9 w-9 rounded-xl flex items-center justify-center hover:bg-[var(--muted)]',
             button_next:
@@ -286,7 +286,7 @@ function parseLocalDate(dateString?: string) {
           }}
         />
 
-        <div className="mt-6 flex items-center justify-between border-t border-black/5 pt-5">
+       <div className="mt-6 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-5">
           <div>
             <p className="text-sm text-[var(--muted-foreground)]">
               Período selecionado
@@ -298,13 +298,13 @@ function parseLocalDate(dateString?: string) {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex shrink-0 gap-3">
             <button
               onClick={() => {
                 setDataInicio('')
                 setDataFim('')
               }}
-              className="rounded-xl border border-black/10 px-6 py-3 font-semibold"
+              className="rounded-xl border border-black/10 px-5 py-2.5 text-sm font-semibold"
             >
               Limpar
             </button>
@@ -314,7 +314,7 @@ function parseLocalDate(dateString?: string) {
                 setPeriodo('personalizado')
                 setShowCalendar(false)
               }}
-              className="rounded-xl bg-[var(--accent)] px-8 py-3 font-semibold text-[var(--background)]"
+              className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--background)]"
             >
               Aplicar período
             </button>
