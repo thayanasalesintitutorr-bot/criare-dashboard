@@ -223,6 +223,19 @@ function cardBg() {
   return 'border border-black/5 bg-[var(--card)] shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]'
 }
 
+function metricCardBg() {
+  return `
+    rounded-[22px]
+    border
+    border-black/5
+    bg-[var(--metric-card)]
+    p-5
+    shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+    dark:border-white/5
+    dark:shadow-[0_10px_30px_rgba(0,0,0,0.30)]
+  `
+}
+
 function GroupCard({
   title,
   icon,
@@ -984,7 +997,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       : 'xl:grid-cols-3'
   }`}
 >
-            <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+            <div className={`space-y-2 ${metricCardBg()}`}>
               <div className={`${
   viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
 } ${textPrimary()}`}>Quantidade total de vendas</div>
@@ -996,7 +1009,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
             </div>
 
-            <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+            <div className={`space-y-2 ${metricCardBg()}`}>
               <div className={`${
   viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
 } ${textPrimary()}`}>Total do valor de venda</div>
@@ -1038,7 +1051,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
               </div>
             </div>
 
-            <div className="space-y-2 rounded-[22px] border border-black/5 bg-white/80 p-5 shadow-[0_10px_30px_rgba(15,23,42,0.08)] dark:border-white/5 dark:!bg-[#163250] dark:shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+            <div className={`space-y-2 ${metricCardBg()}`}>
              <div className={`${
   viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
 } ${textPrimary()}`}>

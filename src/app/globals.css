@@ -4,6 +4,7 @@
   --background: #071423;
   --foreground: #f8fafc;
   --card: #0f2236;
+  --metric-card: #1B3147;
   --card-foreground: #f8fafc;
   --border: rgba(255, 255, 255, 0.06);
   --primary: #8e63ff;
@@ -20,6 +21,7 @@
   --background: #f6f6fb;
   --foreground: #111827;
   --card: #ffffff;
+  --metric-card: #F8F8FA;
   --card-foreground: #111827;
   --border: rgba(15, 23, 42, 0.08);
   --primary: #6f63ff;
