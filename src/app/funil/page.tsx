@@ -17,7 +17,7 @@ import {
   Handshake,
   ClipboardList,
   Sun,
-CalendarCheck2,
+  CalendarCheck2,
 CalendarX2,
 CalendarClock,
 } from 'lucide-react'
@@ -170,7 +170,8 @@ function getInfoMedico(nome: string) {
 }
 
 export default function FunilPage() {
-  const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode } = useFilters()
+const isImac = viewMode === 'desktop'
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -201,8 +202,6 @@ const res = await fetch(url, {
 })
 
         const json: DashboardResponse = await res.json()
-
-        console.log(json)
 
         if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
 
@@ -414,7 +413,7 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
         className="rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] p-6"
       >
         <div className="mb-5 flex items-center gap-4">
-  <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
+  <div className={`${isImac ? 'h-24 w-24' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
     {getFotoMedico(medico.medico) ? (
       <img
         src={getFotoMedico(medico.medico) || ''}
@@ -432,15 +431,15 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   <div className="flex items-start justify-between gap-4">
     
     <div>
-      <h3 className="text-[25px] font-black tracking-[-0.04em] text-[var(--foreground)]">
+      <h3 className={`${isImac ? 'text-[22px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
         {medico.medico}
       </h3>
 
-      <p className="mt-1 text-[20px] font-semibold text-[var(--muted-foreground)]">
+      <p className={`mt-1 ${isImac ? 'text-[16px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
   {infoMedico.crm} • {infoMedico.especialidade}
 </p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-6 text-[22px] font-semibold">
+      <div className={`mt-4 flex flex-wrap items-center ${isImac ? 'gap-4 text-[18px]' : 'gap-6 text-[22px]'} font-semibold`}>
         <span className="flex items-center gap-1 text-blue-500">
   <CalendarDays className="h-6 w-6" />
   {medico.atendimentos || 0} atendimentos finalizados
@@ -489,13 +488,13 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className="space-y-4">
+<div className={isImac ? 'grid grid-cols-2 gap-4' : 'space-y-4'}>
   <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4">
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   AGENDA
 </h4>
 
-    <div className="grid gap-3 md:grid-cols-4">
+    <div className={isImac ? 'grid grid-cols-4 gap-3' : 'grid gap-3 md:grid-cols-4'}>
   <MetricMini
     label="Manhã"
     value={medico.manha || 0}
@@ -603,7 +602,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 )}
 
 
-  <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'p-4' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   FINANCEIRO
 </h4>
@@ -666,7 +665,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
+<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'p-4' : 'p-5'}`}>
   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   CONSOLIDADO
 </h4>
@@ -727,7 +726,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   MOVIMENTAÇÕES DA AGENDA
 </h4>
 
-    <div className="grid items-center gap-6 lg:grid-cols-[1fr_360px]">
+    <div className={isImac ? 'grid grid-cols-[1fr_260px] items-center gap-4' : 'grid items-center gap-6 lg:grid-cols-[1fr_360px]'}>
       <div className="grid gap-3 md:grid-cols-3">
         <MetricMini label="No Show" value={medico.noShow || 0} color="pink" icon={UserX} />
         <MetricMini label="Cancelados" value={medico.cancelados || 0} color="red" icon={CalendarX2} />
@@ -735,7 +734,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
       </div>
 
       <div className="ml-auto flex items-center gap-6">
-        <div className="h-[160px] w-[160px]">
+        <div className={isImac ? 'h-[130px] w-[130px]' : 'h-[160px] w-[160px]'}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -961,25 +960,27 @@ function MetricMini({
   color?: 'blue' | 'red' | 'green' | 'orange' | 'pink' | 'darkRed'
   icon?: any
 }) {
+  const { viewMode } = useFilters()
+  const isImac = viewMode === 'desktop'
   const colors = {
-   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#2563EB]',
-orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#F97316]',
-green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#10B981]',
-pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#EC4899]',
-red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#E00000]',
-darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#8B0000]',
+   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-blue)]',
+orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-orange)]',
+green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-green)]',
+pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-pink)]',
+red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-red)]',
+darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-darkRed)]',
   }
 
   return (
-    <div className={`rounded-[16px] px-4 py-5 text-center shadow-none ${colors[color]}`}>
+    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-3 py-4' : 'px-4 py-5'} ${colors[color]}`}>
       <div className="flex items-center justify-center gap-2">
         {Icon && <Icon className="h-4 w-4" />}
-       <p className="text-[20px] font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
+       <p className={`${isImac ? 'text-[16px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
   {label}
 </p>
       </div>
 
-      <p className="mt-2 text-[42px] font-black text-[var(--foreground)]">{value}</p>
+      <p className={`mt-2 ${isImac ? 'text-[34px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
     </div>
   )
 }
@@ -1002,6 +1003,9 @@ chartColor,
   chart?: number[]
   chartColor?: string
 }) {
+
+  const { viewMode } = useFilters()
+  const isImac = viewMode === 'desktop'
   const tones = {
     blue:
 'border border-[color:var(--border)] bg-[var(--metric-card)]',
@@ -1025,19 +1029,19 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] p-5 shadow-none ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none ${isImac ? 'p-4' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
-        <p className="text-[20px] font-black text-[var(--foreground)]">{label}</p>
+       <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-5">
   <div>
-    <div className="flex w-full items-center justify-between text-[34px] font-black leading-none text-[var(--foreground)]">
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[30px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
-   <p className="mt-3 text-[19px] font-medium text-[var(--muted-foreground)]">
+   <p className={`mt-3 ${isImac ? 'text-[16px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
   {description}
 </p>
   </div>
