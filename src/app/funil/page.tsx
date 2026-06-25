@@ -305,7 +305,7 @@ const res = await fetch(url, {
   <ResumoSection
   title="Fechamentos"
   extra={
-    <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-white dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
+    <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-[var(--card)] dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
       {[
         ['consulta', 'Consultas'],
         ['procedimentos', 'Procedimentos'],
@@ -826,7 +826,7 @@ function ResumoSection({
   extra,
 }: any) {
   return (
-   <div className="rounded-[30px] border border-slate-200 bg-white p-8 shadow-sm dark:!border-[#16324C] dark:!bg-[#102841]">
+   <div className="rounded-[30px] border border-slate-200 bg-[var(--metric-card)] p-8 shadow-sm dark:!border-[#16324C] dark:!bg-[#102841]">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-[8px] rounded-full bg-[#D7B46A]" />
@@ -848,7 +848,7 @@ function ResumoSection({
 
 function ResumoCard({ label, value, icon: Icon }: any) {
   return (
-   <div className="rounded-[24px] border border-slate-200 bg-white p-6 dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
+   <div className="rounded-[24px] border border-slate-200 bg-[var(--metric-card)] p-6 dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
       <div className="mb-6 flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#F7F1E3] dark:bg-[#2A2418]">
           <Icon className="h-7 w-7 text-[#D7B46A]" />
@@ -887,7 +887,7 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
       : 'bg-red-500 text-red-500'
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#0E243B]">
+    <div className="rounded-[24px] border border-slate-200 bg-[var(--metric-card)] p-6 dark:border-white/10 dark:bg-[#0E243B]">
       <div className="mb-6 flex items-center gap-3">
   <span className={`h-3 w-3 rounded-full ${dots[dot]}`} />
 
@@ -992,12 +992,12 @@ function MetricMini({
   icon?: any
 }) {
   const colors = {
-    blue: 'border border-slate-200 bg-white text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
-    orange: 'border border-slate-200 bg-white text-[#F97316] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#FB923C]',
-    green: 'border border-slate-200 bg-white text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
-    pink: 'border border-slate-200 bg-white text-[#EC4899] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#F472B6]',
-    red: 'border border-slate-200 bg-white text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
-    darkRed: 'border border-slate-200 bg-white text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
+    blue: 'border border-slate-200 bg-[var(--metric-card)] text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
+    orange: 'border border-slate-200 bg-[var(--metric-card)] text-[#F97316] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#FB923C]',
+    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
+    pink: 'border border-slate-200 bg-[var(--metric-card)] text-[#EC4899] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#F472B6]',
+    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
+    darkRed: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
   }
 
   return (
@@ -1033,10 +1033,10 @@ chartColor,
   chartColor?: string
 }) {
   const tones = {
-    blue: 'border border-slate-200 bg-white text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
-    green: 'border border-slate-200 bg-white text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
-    red: 'border border-slate-200 bg-white text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
-    purple: 'border border-slate-200 bg-white text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
+    blue: 'border border-slate-200 bg-[var(--metric-card)] text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
+    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
+    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
+    purple: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
   }
 
   return (
