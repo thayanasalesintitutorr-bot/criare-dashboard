@@ -207,11 +207,15 @@ function parseLocalDate(dateString?: string) {
 
             <div ref={profileRef} className="relative">
               <button
-                onClick={() => setShowProfile((v) => !v)}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)]"
-              >
-                <User2 size={18} />
-              </button>
+  onClick={() => setShowProfile((v) => !v)}
+  className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[var(--accent)] text-[var(--background)]"
+>
+  <img
+    src="/altuus-logo.png"
+    alt="Altuus Clinic"
+    className="h-full w-full rounded-full object-cover"
+  />
+</button>
 
               {showProfile && (
                 <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-5 shadow-2xl">
@@ -223,9 +227,13 @@ function parseLocalDate(dateString?: string) {
                   </div>
 
                   <div className="mb-5 flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent)] text-xl font-bold text-[var(--background)]">
-                      US
-                    </div>
+                   <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-[var(--accent)]">
+  <img
+    src="/altuus-logo.png"
+    alt="Altuus Clinic"
+    className="h-full w-full object-cover"
+  />
+</div>
 
                     <div>
                       <div className="text-xl font-semibold">Usuário</div>
