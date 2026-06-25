@@ -117,16 +117,6 @@ function formatMoney(v: number) {
     maximumFractionDigits: 0,
   })
 }
-
-const COLORS = [
-  '#6366F1',
-  '#22C55E',
-  '#F59E0B',
-  '#EF4444',
-  '#06B6D4',
-  '#A855F7',
-]
-
 const fotosMedicos: Record<string, string> = {
   'DR. RODOLPHO REIS': '/medicos/rodolpho.png',
   'DRA. CLAUDIA LAMEIRA': '/medicos/claudia.png',
@@ -185,29 +175,9 @@ export default function FunilPage() {
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const [isDark, setIsDark] = useState(false)
-
- const [visaoFinanceira, setVisaoFinanceira] = useState<
+  const [visaoFinanceira, setVisaoFinanceira] = useState<
   'consulta' | 'procedimentos' | 'consolidado'
 >('consulta')
-
-useEffect(() => {
-  const updateTheme = () => {
-  setIsDark(document.documentElement.classList.contains('dark'))
-}
-
-  updateTheme()
-
-  const observer = new MutationObserver(updateTheme)
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['class'],
-  })
-
-  return () => observer.disconnect()
-}, [])
 
   useEffect(() => {
     async function loadData() {
@@ -280,7 +250,7 @@ const res = await fetch(url, {
   if (loading) {
     return (
       <AppShell title="Consulta (Funil)">
-        <div className="rounded-[28px] bg-[var(--card)] p-6 dark:bg-[#0E243B]">
+        <div className="rounded-[28px] bg-[var(--card)] p-6">
           Carregando consultas...
         </div>
       </AppShell>
@@ -305,7 +275,7 @@ const res = await fetch(url, {
   <ResumoSection
   title="Fechamentos"
   extra={
-    <div className="flex overflow-hidden rounded-2xl border border-slate-200 bg-[var(--card)] dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
+    <div className="flex overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[var(--card)]">
       {[
         ['consulta', 'Consultas'],
         ['procedimentos', 'Procedimentos'],
@@ -318,7 +288,7 @@ const res = await fetch(url, {
           className={`px-6 py-3 text-sm font-black transition-all ${
             visaoFinanceira === key
               ? 'bg-[#D7B46A] text-white'
-              : 'text-slate-500 dark:text-slate-300'
+              : 'text-[var(--muted-foreground)]'
           }`}
         >
           {label}
@@ -374,10 +344,10 @@ const res = await fetch(url, {
 </ResumoSection>
 </div>
 
-       <section className="rounded-[30px] border border-white/10 bg-[var(--card)] p-6 text-[var(--foreground)] shadow-[0_18px_45px_rgba(15,23,42,0.10)] dark:bg-[#0E243B]">
+       <section className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-6 text-[var(--foreground)] shadow-[var(--card-shadow)]">
   <div className="mb-6 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-    <h2 className="text-[26px] font-black">Consultas por médico</h2>
+    <h2 className="text-[26px] font-black text-[var(--foreground)]">Consultas por médico</h2>
   </div>
 
   <div className="grid gap-6">
@@ -441,7 +411,7 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   return (
       <div
         key={medico.medico}
-        className="rounded-[28px] border border-white/10 bg-[var(--background)] p-6"
+        className="rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] p-6"
       >
         <div className="mb-5 flex items-center gap-4">
   <div className="h-28 w-28 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
@@ -462,11 +432,11 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   <div className="flex items-start justify-between gap-4">
     
     <div>
-      <h3 className="text-[25px] font-black tracking-[-0.04em]">
+      <h3 className="text-[25px] font-black tracking-[-0.04em] text-[var(--foreground)]">
         {medico.medico}
       </h3>
 
-      <p className="mt-1 text-[20px] font-semibold text-slate-500 dark:text-slate-400">
+      <p className="mt-1 text-[20px] font-semibold text-[var(--muted-foreground)]">
   {infoMedico.crm} • {infoMedico.especialidade}
 </p>
 
@@ -497,7 +467,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     </div>
 
     <div className="min-w-[150px]">
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-[var(--muted-foreground)]">
         Ocupação da agenda
       </p>
 
@@ -505,7 +475,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
         {medico.capacidadeAgenda || 0}%
       </p>
 
-      <div className="mt-3 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-[#16324C]">
+      <div className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className="h-full rounded-full bg-emerald-500"
           style={{
@@ -520,8 +490,8 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 
 <div className="space-y-4">
-  <div className="rounded-[24px] border border-white/5 bg-[var(--card)] p-4 dark:bg-[#0E243B]">
-    <h4 className="mb-4 text-[22px] font-black">
+  <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4">
+    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   AGENDA
 </h4>
 
@@ -565,7 +535,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   description="Consultas finalizadas"
   tone="green"
   chart={medico.evolucaoConsultaPrimeiraVez}
-  chartColor="#10B981"
+  chartColor="var(--chart-green)"
 />
 
     <MetricCard
@@ -575,7 +545,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   description=""
   tone="blue"
   chart={medico.evolucaoProcedimentos}
-  chartColor="#2563EB"
+  chartColor="var(--chart-blue)"
 />
   </div>
 
@@ -596,7 +566,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   description=""
   tone="red"
   chart={medico.evolucaoInjetaveis}
-  chartColor="#10B981"
+  chartColor="var(--chart-green)"
 />
 
     <MetricCard
@@ -614,7 +584,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   description=""
   tone="purple"
   chart={medico.evolucaoProtocolos}
-  chartColor="#F97316"
+  chartColor="var(--chart-orange)"
 />
   </div>
 )}
@@ -628,13 +598,13 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     description=""
     tone="purple"
     chart={medico.evolucaoCirurgias}
-    chartColor="#8B0000"
+    chartColor="var(--chart-red)"
   />
 )}
 
 
-  <div className="rounded-[24px] border border-white/5 bg-[var(--card)] p-5 dark:bg-[#0E243B]">
-    <h4 className="mb-4 text-[22px] font-black">
+  <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
+    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   FINANCEIRO
 </h4>
 
@@ -696,8 +666,8 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className="rounded-[24px] border border-white/5 bg-[var(--card)] p-5 dark:bg-[#0E243B]">
-  <h4 className="mb-4 text-[22px] font-black text-BLACK500">
+<div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
+  <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   CONSOLIDADO
 </h4>
 
@@ -715,7 +685,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
           {formatMoney(faturamentoConsolidado)}
         </p>
 
-        <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-[#16324C]">
+        <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
           <div
   className={`h-full rounded-full ${
     percentualConsolidado >= 100
@@ -731,7 +701,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
         </div>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-xl font-bold text-slate-500">
+          <span className="text-xl font-bold text-[var(--muted-foreground)]">
   Meta {formatMoney(metaConsolidada)}
 </span>
 
@@ -752,7 +722,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   })()}
 </div>
 
-    <div className="rounded-[24px] border border-white/5 bg-[var(--card)] p-5 dark:bg-[#0E243B]">
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   MOVIMENTAÇÕES DA AGENDA
 </h4>
@@ -793,7 +763,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
                 style={{ backgroundColor: item.cor }}
               />
 
-              <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+              <span className="text-sm font-semibold text-[var(--muted-foreground)]">
   {item.nome}
 </span>
             </div>
@@ -826,12 +796,12 @@ function ResumoSection({
   extra,
 }: any) {
   return (
-   <div className="rounded-[30px] border border-slate-200 bg-[var(--metric-card)] p-8 shadow-sm dark:!border-[#16324C] dark:!bg-[#102841]">
+  <div className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-8 shadow-[var(--card-shadow)]">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-[8px] rounded-full bg-[#D7B46A]" />
 
-          <h3 className="text-[28px] font-black text-slate-900 dark:text-white">
+          <h3 className="text-[28px] font-black text-[var(--foreground)]">
             {title}
           </h3>
         </div>
@@ -839,7 +809,7 @@ function ResumoSection({
         {extra}
       </div>
 
-      <div className="grid gap-22 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3">
         {children}
       </div>
     </div>
@@ -848,13 +818,13 @@ function ResumoSection({
 
 function ResumoCard({ label, value, icon: Icon }: any) {
   return (
-   <div className="rounded-[24px] border border-slate-200 bg-[var(--metric-card)] p-6 dark:!border-[#16324C] dark:!bg-[#0A1A2B]">
+   <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] p-6">
       <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[#F7F1E3] dark:bg-[#2A2418]">
+        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[var(--icon-bg)]">
           <Icon className="h-7 w-7 text-[#D7B46A]" />
         </div>
 
-        <p className="text-[20px] font-black leading-tight text-slate-900 dark:text-white">
+        <p className="text-[20px] font-black leading-tight text-[var(--foreground)]">
           {label}
         </p>
       </div>
@@ -863,7 +833,7 @@ function ResumoCard({ label, value, icon: Icon }: any) {
   {value}
 </p>
 
-<p className="mt-4 text-[24px] font-semibold text-slate-500 dark:text-slate-300">
+<p className="mt-4 text-[24px] font-semibold text-[var(--muted-foreground)]">
   fechamentos no período
 </p>
     </div>
@@ -887,11 +857,11 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
       : 'bg-red-500 text-red-500'
 
   return (
-    <div className="rounded-[24px] border border-slate-200 bg-[var(--metric-card)] p-6 dark:border-white/10 dark:bg-[#0E243B]">
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] p-6">
       <div className="mb-6 flex items-center gap-3">
   <span className={`h-3 w-3 rounded-full ${dots[dot]}`} />
 
-  <p className="text-[18px] font-black text-slate-900 dark:text-white">
+  <p className="text-[18px] font-black text-[var(--foreground)]">
     {label}
   </p>
 </div>
@@ -900,7 +870,7 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
   {isMoney ? formatMoney(value) : value}
 </p>
 
-   <div className="mt-6 h-6 overflow-hidden rounded-full bg-slate-200 dark:bg-[#16324C]">
+   <div className="mt-6 h-6 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className={`h-full rounded-full ${cor.split(' ')[0]}`}
           style={{ width: `${Math.min(percentual, 100)}%` }}
@@ -908,7 +878,7 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
       </div>
 
      <div className="mt-4 flex items-center justify-between">
-  <span className="text-[24px] font-bold text-slate-500">
+  <span className="text-[24px] font-bold text-[var(--muted-foreground)]">
     Meta {isMoney ? formatMoney(meta) : meta}
   </span>
 
@@ -956,8 +926,8 @@ function CardMini({
 }: any) {
   return (
     <div
-      className={`rounded-[24px] border border-white/5 p-5 shadow-[0_18px_45px_rgba(15,23,42,0.10)] ${
-        statusClass || 'bg-[var(--card)] dark:bg-[#0E243B]'
+      className={`rounded-[24px] border border-[color:var(--border)] p-5 shadow-[var(--card-shadow)] ${
+        statusClass || 'bg-[var(--metric-card)]'
       }`}
     >
       <div className="mb-3 flex items-center gap-2">
@@ -968,7 +938,7 @@ function CardMini({
         </p>
       </div>
 
-      <h3 className={`text-4xl font-black tracking-[-0.05em] ${statusClass ? 'dark:text-white' : ''}`}>
+      <h3 className={`text-4xl font-black tracking-[-0.05em] text-[var(--foreground)]`}>
         {value}
       </h3>
 
@@ -992,24 +962,24 @@ function MetricMini({
   icon?: any
 }) {
   const colors = {
-    blue: 'border border-slate-200 dark:border-white/10 bg-[var(--metric-card)] text-[#2563EB] dark:text-[#60A5FA]',
-    orange: 'border border-slate-200 bg-[var(--metric-card)] text-[#F97316] dark:border-white/10 dark:text-[#FB923C]',
-    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:border-white/10 dark:text-[#34D399]',
-    pink: 'border border-slate-200 bg-[var(--metric-card)] text-[#EC4899] dark:border-white/10 dark:text-[#F472B6]',
-    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:border-white/10 dark:text-[#EF4444]',
-    darkRed: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:border-white/10 dark:text-[#B91C1C]',
+   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#2563EB]',
+orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#F97316]',
+green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#10B981]',
+pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#EC4899]',
+red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#E00000]',
+darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[#8B0000]',
   }
 
   return (
     <div className={`rounded-[16px] px-4 py-5 text-center shadow-none ${colors[color]}`}>
       <div className="flex items-center justify-center gap-2">
         {Icon && <Icon className="h-4 w-4" />}
-       <p className="text-[20px] font-black uppercase tracking-[0.08em]">
+       <p className="text-[20px] font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
   {label}
 </p>
       </div>
 
-      <p className="mt-2 text-[42px] font-black">{value}</p>
+      <p className="mt-2 text-[42px] font-black text-[var(--foreground)]">{value}</p>
     </div>
   )
 }
@@ -1033,17 +1003,32 @@ chartColor,
   chartColor?: string
 }) {
   const tones = {
-    blue: 'border border-slate-200 dark:border-white/10 bg-[var(--metric-card)] text-[#2563EB] dark:text-[#60A5FA]',
-    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:border-white/10 dark:text-[#34D399]',
-    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:border-white/10 dark:text-[#EF4444]',
-    purple: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:border-white/10 dark:text-[#B91C1C]',
+    blue:
+'border border-[color:var(--border)] bg-[var(--metric-card)]',
+
+green:
+'border border-[color:var(--border)] bg-[var(--metric-card)]',
+
+red:
+'border border-[color:var(--border)] bg-[var(--metric-card)]',
+
+purple:
+'border border-[color:var(--border)] bg-[var(--metric-card)]',
   }
+
+  const iconColors = {
+  blue: 'text-[var(--chart-blue)]',
+  green: 'text-[var(--chart-green)]',
+  red: 'text-[var(--chart-red)]',
+  purple: 'text-[var(--chart-purple)]',
+}
+
 
   return (
     <div className={`rounded-[16px] p-5 shadow-none ${tones[tone]}`}>
       <div className="flex items-center gap-2">
-        <Icon className="h-6 w-5" />
-        <p className="text-[20px] font-black">{label}</p>
+        <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
+        <p className="text-[20px] font-black text-[var(--foreground)]">{label}</p>
       </div>
 
       <div className="mt-5">
@@ -1052,7 +1037,7 @@ chartColor,
       {value}
     </div>
 
-   <p className="mt-3 text-[19px] font-medium text-slate-500 dark:text-slate-300">
+   <p className="mt-3 text-[19px] font-medium text-[var(--muted-foreground)]">
   {description}
 </p>
   </div>
