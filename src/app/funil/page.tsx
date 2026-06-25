@@ -410,9 +410,9 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   return (
       <div
         key={medico.medico}
-        className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-5' : 'p-6'}`}
+        className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-4' : 'p-6'}`}
       >
-        <div className="mb-5 flex items-center gap-4">
+        <div className="mb-4 flex items-center gap-4">
   <div className={`${isImac ? 'h-24 w-24' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
     {getFotoMedico(medico.medico) ? (
       <img
@@ -546,10 +546,8 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   chart={medico.evolucaoProcedimentos}
   chartColor="var(--chart-blue)"
 />
-</div>
 
- {!medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className={isImac ? 'col-span-6' : ''}>
+{!medico.medico?.toUpperCase().includes('BRENO') && (
   <MetricCard
     icon={Handshake}
     label="Cirurgias realizadas"
@@ -558,12 +556,11 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     tone="purple"
     chart={medico.evolucaoCirurgias}
     chartColor="var(--chart-red)"
-  /></div>
+  />
 )}
   
-
   {medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className={isImac ? 'col-span-7 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  <div className={isImac ? 'col-span-3 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
     <MetricCard
   icon={CircleDollarSign}
   label="Injetáveis vendidos"
@@ -603,7 +600,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 )}
 
 
- 
+ </div>
 
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
@@ -976,15 +973,15 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   }
 
   return (
-    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-3 py-3' : 'px-4 py-5'} ${colors[color]}`}>
+    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-2 py-2' : 'px-4 py-5'} ${colors[color]}`}>
       <div className="flex items-center justify-center gap-2">
         {Icon && <Icon className="h-4 w-4" />}
-       <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
+       <p className={`${isImac ? 'text-[13px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
   {label}
 </p>
       </div>
 
-      <p className={`mt-2 ${isImac ? 'text-[30px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
+      <p className={`mt-2 ${isImac ? 'text-[26px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
     </div>
   )
 }
@@ -1033,19 +1030,19 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-4 py-3' : 'p-5'} ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-3 py-2' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+       <p className={`${isImac ? 'text-[16px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-3">
   <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[28px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[24px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
-   <p className={`mt-2 ${isImac ? 'text-[16px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
+   <p className={`mt-2 ${isImac ? 'text-[14px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
   {description}
 </p>
   </div>
