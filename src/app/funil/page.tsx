@@ -711,7 +711,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 
     return (
       <>
-        <p className="text-[42px] font-black text-slate-950 dark:text-white">
+        <p className="text-[42px] font-black text-[var(--foreground)]">
           {formatMoney(faturamentoConsolidado)}
         </p>
 
@@ -753,7 +753,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 
     <div className="rounded-[24px] border border-white/5 bg-[var(--card)] p-5 dark:bg-[#0E243B]">
-   <h4 className="mb-4 text-[22px] font-black">
+   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   MOVIMENTAÇÕES DA AGENDA
 </h4>
 
@@ -859,7 +859,7 @@ function ResumoCard({ label, value, icon: Icon }: any) {
         </p>
       </div>
 
-      <p className="text-[48px] font-black leading-none text-slate-950 dark:text-white">
+      <p className="text-[48px] font-black leading-none text-[var(--foreground)]">
   {value}
 </p>
 
@@ -896,7 +896,7 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
   </p>
 </div>
 
-<p className="text-[48px] font-black leading-none text-slate-950 dark:text-white">
+<p className="text-[48px] font-black leading-none text-[var(--foreground)]">
   {isMoney ? formatMoney(value) : value}
 </p>
 
@@ -992,12 +992,12 @@ function MetricMini({
   icon?: any
 }) {
   const colors = {
-    blue: 'border border-slate-200 bg-[var(--metric-card)] text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
-    orange: 'border border-slate-200 bg-[var(--metric-card)] text-[#F97316] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#FB923C]',
-    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
-    pink: 'border border-slate-200 bg-[var(--metric-card)] text-[#EC4899] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#F472B6]',
-    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
-    darkRed: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
+    blue: 'border border-slate-200 dark:border-white/10 bg-[var(--metric-card)] text-[#2563EB] dark:text-[#60A5FA]',
+    orange: 'border border-slate-200 bg-[var(--metric-card)] text-[#F97316] dark:border-white/10 dark:text-[#FB923C]',
+    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:border-white/10 dark:text-[#34D399]',
+    pink: 'border border-slate-200 bg-[var(--metric-card)] text-[#EC4899] dark:border-white/10 dark:text-[#F472B6]',
+    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:border-white/10 dark:text-[#EF4444]',
+    darkRed: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:border-white/10 dark:text-[#B91C1C]',
   }
 
   return (
@@ -1033,10 +1033,10 @@ chartColor,
   chartColor?: string
 }) {
   const tones = {
-    blue: 'border border-slate-200 bg-[var(--metric-card)] text-[#2563EB] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#60A5FA]',
-    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#34D399]',
-    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#EF4444]',
-    purple: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:bg-[#0E243B] dark:border-white/10 dark:text-[#B91C1C]',
+    blue: 'border border-slate-200 dark:border-white/10 bg-[var(--metric-card)] text-[#2563EB] dark:text-[#60A5FA]',
+    green: 'border border-slate-200 bg-[var(--metric-card)] text-[#10B981] dark:border-white/10 dark:text-[#34D399]',
+    red: 'border border-slate-200 bg-[var(--metric-card)] text-[#E00000] dark:border-white/10 dark:text-[#EF4444]',
+    purple: 'border border-slate-200 bg-[var(--metric-card)] text-[#8B0000] dark:border-white/10 dark:text-[#B91C1C]',
   }
 
   return (
@@ -1048,7 +1048,7 @@ chartColor,
 
       <div className="mt-5">
   <div>
-    <div className="flex w-full items-center justify-between text-[34px] font-black leading-none text-slate-950 dark:text-white">
+    <div className="flex w-full items-center justify-between text-[34px] font-black leading-none text-[var(--foreground)]">
       {value}
     </div>
 
