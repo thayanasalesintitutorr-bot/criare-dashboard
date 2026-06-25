@@ -131,266 +131,306 @@ function parseLocalDate(dateString?: string) {
           <div className="flex-1 space-y-4">
             <h1 className="text-5xl font-black tracking-[-0.06em]">{title}</h1>
 
-<div className="mb-4">
-  <button
-    onClick={() => setShowFilters(!showFilters)}
-    className="flex items-center gap-2 rounded-xl bg-[var(--card)] px-5 py-3 shadow"
-  >
-    <SlidersHorizontal size={18} />
-    Filtros
-    {showFilters ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
-  </button>
-</div>
+<div className="mb-4 rounded-[28px] bg-[var(--card)] p-5 shadow-sm">
+  <div className="flex items-center justify-between gap-6">
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center gap-2 pr-3 font-bold">
+        <SlidersHorizontal size={18} className="text-[var(--accent)]" />
+        Filtros aplicados
+      </div>
 
+      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+        {tipoData === 'criado' ? 'Criado' : 'Fechado'}
+      </div>
 
-              {showFilters && (
-  <div className="flex flex-wrap items-center gap-3">
-    
-    <div className={groupClass}>
-                <button
+      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+        {periodo === 'hoje'
+          ? 'Hoje'
+          : periodo === 'ontem'
+          ? 'Ontem'
+          : periodo === 'semana'
+          ? 'Semana'
+          : periodo === 'mes-atual'
+          ? 'Mês atual'
+          : periodo === 'mes-passado'
+          ? 'Mês passado'
+          : 'Personalizado'}
+      </div>
 
-        
-                  onClick={() => setTipoData('criado')}
-                  className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
-                >
-                  <Database size={20} />
-                  Criado
-                </button>
+      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+        {segmento === 'vascular'
+          ? 'Vascular'
+          : segmento === 'emagrecimento'
+          ? 'Emagrecimento'
+          : 'Geral'}
+      </div>
 
-                <button
-                  onClick={() => setTipoData('fechado')}
-                  className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
-                >
-                  <Database size={20} />
-                  Fechado
-                </button>
-              </div>
+      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+        {viewMode === 'desktop' ? 'iMac' : 'iPhone'}
+      </div>
+    </div>
 
-              <div className={groupClass}>
-  <button
-    onClick={() => setViewMode('desktop')}
-    className={`${pillBase} ${viewMode === 'desktop' ? pillActive : pillInactive}`}
-  >
-    <Monitor size={20} />
-    iMac
-  </button>
+    <button
+      onClick={() => setShowFilters(!showFilters)}
+      className="flex items-center gap-2 font-semibold text-[var(--accent)]"
+    >
+      {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+      {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+    </button>
+  </div>
 
-  <button
-    onClick={() => setViewMode('mobile')}
-    className={`${pillBase} ${viewMode === 'mobile' ? pillActive : pillInactive}`}
-  >
-    <Smartphone size={20} />
-    iPhone
-  </button>
-</div>
-
-              <div className={groupClass}>
-                <button
-                  onClick={() => setPeriodo('hoje')}
-                  className={`${pillBase} ${periodo === 'hoje' ? pillActive : pillInactive}`}
-                >
-                  Hoje
-                </button>
-
-                <button
-                  onClick={() => setPeriodo('ontem')}
-                  className={`${pillBase} ${periodo === 'ontem' ? pillActive : pillInactive}`}
-                >
-                  Ontem
-                </button>
-
-                <button
-                  onClick={() => setPeriodo('semana')}
-                  className={`${pillBase} ${periodo === 'semana' ? pillActive : pillInactive}`}
-                >
-                  Semana
-                </button>
-
-                <button
-                  onClick={() => setPeriodo('mes-atual')}
-                  className={`${pillBase} ${periodo === 'mes-atual' ? pillActive : pillInactive}`}
-                >
-                  Mês atual
-                </button>
-
-                <button
-                  onClick={() => setPeriodo('mes-passado')}
-                  className={`${pillBase} ${periodo === 'mes-passado' ? pillActive : pillInactive}`}
-                >
-                  Mês passado
-                </button>
-
-                <div ref={calendarRef} className="relative">
-  <button
-    onClick={() => setShowCalendar((v) => !v)}
-    className={`${pillBase} ${
-      periodo === 'personalizado' ? pillActive : pillInactive
-    }`}
-  >
-    <CalendarDays size={20} />
-    Personalizado
-  </button>
-
-  {showCalendar && (
-    <div className="absolute right-0 top-full z-50 mt-4 w-[520px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
-      <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
-          <CalendarDays size={20} />
+  {showFilters && (
+    <div className="mt-6 grid grid-cols-4 gap-6 border-t border-black/5 pt-6">
+      <div>
+        <div className="mb-3 flex items-center gap-2 font-bold">
+          <Database size={18} className="text-[var(--accent)]" />
+          Tipo de data
         </div>
 
-        <div>
-          <p className="text-lg font-bold">Selecione o período</p>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Escolha a data inicial e final no calendário
-          </p>
+        <div className={groupClass}>
+          <button
+            onClick={() => setTipoData('criado')}
+            className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
+          >
+            <Database size={20} />
+            Criado
+          </button>
+
+          <button
+            onClick={() => setTipoData('fechado')}
+            className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
+          >
+            <Database size={20} />
+            Fechado
+          </button>
         </div>
       </div>
 
-      <div className="relative flex flex-col items-center px-5 py-4">
-        <DayPicker
-          locale={ptBR}
-          mode="range"
-          selected={{
-            from: parseLocalDate(dataInicio),
-            to: parseLocalDate(dataFim),
-          }}
-          onSelect={(range) => {
-            if (range?.from) {
-              const ano = range.from.getFullYear()
-              const mes = String(range.from.getMonth() + 1).padStart(2, '0')
-              const dia = String(range.from.getDate()).padStart(2, '0')
-              setDataInicio(`${ano}-${mes}-${dia}`)
-            }
+      <div>
+        <div className="mb-3 flex items-center gap-2 font-bold">
+          <CalendarDays size={18} className="text-[var(--accent)]" />
+          Período
+        </div>
 
-            if (range?.to) {
-              const ano = range.to.getFullYear()
-              const mes = String(range.to.getMonth() + 1).padStart(2, '0')
-              const dia = String(range.to.getDate()).padStart(2, '0')
-              setDataFim(`${ano}-${mes}-${dia}`)
-            }
-  
-          }}
-          
-          numberOfMonths={1}
-          className="text-sm"
-          classNames={{
-  months: 'flex justify-center',
-  month: 'w-[430px] space-y-4 pl-4',
+        <div className={groupClass}>
+          <button
+            onClick={() => setPeriodo('hoje')}
+            className={`${pillBase} ${periodo === 'hoje' ? pillActive : pillInactive}`}
+          >
+            Hoje
+          </button>
 
-  month_caption:
-    'relative flex items-center justify-center text-[28px] font-black capitalize',
+          <button
+            onClick={() => setPeriodo('ontem')}
+            className={`${pillBase} ${periodo === 'ontem' ? pillActive : pillInactive}`}
+          >
+            Ontem
+          </button>
 
-  caption_label: 'text-[28px] font-black capitalize',
+          <button
+            onClick={() => setPeriodo('semana')}
+            className={`${pillBase} ${periodo === 'semana' ? pillActive : pillInactive}`}
+          >
+            Semana
+          </button>
 
-  nav:
-    'absolute left-1/2 top-[145px] z-10 flex w-[520px] -translate-x-1/2 items-center justify-between px-6',
+          <button
+            onClick={() => setPeriodo('mes-atual')}
+            className={`${pillBase} ${periodo === 'mes-atual' ? pillActive : pillInactive}`}
+          >
+            Mês atual
+          </button>
 
-  button_previous:
-    'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
+          <button
+            onClick={() => setPeriodo('mes-passado')}
+            className={`${pillBase} ${periodo === 'mes-passado' ? pillActive : pillInactive}`}
+          >
+            Mês passado
+          </button>
 
-  button_next:
-    'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
-
-  chevron: 'h-6 w-6 text-black',
-
-  weekdays: 'grid grid-cols-7 gap-2 text-center',
-  weekday: 'text-sm font-bold text-[var(--muted-foreground)]',
-
-  weeks: 'space-y-2',
-  week: 'grid grid-cols-7 gap-2',
-
-  day: 'h-11 w-11',
-
-  day_button:
-    'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-semibold text-[#0F172A] transition hover:bg-[var(--accent)]/25',
-
-  selected:
-    'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
-
- range_start:
-  '[&>button]:bg-[#DFBA62] [&>button]:text-white',
-
-range_end:
-  '[&>button]:bg-[#DFBA62] [&>button]:text-white',
-
-range_middle:
-  '[&>button]:bg-[#EFE6D8] [&>button]:text-[#0F172A]',
-  
-  today: '[&>button]:bg-[#F7F1E8] [&>button]:border [&>button]:border-[#DFBA62] [&>button]:text-[#0F172A]',
-}}
-        />
-
-       <div className="mt-5 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-4">
-          <div>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Período selecionado
-            </p>
-            <p className="font-semibold">
-              {dataInicio && dataFim
-                ? `${parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR')} até ${parseLocalDate(dataFim)?.toLocaleDateString('pt-BR')}`
-                : 'Selecione início e fim'}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 gap-3">
+          <div ref={calendarRef} className="relative">
             <button
-              onClick={() => {
-                setDataInicio('')
-                setDataFim('')
-              }}
-              className="rounded-xl border border-black/10 px-5 py-2.5 text-sm font-semibold"
+              onClick={() => setShowCalendar((v) => !v)}
+              className={`${pillBase} ${periodo === 'personalizado' ? pillActive : pillInactive}`}
             >
-              Limpar
+              <CalendarDays size={20} />
+              Personalizado
             </button>
 
-            <button
-              onClick={() => {
-                setPeriodo('personalizado')
-                setShowCalendar(false)
-              }}
-              className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--background)]"
-            >
-              Aplicar período
-            </button>
+            {showCalendar && (
+              <div className="absolute right-0 top-full z-50 mt-4 w-[520px] max-w-[95vw] rounded-[28px] border border-white/10 bg-[var(--card)] shadow-2xl">
+                <div className="flex items-center gap-3 border-b border-black/5 px-6 py-5">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
+                    <CalendarDays size={20} />
+                  </div>
+
+                  <div>
+                    <p className="text-lg font-bold">Selecione o período</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">
+                      Escolha a data inicial e final no calendário
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative flex flex-col items-center px-5 py-4">
+                  <DayPicker
+                    locale={ptBR}
+                    mode="range"
+                    selected={{
+                      from: parseLocalDate(dataInicio),
+                      to: parseLocalDate(dataFim),
+                    }}
+                    onSelect={(range) => {
+                      if (range?.from) {
+                        const ano = range.from.getFullYear()
+                        const mes = String(range.from.getMonth() + 1).padStart(2, '0')
+                        const dia = String(range.from.getDate()).padStart(2, '0')
+                        setDataInicio(`${ano}-${mes}-${dia}`)
+                      }
+
+                      if (range?.to) {
+                        const ano = range.to.getFullYear()
+                        const mes = String(range.to.getMonth() + 1).padStart(2, '0')
+                        const dia = String(range.to.getDate()).padStart(2, '0')
+                        setDataFim(`${ano}-${mes}-${dia}`)
+                      }
+                    }}
+                    numberOfMonths={1}
+                    className="text-sm"
+                    classNames={{
+                      months: 'flex justify-center',
+                      month: 'w-[430px] space-y-4 pl-4',
+                      month_caption:
+                        'relative flex items-center justify-center text-[28px] font-black capitalize',
+                      caption_label: 'text-[28px] font-black capitalize',
+                      nav:
+                        'absolute left-1/2 top-[145px] z-10 flex w-[520px] -translate-x-1/2 items-center justify-between px-6',
+                      button_previous:
+                        'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
+                      button_next:
+                        'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
+                      chevron: 'h-6 w-6 text-black',
+                      weekdays: 'grid grid-cols-7 gap-2 text-center',
+                      weekday: 'text-sm font-bold text-[var(--muted-foreground)]',
+                      weeks: 'space-y-2',
+                      week: 'grid grid-cols-7 gap-2',
+                      day: 'h-11 w-11',
+                      day_button:
+                        'flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F7F1E8] text-sm font-semibold text-[#0F172A] transition hover:bg-[var(--accent)]/25',
+                      selected:
+                        'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
+                      range_start:
+                        '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+                      range_end:
+                        '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+                      range_middle:
+                        '[&>button]:bg-[#EFE6D8] [&>button]:text-[#0F172A]',
+                      today:
+                        '[&>button]:bg-[#F7F1E8] [&>button]:border [&>button]:border-[#DFBA62] [&>button]:text-[#0F172A]',
+                    }}
+                  />
+
+                  <div className="mt-5 flex w-full items-center justify-between gap-4 border-t border-black/5 pt-4">
+                    <div>
+                      <p className="text-sm text-[var(--muted-foreground)]">
+                        Período selecionado
+                      </p>
+                      <p className="font-semibold">
+                        {dataInicio && dataFim
+                          ? `${parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR')} até ${parseLocalDate(dataFim)?.toLocaleDateString('pt-BR')}`
+                          : 'Selecione início e fim'}
+                      </p>
+                    </div>
+
+                    <div className="flex shrink-0 gap-3">
+                      <button
+                        onClick={() => {
+                          setDataInicio('')
+                          setDataFim('')
+                        }}
+                        className="rounded-xl border border-black/10 px-5 py-2.5 text-sm font-semibold"
+                      >
+                        Limpar
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setPeriodo('personalizado')
+                          setShowCalendar(false)
+                        }}
+                        className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--background)]"
+                      >
+                        Aplicar período
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center gap-2 font-bold">
+          <Activity size={18} className="text-[var(--accent)]" />
+          Segmento
+        </div>
+
+        <div className={groupClass}>
+          <button
+            onClick={() => setSegmento('vascular')}
+            className={`${pillBase} ${segmento === 'vascular' ? pillActive : pillInactive}`}
+          >
+            <Activity size={20} />
+            Vascular
+          </button>
+
+          <button
+            onClick={() => setSegmento('emagrecimento')}
+            className={`${pillBase} ${segmento === 'emagrecimento' ? pillActive : pillInactive}`}
+          >
+            <Heart size={20} />
+            Emagrecimento
+          </button>
+
+          <button
+            onClick={() => setSegmento('geral')}
+            className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
+          >
+            <BarChart3 size={20} />
+            Geral
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-3 flex items-center gap-2 font-bold">
+          <Monitor size={18} className="text-[var(--accent)]" />
+          Dispositivo
+        </div>
+
+        <div className={groupClass}>
+          <button
+            onClick={() => setViewMode('desktop')}
+            className={`${pillBase} ${viewMode === 'desktop' ? pillActive : pillInactive}`}
+          >
+            <Monitor size={20} />
+            iMac
+          </button>
+
+          <button
+            onClick={() => setViewMode('mobile')}
+            className={`${pillBase} ${viewMode === 'mobile' ? pillActive : pillInactive}`}
+          >
+            <Smartphone size={20} />
+            iPhone
+          </button>
         </div>
       </div>
     </div>
   )}
 </div>
-</div>
-
-
-              <div className={groupClass}>
-                <button
-                  onClick={() => setSegmento('vascular')}
-                  className={`${pillBase} ${segmento === 'vascular' ? pillActive : pillInactive}`}
-                >
-                  <Activity size={20} />
-                  Vascular
-                </button>
-
-                <button
-                  onClick={() => setSegmento('emagrecimento')}
-                  className={`${pillBase} ${segmento === 'emagrecimento' ? pillActive : pillInactive}`}
-                >
-                  <Heart size={20} />
-                  Emagrecimento
-                </button>
-
-                <button
-                  onClick={() => setSegmento('geral')}
-                  className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
-                >
-                  
-                  <BarChart3 size={20} />
-                  Geral
-                                </button>
-              </div>
-            </div>
-          )}
-        </div>
-          
 
           <div className="flex shrink-0 items-center gap-3">
             <button
@@ -517,7 +557,8 @@ range_middle:
                   </button>
                 </div>
               )}
-            </div>
+             </div>
+              </div>
           </div>
         </div>
       </div>
