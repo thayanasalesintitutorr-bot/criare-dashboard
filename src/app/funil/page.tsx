@@ -343,7 +343,7 @@ const res = await fetch(url, {
 </ResumoSection>
 </div>
 
-       <section className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-6 text-[var(--foreground)] shadow-[var(--card-shadow)]">
+       <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
   <div className="mb-6 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
     <h2 className="text-[26px] font-black text-[var(--foreground)]">Consultas por médico</h2>
@@ -410,7 +410,7 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   return (
       <div
         key={medico.medico}
-        className="rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] p-6"
+        className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-5' : 'p-6'}`}
       >
         <div className="mb-5 flex items-center gap-4">
   <div className={`${isImac ? 'h-24 w-24' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
@@ -488,9 +488,9 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className={isImac ? 'grid grid-cols-12 gap-4' : 'space-y-4'}>
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-4'}`}>
-    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
+<div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-4 p-4' : 'px-4 py-3'}`}>
+    <h4 className="mb-3 text-[22px] font-black text-[var(--foreground)]">
   AGENDA
 </h4>
 
@@ -526,7 +526,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
   </div>
 
-  <div className={isImac ? 'col-span-6 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  <div className={isImac ? 'col-span-8 grid grid-cols-3 gap-3' : 'grid gap-3 md:grid-cols-2'}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -546,10 +546,24 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   chart={medico.evolucaoProcedimentos}
   chartColor="var(--chart-blue)"
 />
-  </div>
+</div>
+
+ {!medico.medico?.toUpperCase().includes('BRENO') && (
+  <div className={isImac ? 'col-span-6' : ''}>
+  <MetricCard
+    icon={Handshake}
+    label="Cirurgias realizadas"
+    value={medico.cirurgias || 0}
+    description=""
+    tone="purple"
+    chart={medico.evolucaoCirurgias}
+    chartColor="var(--chart-red)"
+  /></div>
+)}
+  
 
   {medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className={isImac ? 'col-span-6 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  <div className={isImac ? 'col-span-7 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
     <MetricCard
   icon={CircleDollarSign}
   label="Injetáveis vendidos"
@@ -589,19 +603,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 )}
 
 
- {!medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className={isImac ? 'col-span-6' : ''}>
-  <MetricCard
-    icon={Handshake}
-    label="Cirurgias realizadas"
-    value={medico.cirurgias || 0}
-    description=""
-    tone="purple"
-    chart={medico.evolucaoCirurgias}
-    chartColor="var(--chart-red)"
-  /></div>
-)}
-
+ 
 
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
@@ -639,7 +641,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 
 {/* PROCEDIMENTOS */}
 
-<div className="mt-3 grid gap-3 md:grid-cols-3">
+<div className="mt-2 grid gap-3 md:grid-cols-3">
   <MetricCard
     icon={Stethoscope}
     label="Qtd. procedimentos"
@@ -663,10 +665,11 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     description=""
     tone="blue"
   />
+
 </div>
 </div>
 
-<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
+<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 px-4 py-3' : 'p-5'}`}>
   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   CONSOLIDADO
 </h4>
@@ -681,11 +684,11 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 
     return (
       <>
-        <p className="text-[42px] font-black text-[var(--foreground)]">
+        <p className="text-[36px] font-black text-[var(--foreground)]">
           {formatMoney(faturamentoConsolidado)}
         </p>
 
-        <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+        <div className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
           <div
   className={`h-full rounded-full ${
     percentualConsolidado >= 100
@@ -700,7 +703,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 />
         </div>
 
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-2 flex items-center justify-between">
           <span className="text-xl font-bold text-[var(--muted-foreground)]">
   Meta {formatMoney(metaConsolidada)}
 </span>
@@ -973,15 +976,15 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   }
 
   return (
-    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-3 py-4' : 'px-4 py-5'} ${colors[color]}`}>
+    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-3 py-3' : 'px-4 py-5'} ${colors[color]}`}>
       <div className="flex items-center justify-center gap-2">
         {Icon && <Icon className="h-4 w-4" />}
-       <p className={`${isImac ? 'text-[16px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
+       <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
   {label}
 </p>
       </div>
 
-      <p className={`mt-2 ${isImac ? 'text-[34px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
+      <p className={`mt-2 ${isImac ? 'text-[30px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
     </div>
   )
 }
@@ -1030,19 +1033,19 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] shadow-none ${isImac ? 'p-4' : 'p-5'} ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-4 py-3' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
        <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-3">
   <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[30px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[28px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
-   <p className={`mt-3 ${isImac ? 'text-[16px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
+   <p className={`mt-2 ${isImac ? 'text-[16px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
   {description}
 </p>
   </div>
