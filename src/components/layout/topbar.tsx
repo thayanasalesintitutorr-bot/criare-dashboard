@@ -21,6 +21,9 @@ import {
   Smartphone,
   Maximize2,
   Minimize2,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
@@ -59,7 +62,7 @@ export function Topbar({ title }: { title: string }) {
   const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-
+  const [showFilters, setShowFilters] = useState(false)
 
   const calendarRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -128,9 +131,25 @@ function parseLocalDate(dateString?: string) {
           <div className="flex-1 space-y-4">
             <h1 className="text-5xl font-black tracking-[-0.06em]">{title}</h1>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <div className={groupClass}>
+<div className="mb-4">
+  <button
+    onClick={() => setShowFilters(!showFilters)}
+    className="flex items-center gap-2 rounded-xl bg-[var(--card)] px-5 py-3 shadow"
+  >
+    <SlidersHorizontal size={18} />
+    Filtros
+    {showFilters ? <ChevronUp size={18}/> : <ChevronDown size={18}/>}
+  </button>
+</div>
+
+
+              {showFilters && (
+  <div className="flex flex-wrap items-center gap-3">
+    
+    <div className={groupClass}>
                 <button
+
+        
                   onClick={() => setTipoData('criado')}
                   className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
                 >
@@ -363,12 +382,15 @@ range_middle:
                   onClick={() => setSegmento('geral')}
                   className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
                 >
+                  
                   <BarChart3 size={20} />
                   Geral
-                </button>
+                                </button>
               </div>
             </div>
-          </div>
+          )}
+        </div>
+          
 
           <div className="flex shrink-0 items-center gap-3">
             <button
