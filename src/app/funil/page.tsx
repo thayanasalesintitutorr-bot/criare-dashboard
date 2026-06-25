@@ -488,8 +488,8 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className={isImac ? 'grid grid-cols-2 gap-4' : 'space-y-4'}>
-  <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4">
+<div className={isImac ? 'grid grid-cols-12 gap-4' : 'space-y-4'}>
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-4'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   AGENDA
 </h4>
@@ -526,7 +526,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
   </div>
 
-  <div className="grid gap-3 md:grid-cols-2">
+  <div className={isImac ? 'col-span-6 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -549,7 +549,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   </div>
 
   {medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className="grid gap-3 md:grid-cols-2">
+  <div className={isImac ? 'col-span-6 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
     <MetricCard
   icon={CircleDollarSign}
   label="Injetáveis vendidos"
@@ -590,6 +590,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 
 
  {!medico.medico?.toUpperCase().includes('BRENO') && (
+  <div className={isImac ? 'col-span-6' : ''}>
   <MetricCard
     icon={Handshake}
     label="Cirurgias realizadas"
@@ -598,11 +599,11 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     tone="purple"
     chart={medico.evolucaoCirurgias}
     chartColor="var(--chart-red)"
-  />
+  /></div>
 )}
 
 
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'p-4' : 'p-5'}`}>
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   FINANCEIRO
 </h4>
@@ -665,7 +666,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 </div>
 
-<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'p-4' : 'p-5'}`}>
+<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   CONSOLIDADO
 </h4>
@@ -721,12 +722,12 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   })()}
 </div>
 
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5">
+   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 p-4' : 'p-5'}`}>
    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   MOVIMENTAÇÕES DA AGENDA
 </h4>
 
-    <div className={isImac ? 'grid grid-cols-[1fr_260px] items-center gap-4' : 'grid items-center gap-6 lg:grid-cols-[1fr_360px]'}>
+    <div className={isImac ? 'grid grid-cols-[1fr_360px] items-center gap-4' : 'grid items-center gap-6 lg:grid-cols-[1fr_360px]'}>
       <div className="grid gap-3 md:grid-cols-3">
         <MetricMini label="No Show" value={medico.noShow || 0} color="pink" icon={UserX} />
         <MetricMini label="Cancelados" value={medico.cancelados || 0} color="red" icon={CalendarX2} />
