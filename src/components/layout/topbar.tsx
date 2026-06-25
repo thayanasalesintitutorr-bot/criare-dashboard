@@ -128,8 +128,139 @@ function parseLocalDate(dateString?: string) {
     <header className="z-30 border-b border-white/5 bg-[var(--background)]">
       <div className="flex flex-col gap-4 px-6 py-5 md:px-8">
         <div className="flex items-start justify-between gap-6">
+       
           <div className="flex-1 space-y-4">
             <h1 className="text-5xl font-black tracking-[-0.06em]">{title}</h1>
+</div>
+<div className="flex shrink-0 items-center gap-3">
+            <button
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3"
+            >
+              {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
+              <span className="font-medium">
+                {mounted && (resolvedTheme === 'dark' ? 'Claro' : 'Escuro')}
+              </span>
+            </button>
+
+            <button
+              onClick={handleRefresh}
+              className="rounded-2xl bg-[var(--card)] p-3"
+            >
+              <RefreshCw size={18} />
+            </button>
+
+            <button
+  onClick={toggleFullscreen}
+  title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+  className="rounded-2xl bg-[var(--card)] p-3"
+>
+  {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+</button>
+
+            <button className="rounded-2xl bg-[var(--card)] p-3">
+              <Search size={18} />
+            </button>
+
+            <div ref={notificationRef} className="relative">
+              <button
+                onClick={() => {
+  if (!hasNotification) return
+
+  setShowNotifications((v) => !v)
+  setHideNotifications(false)
+}}
+                className="relative rounded-2xl bg-[var(--card)] p-3"
+              >
+                <Bell size={18} />
+                {hasNotification && (
+  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+    1
+  </span>
+)}
+              </button>
+
+              {showNotifications && !hideNotifications && (
+  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
+    <div className="mb-4 flex items-center justify-between">
+      <div className="text-lg font-bold">Notificações</div>
+
+      <button
+        onClick={() => {
+  setHideNotifications(true)
+  setHasNotification(false)
+}}
+        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+      >
+        <X size={18} />
+      </button>
+    </div>
+
+    <div className="space-y-3">
+      <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-500">
+        Propostas fechadas acima de 70% da meta. Continue assim!
+      </div>
+    </div>
+  </div>
+)}
+            </div>
+
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setShowProfile((v) => !v)}
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)]"
+              >
+                <User2 size={18} />
+              </button>
+
+              {showProfile && (
+                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-5 shadow-2xl">
+                  <div className="mb-5 flex items-center justify-between">
+                    <div className="text-2xl font-bold">Minha conta</div>
+                    <button onClick={() => setShowProfile(false)}>
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="mb-5 flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent)] text-xl font-bold text-[var(--background)]">
+                      US
+                    </div>
+
+                    <div>
+                      <div className="text-xl font-semibold">Usuário</div>
+                      <div className="text-[var(--muted-foreground)]">—</div>
+                    </div>
+                  </div>
+
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+                    Senha
+                  </div>
+
+                  <div className="mb-4 flex items-center justify-between rounded-2xl bg-[var(--background)] px-4 py-3">
+                    <span>{showPassword ? 'Altuus@2026#' : '••••••••'}</span>
+                    <button onClick={() => setShowPassword((v) => !v)}>
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </div>
+
+                  <button className="mb-6 text-[var(--accent)]">
+                    Alterar senha
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 text-rose-500"
+                  >
+                    <LogOut size={20} />
+                    Sair
+                  </button>
+                </div>
+              )}
+             </div>
+             </div>
+              </div>
+           
 
 <div className="mb-4 rounded-[28px] bg-[var(--card)] p-5 shadow-sm">
   <div className="flex items-center justify-between gap-6">
@@ -432,136 +563,9 @@ function parseLocalDate(dateString?: string) {
   )}
 </div>
 
-          <div className="flex shrink-0 items-center gap-3">
-            <button
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3"
-            >
-              {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
-              <span className="font-medium">
-                {mounted && (resolvedTheme === 'dark' ? 'Claro' : 'Escuro')}
-              </span>
-            </button>
-
-            <button
-              onClick={handleRefresh}
-              className="rounded-2xl bg-[var(--card)] p-3"
-            >
-              <RefreshCw size={18} />
-            </button>
-
-            <button
-  onClick={toggleFullscreen}
-  title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-  className="rounded-2xl bg-[var(--card)] p-3"
->
-  {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-</button>
-
-            <button className="rounded-2xl bg-[var(--card)] p-3">
-              <Search size={18} />
-            </button>
-
-            <div ref={notificationRef} className="relative">
-              <button
-                onClick={() => {
-  if (!hasNotification) return
-
-  setShowNotifications((v) => !v)
-  setHideNotifications(false)
-}}
-                className="relative rounded-2xl bg-[var(--card)] p-3"
-              >
-                <Bell size={18} />
-                {hasNotification && (
-  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-    1
-  </span>
-)}
-              </button>
-
-              {showNotifications && !hideNotifications && (
-  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
-    <div className="mb-4 flex items-center justify-between">
-      <div className="text-lg font-bold">Notificações</div>
-
-      <button
-        onClick={() => {
-  setHideNotifications(true)
-  setHasNotification(false)
-}}
-        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-      >
-        <X size={18} />
-      </button>
-    </div>
-
-    <div className="space-y-3">
-      <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-500">
-        Propostas fechadas acima de 70% da meta. Continue assim!
-      </div>
-    </div>
-  </div>
-)}
-            </div>
-
-            <div ref={profileRef} className="relative">
-              <button
-                onClick={() => setShowProfile((v) => !v)}
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--background)]"
-              >
-                <User2 size={18} />
-              </button>
-
-              {showProfile && (
-                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-5 shadow-2xl">
-                  <div className="mb-5 flex items-center justify-between">
-                    <div className="text-2xl font-bold">Minha conta</div>
-                    <button onClick={() => setShowProfile(false)}>
-                      <X size={18} />
-                    </button>
-                  </div>
-
-                  <div className="mb-5 flex items-center gap-4">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent)] text-xl font-bold text-[var(--background)]">
-                      US
-                    </div>
-
-                    <div>
-                      <div className="text-xl font-semibold">Usuário</div>
-                      <div className="text-[var(--muted-foreground)]">—</div>
-                    </div>
-                  </div>
-
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-                    Senha
-                  </div>
-
-                  <div className="mb-4 flex items-center justify-between rounded-2xl bg-[var(--background)] px-4 py-3">
-                    <span>{showPassword ? 'Altuus@2026#' : '••••••••'}</span>
-                    <button onClick={() => setShowPassword((v) => !v)}>
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-
-                  <button className="mb-6 text-[var(--accent)]">
-                    Alterar senha
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 text-rose-500"
-                  >
-                    <LogOut size={20} />
-                    Sair
-                  </button>
-                </div>
-              )}
-             </div>
-              </div>
+          
           </div>
-        </div>
-      </div>
+
     </header>
   )
 }
