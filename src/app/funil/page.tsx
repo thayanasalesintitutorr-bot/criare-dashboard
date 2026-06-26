@@ -74,18 +74,6 @@ vendasPorMedico?: {
     metaTicketMedio: number
   }
 
-  atendimentoConsulta?: {
-  nome: string
-  qtd: number
-  valor: number
-}[]
-
-conveniosConsulta?: {
-  nome: string
-  qtd: number
-  valor: number
-}[]
-
 }
 
 function formatMoney(v: number) {
@@ -431,7 +419,7 @@ const ticketProcedimentosMedico =
 
   <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid gap-3 md:grid-cols-5'}>
     <MetricMini
-      label="Atendimento Finalizado"
+      label="Finalizados"
       value={medico.atendimentos || 0}
       color="green"
       icon={UserCheck}
@@ -471,7 +459,7 @@ const ticketProcedimentosMedico =
   icon={TrendingUp}
   label="Consultas 1ª vez"
   value={medico.consultasPrimeiraVez || 0}
-  description="Consultas finalizadas"
+  description=""
   tone="green"
 />
 
@@ -539,7 +527,7 @@ const ticketProcedimentosMedico =
 </h4>
 
 
-  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'space-y-3'}>
+  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'grid grid-cols-3 gap-3'}>
   <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
   <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
   <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" />
@@ -746,17 +734,40 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   }
 
   return (
-    <div className={`rounded-[16px] text-center shadow-none ${isImac ? 'px-2 py-2' : 'px-4 py-5'} ${colors[color]}`}>
-      <div className="flex items-center justify-center gap-2">
-        {Icon && <Icon className="h-4 w-4" />}
-       <p className={`${isImac ? 'text-[13px]' : 'text-[20px]'} font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}>
-  {label}
-</p>
-      </div>
+  <div
+    className={`rounded-[16px] text-center shadow-none ${colors[color]} ${
+      isImac ? 'px-3 py-3' : 'p-5'
+    }`}
+  >
+    <div
+      className={`${
+        isImac
+          ? 'flex flex-col items-center justify-center gap-1'
+          : 'flex flex-col items-center justify-center gap-2'
+      }`}
+    >
+      {Icon && (
+        <Icon className={`${isImac ? 'h-4 w-4' : 'h-6 w-6'}`} />
+      )}
 
-      <p className={`mt-2 ${isImac ? 'text-[26px]' : 'text-[42px]'} font-black text-[var(--foreground)]`}>{value}</p>
+      <p
+        className={`${
+          isImac ? 'text-[13px]' : 'text-[18px]'
+        } font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}
+      >
+        {label}
+      </p>
     </div>
-  )
+
+    <p
+      className={`mt-2 ${
+        isImac ? 'text-[26px]' : 'text-[42px]'
+      } font-black text-[var(--foreground)]`}
+    >
+      {value}
+    </p>
+  </div>
+)
 }
 
 function MetricCard({
