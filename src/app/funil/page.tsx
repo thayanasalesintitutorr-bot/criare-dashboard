@@ -419,14 +419,21 @@ const ticketProcedimentosMedico =
         key={medico.medico}
         className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-4' : 'p-6'}`}
       >
-        <div className="mb-4 flex items-center gap-4">
-  <div className={`isImac ? 'h-20 w-20' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
+      <div className="mb-4 flex items-center gap-4">
+        
+          <div
+  className={[
+    isImac ? 'h-20 w-20' : 'h-28 w-28',
+    'shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10',
+  ].join(' ')}
+>
+
     {getFotoMedico(medico.medico) ? (
       <img
-        src={getFotoMedico(medico.medico) || ''}
-        alt=""
-        className="block h-full w-full object-cover"
-      />
+  src={getFotoMedico(medico.medico)!}
+  alt={medico.medico}
+  className="h-full w-full object-cover object-center"
+/>
    ) : (
   <div className="flex h-full w-full items-center justify-center text-lg font-black text-[#D7B46A]">
     DR
@@ -437,14 +444,15 @@ const ticketProcedimentosMedico =
  <div className="flex-1">
   <div className="flex items-center justify-between gap-4">
     
-    <div className="flex h-full flex-col justify-center">
+    <div className="flex flex-1 flex-col justify-center pl-2">
+  <div>
   <h3 className={`${isImac ? 'text-[20px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
 
   <p className={`mt-2 ${isImac ? 'text-[15px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
     {infoMedico.crm} • {infoMedico.especialidade}
-  </p>
+  </p></div>
 </div>
 
     <div className="min-w-[150px]">
@@ -780,7 +788,14 @@ function ResumoCard({
   )
 }
 
-function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
+function ResumoCardMeta({
+    label,
+    value,
+    meta,
+    dot,
+    isMoney,
+    previousValue = 0,
+}: any) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
 
   const dots: any = {
