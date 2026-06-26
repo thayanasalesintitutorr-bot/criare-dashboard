@@ -420,7 +420,7 @@ const ticketProcedimentosMedico =
         className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-4' : 'p-6'}`}
       >
         <div className="mb-4 flex items-center gap-4">
-  <div className={`isImac ? 'h-[84px] w-[84px]'' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
+  <div className={`isImac ? 'h-[20px] w-[20px]'' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
     {getFotoMedico(medico.medico) ? (
       <img
         src={getFotoMedico(medico.medico) || ''}
