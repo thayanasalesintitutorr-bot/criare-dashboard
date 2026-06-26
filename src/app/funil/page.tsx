@@ -526,7 +526,22 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
   </div>
 
-  <div className={isImac ? 'col-span-8 grid grid-cols-3 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  {isImac && (
+  <div className="col-span-8 rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-3">
+    <h4 className="mb-3 text-[20px] font-black text-[var(--foreground)]">
+      MOVIMENTAÇÕES DA AGENDA
+    </h4>
+
+    <div className="grid grid-cols-4 gap-3">
+      <MetricMini label="No Show" value={medico.noShow || 0} color="pink" icon={UserX} />
+      <MetricMini label="Cancelados" value={medico.cancelados || 0} color="red" icon={CalendarX2} />
+      <MetricMini label="Reagendados" value={medico.reagendados || 0} color="darkRed" icon={CalendarClock} />
+      <MetricMini label="Finalizados" value={medico.atendimentos || 0} color="green" icon={UserCheck} />
+    </div>
+  </div>
+)}
+
+  <div className={isImac ? 'col-span-12 grid grid-cols-4 gap-3' : 'grid gap-3 md:grid-cols-2'}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -560,43 +575,43 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 )}
   
   {medico.medico?.toUpperCase().includes('BRENO') && (
-  <div className={isImac ? 'col-span-3 grid grid-cols-2 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  <>
     <MetricCard
-  icon={CircleDollarSign}
-  label="Injetáveis vendidos"
-  value={
-    <>
-      <span>{medico.injetaveisVendidos || 0}</span>
+      icon={CircleDollarSign}
+      label="Injetáveis vendidos"
+      value={
+        <>
+          <span>{medico.injetaveisVendidos || 0}</span>
 
-      <span className="ml-auto">
-        {formatMoney(medico.valorInjetaveisVendidos || 0)}
-      </span>
-    </>
-  }
-  description=""
-  tone="red"
-  chart={medico.evolucaoInjetaveis}
-  chartColor="var(--chart-green)"
-/>
+          <span className="ml-auto">
+            {formatMoney(medico.valorInjetaveisVendidos || 0)}
+          </span>
+        </>
+      }
+      description=""
+      tone="red"
+      chart={medico.evolucaoInjetaveis}
+      chartColor="var(--chart-green)"
+    />
 
     <MetricCard
-  icon={ClipboardList}
-  label="Protocolos vendidos"
-  value={
-    <>
-      <span>{medico.protocolosVendidos || 0}</span>
+      icon={ClipboardList}
+      label="Protocolos vendidos"
+      value={
+        <>
+          <span>{medico.protocolosVendidos || 0}</span>
 
-      <span className="ml-auto">
-        {formatMoney(medico.valorProtocolosVendidos || 0)}
-      </span>
-    </>
-  }
-  description=""
-  tone="purple"
-  chart={medico.evolucaoProtocolos}
-  chartColor="var(--chart-orange)"
-/>
-  </div>
+          <span className="ml-auto">
+            {formatMoney(medico.valorProtocolosVendidos || 0)}
+          </span>
+        </>
+      }
+      description=""
+      tone="purple"
+      chart={medico.evolucaoProtocolos}
+      chartColor="var(--chart-orange)"
+    />
+  </>
 )}
 
 
@@ -721,7 +736,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     )
   })()}
 </div>
-
+   {!isImac && (
    <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 p-4' : 'p-5'}`}>
    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   MOVIMENTAÇÕES DA AGENDA
@@ -771,7 +786,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
         </div>
       </div>
     </div>
-  </div>
+  </div>)}
 </div>
 </div>
 )
