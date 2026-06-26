@@ -234,6 +234,48 @@ function getGlobalRange(periodo: string, customStart?: string, customEnd?: strin
       return { start: startOfDay(now), end: endOfDay(now) }
   }
 }
+function getPreviousRange(periodo: string, start: Date, end: Date) {
+  const previousStart = new Date(start)
+  const previousEnd = new Date(end)
+
+  if (periodo === 'hoje' || periodo === 'ontem') {
+    previousStart.setDate(start.getDate() - 1)
+    previousEnd.setDate(end.getDate() - 1)
+
+    return {
+      start: startOfDay(previousStart),
+      end: endOfDay(previousEnd),
+    }
+  }
+
+  if (periodo === 'semana') {
+    previousStart.setDate(start.getDate() - 7)
+    previousEnd.setDate(end.getDate() - 7)
+
+    return {
+      start: startOfDay(previousStart),
+      end: endOfDay(previousEnd),
+    }
+  }
+
+  if (periodo === 'mes-atual' || periodo === 'mes-passado') {
+    return {
+      start: startOfDay(new Date(start.getFullYear(), start.getMonth() - 1, 1)),
+      end: endOfDay(new Date(start.getFullYear(), start.getMonth(), 0)),
+    }
+  }
+
+  const diff = end.getTime() - start.getTime()
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24)) + 1
+
+  previousStart.setDate(start.getDate() - days)
+  previousEnd.setDate(end.getDate() - days)
+
+  return {
+    start: startOfDay(previousStart),
+    end: endOfDay(previousEnd),
+  }
+}
 
 function inRange(date: Date | null, start: Date, end: Date) {
   if (!date) return false
@@ -448,7 +490,11 @@ const data = await response.json()
     const customEnd = searchParams.get('fim') || ''
 
     const range = getGlobalRange(periodo, customStart, customEnd)
-
+    const previousRange = getPreviousRange(
+  periodo,
+  range.start,
+  range.end
+)
     const [consultaBase, vendasBase, reabordBase] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA'),
       fetchAllLeadsByPipeline('VENDAS'),
@@ -473,10 +519,10 @@ const data = await response.json()
 
 const tarefasProximaSemanaConsulta = consultaLeads.filter((l) => {
   const criadoNoPeriodo = inRange(
-    parseDateLocal(l.created_at),
-    range.start,
-    range.end
-  )
+  parseDateLocal(l.created_at),
+  range.start,
+  range.end
+)
 
   const tarefaNaProximaSemana = inRange(
     parseDateLocal(l.closest_task_at),
@@ -871,6 +917,54 @@ const campanhasVendidas = Object.entries(campanhasMap)
     const ticketMedioVendas =
       propostasFechadas > 0 ? valorTotalVendas / propostasFechadas : 0
 
+      const consultaGanhosAnterior = consultaLeads.filter((l) => {
+  return (
+    statusIs(l, 'GANHOU') &&
+    inRange(parseDateLocal(l.closed_at), previousRange.start, previousRange.end)
+  )
+})
+
+const quantidadeAnterior = consultaGanhosAnterior.length
+
+const valorAnterior = consultaGanhosAnterior.reduce(
+  (acc, l) => acc + toNumber(l.faturamento),
+  0
+)
+
+const ticketAnterior =
+  quantidadeAnterior > 0 ? valorAnterior / quantidadeAnterior : 0
+
+const procedimentosGanhosAnterior = vendasLeads.filter((l) => {
+  return (
+    statusIs(l, 'VENDA GANHA') &&
+    toNumber(l.venda) > 0 &&
+    inRange(parseDateLocal(l.closed_at), previousRange.start, previousRange.end)
+  )
+})
+
+const quantidadeAnteriorProcedimentos = procedimentosGanhosAnterior.length
+
+const valorAnteriorProcedimentos = procedimentosGanhosAnterior.reduce(
+  (acc, l) => acc + toNumber(l.venda),
+  0
+)
+
+const ticketAnteriorProcedimentos =
+  quantidadeAnteriorProcedimentos > 0
+    ? valorAnteriorProcedimentos / quantidadeAnteriorProcedimentos
+    : 0
+
+const quantidadeAnteriorConsolidado =
+  quantidadeAnterior + quantidadeAnteriorProcedimentos
+
+const valorAnteriorConsolidado =
+  valorAnterior + valorAnteriorProcedimentos
+
+const ticketAnteriorConsolidado =
+  quantidadeAnteriorConsolidado > 0
+    ? valorAnteriorConsolidado / quantidadeAnteriorConsolidado
+    : 0
+    
     const propostasFechadasPercent = safePercent(propostasFechadas, propostasEnviadas)
     const metaValorTotalVendas = getMetaVendas(periodo, range.start, range.end)
 
@@ -1692,6 +1786,27 @@ consultaPorMedico,
         metaTicketMedio: META_TICKET_MEDIO,
     
       },
+
+      comparativo: {
+  consulta: {
+    quantidadeAnterior,
+    valorAnterior,
+    ticketAnterior,
+  },
+
+  procedimentos: {
+    quantidadeAnteriorProcedimentos,
+    valorAnteriorProcedimentos,
+    ticketAnteriorProcedimentos,
+  },
+
+  consolidado: {
+    quantidadeAnteriorConsolidado,
+    valorAnteriorConsolidado,
+    ticketAnteriorConsolidado,
+  },
+},
+
       funil,
       funilVendas,
       produtosVendidos,

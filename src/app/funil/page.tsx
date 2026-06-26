@@ -74,6 +74,23 @@ vendasPorMedico?: {
     metaTicketMedio: number
   }
 
+  comparativo?: {
+    consulta?: {
+      quantidadeAnterior: number
+      valorAnterior: number
+      ticketAnterior: number
+    }
+    procedimentos?: {
+      quantidadeAnteriorProcedimentos: number
+      valorAnteriorProcedimentos: number
+      ticketAnteriorProcedimentos: number
+    }
+    consolidado?: {
+      quantidadeAnteriorConsolidado: number
+      valorAnteriorConsolidado: number
+      ticketAnteriorConsolidado: number
+    }
+  }
 }
 
 function formatMoney(v: number) {
@@ -253,20 +270,60 @@ const res = await fetch(url, {
   }
 >
   {visaoFinanceira === 'consulta' && (
-    <>
-     <ResumoCard icon={ClipboardList} label="Quantidade de consulta" value={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0} />
-<ResumoCard icon={CircleDollarSign} label="Valor de consulta" value={formatMoney(data?.kpis?.comercialConsulta?.valorTotalConsulta || 0)} />
-<ResumoCard icon={TrendingUp} label="Ticket médio" value={formatMoney(data?.kpis?.comercialConsulta?.ticketMedioConsulta || 0)} />
-    </>
-  )}
+  <>
+    <ResumoCard
+      icon={ClipboardList}
+      label="Quantidade de consulta"
+      value={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0}
+      rawValue={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0}
+      previousValue={data?.comparativo?.consulta?.quantidadeAnterior || 0}
+    />
 
-  {visaoFinanceira === 'procedimentos' && (
-    <>
-      <ResumoCard icon={Stethoscope} label="Quantidade de procedimentos" value={data?.kpis?.comercialVendas?.propostasFechadas || 0} />
-<ResumoCard icon={CircleDollarSign} label="Valor de procedimentos" value={formatMoney(data?.kpis?.comercialVendas?.valorTotalVendas || 0)} />
-<ResumoCard icon={TrendingUp} label="Ticket médio" value={formatMoney(data?.kpis?.comercialVendas?.ticketMedioVendas || 0)} />
-    </>
-  )}
+    <ResumoCard
+      icon={CircleDollarSign}
+      label="Valor de consulta"
+      value={formatMoney(data?.kpis?.comercialConsulta?.valorTotalConsulta || 0)}
+      rawValue={data?.kpis?.comercialConsulta?.valorTotalConsulta || 0}
+      previousValue={data?.comparativo?.consulta?.valorAnterior || 0}
+    />
+
+    <ResumoCard
+      icon={TrendingUp}
+      label="Ticket médio"
+      value={formatMoney(data?.kpis?.comercialConsulta?.ticketMedioConsulta || 0)}
+      rawValue={data?.kpis?.comercialConsulta?.ticketMedioConsulta || 0}
+      previousValue={data?.comparativo?.consulta?.ticketAnterior || 0}
+    />
+  </>
+)}
+
+{visaoFinanceira === 'procedimentos' && (
+  <>
+    <ResumoCard
+      icon={Stethoscope}
+      label="Quantidade de procedimentos"
+      value={data?.kpis?.comercialVendas?.propostasFechadas || 0}
+      rawValue={data?.kpis?.comercialVendas?.propostasFechadas || 0}
+      previousValue={data?.comparativo?.procedimentos?.quantidadeAnteriorProcedimentos || 0}
+    />
+
+    <ResumoCard
+      icon={CircleDollarSign}
+      label="Valor de procedimentos"
+      value={formatMoney(data?.kpis?.comercialVendas?.valorTotalVendas || 0)}
+      rawValue={data?.kpis?.comercialVendas?.valorTotalVendas || 0}
+      previousValue={data?.comparativo?.procedimentos?.valorAnteriorProcedimentos || 0}
+    />
+
+    <ResumoCard
+      icon={TrendingUp}
+      label="Ticket médio"
+      value={formatMoney(data?.kpis?.comercialVendas?.ticketMedioVendas || 0)}
+      rawValue={data?.kpis?.comercialVendas?.ticketMedioVendas || 0}
+      previousValue={data?.comparativo?.procedimentos?.ticketAnteriorProcedimentos || 0}
+    />
+  </>
+)}
 
   {visaoFinanceira === 'consolidado' && (
     <>
@@ -636,10 +693,27 @@ function ResumoSection({
   )
 }
 
-function ResumoCard({ label, value, icon: Icon }: any) {
+function ResumoCard({
+  label,
+  value,
+  rawValue,
+  previousValue = 0,
+  icon: Icon,
+}: any) {
+  const atual = Number(rawValue ?? value ?? 0)
+  const anterior = Number(previousValue || 0)
+
+  const percentual =
+    anterior > 0
+      ? Math.round(((atual - anterior) / anterior) * 100)
+      : 0
+
+  const positivo = percentual > 0
+  const negativo = percentual < 0
+
   return (
-   <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-5">
-      <div className="mb-6 flex items-center gap-4">
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-5">
+      <div className="mb-5 flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[var(--icon-bg)]">
           <Icon className="h-7 w-7 text-[#D7B46A]" />
         </div>
@@ -650,12 +724,54 @@ function ResumoCard({ label, value, icon: Icon }: any) {
       </div>
 
       <p className="text-[42px] font-black leading-none text-[var(--foreground)]">
-  {value}
-</p>
+        {value}
+      </p>
 
-<p className="mt-4 text-[18px] font-semibold text-[var(--muted-foreground)]">
-  fechamentos no período
-</p>
+      <p className="mt-3 text-[16px] font-semibold text-[var(--muted-foreground)]">
+        fechamentos no período
+      </p>
+
+      <div className="mt-5 flex items-center justify-between rounded-[14px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-3">
+        <div>
+          <p
+            className={`text-[22px] font-black ${
+              positivo
+                ? 'text-emerald-500'
+                : negativo
+                ? 'text-red-500'
+                : 'text-[var(--muted-foreground)]'
+            }`}
+          >
+            {positivo ? '▲' : negativo ? '▼' : '•'} {Math.abs(percentual)}%
+          </p>
+
+          <p className="text-[13px] text-[var(--muted-foreground)]">
+            vs. período anterior
+          </p>
+        </div>
+
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${
+            positivo
+              ? 'bg-emerald-500/15'
+              : negativo
+              ? 'bg-red-500/15'
+              : 'bg-gray-500/15'
+          }`}
+        >
+          <span
+            className={`text-xl ${
+              positivo
+                ? 'text-emerald-500'
+                : negativo
+                ? 'text-red-500'
+                : 'text-gray-400'
+            }`}
+          >
+            {positivo ? '↗' : negativo ? '↘' : '→'}
+          </span>
+        </div>
+      </div>
     </div>
   )
 }
