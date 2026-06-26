@@ -954,17 +954,70 @@ const ticketAnteriorProcedimentos =
     ? valorAnteriorProcedimentos / quantidadeAnteriorProcedimentos
     : 0
 
+const reabordAnterior = reabordLeads.filter((l) => {
+  return (
+    statusIs(l, 'FECHADO (GANHO)') &&
+    inRange(parseDateLocal(l.closed_at), previousRange.start, previousRange.end)
+  )
+})
+
+const quantidadeAnteriorReabord = reabordAnterior.length
+
+const valorAnteriorReabord = reabordAnterior.reduce(
+  (acc, l) => acc + toNumber(l.faturamento),
+  0
+)
+
 const quantidadeAnteriorConsolidado =
-  quantidadeAnterior + quantidadeAnteriorProcedimentos
+  quantidadeAnterior + quantidadeAnteriorReabord + quantidadeAnteriorProcedimentos
 
 const valorAnteriorConsolidado =
-  valorAnterior + valorAnteriorProcedimentos
+  valorAnterior + valorAnteriorReabord + valorAnteriorProcedimentos
 
 const ticketAnteriorConsolidado =
   quantidadeAnteriorConsolidado > 0
     ? valorAnteriorConsolidado / quantidadeAnteriorConsolidado
     : 0
-    
+    const vendasPeriodoAnterior = vendasLeads.filter((l) =>
+  inRange(parseDateLocal(l.created_at), previousRange.start, previousRange.end)
+)
+
+const orcamentosAnterior = vendasPeriodoAnterior.filter((l) =>
+  statusIs(l, 'ORÇAMENTO ENTREGUE')
+).length
+
+const negociacaoAnterior =
+  vendasPeriodoAnterior.filter((l) =>
+    statusIs(l, 'SOLICITAÇÃO DE CIRURGIA')
+  ).length +
+  vendasPeriodoAnterior.filter((l) =>
+    statusIs(l, 'MARCADO')
+  ).length
+
+const ganhasAnterior = vendasPeriodoAnterior.filter((l) =>
+  statusIs(l, 'VENDA GANHA')
+).length
+
+const perdidasAnterior = vendasPeriodoAnterior.filter((l) =>
+  statusIs(l, 'VENDA PERDIDA')
+).length
+
+const conversaoAnterior = safePercent(
+  ganhasAnterior,
+  vendasPeriodoAnterior.length
+)
+
+const valorAnteriorVendas = vendasLeads
+  .filter((l) =>
+    statusIs(l, 'VENDA GANHA') &&
+    inRange(parseDateLocal(l.closed_at), previousRange.start, previousRange.end)
+  )
+  .reduce((acc, l) => acc + toNumber(l.venda), 0)
+
+const ticketAnteriorVendas =
+  ganhasAnterior > 0
+    ? valorAnteriorVendas / ganhasAnterior
+    : 0
     const propostasFechadasPercent = safePercent(propostasFechadas, propostasEnviadas)
     const metaValorTotalVendas = getMetaVendas(periodo, range.start, range.end)
 
@@ -1699,37 +1752,32 @@ const canceladosPercent = safePercent(
         fim: range.end.toISOString(),
       },
       kpis: {
-        marketing: {
-  totalEntradas,
-  naoQualificados,
-  naoQualificadosPercent: safePercent(naoQualificados, totalEntradas),
-  leadsAceitos,
-  leadsAceitosPercent: safePercent(leadsAceitos, totalEntradas),
-  convertidos,
-  convertidosPercent: safePercent(convertidos, leadsAceitos),
-
-  leadA,
-  leadB,
-  leadC,
-  leadD,
-},
-        comercialConsulta: {
-  quantidadeConsulta,
-  valorTotalConsulta,
-  ticketMedioConsulta,
-
-  quantidadeReabord,
-  valorTotalReabord,
-  ticketMedioReabord,
-
-  quantidadeTotal:
-    quantidadeConsulta + quantidadeReabord,
-
-  valorTotal:
-    valorTotalConsulta + valorTotalReabord,
-
-  ticketMedioTotal:
-    quantidadeConsulta + quantidadeReabord > 0
+      marketing: {
+      totalEntradas,
+      naoQualificados,
+      naoQualificadosPercent: safePercent(naoQualificados, totalEntradas),
+      leadsAceitos,
+      leadsAceitosPercent: safePercent(leadsAceitos, totalEntradas),
+      convertidos,
+      convertidosPercent: safePercent(convertidos, leadsAceitos),
+      leadA,
+      leadB,
+      leadC,
+      leadD,
+       },
+      comercialConsulta: {
+      quantidadeConsulta,
+      valorTotalConsulta,
+      ticketMedioConsulta,
+      quantidadeReabord,
+      valorTotalReabord,
+      ticketMedioReabord,
+      quantidadeTotal:
+      quantidadeConsulta + quantidadeReabord,
+      valorTotal:
+      valorTotalConsulta + valorTotalReabord,
+      ticketMedioTotal:
+      quantidadeConsulta + quantidadeReabord > 0
       ? (
           valorTotalConsulta +
           valorTotalReabord
@@ -1794,6 +1842,16 @@ consultaPorMedico,
     ticketAnterior,
   },
 
+   vendas: {
+  orcamentosAnterior,
+  negociacaoAnterior,
+  ganhasAnterior,
+  perdidasAnterior,
+  conversaoAnterior,
+  valorAnterior: valorAnteriorVendas,
+  ticketAnterior: ticketAnteriorVendas,
+},
+
   procedimentos: {
     quantidadeAnteriorProcedimentos,
     valorAnteriorProcedimentos,
@@ -1805,6 +1863,7 @@ consultaPorMedico,
     valorAnteriorConsolidado,
     ticketAnteriorConsolidado,
   },
+
 },
 
       funil,
@@ -1825,6 +1884,7 @@ consultaPorMedico,
   qualificado: buildOrigens(leadsQualificados),
   agendado: buildOrigens(leadsAgendados),
 },
+
 
 origensVendaConsulta: campanhasConsulta,
 origensPropostasFechadas: campanhasVendidas,
