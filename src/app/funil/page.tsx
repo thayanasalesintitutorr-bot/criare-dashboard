@@ -58,6 +58,12 @@ vendasPorMedico?: {
       quantidadeConsulta: number
       valorTotalConsulta: number
       ticketMedioConsulta: number
+      quantidadeReabord: number
+valorTotalReabord: number
+ticketMedioReabord: number
+quantidadeTotal: number
+valorTotal: number
+ticketMedioTotal: number
     }
     comercialVendas: {
       propostasFechadas: number
@@ -272,28 +278,28 @@ const res = await fetch(url, {
   {visaoFinanceira === 'consulta' && (
   <>
     <ResumoCard
-      icon={ClipboardList}
-      label="Quantidade de consulta"
-      value={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0}
-      rawValue={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0}
-      previousValue={data?.comparativo?.consulta?.quantidadeAnterior || 0}
-    />
+  icon={ClipboardList}
+  label="Quantidade de consulta"
+  value={data?.kpis?.comercialConsulta?.quantidadeTotal || 0}
+  rawValue={data?.kpis?.comercialConsulta?.quantidadeTotal || 0}
+  previousValue={data?.comparativo?.consulta?.quantidadeAnterior || 0}
+/>
 
-    <ResumoCard
-      icon={CircleDollarSign}
-      label="Valor de consulta"
-      value={formatMoney(data?.kpis?.comercialConsulta?.valorTotalConsulta || 0)}
-      rawValue={data?.kpis?.comercialConsulta?.valorTotalConsulta || 0}
-      previousValue={data?.comparativo?.consulta?.valorAnterior || 0}
-    />
+<ResumoCard
+  icon={CircleDollarSign}
+  label="Valor de consulta"
+  value={formatMoney(data?.kpis?.comercialConsulta?.valorTotal || 0)}
+  rawValue={data?.kpis?.comercialConsulta?.valorTotal || 0}
+  previousValue={data?.comparativo?.consulta?.valorAnterior || 0}
+/>
 
-    <ResumoCard
-      icon={TrendingUp}
-      label="Ticket médio"
-      value={formatMoney(data?.kpis?.comercialConsulta?.ticketMedioConsulta || 0)}
-      rawValue={data?.kpis?.comercialConsulta?.ticketMedioConsulta || 0}
-      previousValue={data?.comparativo?.consulta?.ticketAnterior || 0}
-    />
+<ResumoCard
+  icon={TrendingUp}
+  label="Ticket médio"
+  value={formatMoney(data?.kpis?.comercialConsulta?.ticketMedioTotal || 0)}
+  rawValue={data?.kpis?.comercialConsulta?.ticketMedioTotal || 0}
+  previousValue={data?.comparativo?.consulta?.ticketAnterior || 0}
+/>
   </>
 )}
 
@@ -330,7 +336,9 @@ const res = await fetch(url, {
       <ResumoCard
   icon={Handshake}
   label="Quantidade total de vendas"
-  value={(data?.kpis?.comercialConsulta?.quantidadeConsulta || 0) + (data?.kpis?.comercialVendas?.propostasFechadas || 0)}
+  value={data?.consolidado?.qtdVendas || 0}
+  rawValue={data?.consolidado?.qtdVendas || 0}
+  previousValue={data?.comparativo?.consolidado?.quantidadeAnteriorConsolidado || 0}
 />
 
       <ResumoCardMeta
@@ -742,11 +750,11 @@ function ResumoCard({
                 : 'text-[var(--muted-foreground)]'
             }`}
           >
-            {positivo ? '▲' : negativo ? '▼' : '•'} {Math.abs(percentual)}%
+            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
           </p>
 
           <p className="text-[13px] text-[var(--muted-foreground)]">
-            vs. período anterior
+            {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
           </p>
         </div>
 
