@@ -240,7 +240,7 @@ const res = await fetch(url, {
           key={key}
           type="button"
           onClick={() => setVisaoFinanceira(key as any)}
-          className={`px-6 py-3 text-sm font-black transition-all ${
+          className={`px-5 py-2.5 text-sm font-black transition-all ${
             visaoFinanceira === key
               ? 'bg-[#D7B46A] text-white'
               : 'text-[var(--muted-foreground)]'
@@ -375,11 +375,11 @@ const ticketProcedimentosMedico =
   <div className="flex items-start justify-between gap-4">
     
     <div>
-      <h3 className={`${isImac ? 'text-[22px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
+      <h3 className={`${isImac ? 'text-[20px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
         {medico.medico}
       </h3>
 
-      <p className={`mt-1 ${isImac ? 'text-[16px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
+      <p className={`mt-1 ${isImac ? 'text-[15px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
   {infoMedico.crm} • {infoMedico.especialidade}
 </p>
 
@@ -391,7 +391,7 @@ const ticketProcedimentosMedico =
         Ocupação da agenda
       </p>
 
-      <p className="mt-1 text-5xl font-black text-emerald-500">
+      <p className="mt-1 text-[52px] font-black text-emerald-500">
         {medico.capacidadeAgenda || 0}%
       </p>
 
@@ -411,7 +411,7 @@ const ticketProcedimentosMedico =
 
 <div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${
-  isImac ? 'col-span-12 px-4 py-3' : 'px-4 py-3'
+  isImac ? 'col-span-12 px-4 py-2' : 'px-4 py-2'
 }`}>
   <h4 className="mb-3 text-[22px] font-black text-[var(--foreground)]">
     AGENDA
@@ -523,7 +523,7 @@ const ticketProcedimentosMedico =
 
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
-  FINANCEIRO
+FINANCEIRO
 </h4>
 
 
@@ -538,7 +538,7 @@ const ticketProcedimentosMedico =
 
 <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
-  CONSOLIDADO
+CONSOLIDADO
 </h4>
 
   {(() => {
@@ -629,7 +629,7 @@ function ResumoSection({
         {extra}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3">
         {children}
       </div>
     </div>
@@ -638,22 +638,22 @@ function ResumoSection({
 
 function ResumoCard({ label, value, icon: Icon }: any) {
   return (
-   <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] p-6">
+   <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-5">
       <div className="mb-6 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-[var(--icon-bg)]">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[var(--icon-bg)]">
           <Icon className="h-7 w-7 text-[#D7B46A]" />
         </div>
 
-        <p className="text-[20px] font-black leading-tight text-[var(--foreground)]">
+        <p className="text-[18px] font-black leading-tight text-[var(--foreground)]">
           {label}
         </p>
       </div>
 
-      <p className="text-[48px] font-black leading-none text-[var(--foreground)]">
+      <p className="text-[42px] font-black leading-none text-[var(--foreground)]">
   {value}
 </p>
 
-<p className="mt-4 text-[24px] font-semibold text-[var(--muted-foreground)]">
+<p className="mt-4 text-[18px] font-semibold text-[var(--muted-foreground)]">
   fechamentos no período
 </p>
     </div>
@@ -752,7 +752,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
       <p
         className={`${
-          isImac ? 'text-[13px]' : 'text-[18px]'
+          isImac ? 'text-[12px]' : 'text-[18px]'
         } font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}
       >
         {label}
@@ -761,7 +761,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
     <p
       className={`mt-2 ${
-        isImac ? 'text-[26px]' : 'text-[42px]'
+        isImac ? 'text-[24px]' : 'text-[42px]'
       } font-black text-[var(--foreground)]`}
     >
       {value}
@@ -810,10 +810,10 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-3 py-2' : 'p-5'} ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-4 py-3' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[16px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+       <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-3">
