@@ -416,14 +416,16 @@ const ticketProcedimentosMedico =
 
   return (
       <div
-        key={medico.medico}
-        className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-4' : 'p-6'}`}
-      >
+  key={medico.medico}
+  className={`mx-auto max-w-[1320px] rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
+    isImac ? 'p-3' : 'p-5'
+  }`}
+>
       <div className="mb-4 flex items-center gap-4">
         
           <div
   className={[
-    isImac ? 'h-20 w-20' : 'h-28 w-28',
+    isImac ? 'h-16 w-16' : 'h-28 w-28',
     'shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10',
   ].join(' ')}
 >
@@ -446,25 +448,25 @@ const ticketProcedimentosMedico =
     
     <div className="flex flex-1 flex-col justify-center pl-2">
   <div>
-  <h3 className={`${isImac ? 'text-[20px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
+  <h3 className={`${isImac ? 'text-[17px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
 
-  <p className={`mt-2 ${isImac ? 'text-[15px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
+  <p className={`mt-2 ${isImac ? 'text-[13px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
     {infoMedico.crm} • {infoMedico.especialidade}
   </p></div>
 </div>
 
-    <div className="min-w-[150px]">
+    <div className="min-w-[120px]">
       <p className="text-sm text-[var(--muted-foreground)]">
         Ocupação da agenda
       </p>
 
-      <p className="mt-1 text-[52px] font-black text-emerald-500">
+      <p className="mt-1 text-[42px] font-black text-emerald-500">
         {medico.capacidadeAgenda || 0}%
       </p>
 
-      <div className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className="h-full rounded-full bg-emerald-500"
           style={{
@@ -480,9 +482,9 @@ const ticketProcedimentosMedico =
 
 <div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${
-  isImac ? 'col-span-12 px-4 py-2' : 'px-4 py-2'
+  isImac ? 'col-span-12 px-3 py-2' : 'px-3 py-2'
 }`}>
-  <h4 className="mb-3 text-[22px] font-black text-[var(--foreground)]">
+  <h4 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
     AGENDA
   </h4>
 
@@ -590,8 +592,8 @@ const ticketProcedimentosMedico =
 
  </div>
 
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
-    <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
+    <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
 FINANCEIRO
 </h4>
 
@@ -605,8 +607,8 @@ FINANCEIRO
   <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" />
 </div> </div>
 
-<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
-  <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
+<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
+  <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
 CONSOLIDADO
 </h4>
 
@@ -620,7 +622,7 @@ CONSOLIDADO
 
     return (
       <>
-        <p className="text-[36px] font-black text-[var(--foreground)]">
+        <p className="text-[30px] font-black text-[var(--foreground)]">
           {formatMoney(faturamentoConsolidado)}
         </p>
 
@@ -640,12 +642,12 @@ CONSOLIDADO
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-xl font-bold text-[var(--muted-foreground)]">
+          <span className="text-[16px] font-bold text-[var(--muted-foreground)]">
   Meta {formatMoney(metaConsolidada)}
 </span>
 
 <span
-  className={`text-2xl font-black ${
+  className={`text-[22px] font-black ${
     percentualConsolidado >= 100
       ? 'text-emerald-500'
       : percentualConsolidado >= 50
@@ -871,7 +873,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   return (
   <div
     className={`rounded-[16px] text-center shadow-none ${colors[color]} ${
-      isImac ? 'px-3 py-3' : 'p-5'
+      isImac ? 'px-3.5 py-3.5' : 'p-5'
     }`}
   >
     <div
@@ -887,7 +889,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
       <p
         className={`${
-          isImac ? 'text-[12px]' : 'text-[18px]'
+          isImac ? 'text-[10px]' : 'text-[18px]'
         } font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}
       >
         {label}
@@ -896,7 +898,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
     <p
       className={`mt-2 ${
-        isImac ? 'text-[24px]' : 'text-[42px]'
+        isImac ? 'text-[20px]' : 'text-[42px]'
       } font-black text-[var(--foreground)]`}
     >
       {value}
@@ -945,19 +947,19 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-4 py-3' : 'p-5'} ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-3 py-2' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
-        <Icon className={`h-6 w-6 shrink-0 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+        <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
+       <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-3">
   <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[24px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
-   <p className={`mt-2 ${isImac ? 'text-[14px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
+   <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[19px]'} font-medium text-[var(--muted-foreground)]`}>
   {description}
 </p>
   </div>
