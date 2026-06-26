@@ -466,7 +466,7 @@ const ticketProcedimentosMedico =
     />
   </div>
 </div>
-  <div className={isImac ? 'col-span-12 grid grid-cols-4 gap-3' : 'grid gap-3 md:grid-cols-2'}>
+  <div className={isImac ? `col-span-12 grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid gap-3 md:grid-cols-2'}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -533,71 +533,22 @@ const ticketProcedimentosMedico =
 
  </div>
 
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 p-4' : 'p-5'}`}>
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
     <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   FINANCEIRO
 </h4>
 
 
-  {/* CONSULTAS */}
+  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'space-y-3'}>
+  <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
+  <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
+  <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" />
+  <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
+  <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
+  <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" />
+</div> </div>
 
-<div className="grid gap-3 md:grid-cols-3">
-  <MetricCard
-    icon={TrendingUp}
-    label="Qtd. consultas"
-    value={consultasGanhasMedico}
-    description=""
-    tone="green"
-  />
-
-  <MetricCard
-    icon={CircleDollarSign}
-    label="Venda consultas"
-    value={formatMoney(faturamentoMedico)}
-    description=""
-    tone="green"
-  />
-
-  <MetricCard
-    icon={Ticket}
-    label="Ticket consultas"
-    value={formatMoney(ticketMedioMedico)}
-    description=""
-    tone="green"
-  />
-</div>
-
-{/* PROCEDIMENTOS */}
-
-<div className="mt-2 grid gap-3 md:grid-cols-3">
-  <MetricCard
-    icon={Stethoscope}
-    label="Qtd. procedimentos"
-    value={quantidadeProcedimentosVendidos}
-    description=""
-    tone="blue"
-  />
-
-  <MetricCard
-    icon={CircleDollarSign}
-    label="Venda procedimentos"
-    value={formatMoney(valorProcedimentosMedico)}
-    description=""
-    tone="blue"
-  />
-
-  <MetricCard
-    icon={Ticket}
-    label="Ticket procedimentos"
-    value={formatMoney(ticketProcedimentosMedico)}
-    description=""
-    tone="blue"
-  />
-
-</div>
-</div>
-
-<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-6 px-4 py-3' : 'p-5'}`}>
+<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-4 py-3' : 'p-5'}`}>
   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
   CONSOLIDADO
 </h4>
