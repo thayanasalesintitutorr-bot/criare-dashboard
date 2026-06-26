@@ -420,7 +420,7 @@ const ticketProcedimentosMedico =
         className={`rounded-[28px] border border-[color:var(--border)] bg-[var(--background)] ${isImac ? 'p-4' : 'p-6'}`}
       >
         <div className="mb-4 flex items-center gap-4">
-  <div className={`${isImac ? 'h-24 w-24' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
+  <div className={`isImac ? 'h-[84px] w-[84px]'' : 'h-28 w-28'} shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10`}>
     {getFotoMedico(medico.medico) ? (
       <img
         src={getFotoMedico(medico.medico) || ''}
@@ -435,19 +435,17 @@ const ticketProcedimentosMedico =
   </div>
 
  <div className="flex-1">
-  <div className="flex items-start justify-between gap-4">
+  <div className="flex items-center justify-between gap-4">
     
-    <div>
-      <h3 className={`${isImac ? 'text-[20px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
-        {medico.medico}
-      </h3>
+    <div className="flex h-full flex-col justify-center">
+  <h3 className={`${isImac ? 'text-[20px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
+    {medico.medico}
+  </h3>
 
-      <p className={`mt-1 ${isImac ? 'text-[15px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
-  {infoMedico.crm} • {infoMedico.especialidade}
-</p>
-
-     
-    </div>
+  <p className={`mt-2 ${isImac ? 'text-[15px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
+    {infoMedico.crm} • {infoMedico.especialidade}
+  </p>
+</div>
 
     <div className="min-w-[150px]">
       <p className="text-sm text-[var(--muted-foreground)]">
