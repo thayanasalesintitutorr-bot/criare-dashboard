@@ -210,8 +210,8 @@ const res = await fetch(url, {
 
   return (
     <AppShell title="Vendas (Procedimentos)">
-      <div className="space-y-8">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
+      <div className="space-y-5">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
   <CardMini
   icon={Target}
   title="Orçamentos entregues"
@@ -220,14 +220,6 @@ const res = await fetch(url, {
   previousValue={data?.comparativo?.vendas?.orcamentosAnterior || 0}
   subtitle="no período"
 />
-  <CardMini
-    icon={Funnel}
-    title="Em negociação"
-    value={(funil?.solicitacaoCirurgia || 0) + (funil?.marcado || 0)}
-    rawValue={(funil?.solicitacaoCirurgia || 0) + (funil?.marcado || 0)}
-    previousValue={data?.comparativo?.vendas?.negociacaoAnterior || 0}
-    subtitle="em andamento"
-  />
 
   <CardMini
     icon={TrendingUp}
@@ -247,10 +239,10 @@ const res = await fetch(url, {
     subtitle="perdidas no período"
   />
 
-  <CardMini
+ <CardMini
   icon={TrendingUp}
   title="Conversão"
-  value={`${vendas?.propostasFechadasPercent || 0}%`}
+  value={`${Math.round(vendas?.propostasFechadasPercent || 0)}%`}
   rawValue={vendas?.propostasFechadasPercent || 0}
   previousValue={data?.comparativo?.vendas?.conversaoAnterior || 0}
   subtitle="ganhas sobre orçamentos"
@@ -279,51 +271,18 @@ const res = await fetch(url, {
 
        
 
-        <div className="grid gap-6 xl:grid-cols-2 items-stretch">
-          <section className="flex h-full flex-col rounded-[30px] border border-white/5 bg-[var(--card)] p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <Funnel className="h-6 w-6 text-[var(--accent)]" />
-              <h2 className="text-[26px] font-black">Funil de Vendas</h2>
-            </div>
+        <div className="grid gap-5">
 
-            <div className="space-y-4 flex flex-col items-center">
-              {etapas.map((etapa, index) => {
-                const percent = (etapa.valor / baseFunil) * 100
-                const largura = Math.max(40, 100 - index * 12)
 
-                return (
-                  <div key={etapa.nome} className="w-full flex justify-center">
-                    <div
-                      className="relative flex items-center justify-between rounded-[22px] px-6 py-5 text-white shadow-sm"
-                      style={{
-                        width: `${largura}%`,
-                        background: `linear-gradient(135deg, ${etapa.cor}, ${etapa.cor}CC)`,
-                      }}
-                    >
-                      <div>
-                        <p className="text-xs opacity-80">{etapa.nome}</p>
-                        <p className="text-2xl font-black">{etapa.valor}</p>
-                      </div>
-
-                      <div className="rounded-full bg-white/20 px-3 py-1 text-sm font-bold backdrop-blur-sm">
-                        {formatPercent(percent)}
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="flex h-full flex-col rounded-[30px] border border-white/5 bg-[var(--card)] p-6">
-            <div className="mb-6 flex items-center gap-3">
+          <section className="flex h-full flex-col rounded-[30px] border border-white/5 bg-[var(--card)] p-4">
+            <div className="mb-4 flex items-center gap-3">
               <Package className="h-6 w-6 text-[var(--accent)]" />
-              <h2 className="text-[26px] font-black">
+              <h2 className="text-[22px] font-black">
                 Performance por produto vendido
               </h2>
             </div>
 
-            <div className="max-h-[650px] space-y-4 overflow-y-auto pr-2">
+            <div className="max-h-[300px] space-y-4 overflow-y-auto pr-2">
               {produtosVendidos.length === 0 && (
                 <div className="rounded-2xl bg-[var(--muted)] p-5 text-sm">
                   Nenhum produto vendido no período.
@@ -335,25 +294,25 @@ const res = await fetch(url, {
 
                 return (
                   <div key={produto.nome}>
-                    <div className="mb-2 flex justify-between">
+                    <div className="mb-1 flex justify-between items-center">
                       <div>
-                        <p className="font-semibold">{produto.nome}</p>
-                        <p className="text-sm text-[var(--muted-foreground)]">
+                       <p className="text-[14px] font-semibold">{produto.nome}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {produto.qtd} vendas
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <p className="font-bold">{formatMoney(produto.valor)}</p>
-                        <p className="text-sm text-[var(--muted-foreground)]">
+                        <p className="text-[14px] font-bold">{formatMoney(produto.valor)}</p>
+                        <p className="text-xs text-[var(--muted-foreground)]">
                           {Math.round(produto.percentual)}%
                         </p>
                       </div>
                     </div>
 
-                    <div className="h-10 rounded-xl bg-[var(--muted)] p-1">
+                    <div className="h-7 rounded-xl bg-[var(--muted)] p-1">
                       <div
-                        className="h-full rounded-xl flex items-center px-3 text-white text-sm font-semibold"
+                        className="h-full rounded-xl flex items-center px-2 text-white text-[12px] font-semibold"
                         style={{ width: `${width}%`, backgroundColor: '#6366F1' }}
                       >
                         {produto.qtd}
@@ -365,7 +324,7 @@ const res = await fetch(url, {
             </div>
 
 
-            <div className="mt-6 border-t border-white/5 pt-5">
+            <div className="mt-4 border-t border-white/5 pt-3">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-xs uppercase text-[var(--muted-foreground)]">
@@ -389,11 +348,11 @@ const res = await fetch(url, {
           </section>
         </div>
 
-<section className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-6 shadow-[var(--card-shadow)]">
-  <div className="mb-6 flex items-center justify-between">
+<section className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+ <div className="mb-4 flex items-center justify-between">
     <div className="flex items-center gap-3">
       <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-      <h2 className="text-[26px] font-black text-[var(--foreground)]">
+      <h2 className="text-[20px] font-black text-[var(--foreground)]">
         Vendas por médico
       </h2>
     </div>
@@ -408,7 +367,7 @@ const res = await fetch(url, {
       Nenhuma venda por médico no período.
     </div>
   ) : (
-   <div className="grid gap-6">
+   <div className="grid gap-4">
       {vendasPorMedico.map((medico, index) => {
         const totalProdutosMedico =
           medico.produtos?.reduce(
@@ -428,11 +387,11 @@ const res = await fetch(url, {
         return (
           <div
             key={medico.nome}
-            className="rounded-[30px] border border-[color:var(--border)] bg-[var(--background)] p-7"
+            className="rounded-[30px] border border-[color:var(--border)] bg-[var(--background)] p-4"
           >
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
                   {getFotoMedico(medico.nome) ? (
                     <img
                       src={getFotoMedico(medico.nome) || ''}
@@ -440,7 +399,7 @@ const res = await fetch(url, {
                       className="h-full w-full object-cover object-center"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-lg font-black text-[#D7B46A]">
+                    <div className="flex h-full w-full items-center justify-center text-base font-black text-[#D7B46A]">
                       DR
                     </div>
                   )}
@@ -448,27 +407,27 @@ const res = await fetch(url, {
 
                 <div>
                   {isTop && (
-                    <span className="mb-2 inline-flex rounded-full bg-[#D7B46A]/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-[#D7B46A]">
+                    <span className="mb-2 inline-flex rounded-full bg-[#D7B46A]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#D7B46A]">
                       Top vendedor
                     </span>
                   )}
 
-                  <h3 className="text-[34px] font-black leading-tight text-[var(--foreground)]">
+                  <h3 className="text-[20px] font-black leading-tight text-[var(--foreground)]">
                     {medico.nome}
                   </h3>
 
-                  <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">
+                  <p className="mt-1 text-[13px] font-semibold text-[var(--muted-foreground)]">
                     Procedimentos vendidos
                   </p>
                 </div>
               </div>
 
-              <div className="min-w-[180px] text-right">
-                <p className="text-2xl font-black text-[var(--foreground)]">
+              <div className="min-w-[120px] text-right">
+                <p className="text-[22px] font-black text-[var(--foreground)]">
                   {formatMoney(medico.valor)}
                 </p>
 
-                <div className="mt-2 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
                   <div
                     className={`h-full rounded-full ${
                       percentualMeta >= 100
@@ -481,7 +440,7 @@ const res = await fetch(url, {
                   />
                 </div>
 
-                <div className="mt-2 flex justify-between text-xs">
+                <div className="mt-1 flex justify-between text-[11px]">
                   <span className="text-[var(--muted-foreground)]">
                     Meta {formatMoney(medico.meta)}
                   </span>
@@ -501,14 +460,14 @@ const res = await fetch(url, {
               </div>
             </div>
 
-            <div className="mb-5 grid grid-cols-3 gap-3">
+            <div className="mb-2 grid grid-cols-3 gap-2">
               <MiniInfo label="Valor vendido" value={formatMoney(medico.valor)} />
               <MiniInfo label="Produtos" value={totalProdutosMedico} />
               <MiniInfo label="Ticket médio" value={formatMoney(ticketMedico)} />
             </div>
 
             <div>
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                 <h4 className="text-sm font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
                   Produtos vendidos
                 </h4>
@@ -518,24 +477,22 @@ const res = await fetch(url, {
                 </span>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {(medico.produtos || []).map(
                   (item: { produto: string; qtd: number }, itemIndex: number) => (
                     <div
                       key={`${medico.nome}-${item.produto}-${itemIndex}`}
-                      className="flex items-center justify-between rounded-2xl bg-[var(--card)] px-4 py-3"
+                      className="flex items-center justify-between rounded-lg bg-[var(--card)] px-2 py-1"
                     >
                       <div>
-                        <p className="font-black text-[var(--foreground)]">
+                        <p className="text-[12px] font-semibold text-[var(--foreground)]">
                           {item.produto}
                         </p>
 
-                        <p className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">
-                          produto vendido
-                        </p>
+    
                       </div>
 
-                      <span className="text-xl font-black text-[var(--foreground)]">
+                      <span className="text-[13px] font-black text-[var(--foreground)]">
                         {item.qtd}
                       </span>
                     </div>
@@ -557,12 +514,12 @@ const res = await fetch(url, {
 
 function MiniInfo({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-[color:var(--border)] bg-[var(--card)] px-4 py-3">
+    <div className="rounded-2xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-1.5">
       <p className="text-xs font-bold text-[var(--muted-foreground)]">
         {label}
       </p>
 
-      <p className="mt-2 text-lg font-black text-[var(--foreground)]">
+      <p className="mt-1 text-[15px] font-black text-[var(--foreground)]">
         {value}
       </p>
     </div>
@@ -593,8 +550,8 @@ function CardMeta({
   const negativo = percentualAnterior < 0
 
   return (
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-6 shadow-[var(--card-shadow)]">
-      <div className="mb-5 flex items-center gap-3">
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+      <div className="mb-3 flex items-center gap-3">
         <CircleDollarSign className="h-6 w-6 text-[var(--accent)]" />
 
         <p className="text-sm font-black uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
@@ -602,11 +559,11 @@ function CardMeta({
         </p>
       </div>
 
-      <p className="text-[42px] font-black leading-none text-[var(--foreground)]">
+      <p className="text-[30px] font-black leading-none text-[var(--foreground)]">
         {isMoney ? formatMoney(value) : value}
       </p>
 
-      <div className="mt-5 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+      <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className={`h-full rounded-full ${
             percentual >= 100
@@ -637,9 +594,9 @@ function CardMeta({
         </span>
       </div>
 
-      <div className="mt-5 rounded-[14px] bg-[var(--background)] px-4 py-3">
+      <div className="mt-3 rounded-[14px] bg-[var(--background)] px-3 py-2">
         <p
-          className={`text-[20px] font-black ${
+          className={`text-[18px] font-black ${
             positivo
               ? 'text-emerald-500'
               : negativo
@@ -678,13 +635,13 @@ function CardMini({
 
   return (
     <div
-      className={`rounded-[24px] border border-[color:var(--border)] p-5 shadow-[var(--card-shadow)] ${
+      className={`rounded-[24px] border border-[color:var(--border)] p-4 shadow-[var(--card-shadow)] ${
         statusClass || 'bg-[var(--card)]'
       }`}
     >
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--icon-bg)]">
-          <Icon className="h-6 w-6 text-[var(--accent)]" />
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--icon-bg)]">
+          <Icon className="h-5 w-5 text-[var(--accent)]" />
         </div>
 
         <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
@@ -692,20 +649,20 @@ function CardMini({
         </p>
       </div>
 
-      <h3 className="text-[40px] font-black tracking-[-0.05em] text-[var(--foreground)]">
+      <h3 className="text-[28px] font-black tracking-[-0.05em] text-[var(--foreground)]">
         {value}
       </h3>
 
       {subtitle && (
-        <p className="mt-2 text-base font-semibold text-[var(--muted-foreground)]">
+        <p className="mt-2 text-sm font-semibold text-[var(--muted-foreground)]">
           {subtitle}
         </p>
       )}
 
-      <div className="mt-5 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-4 py-3">
+      <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
         <div>
           <p
-            className={`text-[20px] font-black ${
+            className={`text-[18px] font-black ${
               positivo
                 ? 'text-emerald-500'
                 : negativo
