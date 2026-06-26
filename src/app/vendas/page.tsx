@@ -548,6 +548,7 @@ function CardMeta({
 
   const positivo = percentualAnterior > 0
   const negativo = percentualAnterior < 0
+  const previousLabel = isMoney ? formatMoney(anterior) : anterior
 
   return (
     <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
@@ -594,23 +595,29 @@ function CardMeta({
         </span>
       </div>
 
-      <div className="mt-3 rounded-[14px] bg-[var(--background)] px-3 py-2">
-        <p
-          className={`text-[18px] font-black ${
-            positivo
-              ? 'text-emerald-500'
-              : negativo
-              ? 'text-red-500'
-              : 'text-[var(--muted-foreground)]'
-          }`}
-        >
-          {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentualAnterior)}%
-        </p>
+      <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
+  <div>
+    <p
+      className={`text-[18px] font-black ${
+        positivo
+          ? 'text-emerald-500'
+          : negativo
+          ? 'text-red-500'
+          : 'text-[var(--muted-foreground)]'
+      }`}
+    >
+      {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentualAnterior)}%
+    </p>
 
-        <p className="text-xs text-[var(--muted-foreground)]">
-          {percentualAnterior === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-        </p>
-      </div>
+    <p className="text-xs text-[var(--muted-foreground)]">
+      {percentualAnterior === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
+    </p>
+  </div>
+
+  <span className="text-[14px] font-black text-[var(--muted-foreground)]">
+    {previousLabel}
+  </span>
+</div>
     </div>
   )
 }
@@ -632,6 +639,8 @@ function CardMini({
 
   const positivo = percentual > 0
   const negativo = percentual < 0
+  const isMoneyValue = typeof value === 'string' && value.includes('R$')
+  const previousLabel = isMoneyValue ? formatMoney(anterior) : anterior
 
   return (
     <div
@@ -660,24 +669,28 @@ function CardMini({
       )}
 
       <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
-        <div>
-          <p
-            className={`text-[18px] font-black ${
-              positivo
-                ? 'text-emerald-500'
-                : negativo
-                ? 'text-red-500'
-                : 'text-[var(--muted-foreground)]'
-            }`}
-          >
-            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
-          </p>
+  <div>
+    <p
+      className={`text-[18px] font-black ${
+        positivo
+          ? 'text-emerald-500'
+          : negativo
+          ? 'text-red-500'
+          : 'text-[var(--muted-foreground)]'
+      }`}
+    >
+      {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
+    </p>
 
-          <p className="text-xs text-[var(--muted-foreground)]">
-            {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-          </p>
+    <p className="text-xs text-[var(--muted-foreground)]">
+      {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
+    </p>
+  </div>
+
+  <span className="text-[14px] font-black text-[var(--muted-foreground)]">
+    {previousLabel}
+  </span>
         </div>
       </div>
-    </div>
   )
 }
