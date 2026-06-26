@@ -144,10 +144,9 @@ function getInfoMedico(nome: string) {
   n.includes('FISIOTERAPIA')
 ) {
   return {
-    nome: 'Jéssica Maria',
-    especialidade: 'Fisioterapia',
-    imagem: '/jessica.png',
-  }
+  crm: 'CREFITO não informado',
+  especialidade: 'Fisioterapia',
+}
 }
 
   return { crm: 'CRM não informado', especialidade: 'Especialidade não informada' }
@@ -344,20 +343,19 @@ const res = await fetch(url, {
       <ResumoCardMeta
         dot="gold"
         label="Total do valor de venda"
-        value={(data?.kpis?.comercialConsulta?.valorTotalConsulta || 0) + (data?.kpis?.comercialVendas?.valorTotalVendas || 0)}
+        value={data?.consolidado?.valorVendas || 0}
         meta={data?.consolidado?.metaValorVendas || 0}
         isMoney
+        previousValue={data?.comparativo?.consolidado?.valorAnteriorConsolidado || 0}
       />
 
       <ResumoCardMeta
         dot="green"
         label="Ticket médio total"
-        value={
-          ((data?.kpis?.comercialConsulta?.valorTotalConsulta || 0) + (data?.kpis?.comercialVendas?.valorTotalVendas || 0)) /
-          Math.max((data?.kpis?.comercialConsulta?.quantidadeConsulta || 0) + (data?.kpis?.comercialVendas?.propostasFechadas || 0), 1)
-        }
+        value={data?.consolidado?.ticketMedio || 0}
         meta={data?.consolidado?.metaTicketMedio || 0}
         isMoney
+        previousValue={data?.comparativo?.consolidado?.ticketAnteriorConsolidado || 0}
       />
     </>
   )}
@@ -936,7 +934,7 @@ purple:
   return (
     <div className={`rounded-[16px] shadow-none ${isImac ? 'px-4 py-3' : 'p-5'} ${tones[tone]}`}>
       <div className="flex items-center gap-2">
-        <Icon className={`h-6 w-5 ${iconColors[tone]}`} />
+        <Icon className={`h-6 w-6 shrink-0 ${iconColors[tone]}`} />
        <p className={`${isImac ? 'text-[18px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
