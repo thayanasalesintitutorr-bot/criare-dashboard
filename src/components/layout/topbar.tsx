@@ -270,7 +270,10 @@ function parseLocalDate(dateString?: string) {
               </div>
            
 
-<div className="mb-4 rounded-[28px] bg-[var(--card)] p-5 shadow-sm">
+<div
+  onClick={() => setShowFilters((v) => !v)}
+  className="mb-4 cursor-pointer rounded-[28px] bg-[var(--card)] p-5 shadow-sm transition hover:bg-[var(--card)]/90"
+>
   <div className="flex items-center justify-between gap-6">
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 pr-3 font-bold">
@@ -309,13 +312,9 @@ function parseLocalDate(dateString?: string) {
       </div>
     </div>
 
-    <button
-      onClick={() => setShowFilters(!showFilters)}
-      className="flex items-center gap-2 font-semibold text-[var(--accent)]"
-    >
-      {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
-      {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-    </button>
+    <div className="text-[var(--accent)]">
+  {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+</div>
   </div>
 
   {showFilters && (

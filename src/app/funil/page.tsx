@@ -687,12 +687,12 @@ function ResumoSection({
   extra,
 }: any) {
   return (
-  <div className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-8 shadow-[var(--card-shadow)]">
-      <div className="mb-8 flex items-center justify-between">
+  <div className="rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+      <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-[8px] rounded-full bg-[#D7B46A]" />
+          <div className="h-9 w-[6px] rounded-full bg-[#D7B46A]" />
 
-          <h3 className="text-[28px] font-black text-[var(--foreground)]">
+          <h3 className="text-[23px] font-black text-[var(--foreground)]">
             {title}
           </h3>
         </div>
@@ -726,29 +726,29 @@ function ResumoCard({
   const negativo = percentual < 0
 
   return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-5">
-      <div className="mb-5 flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[var(--icon-bg)]">
-          <Icon className="h-7 w-7 text-[#D7B46A]" />
+    <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[var(--icon-bg)]">
+          <Icon className="h-5 w-5 text-[#D7B46A]" />
         </div>
 
-        <p className="text-[18px] font-black leading-tight text-[var(--foreground)]">
+       <p className="text-[15px] font-black leading-tight text-[var(--foreground)]">
           {label}
         </p>
       </div>
 
-      <p className="text-[42px] font-black leading-none text-[var(--foreground)]">
+      <p className="text-[34px] font-black leading-none text-[var(--foreground)]">
         {value}
       </p>
 
-      <p className="mt-3 text-[16px] font-semibold text-[var(--muted-foreground)]">
-        fechamentos no período
-      </p>
+      <p className="mt-2 text-[13px] font-semibold text-[var(--muted-foreground)]">
+  fechamentos no período
+</p>
 
-      <div className="mt-5 flex items-center justify-between rounded-[14px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-3">
+      <div className="mt-3 flex items-center justify-between rounded-[12px] border border-[color:var(--border)] bg-[var(--card)] px-3 py-2">
         <div>
           <p
-            className={`text-[22px] font-black ${
+            className={`text-[18px] font-black ${
               positivo
                 ? 'text-emerald-500'
                 : negativo
@@ -759,13 +759,13 @@ function ResumoCard({
             {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
           </p>
 
-          <p className="text-[13px] text-[var(--muted-foreground)]">
+          <p className="text-[11px] text-[var(--muted-foreground)]">
             {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
           </p>
         </div>
 
         <div
-          className={`flex h-10 w-10 items-center justify-center rounded-full ${
+          className={`flex h-8 w-8 items-center justify-center rounded-full ${
             positivo
               ? 'bg-emerald-500/15'
               : negativo
@@ -774,7 +774,7 @@ function ResumoCard({
           }`}
         >
           <span
-            className={`text-xl ${
+           className={`text-lg ${
               positivo
                 ? 'text-emerald-500'
                 : negativo
@@ -814,20 +814,20 @@ function ResumoCardMeta({
       : 'bg-red-500 text-red-500'
 
   return (
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] p-6">
-      <div className="mb-6 flex items-center gap-3">
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+      <div className="mb-4 flex items-center gap-3">
   <span className={`h-3 w-3 rounded-full ${dots[dot]}`} />
 
-  <p className="text-[18px] font-black text-[var(--foreground)]">
+  <p className="text-[15px] font-black text-[var(--foreground)]">
     {label}
   </p>
 </div>
 
-<p className="text-[48px] font-black leading-none text-[var(--foreground)]">
+<p className="text-[36px] font-black leading-none text-[var(--foreground)]">
   {isMoney ? formatMoney(value) : value}
 </p>
 
-   <div className="mt-6 h-6 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+   <div className="mt-4 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className={`h-full rounded-full ${cor.split(' ')[0]}`}
           style={{ width: `${Math.min(percentual, 100)}%` }}
@@ -835,12 +835,12 @@ function ResumoCardMeta({
       </div>
 
      <div className="mt-4 flex items-center justify-between">
-  <span className="text-[24px] font-bold text-[var(--muted-foreground)]">
+  <span className="text-[16px] font-bold text-[var(--muted-foreground)]">
     Meta {isMoney ? formatMoney(meta) : meta}
   </span>
 
   <span
-    className={`text-[34px] font-black ${cor.split(' ')[1]}`}
+    className={`text-[24px] font-black ${cor.split(' ')[1]}`}
   >
     {percentual}%
   </span>
