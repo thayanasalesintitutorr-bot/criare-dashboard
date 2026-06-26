@@ -765,11 +765,13 @@ function ResumoCard({
             {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
           </p>
         </div>
-<span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
-  {previousLabel}
-</span>
-        <div
-          className={`flex h-8 w-8 items-center justify-center rounded-full ${
+<div className="flex items-center">
+  <span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
+    {previousLabel}
+  </span>
+
+  <div
+    className={`flex h-8 w-8 items-center justify-center rounded-full ${
             positivo
               ? 'bg-emerald-500/15'
               : negativo
@@ -787,13 +789,13 @@ function ResumoCard({
             }`}
           >
             {positivo ? '↗' : negativo ? '↘' : '→'}
-          </span>
+           </span>
         </div>
       </div>
     </div>
-  )
+  </div>
+)
 }
-
 function ResumoCardMeta({
     label,
     value,
