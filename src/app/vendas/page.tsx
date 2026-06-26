@@ -55,6 +55,17 @@ type DashboardResponse = {
     vendas: number
     total: number
   }
+  comparativo?: {
+  vendas?: {
+    orcamentosAnterior: number
+    negociacaoAnterior: number
+    ganhasAnterior: number
+    perdidasAnterior: number
+    conversaoAnterior: number
+    valorAnterior: number
+    ticketAnterior: number
+  }
+}
 }
 
 function formatMoney(v: number) {
@@ -200,18 +211,21 @@ const res = await fetch(url, {
   return (
     <AppShell title="Vendas (Procedimentos)">
       <div className="space-y-8">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
   <CardMini
-    icon={Target}
-    title="Orçamentos entregues"
-    value={funil?.orcamentoEntregue || 0}
-    subtitle="no período"
-  />
-
+  icon={Target}
+  title="Orçamentos entregues"
+  value={funil?.orcamentoEntregue || 0}
+  rawValue={funil?.orcamentoEntregue || 0}
+  previousValue={data?.comparativo?.vendas?.orcamentosAnterior || 0}
+  subtitle="no período"
+/>
   <CardMini
     icon={Funnel}
     title="Em negociação"
     value={(funil?.solicitacaoCirurgia || 0) + (funil?.marcado || 0)}
+    rawValue={(funil?.solicitacaoCirurgia || 0) + (funil?.marcado || 0)}
+    previousValue={data?.comparativo?.vendas?.negociacaoAnterior || 0}
     subtitle="em andamento"
   />
 
@@ -219,6 +233,8 @@ const res = await fetch(url, {
     icon={TrendingUp}
     title="Vendas ganhas"
     value={funil?.vendaGanha || 0}
+    rawValue={funil?.vendaGanha || 0}
+    previousValue={data?.comparativo?.vendas?.ganhasAnterior || 0}
     subtitle="fechamentos"
   />
 
@@ -226,24 +242,37 @@ const res = await fetch(url, {
     icon={CircleDollarSign}
     title="Vendas perdidas"
     value={funil?.vendaPerdida || 0}
+    rawValue={funil?.vendaPerdida || 0}
+    previousValue={data?.comparativo?.vendas?.perdidasAnterior || 0}
     subtitle="perdidas no período"
   />
+
+  <CardMini
+  icon={TrendingUp}
+  title="Conversão"
+  value={`${vendas?.propostasFechadasPercent || 0}%`}
+  rawValue={vendas?.propostasFechadasPercent || 0}
+  previousValue={data?.comparativo?.vendas?.conversaoAnterior || 0}
+  subtitle="ganhas sobre orçamentos"
+/>
 </div>
 
 <div className="grid gap-5 md:grid-cols-2">
   <CardMeta
-    title="Valor vendido"
-    value={vendas?.valorTotalVendas || 0}
-    meta={metaVendas}
-    isMoney
-  />
+  title="Valor vendido"
+  value={vendas?.valorTotalVendas || 0}
+  meta={metaVendas}
+  isMoney
+  previousValue={data?.comparativo?.vendas?.valorAnterior || 0}
+/>
 
-  <CardMeta
-    title="Ticket médio"
-    value={vendas?.ticketMedioVendas || 0}
-    meta={2800}
-    isMoney
-  />
+<CardMeta
+  title="Ticket médio"
+  value={vendas?.ticketMedioVendas || 0}
+  meta={2800}
+  isMoney
+  previousValue={data?.comparativo?.vendas?.ticketAnterior || 0}
+/>
 </div>
 
 
@@ -294,7 +323,7 @@ const res = await fetch(url, {
               </h2>
             </div>
 
-            <div className="space-y-4">
+            <div className="max-h-[650px] space-y-4 overflow-y-auto pr-2">
               {produtosVendidos.length === 0 && (
                 <div className="rounded-2xl bg-[var(--muted)] p-5 text-sm">
                   Nenhum produto vendido no período.
@@ -379,7 +408,7 @@ const res = await fetch(url, {
       Nenhuma venda por médico no período.
     </div>
   ) : (
-   <div className="grid gap-6 xl:grid-cols-2">
+   <div className="grid gap-6">
       {vendasPorMedico.map((medico, index) => {
         const totalProdutosMedico =
           medico.produtos?.reduce(
@@ -399,11 +428,11 @@ const res = await fetch(url, {
         return (
           <div
             key={medico.nome}
-            className="rounded-[26px] border border-[color:var(--border)] bg-[var(--background)] p-5"
+            className="rounded-[30px] border border-[color:var(--border)] bg-[var(--background)] p-7"
           >
             <div className="mb-5 flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
+                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
                   {getFotoMedico(medico.nome) ? (
                     <img
                       src={getFotoMedico(medico.nome) || ''}
@@ -424,7 +453,7 @@ const res = await fetch(url, {
                     </span>
                   )}
 
-                  <h3 className="text-xl font-black leading-tight text-[var(--foreground)]">
+                  <h3 className="text-[34px] font-black leading-tight text-[var(--foreground)]">
                     {medico.nome}
                   </h3>
 
@@ -545,13 +574,23 @@ function CardMeta({
   value,
   meta,
   isMoney,
+  previousValue = 0,
 }: {
   title: string
   value: number
   meta: number
   isMoney?: boolean
+  previousValue?: number
 }) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
+
+  const anterior = Number(previousValue || 0)
+
+  const percentualAnterior =
+    anterior > 0 ? Math.round(((value - anterior) / anterior) * 100) : 0
+
+  const positivo = percentualAnterior > 0
+  const negativo = percentualAnterior < 0
 
   return (
     <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-6 shadow-[var(--card-shadow)]">
@@ -597,6 +636,24 @@ function CardMeta({
           {percentual}%
         </span>
       </div>
+
+      <div className="mt-5 rounded-[14px] bg-[var(--background)] px-4 py-3">
+        <p
+          className={`text-[20px] font-black ${
+            positivo
+              ? 'text-emerald-500'
+              : negativo
+              ? 'text-red-500'
+              : 'text-[var(--muted-foreground)]'
+          }`}
+        >
+          {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentualAnterior)}%
+        </p>
+
+        <p className="text-xs text-[var(--muted-foreground)]">
+          {percentualAnterior === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
+        </p>
+      </div>
     </div>
   )
 }
@@ -605,9 +662,20 @@ function CardMini({
   icon: Icon,
   title,
   value,
+  rawValue,
+  previousValue = 0,
   subtitle,
   statusClass,
 }: any) {
+  const atual = Number(rawValue ?? value ?? 0)
+  const anterior = Number(previousValue || 0)
+
+  const percentual =
+    anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
+
+  const positivo = percentual > 0
+  const negativo = percentual < 0
+
   return (
     <div
       className={`rounded-[24px] border border-[color:var(--border)] p-5 shadow-[var(--card-shadow)] ${
@@ -633,6 +701,26 @@ function CardMini({
           {subtitle}
         </p>
       )}
+
+      <div className="mt-5 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-4 py-3">
+        <div>
+          <p
+            className={`text-[20px] font-black ${
+              positivo
+                ? 'text-emerald-500'
+                : negativo
+                ? 'text-red-500'
+                : 'text-[var(--muted-foreground)]'
+            }`}
+          >
+            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
+          </p>
+
+          <p className="text-xs text-[var(--muted-foreground)]">
+            {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
+          </p>
+        </div>
+      </div>
     </div>
   )
 }
