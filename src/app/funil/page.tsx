@@ -6,23 +6,16 @@ import { useFilters } from '@/store/use-filters'
 import {
   CircleDollarSign,
   TrendingUp,
-  Target,
-  Megaphone,
   Stethoscope,
-  CalendarDays,
   UserX,
   UserCheck,
   RotateCcw,
   Ticket,
   Handshake,
   ClipboardList,
-  Sun,
-  CalendarCheck2,
 CalendarX2,
 CalendarClock,
 } from 'lucide-react'
-
-import { Cell, Pie, PieChart, ResponsiveContainer, LineChart, Line } from 'recharts'
 
 type DashboardResponse = {
   ok: boolean
@@ -44,15 +37,7 @@ cancelados?: number
 reagendados?: number
 valorParticular?: number
 valorConvenio?: number
-evolucaoConsulta?: number[]
-evolucaoProcedimentos?: number[]
-evolucaoCirurgias?: number[]
-injetaveisVendidos?: number
-valorInjetaveisVendidos?: number
-protocolosVendidos?: number
 valorProtocolosVendidos?: number
-evolucaoInjetaveis?: number[]
-evolucaoProtocolos?: number[]
 }[]
 
 vendasPorMedico?: {
@@ -89,13 +74,6 @@ vendasPorMedico?: {
     metaTicketMedio: number
   }
 
-  campanhasConsulta?: {
-    nome: string
-    qtd: number
-    valor: number
-    percentual: number
-  }[]
-
   atendimentoConsulta?: {
   nome: string
   qtd: number
@@ -116,11 +94,6 @@ function formatMoney(v: number) {
     currency: 'BRL',
     maximumFractionDigits: 0,
   })
-}
-const fotosMedicos: Record<string, string> = {
-  'DR. RODOLPHO REIS': '/medicos/rodolpho.png',
-  'DRA. CLAUDIA LAMEIRA': '/medicos/claudia.png',
-  'DR. BRENO PITANGUI': '/medicos/breno.png',
 }
 
 function getFotoMedico(nome: string) {
@@ -216,8 +189,6 @@ const res = await fetch(url, {
     loadData()
   }, [periodo, tipoData, segmento, dataInicio, dataFim])
 
-  const consulta = data?.kpis?.comercialConsulta
-  const campanhasConsulta = data?.campanhasConsulta || []
   const vendasPorMedico = data?.vendasPorMedico || []
   const consultaPorMedico = Array.from(
   new Map(
@@ -243,9 +214,6 @@ const res = await fetch(url, {
       ])
   ).values()
 )
-  const atendimentoConsulta = data?.atendimentoConsulta || []
-  const conveniosConsulta = data?.conveniosConsulta || []
-
   if (loading) {
     return (
       <AppShell title="Consulta (Funil)">
@@ -391,20 +359,8 @@ const ticketProcedimentosMedico =
     ? valorProcedimentosMedico / quantidadeProcedimentosVendidos
     : 0
 
-  const movimentacoesAgenda = [
-  { nome: 'Finalizados', valor: medico.atendimentos || 0, cor: '#10B981' },
-  { nome: 'No Show', valor: medico.noShow || 0, cor: '#EC4899' },
-  { nome: 'Cancelados', valor: medico.cancelados || 0, cor: '#E00000' },
-  { nome: 'Reagendados', valor: medico.reagendados || 0, cor: '#8B0000' },
-]
-
-const faturamentoConsolidado =
+ const faturamentoConsolidado =
   faturamentoMedico + valorProcedimentosMedico
-
-const totalMovimentacoes = movimentacoesAgenda.reduce(
-  (acc, item) => acc + item.valor,
-  0
-)
 
 
   return (
@@ -439,30 +395,7 @@ const totalMovimentacoes = movimentacoesAgenda.reduce(
   {infoMedico.crm} • {infoMedico.especialidade}
 </p>
 
-      <div className={`mt-4 flex flex-wrap items-center ${isImac ? 'gap-4 text-[18px]' : 'gap-6 text-[22px]'} font-semibold`}>
-        <span className="flex items-center gap-1 text-blue-500">
-  <CalendarDays className="h-6 w-6" />
-  {medico.atendimentos || 0} atendimentos finalizados
-</span>
-
-        <span className="flex items-center gap-1 text-emerald-500">
-          <UserCheck className="h-6 w-6" />
-          {medico.quantidadeConsulta} consultas ganhas
-        </span>
-
-      {medico.medico?.toUpperCase().includes('RODOLPHO') ||
-medico.medico?.toUpperCase().includes('CLAUDIA') ? (
-  <span className="flex items-center gap-1 text-violet-500">
-    <Handshake className="h-6 w-6" />
-    {medico.cirurgias || 0} cirurgias
-  </span>
-) : (
-  <span className="flex items-center gap-1 text-violet-500">
-    <Stethoscope className="h-6 w-6" />
-    {medico.procedimentos || 0} procedimentos
-  </span>
-)}
-      </div>
+     
     </div>
 
     <div className="min-w-[150px]">
@@ -489,58 +422,50 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
 </div>
 
 <div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-4 p-4' : 'px-4 py-3'}`}>
-    <h4 className="mb-3 text-[22px] font-black text-[var(--foreground)]">
-  AGENDA
-</h4>
+  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${
+  isImac ? 'col-span-12 px-4 py-3' : 'px-4 py-3'
+}`}>
+  <h4 className="mb-3 text-[22px] font-black text-[var(--foreground)]">
+    AGENDA
+  </h4>
 
-    <div className={isImac ? 'grid grid-cols-4 gap-3' : 'grid gap-3 md:grid-cols-4'}>
-  <MetricMini
-    label="Manhã"
-    value={medico.manha || 0}
-    color="blue"
-    icon={Sun}
-  />
+  <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid gap-3 md:grid-cols-5'}>
+    <MetricMini
+      label="Atendimento Finalizado"
+      value={medico.atendimentos || 0}
+      color="green"
+      icon={UserCheck}
+    />
 
-  <MetricMini
-    label="Tarde"
-    value={medico.tarde || 0}
-    color="orange"
-    icon={Sun}
-  />
+    <MetricMini
+      label="Retornos"
+      value={medico.retornos || 0}
+      color="blue"
+      icon={RotateCcw}
+    />
 
-  <MetricMini
-    label="Ocupação"
-    value={`${medico.capacidadeAgenda || 0}%`}
-    color="green"
-    icon={CalendarCheck2}
-  />
+    <MetricMini
+      label="No Show"
+      value={medico.noShow || 0}
+      color="pink"
+      icon={UserX}
+    />
 
+    <MetricMini
+      label="Cancelados"
+      value={medico.cancelados || 0}
+      color="red"
+      icon={CalendarX2}
+    />
 
-  <MetricMini
-    label="Retornos"
-    value={medico.retornos || 0}
-    color="blue"
-    icon={RotateCcw}
-  />
+    <MetricMini
+      label="Reagendados"
+      value={medico.reagendados || 0}
+      color="darkRed"
+      icon={CalendarClock}
+    />
+  </div>
 </div>
-  </div>
-
-  {isImac && (
-  <div className="col-span-8 rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-3">
-    <h4 className="mb-3 text-[20px] font-black text-[var(--foreground)]">
-      MOVIMENTAÇÕES DA AGENDA
-    </h4>
-
-    <div className="grid grid-cols-4 gap-3">
-      <MetricMini label="No Show" value={medico.noShow || 0} color="pink" icon={UserX} />
-      <MetricMini label="Cancelados" value={medico.cancelados || 0} color="red" icon={CalendarX2} />
-      <MetricMini label="Reagendados" value={medico.reagendados || 0} color="darkRed" icon={CalendarClock} />
-      <MetricMini label="Finalizados" value={medico.atendimentos || 0} color="green" icon={UserCheck} />
-    </div>
-  </div>
-)}
-
   <div className={isImac ? 'col-span-12 grid grid-cols-4 gap-3' : 'grid gap-3 md:grid-cols-2'}>
    <MetricCard
   icon={TrendingUp}
@@ -548,8 +473,6 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   value={medico.consultasPrimeiraVez || 0}
   description="Consultas finalizadas"
   tone="green"
-  chart={medico.evolucaoConsultaPrimeiraVez}
-  chartColor="var(--chart-green)"
 />
 
     <MetricCard
@@ -558,8 +481,6 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
   value={medico.procedimentos || 0}
   description=""
   tone="blue"
-  chart={medico.evolucaoProcedimentos}
-  chartColor="var(--chart-blue)"
 />
 
 {!medico.medico?.toUpperCase().includes('BRENO') && (
@@ -569,8 +490,7 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     value={medico.cirurgias || 0}
     description=""
     tone="purple"
-    chart={medico.evolucaoCirurgias}
-    chartColor="var(--chart-red)"
+
   />
 )}
   
@@ -590,8 +510,6 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
       }
       description=""
       tone="red"
-      chart={medico.evolucaoInjetaveis}
-      chartColor="var(--chart-green)"
     />
 
     <MetricCard
@@ -608,8 +526,6 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
       }
       description=""
       tone="purple"
-      chart={medico.evolucaoProtocolos}
-      chartColor="var(--chart-orange)"
     />
   </>
 )}
@@ -736,65 +652,15 @@ medico.medico?.toUpperCase().includes('CLAUDIA') ? (
     )
   })()}
 </div>
-   {!isImac && (
-   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 p-4' : 'p-5'}`}>
-   <h4 className="mb-4 text-[22px] font-black text-[var(--foreground)]">
-  MOVIMENTAÇÕES DA AGENDA
-</h4>
-
-    <div className={isImac ? 'grid grid-cols-[1fr_360px] items-center gap-4' : 'grid items-center gap-6 lg:grid-cols-[1fr_360px]'}>
-      <div className="grid gap-3 md:grid-cols-3">
-        <MetricMini label="No Show" value={medico.noShow || 0} color="pink" icon={UserX} />
-        <MetricMini label="Cancelados" value={medico.cancelados || 0} color="red" icon={CalendarX2} />
-        <MetricMini label="Reagendados" value={medico.reagendados || 0} color="darkRed" icon={CalendarClock} />
-      </div>
-
-      <div className="ml-auto flex items-center gap-6">
-        <div className={isImac ? 'h-[130px] w-[130px]' : 'h-[160px] w-[160px]'}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={totalMovimentacoes > 0 ? movimentacoesAgenda : [{ nome: 'Sem dados', valor: 1, cor: '#E5E7EB' }]}
-                dataKey="valor"
-                nameKey="nome"
-                innerRadius={42}
-                outerRadius={68}
-                paddingAngle={3}
-                stroke="transparent"
-              >
-                {(totalMovimentacoes > 0 ? movimentacoesAgenda : [{ nome: 'Sem dados', valor: 1, cor: '#E5E7EB' }]).map((item) => (
-                  <Cell key={item.nome} fill={item.cor} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          {movimentacoesAgenda.map((item) => (
-            <div key={item.nome} className="flex items-center gap-3">
-              <span
-                className="h-3 w-3 rounded-full"
-                style={{ backgroundColor: item.cor }}
-              />
-
-              <span className="text-sm font-semibold text-[var(--muted-foreground)]">
-  {item.nome}
-</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>)}
 </div>
 </div>
 )
 })}
 </div>
+   
+
 </section>
 
-  
 
 <section className="grid gap-6 xl:grid-cols-2">
 
@@ -906,65 +772,6 @@ function ResumoCardMeta({ label, value, meta, dot, isMoney }: any) {
     </div>
   )
 }
-
-function MiniLine({ data, color = '#2563EB' }: { data?: number[]; color?: string }) {
-  const chartData = (data || []).map((value, index) => ({
-    name: index,
-    value,
-  }))
-
-  if (!chartData.length) return null
-
-  return (
-    <div className="h-[54px] w-full px-2">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData}>
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  )
-}
-
-function CardMini({
-  icon: Icon,
-  title,
-  value,
-  subtitle,
-  statusClass,
-}: any) {
-  return (
-    <div
-      className={`rounded-[24px] border border-[color:var(--border)] p-5 shadow-[var(--card-shadow)] ${
-        statusClass || 'bg-[var(--metric-card)]'
-      }`}
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <Icon size={14} className="text-[var(--accent)]" />
-
-        <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
-          {title}
-        </p>
-      </div>
-
-      <h3 className={`text-4xl font-black tracking-[-0.05em] text-[var(--foreground)]`}>
-        {value}
-      </h3>
-
-      {subtitle && (
-        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-          {subtitle}
-        </p>
-      )}
-    </div>
-  )
-}
 function MetricMini({
   label,
   value,
@@ -1005,8 +812,6 @@ function MetricCard({
   icon: Icon,
   label,
   value,
-  chart,
-chartColor,
   description,
   tone = 'blue',
   
@@ -1016,8 +821,6 @@ chartColor,
   value: any
   description: string
   tone?: 'blue' | 'green' | 'red' | 'purple'
-  chart?: number[]
-  chartColor?: string
 }) {
 
   const { viewMode } = useFilters()
@@ -1062,11 +865,7 @@ purple:
 </p>
   </div>
 
-  {chart && (
-    <div className="w-full">
-      <MiniLine data={chart} color={chartColor} />
-    </div>
-  )}
+  {/* gráfico removido */}
 </div>
     </div>
   )
