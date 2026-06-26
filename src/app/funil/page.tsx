@@ -246,9 +246,9 @@ const res = await fetch(url, {
 
   return (
   <AppShell title="Consulta (Funil)">
-    <div className="space-y-8">
+    <div className="space-y-5">
 
-      <div className="space-y-6">
+    <div className="space-y-5">
   <ResumoSection
   title="Fechamentos"
   extra={
@@ -362,10 +362,10 @@ const res = await fetch(url, {
 </ResumoSection>
 </div>
 
-       <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
-  <div className="mb-6 flex items-center gap-3">
+       <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-4'}`}>
+  <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-    <h2 className="text-[26px] font-black text-[var(--foreground)]">Consultas por médico</h2>
+    <h2 className="text-[22px] font-black text-[var(--foreground)]">Consultas por médico</h2>
   </div>
 
   <div className="grid gap-6">
@@ -418,14 +418,14 @@ const ticketProcedimentosMedico =
       <div
   key={medico.medico}
   className={`mx-auto max-w-[1320px] rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
-    isImac ? 'p-3' : 'p-5'
+    isImac ? 'p-3' : 'p-4'
   }`}
 >
       <div className="mb-4 flex items-center gap-4">
         
           <div
   className={[
-    isImac ? 'h-16 w-16' : 'h-28 w-28',
+    isImac ? 'h-16 w-16' : 'h-16 w-16',
     'shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10',
   ].join(' ')}
 >
@@ -448,11 +448,11 @@ const ticketProcedimentosMedico =
     
     <div className="flex flex-1 flex-col justify-center pl-2">
   <div>
-  <h3 className={`${isImac ? 'text-[17px]' : 'text-[25px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
+  <h3 className={`${isImac ? 'text-[17px]' : 'text-[20px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
 
-  <p className={`mt-2 ${isImac ? 'text-[13px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
+  <p className={`mt-2 ${isImac ? 'text-[13px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
     {infoMedico.crm} • {infoMedico.especialidade}
   </p></div>
 </div>
@@ -462,7 +462,7 @@ const ticketProcedimentosMedico =
         Ocupação da agenda
       </p>
 
-      <p className="mt-1 text-[42px] font-black text-emerald-500">
+      <p className="mt-1 text-[34px] font-black text-emerald-500">
         {medico.capacidadeAgenda || 0}%
       </p>
 
@@ -480,7 +480,7 @@ const ticketProcedimentosMedico =
 </div>
 </div>
 
-<div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
+<div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-3'}>
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${
   isImac ? 'col-span-12 px-3 py-2' : 'px-3 py-2'
 }`}>
@@ -488,7 +488,7 @@ const ticketProcedimentosMedico =
     AGENDA
   </h4>
 
-  <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid gap-3 md:grid-cols-5'}>
+  <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid grid-cols-5 gap-2'}>
     <MetricMini
       label="Finalizados"
       value={medico.atendimentos || 0}
@@ -525,7 +525,7 @@ const ticketProcedimentosMedico =
     />
   </div>
 </div>
-  <div className={isImac ? `col-span-12 grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid gap-3 md:grid-cols-2'}>
+  <div className={isImac ? `col-span-12 grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid grid-cols-3 gap-2'}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -598,7 +598,7 @@ FINANCEIRO
 </h4>
 
 
-  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'grid grid-cols-3 gap-3'}>
+  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'grid grid-cols-6 gap-2'}>
   <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
   <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
   <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" />
@@ -936,7 +936,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   return (
   <div
     className={`rounded-[16px] text-center shadow-none ${colors[color]} ${
-      isImac ? 'px-3.5 py-3.5' : 'p-5'
+      isImac ? 'px-3.5 py-3.5' : 'px-2 py-2'
     }`}
   >
     <div
@@ -947,12 +947,12 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
       }`}
     >
       {Icon && (
-        <Icon className={`${isImac ? 'h-4 w-4' : 'h-6 w-6'}`} />
+        <Icon className={`${isImac ? 'h-4 w-4' : 'h-4 w-4'}`} />
       )}
 
       <p
         className={`${
-          isImac ? 'text-[10px]' : 'text-[18px]'
+          isImac ? 'text-[10px]' : 'text-[10px]'
         } font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}
       >
         {label}
@@ -961,7 +961,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
     <p
       className={`mt-2 ${
-        isImac ? 'text-[20px]' : 'text-[42px]'
+        isImac ? 'text-[20px]' : 'text-[20px]'
       } font-black text-[var(--foreground)]`}
     >
       {value}
@@ -1010,15 +1010,15 @@ purple:
 
 
   return (
-    <div className={`rounded-[16px] shadow-none ${isImac ? 'px-3 py-2' : 'p-5'} ${tones[tone]}`}>
+    <div className={`rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+       <p className={`${isImac ? 'text-[15px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-3">
   <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : 'text-[20px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
