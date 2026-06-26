@@ -724,6 +724,8 @@ function ResumoCard({
 
   const positivo = percentual > 0
   const negativo = percentual < 0
+  const isMoneyValue = typeof value === 'string' && value.includes('R$')
+  const previousLabel = isMoneyValue ? formatMoney(anterior) : anterior
 
   return (
     <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
@@ -763,7 +765,9 @@ function ResumoCard({
             {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
           </p>
         </div>
-
+<span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
+  {previousLabel}
+</span>
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-full ${
             positivo
@@ -799,7 +803,15 @@ function ResumoCardMeta({
     previousValue = 0,
 }: any) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
+  const anterior = Number(previousValue || 0)
 
+const percentualComparativo =
+  anterior > 0 ? Math.round(((value - anterior) / anterior) * 100) : 0
+
+const positivoComparativo = percentualComparativo > 0
+const negativoComparativo = percentualComparativo < 0
+
+const previousLabel = isMoney ? formatMoney(anterior) : anterior
   const dots: any = {
   blue: 'bg-[#0EA5E9]',
   gold: 'bg-[#D7B46A]',
@@ -845,6 +857,55 @@ function ResumoCardMeta({
     {percentual}%
   </span>
 </div>
+
+<div className="mt-3 flex items-center justify-between rounded-[12px] border border-[color:var(--border)] bg-[var(--card)] px-3 py-2">
+  <div>
+    <p
+      className={`text-[18px] font-black ${
+        positivoComparativo
+          ? 'text-emerald-500'
+          : negativoComparativo
+          ? 'text-red-500'
+          : 'text-[var(--muted-foreground)]'
+      }`}
+    >
+      {positivoComparativo ? '▲' : negativoComparativo ? '▼' : '＝'} {Math.abs(percentualComparativo)}%
+    </p>
+
+    <p className="text-[11px] text-[var(--muted-foreground)]">
+      {percentualComparativo === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
+    </p>
+  </div>
+
+  <div className="flex items-center">
+    <span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
+      {previousLabel}
+    </span>
+
+    <div
+      className={`flex h-8 w-8 items-center justify-center rounded-full ${
+        positivoComparativo
+          ? 'bg-emerald-500/15'
+          : negativoComparativo
+          ? 'bg-red-500/15'
+          : 'bg-gray-500/15'
+      }`}
+    >
+      <span
+        className={`text-lg ${
+          positivoComparativo
+            ? 'text-emerald-500'
+            : negativoComparativo
+            ? 'text-red-500'
+            : 'text-gray-400'
+        }`}
+      >
+        {positivoComparativo ? '↗' : negativoComparativo ? '↘' : '→'}
+      </span>
+    </div>
+  </div>
+</div>
+
     </div>
   )
 }
