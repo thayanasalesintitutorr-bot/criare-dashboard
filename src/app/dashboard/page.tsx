@@ -293,7 +293,7 @@ function SimpleMetric({
 
       <div
   className={`${
-    isMobile ? 'text-[64px]' : 'text-[22px]'
+    isMobile ? 'text-[64px]' : 'text-[32px]'
   } font-black tracking-[-0.04em] leading-none ${textPrimary()}`}
 >
         {value}
@@ -988,7 +988,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
 } ${textPrimary()}`}>Quantidade total de vendas</div>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {consolidado?.qtdVendas || 0}
               </div>
@@ -1000,7 +1000,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
 } ${textPrimary()}`}>Total do valor de venda</div>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.valorVendas || 0)}
               </div>
@@ -1044,7 +1044,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   Ticket médio total
 </div>
               <div  className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.ticketMedio || 0)}
               </div>
