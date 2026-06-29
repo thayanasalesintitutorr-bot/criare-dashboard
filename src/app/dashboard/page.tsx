@@ -292,10 +292,10 @@ function SimpleMetric({
       </h4>
 
       <div
-        className={`${
-          isMobile ? 'text-[64px]' : 'text-[28px]'
-        } font-black tracking-[-0.05em] ${textPrimary()}`}
-      >
+  className={`${
+    isMobile ? 'text-[64px]' : 'text-[22px]'
+  } font-black tracking-[-0.04em] leading-none ${textPrimary()}`}
+>
         {value}
       </div>
     </div>
@@ -848,7 +848,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
           Consulta
         </h4>
       </div>
@@ -861,7 +861,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
           Reabord
         </h4>
       </div>
@@ -875,12 +875,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   <div className="border-t border-black/10 pt-2 dark:border-white/10">
     <div className="mb-2 flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-      <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+      <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
         Total semanal
       </h4>
     </div>
 
-    <div className="grid grid-cols-3 gap-3">
+    <div className="space-y-1">
       <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeTotal || 0} />
       <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotal || 0)} />
       <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} />
