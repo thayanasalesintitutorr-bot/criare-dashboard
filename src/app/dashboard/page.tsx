@@ -229,7 +229,7 @@ function metricCardBg() {
     border
     border-black/5
     bg-[var(--metric-card)]
-    p-5
+    px-4 py-3
     shadow-[0_10px_30px_rgba(15,23,42,0.08)]
     dark:border-white/5
     dark:shadow-[0_10px_30px_rgba(0,0,0,0.30)]
@@ -969,7 +969,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
             <h3
   className={`${
-    viewMode === 'mobile' ? 'text-[42px]' : 'text-[24px]'
+    viewMode === 'mobile' ? 'text-[42px]' : 'text-[20px]'
   } font-black tracking-[-0.05em] ${textPrimary()}`}
 >
   Consolidado
@@ -983,30 +983,30 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   : 'grid-cols-3'
   }`}
 >
-            <div className={`space-y-2 ${metricCardBg()}`}>
+            <div className={`space-y-1 ${metricCardBg()}`}>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
 } ${textPrimary()}`}>Quantidade total de vendas</div>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {consolidado?.qtdVendas || 0}
               </div>
 
             </div>
 
-            <div className={`space-y-2 ${metricCardBg()}`}>
+            <div className={`space-y-1 ${metricCardBg()}`}>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
 } ${textPrimary()}`}>Total do valor de venda</div>
               <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.valorVendas || 0)}
               </div>
      <div
   className={`flex items-center gap-3 ${
-    viewMode === 'mobile' ? 'text-[32px]' : 'text-base'
+    viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
   }`}
 >
   <span
@@ -1037,20 +1037,20 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
               </div>
             </div>
 
-            <div className={`space-y-2 ${metricCardBg()}`}>
+            <div className={`space-y-1 ${metricCardBg()}`}>
              <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-lg font-semibold'
+  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
 } ${textPrimary()}`}>
   Ticket médio total
 </div>
               <div  className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+  viewMode === 'mobile' ? 'text-[64px]' : 'text-[28px]'
 } font-black tracking-[-0.04em] ${textPrimary()}`}>
                 {formatMoney(consolidado?.ticketMedio || 0)}
               </div>
               <div
   className={`flex items-center gap-3 ${
-    viewMode === 'mobile' ? 'text-[32px]' : 'text-lg'
+    viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
   }`}
 >
                 <span
