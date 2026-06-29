@@ -749,7 +749,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             <div className="space-y-3">
   <h4
     className={`${
-      viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[18px] font-semibold'
+      viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
     } leading-tight ${textPrimary()}`}
   >
     Leads aceitos (SAL - lead aceito)
@@ -767,11 +767,11 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       : [...atual, item]
   )
 }
-        className={`rounded-xl border py-2 font-black transition ${
+        className={`rounded-lg border py-1.5 font-black transition ${
           leadsSelecionados.includes(item)
             ? 'border-emerald-400 bg-emerald-50 text-emerald-500'
             : 'border-slate-200 bg-white text-slate-600'
-        } ${viewMode === 'mobile' ? 'text-[28px]' : 'text-lg'}`}
+        } ${viewMode === 'mobile' ? 'text-[28px]' : 'text-[14px]'}`}
       >
         {item}
       </button>
@@ -780,7 +780,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
   <div
     className={`${
-      viewMode === 'mobile' ? 'text-[64px]' : 'text-5xl'
+      viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
     } font-black tracking-[-0.05em] ${textPrimary()}`}
   >
     {quantidadeLeadSelecionado}
@@ -793,7 +793,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     className={`flex items-center gap-3 ${
       viewMode === 'mobile'
         ? 'text-[28px]'
-        : 'text-base'
+          : 'text-[14px]'
     }`}
   >
     <span className="font-black text-emerald-500">
@@ -813,14 +813,14 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
       viewMode === 'mobile'
         ? 'h-8 rounded-xl'
-        : 'h-3 rounded-full'
+        : 'h-2 rounded-full'
     }`}
   >
     <div
       className={`bg-emerald-400 ${
         viewMode === 'mobile'
           ? 'h-8 rounded-xl'
-          : 'h-3 rounded-full'
+          : 'h-2 rounded-full'
       }`}
       style={{
         width: `${
@@ -844,8 +844,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-  <div className="grid grid-cols-2 gap-8">
-    <div className="space-y-4">
+  <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
         <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
@@ -858,7 +858,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} />
     </div>
 
-    <div className="space-y-4">
+    <div className="space-y-3">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
         <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
@@ -872,7 +872,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     </div>
   </div>
 
-  <div className="border-t border-black/10 pt-5 dark:border-white/10">
+  <div className="border-t border-black/10 pt-3 dark:border-white/10">
     <div className="mb-4 flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
       <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
@@ -880,7 +880,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       </h4>
     </div>
 
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-3 gap-3">
       <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeTotal || 0} />
       <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotal || 0)} />
       <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} />
@@ -939,7 +939,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     mode="max"
   />
 
-  <div className="border-t border-black/10 pt-5 dark:border-white/10">
+ <div className="border-t border-black/10 pt-3 dark:border-white/10">
     <div className="mb-4 flex items-center gap-3">
   <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
   <h4
@@ -965,7 +965,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         </div>
 
         <section className={`rounded-[24px] p-4 ${cardBg()}`}>
-          <div className="mb-5 flex items-center gap-3">
+          <div className="mb-3 flex items-center gap-3">
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
             <h3
   className={`${
@@ -1025,12 +1025,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </div>
               <div
   className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
-    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
   }`}
 >
                 <div
                   className={`${
-  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
 } ${consolidadoVendasOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
                   style={{ width: `${clampPercent(vendasPercent)}%` }}
                 />
@@ -1066,12 +1066,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
               </div>
               <div
   className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
-    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
   }`}
 >
                 <div
                   className={`${
-  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-3 rounded-full'
+  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
 } ${consolidadoTicketOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
                   style={{ width: `${clampPercent(ticketPercent)}%` }}
                 />
