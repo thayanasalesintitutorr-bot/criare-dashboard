@@ -249,14 +249,14 @@ function GroupCard({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <section className={`rounded-[28px] p-6 ${cardBg()}`}>
-      <div className="mb-5 flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]">
+    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'p-4'} ${cardBg()}`}>
+      <div className={`${isMobile ? 'mb-5' : 'mb-3'} flex items-start gap-3`}>
+        <div className={`${isMobile ? 'h-12 w-12' : 'h-10 w-10'} flex shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]`}>
           {icon}
         </div>
         <h3
   className={`
-    ${isMobile ? 'text-[42px]' : 'text-[24px]'}
+   ${isMobile ? 'text-[42px]' : 'text-[20px]'}
     font-black tracking-[-0.05em]
     ${textPrimary()}
   `}
@@ -264,7 +264,7 @@ function GroupCard({
   {title}
 </h3>
       </div>
-      <div className="space-y-7">{children}</div>
+      <div className={isMobile ? 'space-y-7' : 'space-y-4'}>{children}</div>
     </section>
   )
 }
@@ -285,7 +285,7 @@ function SimpleMetric({
     <div className="space-y-2">
       <h4
         className={`${
-          isMobile ? 'text-[26px] font-black' : 'text-[18px] font-semibold'
+          isMobile ? 'text-[26px] font-black' : 'text-[14px] font-semibold'
         } ${textPrimary()}`}
       >
         {label}
@@ -293,7 +293,7 @@ function SimpleMetric({
 
       <div
         className={`${
-          isMobile ? 'text-[64px]' : 'text-5xl'
+          isMobile ? 'text-[64px]' : 'text-[32px]'
         } font-black tracking-[-0.05em] ${textPrimary()}`}
       >
         {value}
@@ -326,7 +326,7 @@ function GoalMetric({
     <div className={isMobile ? 'space-y-2' : 'space-y-2'}>
       <h4
         className={`${
-          isMobile ? 'text-[28px] font-black' : 'text-[18px] font-semibold'
+         isMobile ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
         } leading-tight ${textPrimary()}`}
       >
         {label}
@@ -334,7 +334,7 @@ function GoalMetric({
 
       <div
         className={`${
-          isMobile ? 'text-[64px]' : 'text-5xl'
+          isMobile ? 'text-[64px]' : 'text-[32px]'
         } font-black tracking-[-0.05em] ${textPrimary()}`}
       >
         {value}
@@ -343,7 +343,7 @@ function GoalMetric({
       <div className="flex items-center gap-3">
   <span
     className={`${
-      isMobile ? 'text-[28px]' : 'text-lg'
+      isMobile ? 'text-[28px]' : 'text-[14px]'
     } font-black ${s.textClass}`}
   >
     {formatPercent(percent)}
@@ -351,7 +351,7 @@ function GoalMetric({
 
   <span
     className={`${
-      isMobile ? 'text-[28px]' : 'text-lg'
+      isMobile ? 'text-[28px]' : 'text-[14px]'
     } font-black ${textSecondary()}`}
   >
     de
@@ -359,7 +359,7 @@ function GoalMetric({
 
   <span
     className={`${
-      isMobile ? 'text-[28px]' : 'text-lg'
+      isMobile ? 'text-[28px]' : 'text-[14px]'
     } font-black ${textSecondary()}`}
   >
     {target}%
@@ -380,11 +380,11 @@ function GoalMetric({
         className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
           isMobile
   ? 'h-8 w-full rounded-xl'
-  : 'h-3 w-full rounded-full'
+  : 'h-2 w-full rounded-full'
         }`}
       >
         <div
-          className={`${isMobile ? 'h-8 rounded-xl' : 'h-3 rounded-full'} ${s.barClass}`}
+          className={`${isMobile ? 'h-8 rounded-xl' : 'h-2 rounded-full'} ${s.barClass}`}
           style={{ width: `${clampPercent(percent)}%` }}
         />
       </div>
@@ -728,13 +728,13 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
   return (
     <AppShell title="Visão Geral">
-      <div className="space-y-8">
+     <div className="space-y-4">
        
     <div
-  className={`grid gap-6 ${
+  className={`grid gap-4 ${
     viewMode === 'mobile'
-  ? 'grid-cols-1 w-full'
-  : 'xl:grid-cols-4'
+  ? 'grid-cols-1'
+  : 'grid-cols-4'
   }`}
 >
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>
@@ -844,61 +844,47 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-  <div className="space-y-4">
-    <div className="flex items-center gap-3">
-  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-  <h4
-  className={`${
-    viewMode === 'mobile'
-      ? 'text-[26px]'
-      : 'text-lg'
-  } font-black uppercase tracking-wide ${textSecondary()}`}
->
-    Consulta
-  </h4>
-</div>
+  <div className="grid grid-cols-2 gap-8">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+          Consulta
+        </h4>
+      </div>
 
-    <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeConsulta || 0} accent="blue" />
-    <SimpleMetric label="Faturamento" value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)} accent="gold" />
-    <SimpleMetric label="Ticket Médio" value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} accent="green" />
+      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeConsulta || 0} />
+      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)} />
+      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} />
+    </div>
+
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+        <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+          Reabord
+        </h4>
+      </div>
+
+      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeReabord || 0} />
+      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotalReabord || 0)} />
+      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)} />
+    </div>
   </div>
 
-  <div className="space-y-4 border-t border-black/10 pt-5 dark:border-white/10">
-    <div className="flex items-center gap-3">
-  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-  <h4
-  className={`${
-    viewMode === 'mobile'
-      ? 'text-[26px]'
-      : 'text-lg'
-  } font-black uppercase tracking-wide ${textSecondary()}`}
->
-    Reabordagem
-  </h4>
-</div>
+  <div className="border-t border-black/10 pt-5 dark:border-white/10">
+    <div className="mb-4 flex items-center gap-3">
+      <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
+      <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
+        Total semanal
+      </h4>
+    </div>
 
-    <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeReabord || 0} accent="blue" />
-    <SimpleMetric label="Faturamento" value={formatMoney(comercialConsulta?.valorTotalReabord || 0)} accent="gold" />
-    <SimpleMetric label="Ticket Médio" value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)} accent="green" />
-  </div>
-
-  <div className="space-y-4 border-t border-black/10 pt-5 dark:border-white/10">
-    <div className="flex items-center gap-3">
-  <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-  <h4
-  className={`${
-    viewMode === 'mobile'
-      ? 'text-[26px]'
-      : 'text-lg'
-  } font-black uppercase tracking-wide ${textSecondary()}`}
->
-    Total semanal
-  </h4>
-</div>
-
-    <SimpleMetric label="Quantidade total" value={comercialConsulta?.quantidadeTotal || 0} accent="blue" />
-    <SimpleMetric label="Faturamento total" value={formatMoney(comercialConsulta?.valorTotal || 0)} accent="gold" />
-    <SimpleMetric label="Ticket médio total" value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} accent="green" />
+    <div className="grid grid-cols-3 gap-4">
+      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeTotal || 0} />
+      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotal || 0)} />
+      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} />
+    </div>
   </div>
 </GroupCard>
 
@@ -978,7 +964,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </GroupCard>
         </div>
 
-        <section className={`rounded-[28px] p-6 ${cardBg()}`}>
+        <section className={`rounded-[24px] p-4 ${cardBg()}`}>
           <div className="mb-5 flex items-center gap-3">
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
             <h3
@@ -993,8 +979,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
            <div
   className={`grid gap-4 ${
     viewMode === 'mobile'
-      ? 'grid-cols-1'
-      : 'xl:grid-cols-3'
+  ? 'grid-cols-1'
+  : 'grid-cols-3'
   }`}
 >
             <div className={`space-y-2 ${metricCardBg()}`}>
