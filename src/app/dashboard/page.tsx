@@ -249,14 +249,14 @@ function GroupCard({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'p-4'} ${cardBg()}`}>
+    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-3'} ${cardBg()}`}>
       <div className={`${isMobile ? 'mb-5' : 'mb-3'} flex items-start gap-3`}>
-        <div className={`${isMobile ? 'h-12 w-12' : 'h-10 w-10'} flex shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]`}>
+        <div className={`${isMobile ? 'h-12 w-12' : 'h-9 w-9'} flex shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]`}>
           {icon}
         </div>
         <h3
   className={`
-   ${isMobile ? 'text-[42px]' : 'text-[20px]'}
+   ${isMobile ? 'text-[42px]' : 'text-[18px]'}
     font-black tracking-[-0.05em]
     ${textPrimary()}
   `}
@@ -264,7 +264,7 @@ function GroupCard({
   {title}
 </h3>
       </div>
-      <div className={isMobile ? 'space-y-7' : 'space-y-4'}>{children}</div>
+      <div className={isMobile ? 'space-y-7' : 'space-y-2'}>{children}</div>
     </section>
   )
 }
@@ -282,7 +282,7 @@ function SimpleMetric({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       <h4
         className={`${
           isMobile ? 'text-[26px] font-black' : 'text-[14px] font-semibold'
@@ -293,7 +293,7 @@ function SimpleMetric({
 
       <div
         className={`${
-          isMobile ? 'text-[64px]' : 'text-[32px]'
+          isMobile ? 'text-[64px]' : 'text-[28px]'
         } font-black tracking-[-0.05em] ${textPrimary()}`}
       >
         {value}
@@ -323,7 +323,7 @@ function GoalMetric({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <div className={isMobile ? 'space-y-2' : 'space-y-2'}>
+    <div className={isMobile ? 'space-y-2' : 'space-y-1'}>
       <h4
         className={`${
          isMobile ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
@@ -340,7 +340,7 @@ function GoalMetric({
         {value}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
   <span
     className={`${
       isMobile ? 'text-[28px]' : 'text-[14px]'
@@ -368,7 +368,7 @@ function GoalMetric({
   {metaLabel && (
     <span
       className={`${
-        isMobile ? 'text-[32px]' : 'text-lg'
+        isMobile ? 'text-[32px]' : 'text-[13px]'
       } text-slate-400`}
     >
       {metaLabel}
@@ -728,10 +728,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
   return (
     <AppShell title="Visão Geral">
-     <div className="space-y-4">
+     <div className="space-y-3">
        
     <div
-  className={`grid gap-4 ${
+  className={`grid gap-3 ${
     viewMode === 'mobile'
   ? 'grid-cols-1'
   : 'grid-cols-4'
@@ -752,7 +752,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
     } leading-tight ${textPrimary()}`}
   >
-    Leads aceitos (SAL - lead aceito)
+    Leads aceitos (SAL)
   </h4>
 
   <div className="grid grid-cols-4 gap-3">
@@ -872,8 +872,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     </div>
   </div>
 
-  <div className="border-t border-black/10 pt-3 dark:border-white/10">
-    <div className="mb-4 flex items-center gap-3">
+  <div className="border-t border-black/10 pt-2 dark:border-white/10">
+    <div className="mb-2 flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
       <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-lg'} font-black uppercase tracking-wide ${textSecondary()}`}>
         Total semanal
@@ -939,8 +939,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     mode="max"
   />
 
- <div className="border-t border-black/10 pt-3 dark:border-white/10">
-    <div className="mb-4 flex items-center gap-3">
+ <div className="border-t border-black/10 pt-2 dark:border-white/10">
+    <div className="mb-2 flex items-center gap-3">
   <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
   <h4
   className={`${
@@ -964,7 +964,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </GroupCard>
         </div>
 
-        <section className={`rounded-[24px] p-4 ${cardBg()}`}>
+        <section className={`rounded-[24px] px-4 py-3 ${cardBg()}`}>
           <div className="mb-3 flex items-center gap-3">
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
             <h3
@@ -977,7 +977,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </div>
 
            <div
-  className={`grid gap-4 ${
+  className={`grid gap-2 ${
     viewMode === 'mobile'
   ? 'grid-cols-1'
   : 'grid-cols-3'
