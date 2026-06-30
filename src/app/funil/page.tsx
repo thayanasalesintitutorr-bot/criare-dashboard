@@ -223,6 +223,14 @@ const isImac = viewMode === 'desktop'
 
   const vendasPorMedico = data?.vendasPorMedico || []
   const painelAtendimento = data?.painelAtendimento
+  const totalConsultasComReabord =
+  Number(data?.kpis?.comercialConsulta?.quantidadeTotal || 0)
+
+const faturamentoConsultaComReabord =
+  Number(data?.kpis?.comercialConsulta?.valorTotal || 0)
+
+const ticketMedioConsultaComReabord =
+  Number(data?.kpis?.comercialConsulta?.ticketMedioTotal || 0)
   const consultaPorMedico = Array.from(
   new Map(
     (data?.consultaPorMedico || [])
@@ -294,7 +302,7 @@ const isImac = viewMode === 'desktop'
     <MetricCard
       icon={UserCheck}
       label="Total de consultas"
-      value={painelAtendimento?.totalRecebimentoConsulta || 0}
+      value={totalConsultasComReabord}
       description="consultas recebidas"
       tone="blue"
     />
@@ -302,7 +310,7 @@ const isImac = viewMode === 'desktop'
     <MetricCard
       icon={CircleDollarSign}
       label="Faturamento consultas"
-      value={formatMoney(painelAtendimento?.faturamentoConsulta || 0)}
+      value={formatMoney(faturamentoConsultaComReabord)}
       description="vendas de consulta"
       tone="green"
     />
@@ -310,7 +318,7 @@ const isImac = viewMode === 'desktop'
     <MetricCard
       icon={Ticket}
       label="Ticket médio"
-      value={formatMoney(painelAtendimento?.ticketMedioConsulta || 0)}
+      value={formatMoney(ticketMedioConsultaComReabord)}
       description="média por consulta"
       tone="purple"
     />
