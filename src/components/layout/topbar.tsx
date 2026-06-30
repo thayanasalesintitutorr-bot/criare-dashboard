@@ -127,7 +127,7 @@ function parseLocalDate(dateString?: string) {
 }
   return (
     <header className="z-30 border-b border-white/5 bg-[var(--background)]">
-      <div className="flex flex-col gap-2 px-6 pt-3 pb-2 md:px-8">
+      <div className="flex flex-col gap-1 px-6 pt-2 pb-0 md:px-8">
         <div className="flex items-start justify-between gap-6">
        
           <div className="flex-1 space-y-4">
@@ -274,9 +274,9 @@ function parseLocalDate(dateString?: string) {
 <div
   onMouseEnter={() => setShowFilters(true)}
   onMouseLeave={() => setShowFilters(false)}
-  className="cursor-pointer rounded-[28px] bg-[var(--card)] p-4 shadow-sm transition hover:bg-[var(--card)]/90"
+  className="cursor-pointer rounded-[28px] bg-[var(--card)] px-5 py-3 shadow-sm transition hover:bg-[var(--card)]/90"
 >
-  <div className="flex items-center justify-between gap-6">
+  <div className="flex items-center justify-between gap-3">
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 pr-3 font-bold">
         <SlidersHorizontal size={18} className="text-[var(--accent)]" />
@@ -314,14 +314,16 @@ function parseLocalDate(dateString?: string) {
       </div>
     </div>
 
-    <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-  {comparar ? 'Comparando' : 'Sem comparação'}
+   <div className="flex items-center gap-3">
+  <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+    {comparar ? 'Comparando' : 'Sem comparação'}
+  </div>
+
+  <div className="text-[var(--accent)]">
+    {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+  </div>
 </div>
 
-
-    <div className="text-[var(--accent)]">
-  {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-</div>
   </div>
 
   {showFilters && (
