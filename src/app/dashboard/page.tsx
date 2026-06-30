@@ -242,7 +242,9 @@ function GroupCard({
   return (
     <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-2'} ${cardBg()}`}>
       <div className={`${isMobile ? 'mb-5' : 'mb-2'} flex items-center gap-3`}>
-  {icon}
+  <div className="text-[#D7B46A]">
+    {icon}
+  </div>
 
   <h3
     className={`

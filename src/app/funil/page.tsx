@@ -15,7 +15,7 @@ import {
   ClipboardList,
   CalendarX2,
   CalendarClock,
-  LayoutDashboard,
+  ChartNoAxesCombined,
 } from 'lucide-react'
 
 type DashboardResponse = {
@@ -281,9 +281,9 @@ const ticketMedioConsultaComReabord =
     <div className="space-y-5">
 <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
-  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18">
-    <LayoutDashboard className="h-6 w-6 text-[var(--accent)]" />
-  </div>
+ <div className="flex shrink-0 items-center justify-center">
+  <ChartNoAxesCombined className="h-6 w-6 text-[var(--accent)]" />
+</div>
 
   <div>
     <h2 className="text-[24px] font-black text-[var(--foreground)]">
