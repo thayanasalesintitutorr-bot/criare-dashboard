@@ -287,18 +287,20 @@ function parseLocalDate(dateString?: string) {
       </div>
 
       <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-        {periodo === 'hoje'
-          ? 'Hoje'
-          : periodo === 'ontem'
-          ? 'Ontem'
-          : periodo === 'semana'
-          ? 'Semana'
-          : periodo === 'mes-atual'
-          ? 'Mês atual'
-          : periodo === 'mes-passado'
-          ? 'Mês passado'
-          : 'Personalizado'}
-      </div>
+  {periodo === 'hoje'
+    ? 'Hoje'
+    : periodo === 'ontem'
+    ? 'Ontem'
+    : periodo === 'semana'
+    ? 'Semana'
+    : periodo === 'mes-atual'
+    ? 'Mês atual'
+    : periodo === 'mes-passado'
+    ? 'Mês passado'
+    : dataInicio && dataFim
+    ? `Personalizado (${parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR')} a ${parseLocalDate(dataFim)?.toLocaleDateString('pt-BR')})`
+    : 'Personalizado'}
+</div>
 
       <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
         {segmento === 'vascular'
