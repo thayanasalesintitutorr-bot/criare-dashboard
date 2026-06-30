@@ -390,7 +390,8 @@ const isImac = viewMode === 'desktop'
     Evolução de faturamento
   </h3>
 
-  <div className="relative h-[105px] overflow-hidden px-1 pb-1">
+  <div className="mt-4 overflow-x-auto">
+  <div className="flex h-[150px] min-w-max items-end gap-3 pb-1">
     {(() => {
       const dados = painelAtendimento?.evolucaoFaturamento || []
 
@@ -399,96 +400,41 @@ const isImac = viewMode === 'desktop'
         1
       )
 
-      const pontos = dados.map((item: any, index: number) => {
-        const x =
-  dados.length === 1
-    ? 50
-    : (index / (dados.length - 1)) * 100
+      return dados.map((item: any) => {
+        const valor = Number(item.valor || 0)
 
-        const y = 100 - (Number(item.valor || 0) / maior) * 85
+        const altura =
+          valor > 0
+            ? Math.max((valor / maior) * 90, 10)
+            : 2
 
-        return `${x},${y}`
-      })
-
-      const area = [
-        `0,100`,
-        ...pontos,
-        `100,100`,
-      ].join(' ')
-
-      return (
-        <>
-          <div className="absolute right-5 top-3 text-right">
-            <p className="text-[18px] font-black text-[var(--foreground)]">
-              {formatMoney(
-                dados.reduce(
-                  (acc: number, item: any) =>
-                    acc + Number(item.valor || 0),
-                  0
-                )
-              )}
-            </p>
-
-            <p className="text-[11px] font-semibold text-[var(--muted-foreground)]">
-              Total no período
-            </p>
-          </div>
-
-          <svg
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            className="h-full w-full"
+        return (
+          <div
+            key={item.data}
+            className="flex w-[48px] shrink-0 flex-col items-center"
           >
-            <defs>
-              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
-              </linearGradient>
+            <span className="mb-2 text-[10px] font-black text-[var(--foreground)]">
+              {formatMoney(valor)}
+            </span>
 
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="0.7" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
+            <div className="flex h-[95px] items-end">
+              <div
+                className="w-[22px] rounded-t-lg bg-emerald-500"
+                style={{ height: `${altura}px` }}
+              />
+            </div>
 
-            <polygon
-              points={area}
-              fill="url(#areaFill)"
-            />
-
-            <polyline
-              points={pontos.join(' ')}
-              fill="none"
-              stroke="#16C784"
-              strokeWidth="0.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#glow)"
-            />
-          </svg>
-
-          <div className="absolute bottom-1 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
-            {dados
-              .filter((_: any, index: number) => {
-                if (dados.length <= 6) return true
-
-                return (
-                  index === 0 ||
-                  index === dados.length - 1 ||
-                  index % Math.ceil(dados.length / 5) === 0
-                )
-              })
-              .map((item: any) => (
-                <span key={item.data}>{item.label}</span>
-              ))}
+            <span className="mt-2 text-[11px] font-bold text-[var(--muted-foreground)]">
+              {item.label}
+            </span>
           </div>
-        </>
-      )
+        )
+      })
     })()}
   </div>
+</div>
+
+          
 </div>
 
     <div className="mt-3 grid grid-cols-3 gap-3">
