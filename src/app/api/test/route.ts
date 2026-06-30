@@ -1796,6 +1796,17 @@ const canceladosPercent = safePercent(
   totalCancelados,
   totalAgendamentosExperiencia
 )
+console.log({
+  consultaPorMedico,
+  evolucaoDiaria,
+  consultaGanhosLeads: consultaGanhosLeads.length,
+  leadsAgendados: leadsAgendados.length,
+  atendimentoConsulta,
+  totalFinalizados,
+  totalNoShow,
+  totalReagendados,
+  totalCancelados,
+})
 
 const painelAtendimento = {
   totalPrimeiraVez: consultaPorMedico.reduce(
@@ -1952,6 +1963,7 @@ const painelAtendimento = {
   total: tarefasProximaSemanaConsulta + tarefasProximaSemanaVendas,
 },
 consultaPorMedico,
+painelAtendimento,
       consolidado: {
         qtdVendas: consolidadoQtdVendas,
         valorVendas: consolidadoValorVendas,
@@ -1960,7 +1972,6 @@ consultaPorMedico,
         metaTicketMedio: META_TICKET_MEDIO,
     
       },
-
       comparativo: {
   marketing: {
     totalEntradasAnterior,
