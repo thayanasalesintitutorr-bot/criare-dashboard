@@ -317,12 +317,12 @@ const isImac = viewMode === 'desktop'
   </div>
 
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
-   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
+   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8 min-h-[0]">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Atendimento por dia
       </h3>
 
-      <div className="flex h-[78px] items-end gap-1 overflow-x-auto">
+      <div className="flex h-[62px] items-end gap-1 overflow-x-auto">
         {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
@@ -334,7 +334,7 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
 
           return (
             <div key={item.data} className="flex flex-1 flex-col items-center gap-2">
-              <div className="flex h-[42px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
+              <div className="flex h-[30px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
                 <div
                   className={`w-full rounded-lg ${fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'}`}
                   style={{
@@ -399,7 +399,7 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
         Evolução de faturamento
       </h3>
 
-      <div className="relative h-[180px] overflow-hidden p-2">
+      <div className="relative h-[130px] overflow-hidden p-1">
   {(() => {
     const dados = painelAtendimento?.evolucaoFaturamento || []
 
@@ -480,6 +480,36 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
     )
   })()}
 </div>
+
+<div className="mt-2 grid grid-cols-3 gap-2">
+  {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
+    const item = (painelAtendimento?.finalizadosParticularConvenio || []).find(
+      (x: any) => String(x.nome || '').toUpperCase().includes(nome)
+    )
+
+    return (
+      <div
+        key={nome}
+        className="rounded-[14px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2"
+      >
+        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+          {nome}
+        </p>
+
+        <div className="mt-2 flex items-end justify-between gap-2">
+          <p className="text-[24px] font-black leading-none text-[var(--foreground)]">
+            {item?.qtd || 0}
+          </p>
+
+          <p className="text-[14px] font-black text-[var(--foreground)]">
+            {formatMoney(item?.valor || 0)}
+          </p>
+        </div>
+      </div>
+    )
+  })}
+</div>
+
     </div>
 
     <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
@@ -487,7 +517,7 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
         Agendamentos por origem
       </h3>
 
-      <div className="max-h-[170px] space-y-3 overflow-y-auto pr-2">
+      <div className="max-h-[130px] space-y-2 overflow-y-auto pr-2">
         {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
@@ -505,7 +535,7 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
                 </span>
               </div>
 
-              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
+             <div className="h-2 overflow-hidden rounded-full bg-[var(--metric-card)]">
                 <div
                   className="h-full rounded-full bg-[#D7B46A]"
                   style={{
@@ -520,34 +550,6 @@ const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
     </div>
   </div>
 
-  <div className="mt-4 rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
-    <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-      Atendimento finalizado: particular ou convênio
-    </h3>
-
-    <div className="grid gap-3 md:grid-cols-2">
-      {(painelAtendimento?.finalizadosParticularConvenio || []).map((item: any) => (
-        <div
-          key={item.nome}
-          className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4"
-        >
-          <p className="text-sm font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-            {item.nome}
-          </p>
-
-          <div className="mt-3 flex items-end justify-between gap-4">
-            <p className="text-[40px] font-black leading-none text-[var(--foreground)]">
-              {item.qtd || 0}
-            </p>
-
-            <p className="text-[22px] font-black text-[var(--foreground)]">
-              {formatMoney(item.valor || 0)}
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
 </section>
        <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
   <div className="mb-4 flex items-center gap-3">
