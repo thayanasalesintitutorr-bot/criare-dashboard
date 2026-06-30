@@ -396,44 +396,7 @@ const isImac = viewMode === 'desktop'
         Evolução de faturamento
       </h3>
 
-      <div className="space-y-3">
-        {(painelAtendimento?.evolucaoFaturamento || []).map((item: any) => {
-          const maior = Math.max(
-            ...(painelAtendimento?.evolucaoFaturamento || []).map((x: any) => Number(x.valor || 0)),
-            1
-          )
-
-          return (
-            <div key={item.data}>
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-sm font-bold text-[var(--muted-foreground)]">
-                  {item.label}
-                </span>
-                <span className="text-sm font-black text-[var(--foreground)]">
-                  {formatMoney(item.valor || 0)}
-                </span>
-              </div>
-
-              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
-                <div
-                  className="h-full rounded-full bg-emerald-500"
-                  style={{
-                    width: `${Math.max((Number(item.valor || 0) / maior) * 100, 4)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
-      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-        Agendamentos por origem
-      </h3>
-
-      <div className="relative h-[170px] overflow-hidden rounded-[18px] bg-[var(--metric-card)] p-4">
+      <div className="relative h-[180px] overflow-hidden p-2">
   {(() => {
     const dados = painelAtendimento?.evolucaoFaturamento || []
 
@@ -469,19 +432,35 @@ const isImac = viewMode === 'desktop'
         </div>
 
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
-          <polygon
-            points={area}
-            className="fill-emerald-500/15"
-          />
+          <defs>
+  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stopColor="#10B981" stopOpacity="0.22" />
+    <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
+  </linearGradient>
 
-          <polyline
-            points={pontos.join(' ')}
-            fill="none"
-            stroke="rgb(16 185 129)"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+  <filter id="glow">
+    <feGaussianBlur stdDeviation="0.7" result="blur" />
+    <feMerge>
+      <feMergeNode in="blur" />
+      <feMergeNode in="SourceGraphic" />
+    </feMerge>
+  </filter>
+</defs>
+
+<polygon
+  points={area}
+  fill="url(#areaFill)"
+/>
+
+<polyline
+  points={pontos.join(' ')}
+  fill="none"
+  stroke="#16C784"
+  strokeWidth="0.9"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+  filter="url(#glow)"
+/>
         </svg>
 
         <div className="absolute bottom-3 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
@@ -498,6 +477,43 @@ const isImac = viewMode === 'desktop'
     )
   })()}
 </div>
+    </div>
+
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+        Agendamentos por origem
+      </h3>
+
+      <div className="space-y-3">
+        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 8).map((item: any) => {
+          const maior = Math.max(
+            ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
+            1
+          )
+
+          return (
+            <div key={item.nome}>
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
+                  {item.nome}
+                </span>
+                <span className="text-sm font-black text-[var(--foreground)]">
+                  {item.quantidade || 0}
+                </span>
+              </div>
+
+              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
+                <div
+                  className="h-full rounded-full bg-[#D7B46A]"
+                  style={{
+                    width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   </div>
 
