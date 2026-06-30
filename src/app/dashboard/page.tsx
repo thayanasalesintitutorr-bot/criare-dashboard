@@ -229,7 +229,7 @@ function metricCardBg() {
     border
     border-black/5
     bg-[var(--metric-card)]
-    px-4 py-3
+    px-4 py-2
     shadow-[0_10px_30px_rgba(15,23,42,0.08)]
     dark:border-white/5
     dark:shadow-[0_10px_30px_rgba(0,0,0,0.30)]
@@ -249,8 +249,8 @@ function GroupCard({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-3'} ${cardBg()}`}>
-      <div className={`${isMobile ? 'mb-5' : 'mb-3'} flex items-start gap-3`}>
+    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-2'} ${cardBg()}`}>
+      <div className={`${isMobile ? 'mb-5' : 'mb-2'} flex items-start gap-3`}>
         <div className={`${isMobile ? 'h-12 w-12' : 'h-9 w-9'} flex shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]`}>
           {icon}
         </div>
@@ -264,7 +264,7 @@ function GroupCard({
   {title}
 </h3>
       </div>
-      <div className={isMobile ? 'space-y-7' : 'space-y-2'}>{children}</div>
+      <div className={isMobile ? 'space-y-7' : 'space-y-1'}>{children}</div>
     </section>
   )
 }
@@ -845,7 +845,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
   <div className="grid grid-cols-2 gap-3">
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
         <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
@@ -858,7 +858,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} />
     </div>
 
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
         <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
@@ -872,15 +872,15 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     </div>
   </div>
 
-  <div className="border-t border-black/10 pt-2 dark:border-white/10">
-    <div className="mb-2 flex items-center gap-3">
+  <div className="border-t border-black/10 pt-1 dark:border-white/10">
+    <div className="mb-1 flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
       <h4 className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[14px]'} font-black uppercase tracking-wide ${textSecondary()}`}>
         Total semanal
       </h4>
     </div>
 
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeTotal || 0} />
       <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotal || 0)} />
       <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} />
@@ -964,8 +964,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </GroupCard>
         </div>
 
-        <section className={`rounded-[24px] px-4 py-3 ${cardBg()}`}>
-          <div className="mb-3 flex items-center gap-3">
+        <section className={`rounded-[24px] px-4 py-2 ${cardBg()}`}>
+          <div className="mb-3 flex items-center gap-2">
             <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
             <h3
   className={`${
@@ -1122,7 +1122,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </div>
 
             <div className="space-y-5">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {origensTop.map((item, i) => {
                   const maxQtd = origensTop[0]?.quantidade || 1
                   const pct = (item.quantidade / origensTotal) * 100
