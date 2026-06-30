@@ -663,7 +663,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-  <div className="grid grid-cols-2 gap-3">
+  <div className="grid grid-cols-2 gap-7">
     <div className="space-y-2">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />

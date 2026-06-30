@@ -127,7 +127,7 @@ function parseLocalDate(dateString?: string) {
 }
   return (
     <header className="z-30 border-b border-white/5 bg-[var(--background)]">
-      <div className="flex flex-col gap-4 px-6 py-5 md:px-8">
+      <div className="flex flex-col gap-2 px-6 pt-3 pb-2 md:px-8">
         <div className="flex items-start justify-between gap-6">
        
           <div className="flex-1 space-y-4">
@@ -274,7 +274,7 @@ function parseLocalDate(dateString?: string) {
 <div
   onMouseEnter={() => setShowFilters(true)}
   onMouseLeave={() => setShowFilters(false)}
-  className="mb-4 cursor-pointer rounded-[28px] bg-[var(--card)] p-5 shadow-sm transition hover:bg-[var(--card)]/90"
+  className="cursor-pointer rounded-[28px] bg-[var(--card)] p-4 shadow-sm transition hover:bg-[var(--card)]/90"
 >
   <div className="flex items-center justify-between gap-6">
     <div className="flex flex-wrap items-center gap-3">
