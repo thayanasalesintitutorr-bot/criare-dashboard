@@ -32,13 +32,17 @@ export function Sidebar() {
 
 
   return (
+  <>
+    <div className="fixed left-0 top-0 z-40 h-screen w-4" />
     <aside
   className="
     group
-    sticky
+    fixed
+    left-0
     top-0
+    z-50
     h-screen
-    w-[70px]
+    w-[0px]
     hover:w-[235px]
     overflow-hidden
     border-r
@@ -50,6 +54,7 @@ export function Sidebar() {
     dark:border-white/5
   "
 >
+  
       <div className="flex h-full flex-col">
         <div className="flex h-20 items-center justify-center group-hover:justify-between px-5">
           <div className="hidden group-hover:block">
@@ -92,5 +97,6 @@ export function Sidebar() {
         </nav>
       </div>
     </aside>
-  )
+      </>
+)
 }
