@@ -6,6 +6,7 @@ import {
   Star,
   Stethoscope,
   Users,
+  ChartNoAxesCombined,
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
@@ -240,19 +241,18 @@ function GroupCard({
 
   return (
     <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-2'} ${cardBg()}`}>
-      <div className={`${isMobile ? 'mb-5' : 'mb-2'} flex items-start gap-3`}>
-        <div className={`${isMobile ? 'h-12 w-12' : 'h-9 w-9'} flex shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18 text-[var(--accent)]`}>
-          {icon}
-        </div>
-        <h3
-  className={`
-   ${isMobile ? 'text-[42px]' : 'text-[18px]'}
-    font-black tracking-[-0.05em]
-    ${textPrimary()}
-  `}
->
-  {title}
-</h3>
+      <div className={`${isMobile ? 'mb-5' : 'mb-2'} flex items-center gap-3`}>
+  {icon}
+
+  <h3
+    className={`
+      ${isMobile ? 'text-[42px]' : 'text-[18px]'}
+      font-black tracking-[-0.05em]
+      ${textPrimary()}
+    `}
+  >
+    {title}
+  </h3>
       </div>
       <div className={isMobile ? 'space-y-7' : 'space-y-1'}>{children}</div>
     </section>
@@ -842,16 +842,26 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         </div>
 
         <section className={`rounded-[24px] px-4 py-2 ${cardBg()}`}>
-          <div className="mb-3 flex items-center gap-2">
-            <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-            <h3
+          <div className="mb-3 flex items-center gap-3">
+  <div
   className={`${
-    viewMode === 'mobile' ? 'text-[42px]' : 'text-[20px]'
-  } font-black tracking-[-0.05em] ${textPrimary()}`}
+    viewMode === 'mobile'
+      ? 'h-12 w-12'
+      : 'h-6 w-6'
+  } flex shrink-0 items-center justify-center text-[var(--accent)]`}
 >
-  Consolidado
-</h3>
-          </div>
+  <ChartNoAxesCombined size={26} />
+</div>
+  <h3
+    className={`${
+      viewMode === 'mobile'
+        ? 'text-[42px]'
+        : 'text-[20px]'
+    } font-black tracking-[-0.05em] ${textPrimary()}`}
+  >
+    Consolidado
+  </h3>
+</div>
 
            <div
   className={`grid gap-2 ${
