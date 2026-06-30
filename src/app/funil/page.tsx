@@ -270,7 +270,7 @@ const isImac = viewMode === 'desktop'
   return (
   <AppShell title="Consulta (Funil)">
     <div className="space-y-5">
-<section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-5 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
+<section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="mb-5 flex items-center justify-between">
     <div>
       <h2 className="text-[24px] font-black text-[var(--foreground)]">
@@ -316,13 +316,13 @@ const isImac = viewMode === 'desktop'
     />
   </div>
 
-  <div className="mt-4 grid gap-4 xl:grid-cols-3">
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4 xl:col-span-2">
+  <div className="mt-3 grid gap-3 xl:grid-cols-12">
+   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Atendimento por dia
       </h3>
 
-      <div className="flex h-[220px] items-end gap-3">
+      <div className="flex h-[92px] items-end gap-1 overflow-x-auto">
         {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
@@ -331,7 +331,7 @@ const isImac = viewMode === 'desktop'
 
           return (
             <div key={item.data} className="flex flex-1 flex-col items-center gap-2">
-              <div className="flex h-[160px] w-full items-end rounded-xl bg-[var(--metric-card)] p-1">
+              <div className="flex h-[56px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
                 <div
                   className="w-full rounded-lg bg-[#D7B46A]"
                   style={{
@@ -353,12 +353,12 @@ const isImac = viewMode === 'desktop'
       </div>
     </div>
 
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Status da agenda
       </h3>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-2 gap-2">
         <MetricMini
           label="Finalizados"
           value={painelAtendimento?.statusAgenda?.finalizados || 0}
@@ -551,7 +551,7 @@ const ticketProcedimentosMedico =
       <div
   key={medico.medico}
   className={`mx-auto max-w-[1320px] rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
-    isImac ? 'p-3' : 'p-5'
+    isImac ? 'p-3' : 'p-4'
   }`}
 >
       <div className="mb-4 flex items-center gap-4">
@@ -974,14 +974,14 @@ const previousLabel = isMoney ? formatMoney(anterior) : anterior
   {isMoney ? formatMoney(value) : value}
 </p>
 
-   <div className="mt-4 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+   <div className="mt-3 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <div
           className={`h-full rounded-full ${cor.split(' ')[0]}`}
           style={{ width: `${Math.min(percentual, 100)}%` }}
         />
       </div>
 
-     <div className="mt-4 flex items-center justify-between">
+     <div className="mt-3 flex items-center justify-between">
   <span className="text-[16px] font-bold text-[var(--muted-foreground)]">
     Meta {isMoney ? formatMoney(meta) : meta}
   </span>
@@ -1069,7 +1069,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
   return (
   <div
     className={`rounded-[16px] text-center shadow-none ${colors[color]} ${
-      isImac ? 'px-3.5 py-3.5' : 'p-5'
+      isImac ? 'px-3 py-2' : 'p-4'
     }`}
   >
     <div
@@ -1094,7 +1094,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
     <p
       className={`mt-2 ${
-        isImac ? 'text-[20px]' : 'text-[42px]'
+        isImac ? 'text-[18px]' : 'text-[34px]'
       } font-black text-[var(--foreground)]`}
     >
       {value}
