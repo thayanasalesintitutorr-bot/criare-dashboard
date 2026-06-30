@@ -27,6 +27,8 @@ type FiltersState = {
   setViewMode: (viewMode: ViewMode) => void
   setDataInicio: (dataInicio: string) => void
   setDataFim: (dataFim: string) => void
+  comparar: boolean
+setComparar: (value: boolean) => void
 }
 
 export const useFilters = create<FiltersState>((set) => ({
@@ -36,10 +38,13 @@ export const useFilters = create<FiltersState>((set) => ({
   viewMode: 'desktop',
   dataInicio: '',
   dataFim: '',
+  comparar: false,
   setPeriodo: (periodo) => set({ periodo }),
   setTipoData: (tipoData) => set({ tipoData }),
   setSegmento: (segmento) => set({ segmento }),
   setViewMode: (viewMode) => set({ viewMode }),
   setDataInicio: (dataInicio) => set({ dataInicio }),
-  setDataFim: (dataFim) => set({ dataFim }),
+setDataFim: (dataFim) => set({ dataFim }),
+setComparar: (comparar) => set({ comparar }),
 }))
+  

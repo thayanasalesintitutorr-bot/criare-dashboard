@@ -588,6 +588,56 @@ leadsSiteRodolpho.forEach((l) => {
 })
     const totalEntradas = consultaBasePeriodo.length 
 
+    const consultaBasePeriodoAnterior = consultaLeads.filter((l) => {
+  const criadoNoPeriodoAnterior = inRange(
+    parseDateLocal(l.created_at),
+    previousRange.start,
+    previousRange.end
+  )
+
+  const tag = normalize(l.tag)
+
+  return (
+    criadoNoPeriodoAnterior &&
+    !tag.includes('REGISTRO_VENDA')
+  )
+})
+
+const totalEntradasAnterior = consultaBasePeriodoAnterior.length
+
+const naoQualificadosAnterior = consultaBasePeriodoAnterior.filter((l) =>
+  statusIs(l, 'PERDEU [NÃO QUALIFICADO]')
+).length
+
+const leadsAceitosAnterior =
+  totalEntradasAnterior - naoQualificadosAnterior
+
+const leadAAnterior = consultaBasePeriodoAnterior.filter((l) =>
+  normalize(l.tag).includes('LEAD A')
+).length
+
+const leadBAnterior = consultaBasePeriodoAnterior.filter((l) =>
+  normalize(l.tag).includes('LEAD B')
+).length
+
+const leadCAnterior = consultaBasePeriodoAnterior.filter((l) =>
+  normalize(l.tag).includes('LEAD C')
+).length
+
+const leadDAnterior = consultaBasePeriodoAnterior.filter((l) =>
+  normalize(l.tag).includes('LEAD D')
+).length
+
+const convertidosAnterior = consultaLeads.filter((l) => {
+  return (
+    inRange(parseDateLocal(l.created_at), previousRange.start, previousRange.end) &&
+    (
+      statusIs(l, 'AGENDADO') ||
+      statusIs(l, 'GANHOU')
+    )
+  )
+}).length
+
     const naoQualificados = consultaBasePeriodo.filter((l) =>
       statusIs(l, 'PERDEU [NÃO QUALIFICADO]')
     ).length
@@ -967,6 +1017,11 @@ const valorAnteriorReabord = reabordAnterior.reduce(
   (acc, l) => acc + toNumber(l.faturamento),
   0
 )
+
+const ticketAnteriorReabord =
+  quantidadeAnteriorReabord > 0
+    ? valorAnteriorReabord / quantidadeAnteriorReabord
+    : 0
 
 const quantidadeAnteriorConsolidado =
   quantidadeAnterior + quantidadeAnteriorReabord + quantidadeAnteriorProcedimentos
@@ -1836,34 +1891,54 @@ consultaPorMedico,
       },
 
       comparativo: {
-  consulta: {
-    quantidadeAnterior,
-    valorAnterior,
-    ticketAnterior,
+  marketing: {
+    totalEntradasAnterior,
+    naoQualificadosAnterior,
+    leadsAceitosAnterior,
+    leadAAnterior,
+    leadBAnterior,
+    leadCAnterior,
+    leadDAnterior,
+    convertidosAnterior,
   },
 
-   vendas: {
-  orcamentosAnterior,
-  negociacaoAnterior,
-  ganhasAnterior,
-  perdidasAnterior,
-  conversaoAnterior,
-  valorAnterior: valorAnteriorVendas,
-  ticketAnterior: ticketAnteriorVendas,
-},
+  comercialConsulta: {
+    quantidadeConsultaAnterior: quantidadeAnterior,
+    valorTotalConsultaAnterior: valorAnterior,
+    ticketMedioConsultaAnterior: ticketAnterior,
 
-  procedimentos: {
-    quantidadeAnteriorProcedimentos,
-    valorAnteriorProcedimentos,
-    ticketAnteriorProcedimentos,
+    quantidadeReabordAnterior: quantidadeAnteriorReabord,
+    valorTotalReabordAnterior: valorAnteriorReabord,
+    ticketMedioReabordAnterior: ticketAnteriorReabord,
+
+    quantidadeTotalAnterior:
+      quantidadeAnterior + quantidadeAnteriorReabord,
+
+    valorTotalAnterior:
+      valorAnterior + valorAnteriorReabord,
+
+    ticketMedioTotalAnterior:
+      quantidadeAnterior + quantidadeAnteriorReabord > 0
+        ? (valorAnterior + valorAnteriorReabord) /
+          (quantidadeAnterior + quantidadeAnteriorReabord)
+        : 0,
   },
+
+  comercialVendas: {
+    propostasEnviadasAnterior: orcamentosAnterior,
+    propostasFechadasAnterior: ganhasAnterior,
+    propostasFechadasPercentAnterior: conversaoAnterior,
+    valorTotalVendasAnterior: valorAnteriorVendas,
+    ticketMedioVendasAnterior: ticketAnteriorVendas,
+  },
+
+  experienciaCliente: null,
 
   consolidado: {
-    quantidadeAnteriorConsolidado,
-    valorAnteriorConsolidado,
-    ticketAnteriorConsolidado,
+    qtdVendasAnterior: quantidadeAnteriorConsolidado,
+    valorVendasAnterior: valorAnteriorConsolidado,
+    ticketMedioAnterior: ticketAnteriorConsolidado,
   },
-
 },
 
       funil,

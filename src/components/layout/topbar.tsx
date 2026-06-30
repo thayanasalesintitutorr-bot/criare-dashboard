@@ -49,6 +49,8 @@ export function Topbar({ title }: { title: string }) {
   setDataFim,
   viewMode,
   setViewMode,
+  comparar,
+  setComparar,
 } = useFilters()
 
   const { logout } = useAuth()
@@ -62,9 +64,8 @@ export function Topbar({ title }: { title: string }) {
   const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [showFilters, setShowFilters] = useState(false)
-
   const calendarRef = useRef<HTMLDivElement>(null)
+  const [showFilters, setShowFilters] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
@@ -271,7 +272,8 @@ function parseLocalDate(dateString?: string) {
            
 
 <div
-  onClick={() => setShowFilters((v) => !v)}
+  onMouseEnter={() => setShowFilters(true)}
+  onMouseLeave={() => setShowFilters(false)}
   className="mb-4 cursor-pointer rounded-[28px] bg-[var(--card)] p-5 shadow-sm transition hover:bg-[var(--card)]/90"
 >
   <div className="flex items-center justify-between gap-6">
@@ -312,13 +314,18 @@ function parseLocalDate(dateString?: string) {
       </div>
     </div>
 
+    <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+  {comparar ? 'Comparando' : 'Sem comparação'}
+</div>
+
+
     <div className="text-[var(--accent)]">
   {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
 </div>
   </div>
 
   {showFilters && (
-    <div className="mt-6 grid grid-cols-4 gap-6 border-t border-black/5 pt-6">
+    <div className="mt-6 grid grid-cols-5 gap-6 border-t border-black/5 pt-6">
       <div>
         <div className="mb-3 flex items-center gap-2 font-bold">
           <Database size={18} className="text-[var(--accent)]" />
@@ -566,11 +573,33 @@ function parseLocalDate(dateString?: string) {
           </button>
         </div>
       </div>
-    </div>
-  )}
+      <div>
+
+  <div className="mb-3 flex items-center gap-2 font-bold">
+    <BarChart3 size={18} className="text-[var(--accent)]" />
+    Comparação
+  </div>
+
+  <div className={groupClass}>
+    <button
+      onClick={() => setComparar(false)}
+      className={`${pillBase} ${!comparar ? pillActive : pillInactive}`}
+    >
+      Sem comparar
+    </button>
+
+    <button
+      onClick={() => setComparar(true)}
+      className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
+    >
+      Comparar
+    </button>
+  </div>
 </div>
 
-          
+    </div>
+  )}
+</div>          
           </div>
 
     </header>
