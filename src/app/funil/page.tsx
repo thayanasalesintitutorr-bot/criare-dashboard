@@ -317,44 +317,58 @@ const isImac = viewMode === 'desktop'
   </div>
 
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
-   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8 min-h-[0]">
-      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-        Atendimento por dia
-      </h3>
+   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
+  <div className="mb-3 flex items-center justify-between">
+    <h3 className="text-[18px] font-black text-[var(--foreground)]">
+      Atendimento por dia
+    </h3>
 
-      <div className="flex h-[62px] items-end gap-1 overflow-x-auto">
-        {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
-          const maior = Math.max(
-            ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
-            1
-          )
-
-          const dataObj = new Date(`${item.data}T00:00:00`)
-const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
-
-          return (
-            <div key={item.data} className="flex flex-1 flex-col items-center gap-2">
-              <div className="flex h-[30px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
-                <div
-                  className={`w-full rounded-lg ${fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'}`}
-                  style={{
-                    height: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
-                  }}
-                />
-              </div>
-
-              <span className="text-[11px] font-bold text-[var(--muted-foreground)]">
-                {item.label}
-              </span>
-
-              <span className="text-[14px] font-black text-[var(--foreground)]">
-                {item.quantidade || 0}
-              </span>
-            </div>
-          )
-        })}
-      </div>
+    <div className="flex items-center gap-3 text-[11px] font-bold text-[var(--muted-foreground)]">
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-[#D7B46A]" />
+        Seg a sex
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="h-2 w-2 rounded-full bg-gray-300" />
+        Sáb e dom
+      </span>
     </div>
+  </div>
+
+  <div className="overflow-x-auto">
+    <div className="flex h-[118px] min-w-max items-end gap-2 pb-1">
+      {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
+        const maior = Math.max(
+          ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
+          1
+        )
+
+        const dataObj = new Date(`${item.data}T00:00:00`)
+        const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
+        const altura = Math.max((Number(item.quantidade || 0) / maior) * 46, Number(item.quantidade || 0) > 0 ? 8 : 2)
+
+        return (
+          <div key={item.data} className="flex w-[34px] shrink-0 flex-col items-center">
+            <div className="flex h-[52px] items-end">
+              <div
+                className={`w-[18px] rounded-full ${fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'}`}
+                style={{ height: `${altura}px` }}
+              />
+            </div>
+
+            <span className="mt-2 text-[11px] font-bold text-[var(--muted-foreground)]">
+              {item.label}
+            </span>
+
+            <span className="mt-1 text-[14px] font-black text-[var(--foreground)]">
+              {item.quantidade || 0}
+            </span>
+          </div>
+        )
+      })}
+    </div>
+  </div>
+</div>
 
     <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
