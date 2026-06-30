@@ -317,7 +317,7 @@ const isImac = viewMode === 'desktop'
   </div>
 
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
-   <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
+   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
       Atendimento por dia
