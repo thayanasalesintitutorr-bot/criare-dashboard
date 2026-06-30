@@ -317,7 +317,9 @@ const isImac = viewMode === 'desktop'
   </div>
 
   <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
-   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
+  <div className="grid gap-3 xl:col-span-8">
+
+    <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
       Atendimento por dia
@@ -328,6 +330,7 @@ const isImac = viewMode === 'desktop'
         <span className="h-2 w-2 rounded-full bg-[#D7B46A]" />
         Seg a sex
       </span>
+
       <span className="flex items-center gap-1">
         <span className="h-2 w-2 rounded-full bg-gray-300" />
         Sáb e dom
@@ -339,19 +342,31 @@ const isImac = viewMode === 'desktop'
     <div className="flex h-[118px] min-w-max items-end gap-2 pb-1">
       {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
         const maior = Math.max(
-          ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
+          ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) =>
+            Number(x.quantidade || 0)
+          ),
           1
         )
 
         const dataObj = new Date(`${item.data}T00:00:00`)
-        const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
-        const altura = Math.max((Number(item.quantidade || 0) / maior) * 46, Number(item.quantidade || 0) > 0 ? 8 : 2)
+        const fimDeSemana =
+          dataObj.getDay() === 0 || dataObj.getDay() === 6
+
+        const altura = Math.max(
+          (Number(item.quantidade || 0) / maior) * 46,
+          Number(item.quantidade || 0) > 0 ? 8 : 2
+        )
 
         return (
-          <div key={item.data} className="flex w-[34px] shrink-0 flex-col items-center">
+          <div
+            key={item.data}
+            className="flex w-[34px] shrink-0 flex-col items-center"
+          >
             <div className="flex h-[52px] items-end">
               <div
-                className={`w-[18px] rounded-full ${fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'}`}
+                className={`w-[18px] rounded-full ${
+                  fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'
+                }`}
                 style={{ height: `${altura}px` }}
               />
             </div>
@@ -370,151 +385,132 @@ const isImac = viewMode === 'desktop'
   </div>
 </div>
 
-   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
-      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-        Status da agenda
-      </h3>
-
-      <div className="grid grid-cols-2 gap-2">
-        <MetricMini
-          label="Finalizados"
-          value={painelAtendimento?.statusAgenda?.finalizados || 0}
-          color="green"
-          icon={UserCheck}
-        />
-
-        <MetricMini
-          label="No Show"
-          value={painelAtendimento?.statusAgenda?.noShow || 0}
-          color="pink"
-          icon={UserX}
-        />
-
-        <MetricMini
-          label="Reagendados"
-          value={painelAtendimento?.statusAgenda?.reagendados || 0}
-          color="darkRed"
-          icon={CalendarClock}
-        />
-
-        <MetricMini
-          label="Cancelados"
-          value={painelAtendimento?.statusAgenda?.cancelados || 0}
-          color="red"
-          icon={CalendarX2}
-        />
-      </div>
-    </div>
-  </div>
-
-<div className="mt-0 grid items-start gap-3 xl:grid-cols-12">
-   <div className="grid gap-2 xl:col-span-8">
     <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
-      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-        Evolução de faturamento
-      </h3>
+  <h3 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
+    Evolução de faturamento
+  </h3>
 
-     <div className="relative h-[105px] overflow-hidden pt-0 px-1 pb-1">
-  {(() => {
-    const dados = painelAtendimento?.evolucaoFaturamento || []
+  <div className="relative h-[105px] overflow-hidden px-1 pb-1">
+    {(() => {
+      const dados = painelAtendimento?.evolucaoFaturamento || []
 
-    const maior = Math.max(
-      ...dados.map((x: any) => Number(x.valor || 0)),
-      1
-    )
+      const maior = Math.max(
+        ...dados.map((x: any) => Number(x.valor || 0)),
+        1
+      )
 
-    const pontos = dados.map((item: any, index: number) => {
-      const x = dados.length > 1 ? (index / (dados.length - 1)) * 100 : 0
-      const y = 100 - (Number(item.valor || 0) / maior) * 85
+      const pontos = dados.map((item: any, index: number) => {
+        const x = dados.length > 1
+          ? (index / (dados.length - 1)) * 100
+          : 0
 
-      return `${x},${y}`
-    })
+        const y = 100 - (Number(item.valor || 0) / maior) * 85
 
-    const area = [
-      `0,100`,
-      ...pontos,
-      `100,100`,
-    ].join(' ')
+        return `${x},${y}`
+      })
 
-    return (
-      <>
-        <div className="absolute right-5 top-3 text-right">
-          <p className="text-[18px] font-black text-[var(--foreground)]">
-            {formatMoney(
-              dados.reduce((acc: number, item: any) => acc + Number(item.valor || 0), 0)
-            )}
-          </p>
-          <p className="text-[11px] font-semibold text-[var(--muted-foreground)]">
-            Total no período
-          </p>
-        </div>
+      const area = [
+        `0,100`,
+        ...pontos,
+        `100,100`,
+      ].join(' ')
 
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
-          <defs>
-  <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stopColor="#10B981" stopOpacity="0.22" />
-    <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
-  </linearGradient>
+      return (
+        <>
+          <div className="absolute right-5 top-3 text-right">
+            <p className="text-[18px] font-black text-[var(--foreground)]">
+              {formatMoney(
+                dados.reduce(
+                  (acc: number, item: any) =>
+                    acc + Number(item.valor || 0),
+                  0
+                )
+              )}
+            </p>
 
-  <filter id="glow">
-    <feGaussianBlur stdDeviation="0.7" result="blur" />
-    <feMerge>
-      <feMergeNode in="blur" />
-      <feMergeNode in="SourceGraphic" />
-    </feMerge>
-  </filter>
-</defs>
+            <p className="text-[11px] font-semibold text-[var(--muted-foreground)]">
+              Total no período
+            </p>
+          </div>
 
-<polygon
-  points={area}
-  fill="url(#areaFill)"
-/>
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className="h-full w-full"
+          >
+            <defs>
+              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10B981" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
+              </linearGradient>
 
-<polyline
-  points={pontos.join(' ')}
-  fill="none"
-  stroke="#16C784"
-  strokeWidth="0.9"
-  strokeLinecap="round"
-  strokeLinejoin="round"
-  filter="url(#glow)"
-/>
-        </svg>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="0.7" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-        <div className="absolute bottom-1 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
-          {dados
-            .filter((_: any, index: number) => {
-              if (dados.length <= 6) return true
-              return index === 0 || index === dados.length - 1 || index % Math.ceil(dados.length / 5) === 0
-            })
-            .map((item: any) => (
-              <span key={item.data}>{item.label}</span>
-            ))}
-        </div>
-      </>
-    )
-  })()}
+            <polygon
+              points={area}
+              fill="url(#areaFill)"
+            />
+
+            <polyline
+              points={pontos.join(' ')}
+              fill="none"
+              stroke="#16C784"
+              strokeWidth="0.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter="url(#glow)"
+            />
+          </svg>
+
+          <div className="absolute bottom-1 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
+            {dados
+              .filter((_: any, index: number) => {
+                if (dados.length <= 6) return true
+
+                return (
+                  index === 0 ||
+                  index === dados.length - 1 ||
+                  index % Math.ceil(dados.length / 5) === 0
+                )
+              })
+              .map((item: any) => (
+                <span key={item.data}>{item.label}</span>
+              ))}
+          </div>
+        </>
+      )
+    })()}
+  </div>
 </div>
-</div>
 
-
-<div className="mt-3 grid grid-cols-3 gap-2">
+    <div className="mt-3 grid grid-cols-3 gap-3">
   {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
-    const item = (painelAtendimento?.finalizadosParticularConvenio || []).find(
-      (x: any) => String(x.nome || '').toUpperCase().includes(nome)
-    )
+    const item =
+      (painelAtendimento?.finalizadosParticularConvenio || []).find(
+        (x: any) =>
+          String(x.nome || '')
+            .toUpperCase()
+            .includes(nome)
+      )
 
     return (
       <div
-        key={nome}
-        className="rounded-[14px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2"
-      >
+  key={nome}
+  className="rounded-[18px] border border-[color:var(--border)] bg-[var(--background)] px-3 py-2"
+>
         <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
           {nome}
         </p>
 
-        <div className="mt-2 flex items-end justify-between gap-2">
-          <p className="text-[24px] font-black leading-none text-[var(--foreground)]">
+        <div className="mt-2 flex items-end justify-between">
+          <p className="text-[26px] font-black text-[var(--foreground)]">
             {item?.qtd || 0}
           </p>
 
@@ -527,46 +523,64 @@ const isImac = viewMode === 'desktop'
   })}
 </div>
 
+  </div>
 
-    </div>
+  <div className="grid gap-3 xl:col-span-4">
 
-   <div className="self-start h-[247px] rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
-      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-        Agendamentos por origem
-      </h3>
+ <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+  <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+    Status da agenda
+  </h3>
 
-      <div className="max-h-[185px] space-y-2 overflow-y-auto pr-2">
-        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
-          const maior = Math.max(
-            ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
-            1
-          )
+  <div className="grid grid-cols-2 gap-2">
+    <MetricMini label="Finalizados" value={painelAtendimento?.statusAgenda?.finalizados || 0} color="green" icon={UserCheck} />
+    <MetricMini label="No Show" value={painelAtendimento?.statusAgenda?.noShow || 0} color="pink" icon={UserX} />
+    <MetricMini label="Reagendados" value={painelAtendimento?.statusAgenda?.reagendados || 0} color="darkRed" icon={CalendarClock} />
+    <MetricMini label="Cancelados" value={painelAtendimento?.statusAgenda?.cancelados || 0} color="red" icon={CalendarX2} />
+  </div>
+</div>
 
-          return (
-            <div key={item.nome}>
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
-                  {item.nome}
-                </span>
-                <span className="text-sm font-black text-[var(--foreground)]">
-                  {item.quantidade || 0}
-                </span>
-              </div>
+   <div className="self-start h-[247px] rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+  <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+    Agendamentos por origem
+  </h3>
 
-             <div className="h-2 overflow-hidden rounded-full bg-[var(--metric-card)]">
-                <div
-                  className="h-full rounded-full bg-[#D7B46A]"
-                  style={{
-                    width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  </div></section>
+  <div className="max-h-[185px] space-y-2 overflow-y-auto pr-2">
+    {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
+      const maior = Math.max(
+        ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
+        1
+      )
+
+      return (
+        <div key={item.nome}>
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
+              {item.nome}
+            </span>
+
+            <span className="text-sm font-black text-[var(--foreground)]">
+              {item.quantidade || 0}
+            </span>
+          </div>
+
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--metric-card)]">
+            <div
+              className="h-full rounded-full bg-[#D7B46A]"
+              style={{
+                width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
+              }}
+            />
+          </div>
+        </div>
+      )
+    })}
+  </div>
+</div>
+
+  </div>
+</div>
+</section>
 
        <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
   <div className="mb-4 flex items-center gap-3">
