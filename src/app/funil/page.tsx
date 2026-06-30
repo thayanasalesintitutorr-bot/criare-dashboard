@@ -316,7 +316,7 @@ const isImac = viewMode === 'desktop'
     />
   </div>
 
-  <div className="mt-3 grid gap-3 xl:grid-cols-12">
+  <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
    <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
@@ -370,7 +370,7 @@ const isImac = viewMode === 'desktop'
   </div>
 </div>
 
-    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
+   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Status da agenda
       </h3>
@@ -498,7 +498,7 @@ const isImac = viewMode === 'desktop'
 </div>
 
 
-<div className="mt-2 grid grid-cols-3 gap-2">
+<div className="mt-3 grid grid-cols-3 gap-2">
   {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
     const item = (painelAtendimento?.finalizadosParticularConvenio || []).find(
       (x: any) => String(x.nome || '').toUpperCase().includes(nome)
