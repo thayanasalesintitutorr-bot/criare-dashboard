@@ -407,7 +407,7 @@ const isImac = viewMode === 'desktop'
     </div>
   </div>
 
- <div className="mt-3 grid gap-3 xl:grid-cols-12">
+ <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
     <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Evolução de faturamento
@@ -526,12 +526,12 @@ const isImac = viewMode === 'desktop'
 
     </div>
 
-    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
+   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Agendamentos por origem
       </h3>
 
-      <div className="max-h-[130px] space-y-2 overflow-y-auto pr-2">
+      <div className="max-h-[145px] space-y-2 overflow-y-auto pr-2">
         {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
