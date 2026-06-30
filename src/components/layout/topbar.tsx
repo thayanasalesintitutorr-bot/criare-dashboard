@@ -127,7 +127,7 @@ function parseLocalDate(dateString?: string) {
 }
   return (
     <header className="z-30 border-b border-white/5 bg-[var(--background)]">
-      <div className="flex flex-col gap-1 px-6 pt-2 pb-0 md:px-8">
+      <div className="flex flex-col gap-3 px-6 pt-4 pb-1 md:px-8">
         <div className="flex items-start justify-between gap-6">
        
           <div className="flex-1 space-y-4">
@@ -312,16 +312,13 @@ function parseLocalDate(dateString?: string) {
       <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
         {viewMode === 'desktop' ? 'iMac' : 'iPhone'}
       </div>
+      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+  {comparar ? 'Comparando' : 'Sem comparação'}
+</div>
     </div>
 
-   <div className="flex items-center gap-3">
-  <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-    {comparar ? 'Comparando' : 'Sem comparação'}
-  </div>
-
-  <div className="text-[var(--accent)]">
-    {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-  </div>
+    <div className="ml-auto text-[var(--accent)]">
+  {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
 </div>
 
   </div>
