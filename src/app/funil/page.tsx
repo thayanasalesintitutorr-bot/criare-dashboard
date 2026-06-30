@@ -19,6 +19,7 @@ CalendarClock,
 
 type DashboardResponse = {
   ok: boolean
+  painelAtendimento?: any
   consultaPorMedico?: {
   medico: string
   atendimentos: number
@@ -159,47 +160,69 @@ const isImac = viewMode === 'desktop'
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [visaoFinanceira, setVisaoFinanceira] = useState<
-  'consulta' | 'procedimentos' | 'consolidado'
->('consulta')
+
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true)
-        setError(null)
+  async function loadData(showLoading = false) {
+    try {
+      if (showLoading) setLoading(true)
 
-        let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}`
+      setError(null)
 
-        if (periodo === 'personalizado' && dataInicio && dataFim) {
-          url += `&inicio=${dataInicio}&fim=${dataFim}`
+      let url =
+        `/api/test?periodo=${periodo}` +
+        `&tipo=${tipoData}` +
+        `&segmento=${segmento}` +
+        `&t=${Date.now()}`
+
+      if (periodo === 'personalizado' && dataInicio && dataFim) {
+        url += `&inicio=${dataInicio}&fim=${dataFim}`
+      }
+
+      const token = localStorage.getItem('access_token')
+
+      const res = await fetch(url, {
+        cache: 'no-store',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      const json: DashboardResponse = await res.json()
+
+      if (!json.ok) {
+        throw new Error(json.error || 'Erro ao buscar dados')
+      }
+
+      setData((prev) => {
+        if (JSON.stringify(prev) === JSON.stringify(json)) {
+          return prev
         }
 
-        const token = localStorage.getItem('access_token')
-
-const res = await fetch(url, {
-  cache: 'no-store',
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-})
-
-        const json: DashboardResponse = await res.json()
-
-        if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
-
-        setData(json)
-      } catch (err: any) {
-        setError(err.message || 'Erro inesperado')
-      } finally {
+        return json
+      })
+    } catch (err: any) {
+      setError(err.message || 'Erro inesperado')
+    } finally {
+      if (showLoading) {
         setLoading(false)
       }
     }
+  }
 
-    loadData()
-  }, [periodo, tipoData, segmento, dataInicio, dataFim])
+  // Primeira carga
+  loadData(true)
+
+  // Atualização automática a cada 10 segundos
+  const interval = setInterval(() => {
+    loadData(false)
+  }, 10000)
+
+  return () => clearInterval(interval)
+}, [periodo, tipoData, segmento, dataInicio, dataFim])
 
   const vendasPorMedico = data?.vendasPorMedico || []
+  const painelAtendimento = data?.painelAtendimento
   const consultaPorMedico = Array.from(
   new Map(
     (data?.consultaPorMedico || [])
@@ -247,121 +270,231 @@ const res = await fetch(url, {
   return (
   <AppShell title="Consulta (Funil)">
     <div className="space-y-5">
+<section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-5 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
+  <div className="mb-5 flex items-center justify-between">
+    <div>
+      <h2 className="text-[24px] font-black text-[var(--foreground)]">
+        Visão geral dos atendimentos
+      </h2>
+      <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">
+        Dados consolidados de todos os profissionais no período
+      </p>
+    </div>
+  </div>
 
-    <div className="space-y-5">
-  <ResumoSection
-  title="Fechamentos"
-  extra={
-    <div className="flex overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[var(--card)]">
-      {[
-        ['consulta', 'Consultas'],
-        ['procedimentos', 'Procedimentos'],
-        ['consolidado', 'Consolidado'],
-      ].map(([key, label]) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => setVisaoFinanceira(key as any)}
-          className={`px-5 py-2.5 text-sm font-black transition-all ${
-            visaoFinanceira === key
-              ? 'bg-[#D7B46A] text-white'
-              : 'text-[var(--muted-foreground)]'
-          }`}
+  <div className="grid gap-3 md:grid-cols-4">
+    <MetricCard
+      icon={TrendingUp}
+      label="Atendimentos 1ª vez"
+      value={painelAtendimento?.totalPrimeiraVez || 0}
+      description="total no período"
+      tone="green"
+    />
+
+    <MetricCard
+      icon={UserCheck}
+      label="Total de consultas"
+      value={painelAtendimento?.totalRecebimentoConsulta || 0}
+      description="consultas recebidas"
+      tone="blue"
+    />
+
+    <MetricCard
+      icon={CircleDollarSign}
+      label="Faturamento consultas"
+      value={formatMoney(painelAtendimento?.faturamentoConsulta || 0)}
+      description="vendas de consulta"
+      tone="green"
+    />
+
+    <MetricCard
+      icon={Ticket}
+      label="Ticket médio"
+      value={formatMoney(painelAtendimento?.ticketMedioConsulta || 0)}
+      description="média por consulta"
+      tone="purple"
+    />
+  </div>
+
+  <div className="mt-4 grid gap-4 xl:grid-cols-3">
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4 xl:col-span-2">
+      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+        Atendimento por dia
+      </h3>
+
+      <div className="flex h-[220px] items-end gap-3">
+        {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
+          const maior = Math.max(
+            ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
+            1
+          )
+
+          return (
+            <div key={item.data} className="flex flex-1 flex-col items-center gap-2">
+              <div className="flex h-[160px] w-full items-end rounded-xl bg-[var(--metric-card)] p-1">
+                <div
+                  className="w-full rounded-lg bg-[#D7B46A]"
+                  style={{
+                    height: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
+                  }}
+                />
+              </div>
+
+              <span className="text-[11px] font-bold text-[var(--muted-foreground)]">
+                {item.label}
+              </span>
+
+              <span className="text-[14px] font-black text-[var(--foreground)]">
+                {item.quantidade || 0}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+        Status da agenda
+      </h3>
+
+      <div className="grid gap-3">
+        <MetricMini
+          label="Finalizados"
+          value={painelAtendimento?.statusAgenda?.finalizados || 0}
+          color="green"
+          icon={UserCheck}
+        />
+
+        <MetricMini
+          label="No Show"
+          value={painelAtendimento?.statusAgenda?.noShow || 0}
+          color="pink"
+          icon={UserX}
+        />
+
+        <MetricMini
+          label="Reagendados"
+          value={painelAtendimento?.statusAgenda?.reagendados || 0}
+          color="darkRed"
+          icon={CalendarClock}
+        />
+
+        <MetricMini
+          label="Cancelados"
+          value={painelAtendimento?.statusAgenda?.cancelados || 0}
+          color="red"
+          icon={CalendarX2}
+        />
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-4 grid gap-4 xl:grid-cols-2">
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+        Evolução de faturamento
+      </h3>
+
+      <div className="space-y-3">
+        {(painelAtendimento?.evolucaoFaturamento || []).map((item: any) => {
+          const maior = Math.max(
+            ...(painelAtendimento?.evolucaoFaturamento || []).map((x: any) => Number(x.valor || 0)),
+            1
+          )
+
+          return (
+            <div key={item.data}>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-sm font-bold text-[var(--muted-foreground)]">
+                  {item.label}
+                </span>
+                <span className="text-sm font-black text-[var(--foreground)]">
+                  {formatMoney(item.valor || 0)}
+                </span>
+              </div>
+
+              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{
+                    width: `${Math.max((Number(item.valor || 0) / maior) * 100, 4)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+
+    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+      <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+        Agendamentos por origem
+      </h3>
+
+      <div className="space-y-3">
+        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 8).map((item: any) => {
+          const maior = Math.max(
+            ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
+            1
+          )
+
+          return (
+            <div key={item.nome}>
+              <div className="mb-1 flex items-center justify-between gap-3">
+                <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
+                  {item.nome}
+                </span>
+                <span className="text-sm font-black text-[var(--foreground)]">
+                  {item.quantidade || 0}
+                </span>
+              </div>
+
+              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
+                <div
+                  className="h-full rounded-full bg-[#D7B46A]"
+                  style={{
+                    width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-4 rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+    <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+      Atendimento finalizado: particular ou convênio
+    </h3>
+
+    <div className="grid gap-3 md:grid-cols-2">
+      {(painelAtendimento?.finalizadosParticularConvenio || []).map((item: any) => (
+        <div
+          key={item.nome}
+          className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4"
         >
-          {label}
-        </button>
+          <p className="text-sm font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+            {item.nome}
+          </p>
+
+          <div className="mt-3 flex items-end justify-between gap-4">
+            <p className="text-[40px] font-black leading-none text-[var(--foreground)]">
+              {item.qtd || 0}
+            </p>
+
+            <p className="text-[22px] font-black text-[var(--foreground)]">
+              {formatMoney(item.valor || 0)}
+            </p>
+          </div>
+        </div>
       ))}
     </div>
-  }
->
-  {visaoFinanceira === 'consulta' && (
-  <>
-    <ResumoCard
-  icon={ClipboardList}
-  label="Quantidade de consulta"
-  value={data?.kpis?.comercialConsulta?.quantidadeTotal || 0}
-  rawValue={data?.kpis?.comercialConsulta?.quantidadeTotal || 0}
-  previousValue={data?.comparativo?.consulta?.quantidadeAnterior || 0}
-/>
-
-<ResumoCard
-  icon={CircleDollarSign}
-  label="Valor de consulta"
-  value={formatMoney(data?.kpis?.comercialConsulta?.valorTotal || 0)}
-  rawValue={data?.kpis?.comercialConsulta?.valorTotal || 0}
-  previousValue={data?.comparativo?.consulta?.valorAnterior || 0}
-/>
-
-<ResumoCard
-  icon={TrendingUp}
-  label="Ticket médio"
-  value={formatMoney(data?.kpis?.comercialConsulta?.ticketMedioTotal || 0)}
-  rawValue={data?.kpis?.comercialConsulta?.ticketMedioTotal || 0}
-  previousValue={data?.comparativo?.consulta?.ticketAnterior || 0}
-/>
-  </>
-)}
-
-{visaoFinanceira === 'procedimentos' && (
-  <>
-    <ResumoCard
-      icon={Stethoscope}
-      label="Quantidade de procedimentos"
-      value={data?.kpis?.comercialVendas?.propostasFechadas || 0}
-      rawValue={data?.kpis?.comercialVendas?.propostasFechadas || 0}
-      previousValue={data?.comparativo?.procedimentos?.quantidadeAnteriorProcedimentos || 0}
-    />
-
-    <ResumoCard
-      icon={CircleDollarSign}
-      label="Valor de procedimentos"
-      value={formatMoney(data?.kpis?.comercialVendas?.valorTotalVendas || 0)}
-      rawValue={data?.kpis?.comercialVendas?.valorTotalVendas || 0}
-      previousValue={data?.comparativo?.procedimentos?.valorAnteriorProcedimentos || 0}
-    />
-
-    <ResumoCard
-      icon={TrendingUp}
-      label="Ticket médio"
-      value={formatMoney(data?.kpis?.comercialVendas?.ticketMedioVendas || 0)}
-      rawValue={data?.kpis?.comercialVendas?.ticketMedioVendas || 0}
-      previousValue={data?.comparativo?.procedimentos?.ticketAnteriorProcedimentos || 0}
-    />
-  </>
-)}
-
-  {visaoFinanceira === 'consolidado' && (
-    <>
-      <ResumoCard
-  icon={Handshake}
-  label="Quantidade total de vendas"
-  value={data?.consolidado?.qtdVendas || 0}
-  rawValue={data?.consolidado?.qtdVendas || 0}
-  previousValue={data?.comparativo?.consolidado?.quantidadeAnteriorConsolidado || 0}
-/>
-
-      <ResumoCardMeta
-        dot="gold"
-        label="Total do valor de venda"
-        value={data?.consolidado?.valorVendas || 0}
-        meta={data?.consolidado?.metaValorVendas || 0}
-        isMoney
-        previousValue={data?.comparativo?.consolidado?.valorAnteriorConsolidado || 0}
-      />
-
-      <ResumoCardMeta
-        dot="green"
-        label="Ticket médio total"
-        value={data?.consolidado?.ticketMedio || 0}
-        meta={data?.consolidado?.metaTicketMedio || 0}
-        isMoney
-        previousValue={data?.comparativo?.consolidado?.ticketAnteriorConsolidado || 0}
-      />
-    </>
-  )}
-</ResumoSection>
-</div>
-
+  </div>
+</section>
        <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
   <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />

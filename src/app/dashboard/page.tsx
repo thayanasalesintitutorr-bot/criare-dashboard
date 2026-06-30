@@ -434,13 +434,17 @@ export default function DashboardPage() {
 
 
 
-  useEffect(() => {
+ useEffect(() => {
   async function loadData(showLoading = false) {
     try {
       if (showLoading) setLoading(true)
       setError(null)
 
-      let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}&t=${Date.now()}`
+      let url =
+        `/api/test?periodo=${periodo}` +
+        `&tipo=${tipoData}` +
+        `&segmento=${segmento}` +
+        `&t=${Date.now()}`
 
       if (periodo === 'personalizado' && dataInicio && dataFim) {
         url += `&inicio=${dataInicio}&fim=${dataFim}`
@@ -483,7 +487,7 @@ export default function DashboardPage() {
   }, 10000)
 
   return () => clearInterval(interval)
-}, [periodo, tipoData, segmento, dataInicio, dataFim, comparar])
+}, [periodo, tipoData, segmento, dataInicio, dataFim])
 
   const marketing = data?.kpis?.marketing
   const comercialConsulta = data?.kpis?.comercialConsulta
@@ -596,14 +600,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       </button>
     ))}
   </div>
-
-  <div
-    className={`${
-      viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
-    } font-black tracking-[-0.05em] ${textPrimary()}`}
-  >
-    {quantidadeLeadSelecionado}
-  </div>
+    <SimpleMetric
+   label=""
+   value={quantidadeLeadSelecionado}
+   previousValue={comparativo?.marketing?.leadsAceitosAnterior}
+   showCompare={comparar}
+/>
 
   
 </div>

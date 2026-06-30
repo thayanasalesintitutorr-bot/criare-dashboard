@@ -1797,6 +1797,76 @@ const canceladosPercent = safePercent(
   totalAgendamentosExperiencia
 )
 
+const painelAtendimento = {
+  totalPrimeiraVez: consultaPorMedico.reduce(
+    (acc, medico) => acc + Number(medico.consultasPrimeiraVez || 0),
+    0
+  ),
+
+  totalRecebimentoConsulta: consultaPorMedico.reduce(
+    (acc, medico) => acc + Number(medico.quantidadeConsulta || 0),
+    0
+  ),
+
+  faturamentoConsulta: consultaPorMedico.reduce(
+    (acc, medico) => acc + Number(medico.valorConsulta || 0),
+    0
+  ),
+
+  ticketMedioConsulta:
+    consultaPorMedico.reduce(
+      (acc, medico) => acc + Number(medico.quantidadeConsulta || 0),
+      0
+    ) > 0
+      ? consultaPorMedico.reduce(
+          (acc, medico) => acc + Number(medico.valorConsulta || 0),
+          0
+        ) /
+        consultaPorMedico.reduce(
+          (acc, medico) => acc + Number(medico.quantidadeConsulta || 0),
+          0
+        )
+      : 0,
+
+  atendimentoPorDia: evolucaoDiaria.map((dia, index) => ({
+    data: dia.data,
+    label: dia.label,
+    quantidade: consultaPorMedico.reduce(
+      (acc, medico) =>
+        acc + Number(medico.evolucaoConsultaPrimeiraVez?.[index] || 0),
+      0
+    ),
+  })),
+
+  statusAgenda: {
+    finalizados: totalFinalizados,
+    noShow: totalNoShow,
+    reagendados: totalReagendados,
+    cancelados: totalCancelados,
+  },
+
+  evolucaoFaturamento: evolucaoDiaria.map((dia) => {
+    const diaData = parseLocalDate(dia.data)
+
+    const valor = consultaGanhosLeads
+      .filter((lead) => {
+        const data = parseDateLocal(lead.closed_at)
+        return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
+      })
+      .reduce((acc, lead) => acc + toNumber(lead.faturamento), 0)
+
+    return {
+      data: dia.data,
+      label: dia.label,
+      valor,
+    }
+  }),
+
+  agendamentosPorOrigem: buildOrigens(leadsAgendados),
+
+  finalizadosParticularConvenio: atendimentoConsulta,
+}
+
 
     return Response.json({
       ok: true,
