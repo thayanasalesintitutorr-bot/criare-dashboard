@@ -2,24 +2,11 @@
 
 import { ReactNode, useEffect, useState } from 'react'
 import {
-  ClipboardList,
   Funnel,
   Star,
   Stethoscope,
   Users,
 } from 'lucide-react'
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from 'recharts'
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
 
@@ -95,6 +82,9 @@ conveniosConsulta?: {
     metaValorVendas: number
     metaTicketMedio: number
   }
+
+  comparativo?: any
+
   funil?: {
     entrada: number
     primeiroContato: number
@@ -272,14 +262,27 @@ function GroupCard({
 function SimpleMetric({
   label,
   value,
-  accent = 'gold',
+  previousValue,
+  showCompare = false,
 }: {
   label: string
   value: number | string
-  accent?: 'gold' | 'blue' | 'green'
+  previousValue?: number
+  showCompare?: boolean
 }) {
   const { viewMode } = useFilters()
   const isMobile = viewMode === 'mobile'
+  const numericValue =
+  typeof value === 'number'
+    ? value
+    : Number(String(value).replace(/[^\d,-]/g, '').replace(',', '.')) || 0
+
+const diff =
+  previousValue !== undefined && previousValue > 0
+    ? ((numericValue - previousValue) / previousValue) * 100
+    : 0
+
+const isUp = diff >= 0
 
   return (
     <div className="space-y-1">
@@ -298,6 +301,19 @@ function SimpleMetric({
 >
         {value}
       </div>
+
+      {showCompare && (
+  <div className={`flex items-center gap-2 ${isMobile ? 'text-[24px]' : 'text-[12px]'}`}>
+    <span className={`font-black ${isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
+      {isUp ? '▲' : '▼'} {formatPercent(Math.abs(diff))}
+    </span>
+
+    <span className="font-semibold text-slate-400">
+      ant. {typeof value === 'string' && value.includes('R$') ? formatMoney(previousValue || 0) : previousValue || 0}
+    </span>
+  </div>
+)}
+
     </div>
   )
 }
@@ -390,85 +406,7 @@ function GoalMetric({
       </div>
     </div>
   )
-}
 
-function ExperiencePlaceholder({ label }: { label: string }) {
-  return (
-    <div className="space-y-2">
-      <h4 className={`text-[18px] font-semibold ${textPrimary()}`}>{label}</h4>
-      <div className={`text-5xl font-black tracking-[-0.05em] ${textPrimary()}`}>—</div>
-      <p className={`text-sm ${textSecondary()}`}>Em breve com integração Google</p>
-      <div className="h-3 rounded-full bg-slate-200 dark:bg-white/10">
-        <div className="h-3 w-[32%] rounded-full bg-slate-300 dark:bg-white/15" />
-      </div>
-    </div>
-  )
-}
-
-function ChartTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null
-
-  const formatDateWithWeekday = (rawLabel?: string) => {
-    if (!rawLabel) return ''
-
-    const [day, month] = rawLabel.split('/')
-    const now = new Date()
-    const date = new Date(now.getFullYear(), Number(month) - 1, Number(day))
-
-    const weekday = date.toLocaleDateString('pt-BR', {
-      weekday: 'long',
-    })
-
-    const formattedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1)
-    return `${rawLabel} • ${formattedWeekday}`
-  }
-
-  const formatName = (key: string) => {
-    if (key === 'leads') return 'Entradas'
-    if (key === 'vendasValor') return 'Vendas Total'
-    if (key === 'desqualificados') return 'Desqualificados'
-    return key
-  }
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#0a1e3d] px-4 py-3 text-sm shadow-xl">
-      <div className="mb-1 font-semibold text-white/70">
-        {formatDateWithWeekday(label)}
-      </div>
-
-      {payload.map((item: any, index: number) => (
-        <div key={index} className="flex justify-between gap-4 text-white text-sm">
-          <span>{formatName(item.dataKey)}</span>
-          <span>
-            {item.dataKey === 'vendasValor'
-              ? Number(item.value || 0).toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                  maximumFractionDigits: 0,
-                })
-              : Number(item.value || 0).toLocaleString('pt-BR')}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function OrigensTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const item = payload[0]
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#0a1e3d] px-4 py-3 text-sm shadow-xl">
-      <div className="mb-1 font-semibold text-white/90">{item.payload.nome}</div>
-      <div className="flex items-center gap-2">
-        <span className="h-2.5 w-2.5 rounded-full" style={{ background: item.fill }} />
-        <span className="text-white/60">Leads:</span>
-        <span className="font-bold text-white">{item.value}</span>
-      </div>
-    </div>
-  )
 }
 
 const ORIGENS_COLORS = [
@@ -486,52 +424,8 @@ const ORIGENS_COLORS = [
   '#6366f1',
 ]
 
-function FunnelChart({
-  title,
-  stages,
-  baseValue,
-}: {
-  title: string
-  stages: { label: string; value: number; color: string }[]
-  baseValue: number
-}) {
-  const base = Math.max(baseValue, 1)
-
-  return (
-    <div className={`rounded-[28px] p-6 ${cardBg()}`}>
-      <div className="mb-5 flex items-center gap-3">
-        <span className="h-8 w-1.5 rounded-full bg-[var(--accent)]" />
-        <h3 className={`text-[24px] font-black tracking-[-0.04em] ${textPrimary()}`}>{title}</h3>
-      </div>
-
-      <div className="space-y-4">
-        {stages.map((item) => {
-          const width = Math.max(12, (item.value / base) * 100)
-
-          return (
-            <div key={item.label} className="grid grid-cols-[160px_1fr_80px] items-center gap-4">
-              <div className={`text-sm font-medium ${textSecondary()}`}>{item.label}</div>
-              <div className="h-14 rounded-2xl bg-slate-200 dark:bg-white/8">
-                <div
-                  className="flex h-14 items-center rounded-2xl px-5 text-lg font-bold text-white"
-                  style={{ width: `${width}%`, backgroundColor: item.color }}
-                >
-                  {item.value}
-                </div>
-              </div>
-              <div className={`text-right text-sm ${textSecondary()}`}>
-                {formatPercent((item.value / base) * 100)}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 export default function DashboardPage() {
-  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar } = useFilters()
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -589,20 +483,15 @@ export default function DashboardPage() {
   }, 10000)
 
   return () => clearInterval(interval)
-}, [periodo, tipoData, segmento, dataInicio, dataFim])
+}, [periodo, tipoData, segmento, dataInicio, dataFim, comparar])
 
   const marketing = data?.kpis?.marketing
   const comercialConsulta = data?.kpis?.comercialConsulta
   const comercialVendas = data?.kpis?.comercialVendas
   const consolidado = data?.consolidado
-  const funil = data?.funil
-  const funilVendas = data?.funilVendas
-  const funilReabord = data?.funilReabord
-  const evolucaoDiaria = data?.evolucaoDiaria || []
   const origens = data?.origens || []
-  const campanhaSite = data?.campanhaSiteRodolpho
   const experienciaCliente = (data as any)?.kpis?.experienciaCliente
-
+  const comparativo = data?.comparativo
   if (loading) {
     return (
       <AppShell title="Visão Geral">
@@ -631,84 +520,9 @@ export default function DashboardPage() {
   const consolidadoTicketOk = (consolidado?.ticketMedio || 0) >= metaTicket
   const vendasPercent = metaVendas > 0 ? ((consolidado?.valorVendas || 0) / metaVendas) * 100 : 0
   const ticketPercent = metaTicket > 0 ? ((consolidado?.ticketMedio || 0) / metaTicket) * 100 : 0
-
-  const funilConsultaStages = [
-    { label: 'Entrada', value: funil?.entrada || 0, color: '#94A3B8' },
-    { label: 'Primeiro Contato', value: funil?.primeiroContato || 0, color: '#3B82F6' },
-    { label: 'Formulário', value: funil?.formulario || 0, color: '#F87171' },
-    { label: 'Follow-up', value: funil?.followUp || 0, color: '#FACC15' },
-    { label: 'Não Qualificado', value: funil?.naoQualificado || 0, color: '#EF4444' },
-    { label: 'Qualificado', value: funil?.qualificado || 0, color: '#34D399' },
-    { label: 'Agendado', value: funil?.agendado || 0, color: '#FDE047' },
-    { label: 'Ganhou', value: funil?.ganhou || 0, color: '#84CC16' },
-    { label: 'Perdeu', value: funil?.perdeu || 0, color: '#6B7280' },
-  ]
-
-  const funilVendasStages = [
-    { label: 'Criados', value: funilVendas?.total || 0, color: '#94A3B8' },
-    { label: 'Orçamento Entregue', value: funilVendas?.orcamentoEntregue || 0, color: '#3B82F6' },
-    { label: 'Solicitação de Cirurgia', value: funilVendas?.solicitacaoCirurgia || 0, color: '#FACC15' },
-    { label: 'Marcado', value: funilVendas?.marcado || 0, color: '#F59E0B' },
-    { label: 'Venda Ganha', value: funilVendas?.vendaGanha || 0, color: '#84CC16' },
-    { label: 'Venda Perdida', value: funilVendas?.vendaPerdida || 0, color: '#6B7280' },
-  ]
-
-  const funilReabordStages = [
-    { label: 'Contato', value: funilReabord?.contato || 0, color: '#C084FC' },
-    { label: 'Oferta', value: funilReabord?.oferta || 0, color: '#F87171' },
-    { label: 'Agendado', value: funilReabord?.agendado || 0, color: '#FBBF24' },
-    { label: 'Fechado (Ganho)', value: funilReabord?.fechadoGanho || 0, color: '#A3E635' },
-    { label: 'Fechado (Perdido)', value: funilReabord?.fechadoPerdido || 0, color: '#D1D5DB' },
-  ]
-
   const origensTop = origens.slice(0, 10)
   const origensTotal = origens.reduce((acc, o) => acc + o.quantidade, 0)
-
-
-const siteStatusColors: Record<string, string> = {
-  '1º CONTATO': '#3B82F6',
-  'FORMULÁRIO [CAMPANHA]': '#F87171',
-  'FOLLOW-UP [S/ RESPOSTA]': '#FACC15',
-  'PERDEU [NÃO QUALIFICADO]': '#EF4444',
-  'LEAD QUALIFICADO [SAL]': '#34D399',
-  AGENDADO: '#FDE047',
-  GANHOU: '#84CC16',
-  PERDEU: '#6B7280',
-}
-
-const siteStatusLabels: Record<string, string> = {
-  '1º CONTATO': 'Primeiro Contato',
-  'FORMULÁRIO [CAMPANHA]': 'Formulário',
-  'FOLLOW-UP [S/ RESPOSTA]': 'Follow-up',
-  'PERDEU [NÃO QUALIFICADO]': 'Não Qualificado',
-  'LEAD QUALIFICADO [SAL]': 'Qualificado',
-  AGENDADO: 'Agendado',
-  GANHOU: 'Ganhou',
-  PERDEU: 'Perdeu',
-}
-
-const siteTotal = campanhaSite?.total || 0
-const siteAgendados = campanhaSite?.porStatus?.['AGENDADO'] || 0
-
-const siteAgendadoPercent =
-  siteTotal > 0 ? (siteAgendados / siteTotal) * 100 : 0
-
-const siteStatusData = Object.entries(campanhaSite?.porStatus || {})
-  .map(([status, qtd]) => ({
-    status,
-    label: siteStatusLabels[status] || status,
-    value: Number(qtd),
-    color: siteStatusColors[status] || '#94A3B8',
-  }))
-  .filter((item) => item.value > 0)
-
-const siteDonutData = siteStatusData.map((item) => ({
-  name: item.label,
-  value: item.value,
-  color: item.color,
-}))
-const campanhasConsulta = data?.campanhasConsulta || []
-const leadsPorTipo = {
+  const leadsPorTipo = {
   A: marketing?.leadA || 0,
   B: marketing?.leadB || 0,
   C: marketing?.leadC || 0,
@@ -738,7 +552,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   }`}
 >
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>
-            <SimpleMetric label="Total de leads recebidos" value={marketing?.totalEntradas || 0} accent="blue" />
+            <SimpleMetric
+  label="Total de leads recebidos"
+  value={marketing?.totalEntradas || 0}
+  previousValue={comparativo?.marketing?.totalEntradasAnterior}
+  showCompare={comparar}
+/>
             <GoalMetric
               label="Leads não qualificados"
               value={marketing?.naoQualificados || 0}
@@ -852,10 +671,26 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           Consulta
         </h4>
       </div>
+      <SimpleMetric
+  label="Quantidade"
+  value={comercialConsulta?.quantidadeConsulta || 0}
+  previousValue={comparativo?.comercialConsulta?.quantidadeConsultaAnterior}
+  showCompare={comparar}
+/>
 
-      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeConsulta || 0} />
-      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)} />
-      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)} />
+<SimpleMetric
+  label="Recebimento"
+  value={formatMoney(comercialConsulta?.valorTotalConsulta || 0)}
+  previousValue={comparativo?.comercialConsulta?.valorTotalConsultaAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Ticket M."
+  value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)}
+  previousValue={comparativo?.comercialConsulta?.ticketMedioConsultaAnterior}
+  showCompare={comparar}
+/>
     </div>
 
     <div className="space-y-2">
@@ -866,9 +701,26 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         </h4>
       </div>
 
-      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeReabord || 0} />
-      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotalReabord || 0)} />
-      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)} />
+      <SimpleMetric
+  label="Quantidade"
+  value={comercialConsulta?.quantidadeReabord || 0}
+  previousValue={comparativo?.comercialConsulta?.quantidadeReabordAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Recebimento"
+  value={formatMoney(comercialConsulta?.valorTotalReabord || 0)}
+  previousValue={comparativo?.comercialConsulta?.valorTotalReabordAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Ticket M."
+  value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)}
+  previousValue={comparativo?.comercialConsulta?.ticketMedioReabordAnterior}
+  showCompare={comparar}
+/>
     </div>
   </div>
 
@@ -881,36 +733,59 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     </div>
 
     <div className="space-y-0.5">
-      <SimpleMetric label="Quantidade" value={comercialConsulta?.quantidadeTotal || 0} />
-      <SimpleMetric label="Recebimento" value={formatMoney(comercialConsulta?.valorTotal || 0)} />
-      <SimpleMetric label="Ticket M." value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)} />
+      <SimpleMetric
+  label="Quantidade"
+  value={comercialConsulta?.quantidadeTotal || 0}
+  previousValue={comparativo?.comercialConsulta?.quantidadeTotalAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Recebimento"
+  value={formatMoney(comercialConsulta?.valorTotal || 0)}
+  previousValue={comparativo?.comercialConsulta?.valorTotalAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Ticket M."
+  value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)}
+  previousValue={comparativo?.comercialConsulta?.ticketMedioTotalAnterior}
+  showCompare={comparar}
+/>
     </div>
   </div>
 </GroupCard>
 
           <GroupCard title="Comercial III" icon={<Users size={26} />}>
-            <SimpleMetric
-              label="Propostas enviadas"
-              value={comercialVendas?.propostasEnviadas || 0}
-              accent="blue"
-            />
-            <GoalMetric
-              label="Propostas fechadas"
-              value={comercialVendas?.propostasFechadas || 0}
-              percent={comercialVendas?.propostasFechadasPercent || 0}
-              target={comercialVendas?.metaPropostasFechadasPercent || 70}
-              mode="min"
-            />
-            <SimpleMetric
-              label="Valor total de vendas"
-              value={formatMoney(comercialVendas?.valorTotalVendas || 0)}
-              accent="gold"
-            />
-            <SimpleMetric
-              label="Ticket Médio"
-              value={formatMoney(comercialVendas?.ticketMedioVendas || 0)}
-              accent="green"
-            />
+           <SimpleMetric
+  label="Propostas enviadas"
+  value={comercialVendas?.propostasEnviadas || 0}
+  previousValue={comparativo?.comercialVendas?.propostasEnviadasAnterior}
+  showCompare={comparar}
+/>
+
+<GoalMetric
+  label="Propostas fechadas"
+  value={comercialVendas?.propostasFechadas || 0}
+  percent={comercialVendas?.propostasFechadasPercent || 0}
+  target={comercialVendas?.metaPropostasFechadasPercent || 70}
+  mode="min"
+/>
+
+<SimpleMetric
+  label="Valor total de vendas"
+  value={formatMoney(comercialVendas?.valorTotalVendas || 0)}
+  previousValue={comparativo?.comercialVendas?.valorTotalVendasAnterior}
+  showCompare={comparar}
+/>
+
+<SimpleMetric
+  label="Ticket Médio"
+  value={formatMoney(comercialVendas?.ticketMedioVendas || 0)}
+  previousValue={comparativo?.comercialVendas?.ticketMedioVendasAnterior}
+  showCompare={comparar}
+/>
           </GroupCard>
 
          <GroupCard title="Comparecimento" icon={<Star size={26} />}>
@@ -984,99 +859,113 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   }`}
 >
             <div className={`space-y-1 ${metricCardBg()}`}>
-              <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
-} ${textPrimary()}`}>Quantidade total de vendas</div>
-              <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
-} font-black tracking-[-0.04em] ${textPrimary()}`}>
-                {consolidado?.qtdVendas || 0}
-              </div>
+  <SimpleMetric
+    label="Quantidade total de vendas"
+    value={consolidado?.qtdVendas || 0}
+    previousValue={comparativo?.consolidado?.qtdVendasAnterior}
+    showCompare={comparar}
+  />
+</div>
 
-            </div>
+<div className={`space-y-1 ${metricCardBg()}`}>
+  <SimpleMetric
+    label="Total do valor de venda"
+    value={formatMoney(consolidado?.valorVendas || 0)}
+    previousValue={comparativo?.consolidado?.valorVendasAnterior}
+    showCompare={comparar}
+  />
 
-            <div className={`space-y-1 ${metricCardBg()}`}>
-              <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
-} ${textPrimary()}`}>Total do valor de venda</div>
-              <div className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
-} font-black tracking-[-0.04em] ${textPrimary()}`}>
-                {formatMoney(consolidado?.valorVendas || 0)}
-              </div>
-     <div
-  className={`flex items-center gap-3 ${
-    viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
-  }`}
->
-  <span
-    className={
-      consolidadoVendasOk
-        ? 'font-semibold text-emerald-500 dark:text-emerald-400'
-        : 'font-semibold text-rose-500 dark:text-rose-400'
-    }
+  <div
+    className={`flex items-center gap-3 ${
+      viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
+    }`}
   >
-    {formatPercent(vendasPercent)}
-  </span>
+    <span
+      className={
+        consolidadoVendasOk
+          ? 'font-semibold text-emerald-500 dark:text-emerald-400'
+          : 'font-semibold text-rose-500 dark:text-rose-400'
+      }
+    >
+      {formatPercent(vendasPercent)}
+    </span>
 
-  <span className={textSecondary()}>
-    da meta de {formatMoneyShort(metaVendas)} atingida
-  </span>
-</div>
-              <div
-  className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
-    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
-  }`}
->
-                <div
-                  className={`${
-  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
-} ${consolidadoVendasOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
-                  style={{ width: `${clampPercent(vendasPercent)}%` }}
-                />
-              </div>
-            </div>
+    <span className={textSecondary()}>
+      da meta de {formatMoneyShort(metaVendas)} atingida
+    </span>
+  </div>
 
-            <div className={`space-y-1 ${metricCardBg()}`}>
-             <div className={`${
-  viewMode === 'mobile' ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
-} ${textPrimary()}`}>
-  Ticket médio total
+  <div
+    className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+      viewMode === 'mobile'
+        ? 'h-8 rounded-xl'
+        : 'h-2 rounded-full'
+    }`}
+  >
+    <div
+      className={`${
+        viewMode === 'mobile'
+          ? 'h-8 rounded-xl'
+          : 'h-2 rounded-full'
+      } ${
+        consolidadoVendasOk
+          ? 'bg-emerald-400'
+          : 'bg-rose-400'
+      }`}
+      style={{ width: `${clampPercent(vendasPercent)}%` }}
+    />
+  </div>
 </div>
-              <div  className={`${
-  viewMode === 'mobile' ? 'text-[64px]' : 'text-[32px]'
-} font-black tracking-[-0.04em] ${textPrimary()}`}>
-                {formatMoney(consolidado?.ticketMedio || 0)}
-              </div>
-              <div
-  className={`flex items-center gap-3 ${
-    viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
-  }`}
->
-                <span
-                  className={
-                    consolidadoTicketOk
-                      ? 'font-semibold text-emerald-500 dark:text-emerald-400'
-                      : 'font-semibold text-rose-500 dark:text-rose-400'
-                  }
-                >
-                  {consolidadoTicketOk ? 'atingido' : 'abaixo'}
-                </span>
-                <span className={textSecondary()}>mín. {formatMoney(metaTicket)}</span>
-              </div>
-              <div
-  className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
-    viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
-  }`}
->
-                <div
-                  className={`${
-  viewMode === 'mobile' ? 'h-8 rounded-xl' : 'h-2 rounded-full'
-} ${consolidadoTicketOk ? 'bg-emerald-400' : 'bg-rose-400'}`}
-                  style={{ width: `${clampPercent(ticketPercent)}%` }}
-                />
-              </div>
-            </div>
+
+<div className={`space-y-1 ${metricCardBg()}`}>
+  <SimpleMetric
+    label="Ticket médio total"
+    value={formatMoney(consolidado?.ticketMedio || 0)}
+    previousValue={comparativo?.consolidado?.ticketMedioAnterior}
+    showCompare={comparar}
+  />
+
+  <div
+    className={`flex items-center gap-3 ${
+      viewMode === 'mobile' ? 'text-[32px]' : 'text-[14px]'
+    }`}
+  >
+    <span
+      className={
+        consolidadoTicketOk
+          ? 'font-semibold text-emerald-500 dark:text-emerald-400'
+          : 'font-semibold text-rose-500 dark:text-rose-400'
+      }
+    >
+      {consolidadoTicketOk ? 'atingido' : 'abaixo'}
+    </span>
+
+    <span className={textSecondary()}>
+      mín. {formatMoney(metaTicket)}
+    </span>
+  </div>
+
+  <div
+    className={`overflow-hidden bg-slate-200 dark:bg-white/10 ${
+      viewMode === 'mobile'
+        ? 'h-8 rounded-xl'
+        : 'h-2 rounded-full'
+    }`}
+  >
+    <div
+      className={`${
+        viewMode === 'mobile'
+          ? 'h-8 rounded-xl'
+          : 'h-2 rounded-full'
+      } ${
+        consolidadoTicketOk
+          ? 'bg-emerald-400'
+          : 'bg-rose-400'
+      }`}
+      style={{ width: `${clampPercent(ticketPercent)}%` }}
+    />
+  </div>
+</div>
           </div>
         </section>
 
@@ -1124,7 +1013,6 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             <div className="space-y-5">
               <div className="space-y-2">
                 {origensTop.map((item, i) => {
-                  const maxQtd = origensTop[0]?.quantidade || 1
                   const pct = (item.quantidade / origensTotal) * 100
                   const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
 
