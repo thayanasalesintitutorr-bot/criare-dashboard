@@ -316,10 +316,10 @@ const isImac = viewMode === 'desktop'
     />
   </div>
 
-  <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
-  <div className="grid gap-3 xl:col-span-8">
+  <div className="mt-3 grid gap-3 xl:grid-cols-12">
+  <div className="min-w-0 space-y-3 xl:col-span-8">
 
-    <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+    <div className="min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
       Atendimento por dia
@@ -385,7 +385,7 @@ const isImac = viewMode === 'desktop'
   </div>
 </div>
 
-    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+   <div className="min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <h3 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
     Evolução de faturamento
   </h3>
@@ -400,9 +400,10 @@ const isImac = viewMode === 'desktop'
       )
 
       const pontos = dados.map((item: any, index: number) => {
-        const x = dados.length > 1
-          ? (index / (dados.length - 1)) * 100
-          : 0
+        const x =
+  dados.length === 1
+    ? 50
+    : (index / (dados.length - 1)) * 100
 
         const y = 100 - (Number(item.valor || 0) / maior) * 85
 
@@ -525,7 +526,7 @@ const isImac = viewMode === 'desktop'
 
   </div>
 
-  <div className="grid gap-3 xl:col-span-4">
+<div className="min-w-0 space-y-3 xl:col-span-4">
 
  <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
@@ -540,7 +541,7 @@ const isImac = viewMode === 'desktop'
   </div>
 </div>
 
-   <div className="self-start h-[247px] rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+   <div className="h-[247px] min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
     Agendamentos por origem
   </h3>
