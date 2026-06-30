@@ -495,6 +495,36 @@ const isImac = viewMode === 'desktop'
   })()}
 </div>
 
+<div className="mt-2 grid grid-cols-3 gap-2">
+  {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
+    const item = (painelAtendimento?.finalizadosParticularConvenio || []).find(
+      (x: any) => String(x.nome || '').toUpperCase().includes(nome)
+    )
+
+    return (
+      <div
+        key={nome}
+        className="rounded-[14px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2"
+      >
+        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+          {nome}
+        </p>
+
+        <div className="mt-2 flex items-end justify-between gap-2">
+          <p className="text-[24px] font-black leading-none text-[var(--foreground)]">
+            {item?.qtd || 0}
+          </p>
+
+          <p className="text-[14px] font-black text-[var(--foreground)]">
+            {formatMoney(item?.valor || 0)}
+          </p>
+        </div>
+      </div>
+    )
+  })}
+</div>
+
+
     </div>
 
    <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
@@ -533,36 +563,8 @@ const isImac = viewMode === 'desktop'
         })}
       </div>
     </div>
-  </div>
-<div className="mt-3 grid grid-cols-3 gap-2">
-  {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
-    const item = (painelAtendimento?.finalizadosParticularConvenio || []).find(
-      (x: any) => String(x.nome || '').toUpperCase().includes(nome)
-    )
+  </div></section>
 
-    return (
-      <div
-        key={nome}
-        className="rounded-[14px] border border-[color:var(--border)] bg-[var(--background)] px-3 py-2"
-      >
-        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-          {nome}
-        </p>
-
-        <div className="mt-2 flex items-end justify-between gap-2">
-          <p className="text-[24px] font-black leading-none text-[var(--foreground)]">
-            {item?.qtd || 0}
-          </p>
-
-          <p className="text-[14px] font-black text-[var(--foreground)]">
-            {formatMoney(item?.valor || 0)}
-          </p>
-        </div>
-      </div>
-    )
-  })}
-</div>
-</section>
        <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
   <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
