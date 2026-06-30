@@ -433,36 +433,71 @@ const isImac = viewMode === 'desktop'
         Agendamentos por origem
       </h3>
 
-      <div className="space-y-3">
-        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 8).map((item: any) => {
-          const maior = Math.max(
-            ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
-            1
-          )
+      <div className="relative h-[170px] overflow-hidden rounded-[18px] bg-[var(--metric-card)] p-4">
+  {(() => {
+    const dados = painelAtendimento?.evolucaoFaturamento || []
 
-          return (
-            <div key={item.nome}>
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
-                  {item.nome}
-                </span>
-                <span className="text-sm font-black text-[var(--foreground)]">
-                  {item.quantidade || 0}
-                </span>
-              </div>
+    const maior = Math.max(
+      ...dados.map((x: any) => Number(x.valor || 0)),
+      1
+    )
 
-              <div className="h-3 overflow-hidden rounded-full bg-[var(--metric-card)]">
-                <div
-                  className="h-full rounded-full bg-[#D7B46A]"
-                  style={{
-                    width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
-                  }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </div>
+    const pontos = dados.map((item: any, index: number) => {
+      const x = dados.length > 1 ? (index / (dados.length - 1)) * 100 : 0
+      const y = 100 - (Number(item.valor || 0) / maior) * 85
+
+      return `${x},${y}`
+    })
+
+    const area = [
+      `0,100`,
+      ...pontos,
+      `100,100`,
+    ].join(' ')
+
+    return (
+      <>
+        <div className="absolute right-4 top-4 text-right">
+          <p className="text-[18px] font-black text-[var(--foreground)]">
+            {formatMoney(
+              dados.reduce((acc: number, item: any) => acc + Number(item.valor || 0), 0)
+            )}
+          </p>
+          <p className="text-[11px] font-semibold text-[var(--muted-foreground)]">
+            Total no período
+          </p>
+        </div>
+
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="h-full w-full">
+          <polygon
+            points={area}
+            className="fill-emerald-500/15"
+          />
+
+          <polyline
+            points={pontos.join(' ')}
+            fill="none"
+            stroke="rgb(16 185 129)"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+
+        <div className="absolute bottom-3 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
+          {dados
+            .filter((_: any, index: number) => {
+              if (dados.length <= 6) return true
+              return index === 0 || index === dados.length - 1 || index % Math.ceil(dados.length / 5) === 0
+            })
+            .map((item: any) => (
+              <span key={item.data}>{item.label}</span>
+            ))}
+        </div>
+      </>
+    )
+  })()}
+</div>
     </div>
   </div>
 
