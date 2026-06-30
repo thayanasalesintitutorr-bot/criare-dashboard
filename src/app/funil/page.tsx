@@ -322,18 +322,21 @@ const isImac = viewMode === 'desktop'
         Atendimento por dia
       </h3>
 
-      <div className="flex h-[92px] items-end gap-1 overflow-x-auto">
+      <div className="flex h-[78px] items-end gap-1 overflow-x-auto">
         {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) => Number(x.quantidade || 0)),
             1
           )
 
+          const dataObj = new Date(`${item.data}T00:00:00`)
+const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
+
           return (
             <div key={item.data} className="flex flex-1 flex-col items-center gap-2">
-              <div className="flex h-[56px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
+              <div className="flex h-[42px] w-full min-w-[22px] items-end rounded-lg bg-[var(--metric-card)] p-1">
                 <div
-                  className="w-full rounded-lg bg-[#D7B46A]"
+                  className={`w-full rounded-lg ${fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'}`}
                   style={{
                     height: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
                   }}
@@ -390,8 +393,8 @@ const isImac = viewMode === 'desktop'
     </div>
   </div>
 
-  <div className="mt-4 grid gap-4 xl:grid-cols-2">
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+ <div className="mt-3 grid gap-3 xl:grid-cols-12">
+    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Evolução de faturamento
       </h3>
@@ -479,13 +482,13 @@ const isImac = viewMode === 'desktop'
 </div>
     </div>
 
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] p-4">
+    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Agendamentos por origem
       </h3>
 
-      <div className="space-y-3">
-        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 8).map((item: any) => {
+      <div className="max-h-[170px] space-y-3 overflow-y-auto pr-2">
+        {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
             1
