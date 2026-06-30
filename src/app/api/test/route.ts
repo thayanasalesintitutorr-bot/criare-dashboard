@@ -1806,6 +1806,7 @@ const canceladosPercent = safePercent(
         inicio: range.start.toISOString(),
         fim: range.end.toISOString(),
       },
+
       kpis: {
       marketing: {
       totalEntradas,
