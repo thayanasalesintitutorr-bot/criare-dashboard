@@ -13,8 +13,9 @@ import {
   Ticket,
   Handshake,
   ClipboardList,
-CalendarX2,
-CalendarClock,
+  CalendarX2,
+  CalendarClock,
+  LayoutDashboard,
 } from 'lucide-react'
 
 type DashboardResponse = {
@@ -279,15 +280,20 @@ const ticketMedioConsultaComReabord =
   <AppShell title="Consulta (Funil)">
     <div className="space-y-5">
 <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
-  <div className="mb-5 flex items-center justify-between">
-    <div>
-      <h2 className="text-[24px] font-black text-[var(--foreground)]">
-        Visão geral dos atendimentos
-      </h2>
-      <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">
-        Dados consolidados de todos os profissionais no período
-      </p>
-    </div>
+  <div className="flex items-center gap-4">
+  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)]/18">
+    <LayoutDashboard className="h-6 w-6 text-[var(--accent)]" />
+  </div>
+
+  <div>
+    <h2 className="text-[24px] font-black text-[var(--foreground)]">
+      Visão geral dos atendimentos
+    </h2>
+
+    <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">
+      Dados consolidados de todos os profissionais no período
+    </p>
+  </div>
   </div>
 
   <div className="grid gap-3 md:grid-cols-4">
@@ -592,9 +598,9 @@ const ticketProcedimentosMedico =
   return (
       <div
   key={medico.medico}
-  className={`mx-auto max-w-[1320px] rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
-    isImac ? 'p-3' : 'p-4'
-  }`}
+  className={`w-full rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
+  isImac ? 'p-3' : 'p-4'
+}`}
 >
       <div className="mb-4 flex items-center gap-4">
         
