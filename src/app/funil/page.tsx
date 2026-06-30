@@ -407,8 +407,9 @@ const isImac = viewMode === 'desktop'
     </div>
   </div>
 
- <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
-    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-8">
+ <div className="mt-1 grid items-start gap-3 xl:grid-cols-12">
+   <div className="grid gap-2 xl:col-span-8">
+    <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Evolução de faturamento
       </h3>
@@ -494,6 +495,8 @@ const isImac = viewMode === 'desktop'
     )
   })()}
 </div>
+</div>
+
 
 <div className="mt-2 grid grid-cols-3 gap-2">
   {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
