@@ -407,14 +407,14 @@ const isImac = viewMode === 'desktop'
     </div>
   </div>
 
- <div className="mt-1 grid items-start gap-3 xl:grid-cols-12">
+<div className="mt-0 grid items-start gap-3 xl:grid-cols-12">
    <div className="grid gap-2 xl:col-span-8">
     <div className="rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Evolução de faturamento
       </h3>
 
-     <div className="relative h-[115px] overflow-hidden p-1">
+     <div className="relative h-[105px] overflow-hidden pt-0 px-1 pb-1">
   {(() => {
     const dados = painelAtendimento?.evolucaoFaturamento || []
 
@@ -438,7 +438,7 @@ const isImac = viewMode === 'desktop'
 
     return (
       <>
-        <div className="absolute right-4 top-4 text-right">
+        <div className="absolute right-5 top-3 text-right">
           <p className="text-[18px] font-black text-[var(--foreground)]">
             {formatMoney(
               dados.reduce((acc: number, item: any) => acc + Number(item.valor || 0), 0)
@@ -481,7 +481,7 @@ const isImac = viewMode === 'desktop'
 />
         </svg>
 
-        <div className="absolute bottom-3 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
+        <div className="absolute bottom-1 left-4 right-4 flex justify-between text-[11px] font-bold text-[var(--muted-foreground)]">
           {dados
             .filter((_: any, index: number) => {
               if (dados.length <= 6) return true
@@ -530,12 +530,12 @@ const isImac = viewMode === 'desktop'
 
     </div>
 
-   <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
+   <div className="self-start h-[247px] rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3 xl:col-span-4">
       <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
         Agendamentos por origem
       </h3>
 
-      <div className="max-h-[145px] space-y-2 overflow-y-auto pr-2">
+      <div className="max-h-[185px] space-y-2 overflow-y-auto pr-2">
         {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
           const maior = Math.max(
             ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
