@@ -2,13 +2,6 @@
 
 import { useEffect, useState, type ReactNode } from 'react'
 
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-} from 'recharts'
 
 import { AppShell } from '@/components/layout/app-shell'
 
@@ -34,40 +27,6 @@ const ORIGENS_COLORS = [
   '#e879f9',
 ]
 
-function formatPercent(v: number) {
-  return `${Math.round(v)}%`
-}
-
-function OrigensTooltip({ active, payload }: any) {
-  if (!active || !payload?.length) return null
-
-  const item = payload[0]
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-[var(--card)] px-4 py-3 text-sm shadow-xl">
-      <div className="mb-1 font-semibold text-white/90">
-        {item.payload.nome}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <span
-          className="h-2.5 w-2.5 rounded-full"
-          style={{ background: item.fill }}
-        />
-
-        <span className="text-[var(--muted-foreground)]">Leads:</span>
-
-        <span className="font-bold text-[var(--foreground)]">
-          {item.value}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function cardBg() {
-  return 'border border-black/5 bg-[var(--card)] shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]'
-}
 function MarketingMetricCard({
   title,
   value,
@@ -176,7 +135,16 @@ function OrigemStageCard({
   items,
   status,
 }: {
- items: { nome: string; quantidade?: number; qtd?: number; valor?: number }[]
+  items: {
+    nome: string
+    quantidade?: number
+    qtd?: number
+    valor?: number
+    detalhes?: {
+      nome: string
+      quantidade: number
+    }[]
+  }[]
   status: 'green' | 'red' | 'blue'
 }) {
   const innerBg =
@@ -196,40 +164,66 @@ function OrigemStageCard({
         </div>
       )}
 
-      {items.slice(0, 3).map((item, index) => {
-        return (
-          <div
-  key={`${item.nome}-${index}`}
-  className="flex items-center justify-between gap-3"
->
-            <div className="flex min-w-0 items-center gap-3">
-  <span
-    className="h-2.5 w-2.5 shrink-0 rounded-full"
-    style={{ backgroundColor: ORIGENS_COLORS[index % ORIGENS_COLORS.length] }}
-  />
+      {items.slice(0, 3).map((item, index) => (
+        <div
+          key={`${item.nome}-${index}`}
+          className="group relative flex items-center justify-between gap-3"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{
+                backgroundColor:
+                  ORIGENS_COLORS[index % ORIGENS_COLORS.length],
+              }}
+            />
 
-  <span className="truncate text-sm font-semibold text-slate-700 dark:text-white/75">
-    {item.nome}
-  </span>
-</div>
-
-<div className="shrink-0 text-right">
-  <div className="text-sm font-black text-slate-900 dark:text-white">
-    {item.quantidade ?? item.qtd ?? 0}
-  </div>
-
-  {item.valor !== undefined && (
-    <div className="text-xs font-bold text-slate-500 dark:text-white/50">
-      {item.valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      })}
-    </div>
-  )}
-</div>
+            <span className="truncate text-sm font-semibold text-slate-700 dark:text-white/75">
+              {item.nome}
+            </span>
           </div>
-        )
-      })}
+
+          <div className="ml-auto shrink-0 text-right">
+            <div className="text-base font-black text-slate-900 dark:text-white">
+              {item.quantidade ?? item.qtd ?? 0}
+            </div>
+
+            {item.valor !== undefined && (
+              <div className="text-xs font-bold text-slate-500 dark:text-white/50">
+                {item.valor.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
+              </div>
+            )}
+          </div>
+
+          {item.detalhes && item.detalhes.length > 0 && (
+            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[320px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
+              <div className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                Pipeline e status
+              </div>
+
+              <div className="space-y-2">
+                {item.detalhes.slice(0, 6).map((detalhe) => (
+                  <div
+                    key={detalhe.nome}
+                    className="flex items-center justify-between gap-3 text-xs"
+                  >
+                    <span className="truncate font-bold text-slate-700 dark:text-white/80">
+                      {detalhe.nome}
+                    </span>
+
+                    <span className="font-black text-slate-900 dark:text-white">
+                      {detalhe.quantidade}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   )
 }
@@ -241,7 +235,7 @@ export default function MarketingPage() {
 const [data, setData] = useState<any>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
-const [tagSelecionada, setTagSelecionada] = useState<string | null>(null)
+const [tagsSelecionadas, setTagsSelecionadas] = useState<('A' | 'B' | 'C' | 'D')[]>([])
 useEffect(() => {
   async function loadData() {
     try {
@@ -285,7 +279,6 @@ return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])
 
 const marketing = data?.kpis?.marketing
-const origens: { nome: string; quantidade: number }[] = data?.origens || []
 const origensPorEtapa = data?.origensPorEtapa || {
   entrada: [],
   naoQualificado: [],
@@ -302,9 +295,9 @@ const origensQualificadosPorTag =
   }
 
 const qualificadosFiltrados =
-  tagSelecionada === null
+  tagsSelecionadas.length === 0
     ? origensQualificadosPorTag.todas
-    : origensQualificadosPorTag[tagSelecionada]
+    : tagsSelecionadas.flatMap((tag) => origensQualificadosPorTag[tag])
 
 
 const origensVendaConsulta: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
@@ -359,62 +352,55 @@ return (
         <MarketingMetricCard
           title="Qualificados"
           value={
-  tagSelecionada === null
+  tagsSelecionadas.length === 0
     ? marketing?.leadsAceitos || 0
-    : tagSelecionada === 'A'
-      ? marketing?.leadA || 0
-      : tagSelecionada === 'B'
-        ? marketing?.leadB || 0
-        : tagSelecionada === 'C'
-          ? marketing?.leadC || 0
-          : marketing?.leadD || 0
+    : tagsSelecionadas.reduce((total, tag) => {
+        if (tag === 'A') return total + (marketing?.leadA || 0)
+        if (tag === 'B') return total + (marketing?.leadB || 0)
+        if (tag === 'C') return total + (marketing?.leadC || 0)
+        return total + (marketing?.leadD || 0)
+      }, 0)
 }
           subtitle={`${Math.round(marketing?.leadsAceitosPercent || 0)}% de 90%`}
           icon="qualificado"
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percent={marketing?.leadsAceitosPercent || 0}
         >
-          <div className="mb-4 grid grid-cols-5 gap-2">
-  <button
-    onClick={() => setTagSelecionada(null)}
-    className={`rounded-xl px-3 py-2 text-xs font-black ${
-      tagSelecionada === null
-        ? 'bg-[#D7B46A] text-white'
-        : 'bg-[#F3E7C7]/70 text-[#8A6A22]'
-    }`}
-  >
-   <>
-  Todas
-  <div className="text-[10px] opacity-80">
-    {marketing?.leadsAceitos || 0}
-  </div>
-</>
-  </button>
+          <div className="mb-4 grid grid-cols-4 gap-4">
+  {(['A', 'B', 'C', 'D'] as const).map((tag) => {
+    const ativo = tagsSelecionadas.includes(tag)
 
-  {['A', 'B', 'C', 'D'].map((tag) => (
-    <button
-      key={tag}
-      onClick={() => setTagSelecionada(tag)}
-      className={`rounded-xl px-3 py-2 text-sm font-black ${
-        tagSelecionada === tag
-          ? 'bg-[#D7B46A] text-white'
-          : 'bg-[#F3E7C7]/70 text-[#8A6A22]'
-      }`}
-    >
-      <>
-  {tag}
-  <div className="text-[10px] opacity-80">
-    {tag === 'A'
-  ? marketing?.leadA || 0
-  : tag === 'B'
-    ? marketing?.leadB || 0
-    : tag === 'C'
-      ? marketing?.leadC || 0
-      : marketing?.leadD || 0}
-  </div>
-</>
-    </button>
-  ))}
+    const quantidade =
+      tag === 'A'
+        ? marketing?.leadA || 0
+        : tag === 'B'
+          ? marketing?.leadB || 0
+          : tag === 'C'
+            ? marketing?.leadC || 0
+            : marketing?.leadD || 0
+
+    return (
+      <button
+        key={tag}
+        type="button"
+        onClick={() =>
+          setTagsSelecionadas((atual) =>
+            atual.includes(tag)
+              ? atual.filter((item) => item !== tag)
+              : [...atual, tag]
+          )
+        }
+        className={`rounded-2xl border px-4 py-3 text-center font-black transition ${
+          ativo
+            ? 'border-emerald-400 bg-emerald-50/80 text-emerald-500'
+            : 'border-slate-200 bg-white/40 text-slate-600 hover:bg-white/70'
+        }`}
+      >
+        <div className="text-xl">{tag}</div>
+        <div className="text-xs opacity-80">{quantidade}</div>
+      </button>
+    )
+  })}
 </div>
           <OrigemStageCard
             items={qualificadosFiltrados}

@@ -433,7 +433,13 @@ function buildEvolucaoDiaria(
 }
 
 function buildOrigens(leads: Lead[]) {
-  const map: Record<string, number> = {}
+  const map: Record<
+    string,
+    {
+      quantidade: number
+      detalhes: Record<string, number>
+    }
+  > = {}
 
   for (const lead of leads) {
     const origem =
@@ -441,11 +447,33 @@ function buildOrigens(leads: Lead[]) {
       (lead.source || '').trim() ||
       'Sem origem'
 
-    map[origem] = (map[origem] || 0) + 1
+    const pipeline = lead.pipeline_id || 'SEM PIPELINE'
+    const status = lead.status_id || 'SEM STATUS'
+    const chaveDetalhe = `${pipeline} | ${status}`
+
+    if (!map[origem]) {
+      map[origem] = {
+        quantidade: 0,
+        detalhes: {},
+      }
+    }
+
+    map[origem].quantidade += 1
+    map[origem].detalhes[chaveDetalhe] =
+      (map[origem].detalhes[chaveDetalhe] || 0) + 1
   }
 
   return Object.entries(map)
-    .map(([nome, quantidade]) => ({ nome, quantidade }))
+    .map(([nome, item]) => ({
+      nome,
+      quantidade: item.quantidade,
+      detalhes: Object.entries(item.detalhes)
+        .map(([nome, quantidade]) => ({
+          nome,
+          quantidade,
+        }))
+        .sort((a, b) => b.quantidade - a.quantidade),
+    }))
     .sort((a, b) => b.quantidade - a.quantidade)
 }
 
@@ -2124,8 +2152,6 @@ painelAtendimento,
 },
 
 origensQualificadosPorTag,
-
-
 origensVendaConsulta: campanhasConsulta,
 origensPropostasFechadas: campanhasVendidas,
 
