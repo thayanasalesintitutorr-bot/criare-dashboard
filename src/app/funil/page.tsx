@@ -224,6 +224,8 @@ const isImac = viewMode === 'desktop'
 
   const vendasPorMedico = data?.vendasPorMedico || []
   const painelAtendimento = data?.painelAtendimento
+  const totalAgendamentosOrigem =
+  painelAtendimento?.totalAgendamentos || 0
   const totalConsultasComReabord =
   Number(data?.kpis?.comercialConsulta?.quantidadeTotal || 0)
 
@@ -353,7 +355,7 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="overflow-x-auto">
-    <div className="flex h-[118px] min-w-max items-end gap-2 pb-1">
+    <div className="flex h-[118px] w-full items-end justify-between gap-2 pb-1">
       {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
         const maior = Math.max(
           ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) =>
@@ -405,7 +407,7 @@ const ticketMedioConsultaComReabord =
   </h3>
 
   <div className="mt-4 overflow-x-auto">
-  <div className="flex h-[150px] min-w-max items-end gap-3 pb-1">
+  <div className="flex h-[150px] w-full items-end justify-between gap-3 pb-1">
     {(() => {
       const dados = painelAtendimento?.evolucaoFaturamento || []
 
@@ -502,9 +504,15 @@ const ticketMedioConsultaComReabord =
 </div>
 
    <div className="h-[247px] min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
-  <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-    Agendamentos por origem
+  <div className="mb-4 flex items-center justify-between">
+  <h3 className="text-[18px] font-black text-[var(--foreground)]">
+    Origen dos agendamentos
   </h3>
+
+  <span className="text-[22px] font-black text-[var(--accent)]">
+    {totalAgendamentosOrigem}
+  </span>
+</div>
 
   <div className="max-h-[185px] space-y-2 overflow-y-auto pr-2">
     {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {

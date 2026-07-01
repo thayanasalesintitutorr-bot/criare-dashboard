@@ -432,12 +432,16 @@ function buildEvolucaoDiaria(
   return result
 }
 
-function buildOrigens(consultaLeads: Lead[]) {
+function buildOrigens(leads: Lead[]) {
   const map: Record<string, number> = {}
 
-  for (const lead of consultaLeads) {
-    const key = (lead.campanha || '').trim() || 'Sem campanha'
-    map[key] = (map[key] || 0) + 1
+  for (const lead of leads) {
+    const origem =
+      (lead.campanha || '').trim() ||
+      (lead.source || '').trim() ||
+      'Sem origem'
+
+    map[origem] = (map[origem] || 0) + 1
   }
 
   return Object.entries(map)

@@ -266,11 +266,13 @@ function SimpleMetric({
   value,
   previousValue,
   showCompare = false,
+  children,
 }: {
   label: string
   value: number | string
   previousValue?: number
   showCompare?: boolean
+  children?: React.ReactNode
 }) {
   const { viewMode } = useFilters()
   const isMobile = viewMode === 'mobile'
@@ -287,7 +289,7 @@ const diff =
 const isUp = diff >= 0
 
   return (
-    <div className="space-y-1">
+    <div className="relative group space-y-1">
       <h4
         className={`${
           isMobile ? 'text-[26px] font-black' : 'text-[14px] font-semibold'
@@ -315,7 +317,7 @@ const isUp = diff >= 0
     </span>
   </div>
 )}
-
+ {children}
     </div>
   )
 }
@@ -340,6 +342,7 @@ function GoalMetric({
 
   const isMobile = viewMode === 'mobile'
 
+  
   return (
     <div className={isMobile ? 'space-y-2' : 'space-y-1'}>
       <h4
@@ -558,12 +561,79 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   }`}
 >
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>
-            <SimpleMetric
+           <SimpleMetric
   label="Total de leads recebidos"
   value={marketing?.totalEntradas || 0}
   previousValue={comparativo?.marketing?.totalEntradasAnterior}
   showCompare={comparar}
-/>
+>
+  <div
+  className="
+    absolute
+    left-0
+    top-full
+    z-50
+    mt-3
+    w-[720px]
+    rounded-[28px]
+    border
+    border-black/10
+    bg-[var(--card)]
+    p-5
+    shadow-2xl
+
+    opacity-0
+    invisible
+
+    group-hover:opacity-100
+    group-hover:visible
+
+    transition-all
+    duration-200
+  "
+>
+      <div className="mb-4 flex items-center justify-between">
+  <h3 className="text-[18px] font-black text-[var(--foreground)]">
+    Origens dos leads
+  </h3>
+
+  <span className="text-[24px] font-black text-[var(--foreground)]">
+    {origensTotal}
+  </span>
+</div>
+
+<div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+  {origensTop.map((item, i) => {
+    const pct = (item.quantidade / origensTotal) * 100
+    const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
+
+    return (
+      <div key={item.nome}>
+        <div className="mb-1 flex items-center justify-between gap-4">
+          <span className="truncate text-[13px] font-black text-[var(--muted-foreground)]">
+            {item.nome}
+          </span>
+
+          <span className="text-[14px] font-black text-[var(--foreground)]">
+            {item.quantidade}
+          </span>
+        </div>
+
+        <div className="relative h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+          <div
+            className="h-3 rounded-full"
+            style={{
+              width: `${Math.max(pct, 4)}%`,
+              backgroundColor: color,
+            }}
+          />
+        </div>
+      </div>
+    )
+  })}
+</div>
+  </div>
+</SimpleMetric>
             <GoalMetric
               label="Leads não qualificados"
               value={marketing?.naoQualificados || 0}
@@ -982,119 +1052,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </div>
           </div>
         </section>
-
-
-        {origensTop.length > 0 && (
-          <section className={`rounded-[28px] p-6 ${cardBg()}`}>
-            <div className="mb-8 flex items-center justify-between">
-  <div>
-    <div className="flex items-center gap-4">
-      <span className="h-12 w-[8px] rounded-full bg-[#D7B46A]" />
-
-      <div>
-        <h3
-  className={`${
-    viewMode === 'mobile'
-      ? 'text-[42px]'
-      : 'text-[24px]'
-  } font-black tracking-[-0.05em] ${textPrimary()}`}
->
-          Origens dos leads
-        </h3>
-
-      
-      </div>
-    </div>
-  </div>
-
-  <div className="text-right">
-    <p className={`text-[20px] font-bold ${textSecondary()}`}>
-      Total de leads
-    </p>
-
-    <p
-  className={`${
-    viewMode === 'mobile'
-      ? 'text-[64px]'
-      : 'text-5xl'
-  } font-black leading-none ${textPrimary()}`}
->
-  {origensTotal}
-</p>
-  </div>
-</div>
-
-            <div className="space-y-5">
-              <div className="space-y-2">
-                {origensTop.map((item, i) => {
-                  const pct = (item.quantidade / origensTotal) * 100
-                  const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
-
-                  return (
-                    <div key={item.nome}>
-                     <div className="mb-3 flex items-start justify-between gap-8">
-  <div className="flex-1">
-    <span
-      className={`${
-        viewMode === 'mobile' ? 'text-[26px]' : 'text-[18px]'
-      } font-black ${textPrimary()}`}
-    >
-      {item.nome}
-    </span>
-
-    <div className="mt-3 relative">
-  <div
-    className={`overflow-hidden bg-slate-200 dark:bg-white/8 ${
-      viewMode === 'mobile'
-        ? 'h-8 rounded-xl'
-        : 'h-6 rounded-xl'
-    }`}
-  >
-    <div
-      className={`transition-all duration-500 ${
-        viewMode === 'mobile'
-          ? 'h-8 rounded-xl'
-          : 'h-6 rounded-xl'
-      }`}
-      style={{
-        width: `${Math.max(pct, 4)}%`,
-        backgroundColor: color,
-      }}
-    />
-  </div>
-
-  <span
-  className={`absolute top-1/2 -translate-y-1/2 font-black text-white ${
-    viewMode === 'mobile'
-      ? 'text-[24px]'
-      : 'text-[16px]'
-  }`}
-  style={{
-    left: `calc(${Math.max(pct, 4)}% - 28px)`,
-  }}
->
-  {formatPercent(pct)}
-</span>
-</div>
-  </div>
-
-  <span
-    className={`${
-      viewMode === 'mobile' ? 'text-[48px]' : 'text-4xl'
-    } min-w-[90px] text-right font-black leading-none ${textPrimary()}`}
-  >
-    {item.quantidade}
-  </span>
-</div>
-                    </div>
-                  )
-                })}
-              </div>
-
-        
-            </div>
-          </section>
-          )}
+  
 
 
       </div>
