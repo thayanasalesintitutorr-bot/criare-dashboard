@@ -597,16 +597,16 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   "
 >
       <div className="mb-4 flex items-center justify-between">
-  <h3 className="text-[18px] font-black text-[var(--foreground)]">
+  <h3 className={`${viewMode === 'mobile' ? 'text-[34px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
     Origens dos leads
   </h3>
 
-  <span className="text-[24px] font-black text-[var(--foreground)]">
+  <span className={`${viewMode === 'mobile' ? 'text-[54px]' : 'text-[24px]'} font-black text-[var(--foreground)]`}>
     {origensTotal}
   </span>
 </div>
 
-<div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
+<div className={`${viewMode === 'mobile' ? 'max-h-[680px] space-y-6' : 'max-h-[360px] space-y-3'} overflow-y-auto pr-2`}>
   {origensTop.map((item, i) => {
     const pct = (item.quantidade / origensTotal) * 100
     const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
@@ -614,18 +614,18 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     return (
       <div key={item.nome}>
         <div className="mb-1 flex items-center justify-between gap-4">
-          <span className="truncate text-[13px] font-black text-[var(--muted-foreground)]">
+          <span className={`${viewMode === 'mobile' ? 'text-[26px]' : 'text-[13px]'} truncate font-black text-[var(--muted-foreground)]`}>
             {item.nome}
           </span>
 
-          <span className="text-[14px] font-black text-[var(--foreground)]">
+          <span className={`${viewMode === 'mobile' ? 'text-[30px]' : 'text-[14px]'} font-black text-[var(--foreground)]`}>
             {item.quantidade}
           </span>
         </div>
 
-        <div className="relative h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+        <div className={`${viewMode === 'mobile' ? 'h-6' : 'h-3'} relative overflow-hidden rounded-full bg-slate-200 dark:bg-white/10`}>
           <div
-            className="h-3 rounded-full"
+            className={`${viewMode === 'mobile' ? 'h-6' : 'h-3'} rounded-full`}
             style={{
               width: `${Math.max(pct, 4)}%`,
               backgroundColor: color,
