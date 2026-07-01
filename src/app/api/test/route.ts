@@ -726,7 +726,19 @@ const leadD = consultaBasePeriodo.filter((l) =>
     const ticketMedioConsulta =
       quantidadeConsulta > 0 ? valorTotalConsulta / quantidadeConsulta : 0
 
-      const campanhasConsultaMap: Record<string, { qtd: number; valor: number }> = {}
+   const campanhasConsultaMap: Record<
+  string,
+  {
+    qtd: number
+    valor: number
+    detalhes: {
+      medico: string
+      atendimento: string
+      convenio: string
+      valor: number
+    }[]
+  }
+> = {}
 
 consultaGanhosLeads.forEach((lead) => {
   const campanha = normalizeCampaignName(lead.campanha)
@@ -735,11 +747,22 @@ consultaGanhosLeads.forEach((lead) => {
   if (valorConsulta <= 0) return
 
   if (!campanhasConsultaMap[campanha]) {
-    campanhasConsultaMap[campanha] = { qtd: 0, valor: 0 }
+    campanhasConsultaMap[campanha] = {
+      qtd: 0,
+      valor: 0,
+      detalhes: [],
+    }
   }
 
   campanhasConsultaMap[campanha].qtd += 1
   campanhasConsultaMap[campanha].valor += valorConsulta
+
+  campanhasConsultaMap[campanha].detalhes.push({
+    medico: lead.medico || 'Sem médico',
+    atendimento: lead.Atendimento || 'Sem atendimento',
+    convenio: lead.Convenio || 'Particular',
+    valor: valorConsulta,
+  })
 })
 
 const valorTotalCampanhasConsulta = Object.values(campanhasConsultaMap).reduce(
@@ -756,6 +779,7 @@ const campanhasConsulta = Object.entries(campanhasConsultaMap)
       valorTotalCampanhasConsulta > 0
         ? (item.valor / valorTotalCampanhasConsulta) * 100
         : 0,
+    detalhes: item.detalhes,
   }))
   .sort((a, b) => b.valor - a.valor)
 
@@ -827,7 +851,18 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
     })
 
     const produtosMap: Record<string, { qtd: number; valor: number }> = {}
-    const campanhasMap: Record<string, { qtd: number; valor: number }> = {}
+    const campanhasMap: Record<
+  string,
+  {
+    qtd: number
+    valor: number
+    detalhes: {
+      medico: string
+      produto: string
+      valor: number
+    }[]
+  }
+> = {}
 
     const medicosMap: Record<
   string,
@@ -916,19 +951,6 @@ const vendasPorMedico = Object.entries(medicosMap)
 propostasFechadasLeads.forEach((lead) => {
   const valorVenda = toNumber(lead.venda)
   const campanha = normalizeCampaignName(lead.campanha)
-
-  if (valorVenda <= 0) return
-
-  if (!campanhasMap[campanha]) {
-    campanhasMap[campanha] = { qtd: 0, valor: 0 }
-  }
-
-  campanhasMap[campanha].qtd += 1
-  campanhasMap[campanha].valor += valorVenda
-})
-
-propostasFechadasLeads.forEach((lead) => {
-  const valorVenda = toNumber(lead.venda)
   const produtosRaw = lead.Produto
 
   const produtos = Array.isArray(produtosRaw)
@@ -938,19 +960,41 @@ propostasFechadasLeads.forEach((lead) => {
         .map((p) => p.trim())
         .filter(Boolean)
 
-  if (!produtos.length || valorVenda <= 0) return
-
-  const valorPorProduto = valorVenda / produtos.length
-
-  produtos.forEach((produto) => {
-    if (!produtosMap[produto]) {
-      produtosMap[produto] = { qtd: 0, valor: 0 }
+  const produtoPrincipal =
+    produtos.length > 0 ? produtos.join(', ') : 'Sem produto'
+    
+    produtos.forEach((produto) => {
+  if (!produtosMap[produto]) {
+    produtosMap[produto] = {
+      qtd: 0,
+      valor: 0,
     }
+  }
 
-    produtosMap[produto].qtd += 1
-    produtosMap[produto].valor += valorPorProduto
+  produtosMap[produto].qtd += 1
+  produtosMap[produto].valor += valorVenda / produtos.length
+})
+
+  if (valorVenda <= 0) return
+
+  if (!campanhasMap[campanha]) {
+    campanhasMap[campanha] = {
+      qtd: 0,
+      valor: 0,
+      detalhes: [],
+    }
+  }
+
+  campanhasMap[campanha].qtd += 1
+  campanhasMap[campanha].valor += valorVenda
+
+  campanhasMap[campanha].detalhes.push({
+    medico: lead.medico || 'Sem médico',
+    produto: produtoPrincipal,
+    valor: valorVenda,
   })
 })
+
 
 const valorTotalProdutos = Object.values(produtosMap).reduce(
   (acc, item) => acc + item.valor,
@@ -966,23 +1010,10 @@ const produtosVendidos = Object.entries(produtosMap)
   }))
   .sort((a, b) => b.valor - a.valor)
 
-propostasFechadasLeads.forEach((lead) => {
-  const campanha = normalizeCampaignName(lead.campanha)
-  const valorVenda = toNumber(lead.venda)
-
-  if (!campanhasMap[campanha]) {
-    campanhasMap[campanha] = { qtd: 0, valor: 0 }
-  }
-
-  campanhasMap[campanha].qtd += 1
-  campanhasMap[campanha].valor += valorVenda
-})
-
 const valorTotalCampanhas = Object.values(campanhasMap).reduce(
   (acc, item) => acc + item.valor,
   0
 )
-
 const campanhasVendidas = Object.entries(campanhasMap)
   .map(([nome, item]) => ({
     nome,
@@ -990,9 +1021,9 @@ const campanhasVendidas = Object.entries(campanhasMap)
     valor: item.valor,
     percentual:
       valorTotalCampanhas > 0 ? (item.valor / valorTotalCampanhas) * 100 : 0,
+    detalhes: item.detalhes,
   }))
   .sort((a, b) => b.valor - a.valor)
-
     const propostasFechadas = propostasFechadasLeads.length
 
     const valorTotalVendas = propostasFechadasLeads.reduce(

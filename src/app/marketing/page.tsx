@@ -167,7 +167,7 @@ function OrigemStageCard({
       {items.slice(0, 3).map((item, index) => (
         <div
           key={`${item.nome}-${index}`}
-          className="group relative flex items-center justify-between gap-3"
+          className="group relative flex cursor-pointer items-center justify-between gap-3"
         >
           <div className="flex min-w-0 items-center gap-3">
             <span
@@ -199,9 +199,9 @@ function OrigemStageCard({
           </div>
 
           {item.detalhes && item.detalhes.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[320px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
+            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[420px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
               <div className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
-                Pipeline e status
+                Origem dos Leads
               </div>
 
               <div className="space-y-2">
