@@ -150,7 +150,13 @@ function startOfDay(date: Date) {
   return d
 }
 
-function endOfDay(date: Date) {
+function nowBrasilia() {
+  return new Date(
+    new Date().toLocaleString('en-US', {
+      timeZone: 'America/Sao_Paulo',
+    }),
+  )
+}
   const d = new Date(date)
   d.setHours(23, 59, 59, 999)
   return d
@@ -199,7 +205,11 @@ function getPreviousMonthRange(date: Date) {
 }
 
 function getGlobalRange(periodo: string, customStart?: string, customEnd?: string) {
-  const now = new Date()
+  const now = new Date(
+  new Date().toLocaleString('en-US', {
+    timeZone: 'America/Sao_Paulo',
+  }),
+)
 
   switch (periodo) {
     case 'hoje':
