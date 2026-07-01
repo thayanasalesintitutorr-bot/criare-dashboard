@@ -289,7 +289,7 @@ const diff =
 const isUp = diff >= 0
 
   return (
-    <div className="relative group space-y-1">
+    <div className="relative space-y-1">
       <h4
         className={`${
           isMobile ? 'text-[26px] font-black' : 'text-[14px] font-semibold'
@@ -298,13 +298,17 @@ const isUp = diff >= 0
         {label}
       </h4>
 
-      <div
-  className={`${
-    isMobile ? 'text-[64px]' : 'text-[32px]'
-  } font-black tracking-[-0.04em] leading-none ${textPrimary()}`}
->
-        {value}
-      </div>
+      <div className="relative inline-block group">
+  <div
+    className={`${
+      isMobile ? 'text-[64px]' : 'text-[32px]'
+    } font-black tracking-[-0.04em] leading-none cursor-pointer ${textPrimary()}`}
+  >
+    {value}
+  </div>
+
+  {children}
+</div>
 
       {showCompare && (
   <div className={`flex items-center gap-2 ${isMobile ? 'text-[24px]' : 'text-[12px]'}`}>
@@ -574,7 +578,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     top-full
     z-50
     mt-3
-    w-[720px]
+    w-[900px]
     rounded-[28px]
     border
     border-black/10
