@@ -155,7 +155,7 @@ function getInfoMedico(nome: string) {
 }
 
 export default function FunilPage() {
-  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode } = useFilters()
+const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar } = useFilters()
 const isImac = viewMode === 'desktop'
 
   const [data, setData] = useState<DashboardResponse | null>(null)
@@ -234,6 +234,7 @@ const faturamentoConsultaComReabord =
 
 const ticketMedioConsultaComReabord =
   Number(data?.kpis?.comercialConsulta?.ticketMedioTotal || 0)
+  const comparativo = data?.comparativo
   const consultaPorMedico = Array.from(
   new Map(
     (data?.consultaPorMedico || [])
@@ -308,12 +309,14 @@ const ticketMedioConsultaComReabord =
     />
 
     <MetricCard
-      icon={UserCheck}
-      label="Total de consultas"
-      value={totalConsultasComReabord}
-      description="consultas recebidas"
-      tone="blue"
-    />
+  icon={UserCheck}
+  label="Total de consultas"
+  value={totalConsultasComReabord}
+  description="consultas recebidas"
+  tone="blue"
+  previousValue={comparativo?.consulta?.quantidadeAnterior}
+  showCompare={comparar}
+/>
 
     <MetricCard
       icon={CircleDollarSign}
@@ -321,6 +324,8 @@ const ticketMedioConsultaComReabord =
       value={formatMoney(faturamentoConsultaComReabord)}
       description="vendas de consulta"
       tone="green"
+      previousValue={comparativo?.consulta?.valorAnterior}
+      showCompare={comparar}
     />
 
     <MetricCard
@@ -329,6 +334,8 @@ const ticketMedioConsultaComReabord =
       value={formatMoney(ticketMedioConsultaComReabord)}
       description="média por consulta"
       tone="purple"
+      previousValue={comparativo?.consulta?.ticketAnterior}
+      showCompare={comparar}
     />
   </div>
 
@@ -1165,14 +1172,19 @@ function MetricCard({
   value,
   description,
   tone = 'blue',
-  
+  previousValue,
+  showCompare = false,
 }: {
   icon: any
   label: string
   value: any
   description: string
   tone?: 'blue' | 'green' | 'red' | 'purple'
+  previousValue?: number
+  showCompare?: boolean
 }) {
+
+  
 
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
@@ -1197,6 +1209,19 @@ purple:
   purple: 'text-[var(--chart-purple)]',
 }
 
+const atual =
+  typeof value === 'string'
+    ? Number(String(value).replace(/[^\d,-]/g, '').replace(',', '.')) || 0
+    : Number(value || 0)
+
+const anterior = Number(previousValue || 0)
+
+const diff =
+  anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
+
+const positivo = diff > 0
+const negativo = diff < 0
+
 
   return (
     <div className={`rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
@@ -1214,6 +1239,26 @@ purple:
    <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
   {description}
 </p>
+
+{showCompare && (
+  <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+    <span
+      className={
+        positivo
+          ? 'text-emerald-500'
+          : negativo
+          ? 'text-red-500'
+          : 'text-[var(--muted-foreground)]'
+      }
+    >
+      {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
+    </span>
+
+    <span className="text-[var(--muted-foreground)]">
+      vs anterior
+    </span>
+  </div>
+)}
   </div>
 
   {/* gráfico removido */}

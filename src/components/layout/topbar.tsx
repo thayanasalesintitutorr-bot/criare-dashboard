@@ -271,10 +271,12 @@ function parseLocalDate(dateString?: string) {
               </div>
            
 
-<div
-  onClick={() => setShowFilters(!showFilters)}
-  className="cursor-pointer rounded-[28px] bg-[var(--card)] px-5 py-3 shadow-sm transition hover:bg-[var(--card)]/90"
->
+<div className="rounded-[28px] bg-[var(--card)] px-5 py-3 shadow-sm">
+
+  <div
+    onClick={() => setShowFilters(!showFilters)}
+    className="flex cursor-pointer items-center justify-between gap-3"
+  >
   <div className="flex items-center justify-between gap-3">
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 pr-3 font-bold">
@@ -324,6 +326,7 @@ function parseLocalDate(dateString?: string) {
 
   </div>
 
+  </div>
   {showFilters && (
     <div className="mt-6 grid grid-cols-5 gap-6 border-t border-black/5 pt-6">
       <div>
