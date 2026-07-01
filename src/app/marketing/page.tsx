@@ -130,10 +130,10 @@ children?: ReactNode
   </div>
 )
 }
-
 function OrigemStageCard({
   items,
   status,
+  tooltipType = 'origem',
 }: {
   items: {
     nome: string
@@ -146,6 +146,7 @@ function OrigemStageCard({
     }[]
   }[]
   status: 'green' | 'red' | 'blue'
+  tooltipType?: 'origem' | 'consulta' | 'procedimento'
 }) {
   const innerBg =
     status === 'green'
@@ -429,7 +430,11 @@ return (
   icon="consulta"
   status="blue"
 >
-  <OrigemStageCard items={origensVendaConsulta} status="blue" />
+  <OrigemStageCard
+  items={origensVendaConsulta}
+  status="blue"
+  tooltipType="consulta"
+/>
 </MarketingMetricCard>
 
 <MarketingMetricCard
@@ -439,7 +444,11 @@ return (
   icon="procedimento"
   status="blue"
 >
-  <OrigemStageCard items={origensPropostasFechadas} status="blue" />
+  <OrigemStageCard
+  items={origensPropostasFechadas}
+  status="blue"
+  tooltipType="procedimento"
+/>
 </MarketingMetricCard>
             </div>
     </div>
