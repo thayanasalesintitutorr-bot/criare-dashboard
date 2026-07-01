@@ -1,8 +1,8 @@
 'use client'
 
-
 import {
   LayoutDashboard,
+  Megaphone,
   Filter,
   DollarSign,
 } from 'lucide-react'
@@ -15,6 +15,11 @@ const items = [
     label: 'Visão Geral',
     icon: LayoutDashboard,
   },
+  {
+  href: '/marketing',
+  label: 'Marketing',
+  icon: Megaphone,
+},
   {
     href: '/funil',
     label: 'Consultas',
