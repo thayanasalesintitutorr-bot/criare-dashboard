@@ -1848,7 +1848,7 @@ const painelAtendimento = {
       0
     ),
   })),
-
+  totalAgendamentos: leadsAgendados.length,
   statusAgenda: {
     finalizados: totalFinalizados,
     noShow: totalNoShow,
