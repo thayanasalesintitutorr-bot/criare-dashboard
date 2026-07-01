@@ -1294,6 +1294,53 @@ const totalFinalizados = noShowFiltrado.filter((item: any) =>
 
 const totalAtendimentos = totalFinalizados + totalNoShow
 
+const noShowFiltradoAnterior = (noShowData || []).filter((item: any) => {
+  const data = parseDataAmplimed(item['Data e hora Agendada'])
+
+  if (!inRange(data, previousRange.start, previousRange.end)) return false
+
+  if (segmento === 'geral') return true
+
+  const profissional = normalize(item['Profissional'])
+
+  if (segmento === 'vascular') {
+    return MEDICOS_VASCULAR.some((m) =>
+      profissional.includes(normalize(m).split(' ')[1])
+    )
+  }
+
+  if (segmento === 'emagrecimento') {
+    return MEDICOS_EMAGRECIMENTO.some((m) =>
+      profissional.includes(normalize(m).split(' ')[1])
+    )
+  }
+
+  return true
+})
+
+const consultasProcedimentosAnterior = [
+  'COMBO LIPEDEMA',
+  'COMBO VASCULAR',
+  'COMBO VASCULAR CLINICA',
+  'CONSULTA',
+  'CONSULTA - LIPEDEMA',
+  'CONSULTA - VASCULAR',
+  'CONSULTA DE 1ª VEZ',
+  'CONSULTA EM CONSULTÓRIO',
+]
+
+const totalPrimeiraVezAnterior = noShowFiltradoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  return consultasProcedimentosAnterior.some((consulta) =>
+    procedimento.includes(normalize(consulta))
+  )
+}).length
+
 const noShowPercent = safePercent(totalNoShow, totalAtendimentos)
 
 const metaNoShowPercent = 10
@@ -1981,6 +2028,9 @@ painelAtendimento,
     
       },
       comparativo: {
+      atendimento: {
+      totalPrimeiraVezAnterior,
+  },
   marketing: {
     totalEntradasAnterior,
     naoQualificadosAnterior,

@@ -83,22 +83,36 @@ ticketMedioTotal: number
   }
 
   comparativo?: {
-    consulta?: {
-      quantidadeAnterior: number
-      valorAnterior: number
-      ticketAnterior: number
-    }
-    procedimentos?: {
-      quantidadeAnteriorProcedimentos: number
-      valorAnteriorProcedimentos: number
-      ticketAnteriorProcedimentos: number
-    }
-    consolidado?: {
-      quantidadeAnteriorConsolidado: number
-      valorAnteriorConsolidado: number
-      ticketAnteriorConsolidado: number
-    }
+  atendimento?: {
+    totalPrimeiraVezAnterior: number
   }
+
+  comercialConsulta?: {
+    quantidadeConsultaAnterior: number
+    valorTotalConsultaAnterior: number
+    ticketMedioConsultaAnterior: number
+
+    quantidadeReabordAnterior: number
+    valorTotalReabordAnterior: number
+    ticketMedioReabordAnterior: number
+
+    quantidadeTotalAnterior: number
+    valorTotalAnterior: number
+    ticketMedioTotalAnterior: number
+  }
+
+  comercialVendas?: {
+    propostasFechadasAnterior: number
+    valorTotalVendasAnterior: number
+    ticketMedioVendasAnterior: number
+  }
+
+  consolidado?: {
+    qtdVendasAnterior: number
+    valorVendasAnterior: number
+    ticketMedioAnterior: number
+  }
+}
 }
 
 function formatMoney(v: number) {
@@ -299,14 +313,16 @@ const ticketMedioConsultaComReabord =
   </div>
   </div>
 
-  <div className="grid gap-3 md:grid-cols-4">
-    <MetricCard
-      icon={TrendingUp}
-      label="Atendimentos 1ª vez"
-      value={painelAtendimento?.totalPrimeiraVez || 0}
-      description="total no período"
-      tone="green"
-    />
+  <div className="mt-6 grid gap-3 md:grid-cols-4">
+<MetricCard
+  icon={TrendingUp}
+  label="Atendimentos 1ª vez"
+  value={painelAtendimento?.totalPrimeiraVez || 0}
+  description="total no período"
+  tone="green"
+  previousValue={comparativo?.atendimento?.totalPrimeiraVezAnterior}
+  showCompare={comparar}
+/>
 
     <MetricCard
   icon={UserCheck}
@@ -314,7 +330,7 @@ const ticketMedioConsultaComReabord =
   value={totalConsultasComReabord}
   description="consultas recebidas"
   tone="blue"
-  previousValue={comparativo?.consulta?.quantidadeAnterior}
+  previousValue={comparativo?.comercialConsulta?.quantidadeTotalAnterior}
   showCompare={comparar}
 />
 
@@ -324,7 +340,7 @@ const ticketMedioConsultaComReabord =
       value={formatMoney(faturamentoConsultaComReabord)}
       description="vendas de consulta"
       tone="green"
-      previousValue={comparativo?.consulta?.valorAnterior}
+      previousValue={comparativo?.comercialConsulta?.valorTotalAnterior}
       showCompare={comparar}
     />
 
@@ -334,7 +350,7 @@ const ticketMedioConsultaComReabord =
       value={formatMoney(ticketMedioConsultaComReabord)}
       description="média por consulta"
       tone="purple"
-      previousValue={comparativo?.consulta?.ticketAnterior}
+      previousValue={comparativo?.comercialConsulta?.ticketMedioTotalAnterior}
       showCompare={comparar}
     />
   </div>
