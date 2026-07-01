@@ -86,7 +86,10 @@ export function Sidebar() {
       : 'text-white/70 hover:bg-white/8 hover:text-white'
   }`}
 >
-                <Icon size={18} />
+                <Icon
+  size={18}
+  className={item.href === '/marketing' ? 'text-[var(--accent)]' : ''}
+/>
                 <span
   className="
     hidden

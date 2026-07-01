@@ -98,9 +98,6 @@ children?: ReactNode
             ? BadgeDollarSign
             : BriefcaseMedical
 
-const bg =
-  'bg-transparent'
-
   const progressColor =
     status === 'green'
       ? 'bg-emerald-500'
@@ -108,7 +105,8 @@ const bg =
         ? 'bg-rose-500'
         : 'bg-[#d4af5f]'
 
-  return (<div className={`h-[720px] rounded-[28px] p-5 flex flex-col overflow-hidden shadow-[0_16px_50px_rgba(15,23,42,0.08)] ${bg}`}>
+ return (
+  <div className={`min-h-[420px] rounded-[28px] border border-black/5 bg-white p-6 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
   
   <div className="mb-2 flex min-h-[48px] items-start gap-3">
   <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[15px] bg-[#F3E7C7]/65 dark:bg-[#F3E7C7]/10">
@@ -163,19 +161,10 @@ const bg =
   )}
 </div>
 
-<div className="relative mt-6 flex-1 overflow-hidden">
+<div className="relative mt-5 flex-1">
  
-  <div
-    className="
-      h-full
-      overflow-y-auto
-      pr-1
-      scrollbar-thin
-      scrollbar-track-transparent
-      scrollbar-thumb-[#D7B46A]/40
-hover:scrollbar-thumb-[#D7B46A]/70
-    "
-  >
+  <div className="space-y-3">
+
     {children}
   </div>
 </div>
@@ -197,30 +186,8 @@ function OrigemStageCard({
         ? 'bg-rose-700/20 dark:bg-[#341024]'
         : 'bg-slate-700/10 dark:bg-[#183047]'
 
-        const miniCardColorsLight = [
-  'bg-[#4F83F1]',
-  'bg-[#39C98D]',
-  'bg-[#F5A524]',
-  'bg-[#F36B6B]',
-  'bg-[#9B7EED]',
-  'bg-[#FB923C]',
-  'bg-[#38BDF8]',
-  'bg-[#E879F9]',
-]
-
-const miniCardColorsDark = [
-  'dark:bg-[#214A92]',
-  'dark:bg-[#176F52]',
-  'dark:bg-[#9A5F08]',
-  'dark:bg-[#8F2F35]',
-  'dark:bg-[#5B3FA3]',
-  'dark:bg-[#9A4E16]',
-  'dark:bg-[#176B8A]',
-  'dark:bg-[#8A3A92]',
-]
-
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-white/10">
       {items.length === 0 && (
         <div
           className={`rounded-[16px] ${innerBg} p-5 text-sm font-bold text-[var(--foreground)]`}
@@ -229,40 +196,37 @@ const miniCardColorsDark = [
         </div>
       )}
 
-      {items.map((item, index) => {
+      {items.slice(0, 3).map((item, index) => {
         return (
           <div
-            key={`${item.nome}-${index}`}
-            className={`
-  rounded-[16px]
-  ${miniCardColorsLight[index % miniCardColorsLight.length]}
-  ${miniCardColorsDark[index % miniCardColorsDark.length]}
-  px-4 py-3
-  min-h-[82px]
-  flex flex-col justify-between
-  shadow-[0_12px_28px_rgba(0,0,0,0.08)]
-  dark:shadow-[0_14px_30px_rgba(0,0,0,0.28)]
-`}
-          >
-            <div>
-              <div className="text-[13px] leading-[16px] font-[800] uppercase break-words line-clamp-2 text-white">
-                {item.nome}
-              </div>
-            </div>
+  key={`${item.nome}-${index}`}
+  className="flex items-center justify-between gap-3"
+>
+            <div className="flex min-w-0 items-center gap-3">
+  <span
+    className="h-2.5 w-2.5 shrink-0 rounded-full"
+    style={{ backgroundColor: ORIGENS_COLORS[index % ORIGENS_COLORS.length] }}
+  />
 
-            <div className="mt-4">
-              <div className="text-[26px] font-black leading-none text-white">
-                {item.quantidade ?? item.qtd ?? 0}
-                {item.valor !== undefined && (
-  <div className="mt-1 text-[12px] font-black text-white/75">
-    {item.valor.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    })}
+  <span className="truncate text-sm font-semibold text-slate-700 dark:text-white/75">
+    {item.nome}
+  </span>
+</div>
+
+<div className="shrink-0 text-right">
+  <div className="text-sm font-black text-slate-900 dark:text-white">
+    {item.quantidade ?? item.qtd ?? 0}
   </div>
-)}
-              </div>
-            </div>
+
+  {item.valor !== undefined && (
+    <div className="text-xs font-bold text-slate-500 dark:text-white/50">
+      {item.valor.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      })}
+    </div>
+  )}
+</div>
           </div>
         )
       })}
@@ -277,7 +241,7 @@ export default function MarketingPage() {
 const [data, setData] = useState<any>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
-
+const [tagSelecionada, setTagSelecionada] = useState<string | null>(null)
 useEffect(() => {
   async function loadData() {
     try {
@@ -312,6 +276,12 @@ const res = await fetch(url, {
   }
 
   loadData()
+
+const interval = setInterval(() => {
+  loadData()
+}, 5000)
+
+return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])
 
 const marketing = data?.kpis?.marketing
@@ -322,27 +292,28 @@ const origensPorEtapa = data?.origensPorEtapa || {
   qualificado: [],
   agendado: [],
 }
-const origensTop = origens.slice(0, 10)
-const origensTotal = origens.reduce(
-  (acc: number, item: any) => acc + item.quantidade,
-  0
-)
+const origensQualificadosPorTag =
+  data?.origensQualificadosPorTag || {
+    todas: [],
+    A: [],
+    B: [],
+    C: [],
+    D: [],
+  }
+
+const qualificadosFiltrados =
+  tagSelecionada === null
+    ? origensQualificadosPorTag.todas
+    : origensQualificadosPorTag[tagSelecionada]
+
 
 const origensVendaConsulta: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
   data?.origensVendaConsulta || []
 
-const origensVendaConsultaTotal = origensVendaConsulta.reduce(
-  (acc: number, item: any) => acc + (item.quantidade ?? item.qtd ?? 0),
-  0
-)
 
 const origensPropostasFechadas: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
   data?.origensPropostasFechadas || []
 
-const origensPropostasFechadasTotal = origensPropostasFechadas.reduce(
-  (acc: number, item: any) => acc + (item.quantidade ?? item.qtd ?? 0),
-  0
-)
 
 const formatMoney = (value: number) =>
   value.toLocaleString('pt-BR', {
@@ -360,7 +331,7 @@ return (
   <AppShell title="Marketing">
     <div className="space-y-8">
       <div className="sticky top-[96px] z-20 rounded-[34px] bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-6">
+  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <MarketingMetricCard
           title="Entrada"
           value={marketing?.totalEntradas || 0}
@@ -387,14 +358,66 @@ return (
 
         <MarketingMetricCard
           title="Qualificados"
-          value={marketing?.leadsAceitos || 0}
+          value={
+  tagSelecionada === null
+    ? marketing?.leadsAceitos || 0
+    : tagSelecionada === 'A'
+      ? marketing?.leadA || 0
+      : tagSelecionada === 'B'
+        ? marketing?.leadB || 0
+        : tagSelecionada === 'C'
+          ? marketing?.leadC || 0
+          : marketing?.leadD || 0
+}
           subtitle={`${Math.round(marketing?.leadsAceitosPercent || 0)}% de 90%`}
           icon="qualificado"
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percent={marketing?.leadsAceitosPercent || 0}
         >
+          <div className="mb-4 grid grid-cols-5 gap-2">
+  <button
+    onClick={() => setTagSelecionada(null)}
+    className={`rounded-xl px-3 py-2 text-xs font-black ${
+      tagSelecionada === null
+        ? 'bg-[#D7B46A] text-white'
+        : 'bg-[#F3E7C7]/70 text-[#8A6A22]'
+    }`}
+  >
+   <>
+  Todas
+  <div className="text-[10px] opacity-80">
+    {marketing?.leadsAceitos || 0}
+  </div>
+</>
+  </button>
+
+  {['A', 'B', 'C', 'D'].map((tag) => (
+    <button
+      key={tag}
+      onClick={() => setTagSelecionada(tag)}
+      className={`rounded-xl px-3 py-2 text-sm font-black ${
+        tagSelecionada === tag
+          ? 'bg-[#D7B46A] text-white'
+          : 'bg-[#F3E7C7]/70 text-[#8A6A22]'
+      }`}
+    >
+      <>
+  {tag}
+  <div className="text-[10px] opacity-80">
+    {tag === 'A'
+  ? marketing?.leadA || 0
+  : tag === 'B'
+    ? marketing?.leadB || 0
+    : tag === 'C'
+      ? marketing?.leadC || 0
+      : marketing?.leadD || 0}
+  </div>
+</>
+    </button>
+  ))}
+</div>
           <OrigemStageCard
-            items={origensPorEtapa.qualificado}
+            items={qualificadosFiltrados}
             status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           />
         </MarketingMetricCard>

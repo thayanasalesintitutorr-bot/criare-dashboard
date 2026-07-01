@@ -1193,6 +1193,29 @@ const leadsNaoQualificados = consultaBasePeriodo.filter((l) =>
 const leadsQualificados = leadsEntrada.filter((l) =>
   !statusIs(l, 'PERDEU [NÃO QUALIFICADO]')
 )
+const leadsQualificadosA = leadsQualificados.filter((l) =>
+  normalize(l.tag).includes('LEAD A')
+)
+
+const leadsQualificadosB = leadsQualificados.filter((l) =>
+  normalize(l.tag).includes('LEAD B')
+)
+
+const leadsQualificadosC = leadsQualificados.filter((l) =>
+  normalize(l.tag).includes('LEAD C')
+)
+
+const leadsQualificadosD = leadsQualificados.filter((l) =>
+  normalize(l.tag).includes('LEAD D')
+)
+
+const origensQualificadosPorTag = {
+  todas: buildOrigens(leadsQualificados),
+  A: buildOrigens(leadsQualificadosA),
+  B: buildOrigens(leadsQualificadosB),
+  C: buildOrigens(leadsQualificadosC),
+  D: buildOrigens(leadsQualificadosD),
+}
 
 const leadsAgendados = consultaLeads.filter((l) =>
   statusIs(l, 'AGENDADO') &&
@@ -2094,11 +2117,13 @@ painelAtendimento,
       conveniosConsulta,
 
       origensPorEtapa: {
-  entrada: buildOrigens(leadsEntrada),
-  naoQualificado: buildOrigens(leadsNaoQualificados),
-  qualificado: buildOrigens(leadsQualificados),
-  agendado: buildOrigens(leadsAgendados),
+      entrada: buildOrigens(leadsEntrada),
+      naoQualificado: buildOrigens(leadsNaoQualificados),
+      qualificado: buildOrigens(leadsQualificados),
+      agendado: buildOrigens(leadsAgendados),
 },
+
+origensQualificadosPorTag,
 
 
 origensVendaConsulta: campanhasConsulta,
