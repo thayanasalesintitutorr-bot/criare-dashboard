@@ -352,15 +352,21 @@ const totalQualificadosSelecionados =
         return total + (marketing?.leadD || 0)
       }, 0)
 
-const conversaoAgendados =
-  totalQualificadosSelecionados > 0
-    ? ((marketing?.agendados || 0) / totalQualificadosSelecionados) * 100
-    : 0
-
 const qualificadosFiltrados =
   tagsSelecionadas.length === 0
     ? origensQualificadosPorTag.todas
     : tagsSelecionadas.flatMap((tag) => origensQualificadosPorTag[tag])
+
+    const totalAgendados =
+  origensPorEtapa.agendado?.reduce(
+    (total: number, item: any) => total + (item.quantidade ?? item.qtd ?? 0),
+    0
+  ) || 0
+
+const conversaoAgendados =
+  totalQualificadosSelecionados > 0
+    ? (totalAgendados / totalQualificadosSelecionados) * 100
+    : 0
 
 const origensVendaConsulta: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
   data?.origensVendaConsulta || []
@@ -472,7 +478,7 @@ return (
 
         <MarketingMetricCard
           title="Agendados"
-          value={marketing?.agendados || 0}
+          value={totalAgendados}
           subtitle={`${Math.round(conversaoAgendados)}% de conversão`}
           icon="agendado"
           status={conversaoAgendados >= 30 ? 'green' : 'red'}
