@@ -137,12 +137,11 @@ extra?: ReactNode
         : 'bg-[#d4af5f]'
 
  return (
-  <div className="min-h-[255px] rounded-[24px] border border-black/5 bg-white p-4 flex flex-col shadow-[0_10px_35px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-[#112742]">
-  
+  <div className="h-[230px] rounded-[22px] border border-black/5 bg-white p-3 flex flex-col overflow-hidden shadow-[0_8px_28px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-[#112742]">
   <div className="mb-1 flex min-h-[40px] items-start gap-3">
   <div className="flex shrink-0 items-center justify-center">
     <Icon
-      size={26}
+      size={22}
       strokeWidth={2.2}
       className="text-[#D7B46A]"
     />
@@ -155,7 +154,7 @@ extra?: ReactNode
   min-w-0
   whitespace-normal
   break-words
-  text-[16px]
+  text-[14px]
   font-black
   uppercase
   leading-[1.12]
@@ -168,7 +167,7 @@ extra?: ReactNode
 </div>
 
 <div className="mt-1 min-h-[48px] flex flex-col justify-start">
- <div className="text-3xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+ <div className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
     {value}
   </div>
 
@@ -191,15 +190,14 @@ extra?: ReactNode
     </div>
   )}
   {extra && (
-  <div className="mt-3 grid grid-cols-2 gap-2">
+  <div className="mt-2 grid grid-cols-2 gap-2">
     {extra}
   </div>
 )}
 </div>
 
 <div className="relative mt-3 flex-1">
- 
-  <div className="space-y-2">
+ <div className="max-h-[92px] space-y-2 overflow-y-auto pr-1">
 
     {children}
   </div>
@@ -291,7 +289,7 @@ function OrigemStageCard({
                     return (
                       <div
                         key={`${detalhe.medico}-${detalheIndex}`}
-                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-slate-50 p-3 text-xs dark:bg-white/5"
+                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-slate-50 p-2 text-xs dark:bg-white/5"
                       >
                         <div className="truncate font-black text-slate-900 dark:text-white">
                           {detalhe.medico || 'Sem médico'}
@@ -366,7 +364,7 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="min-h-[255px] rounded-[24px] border border-black/5 bg-white p-4 shadow-[0_10px_35px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-[#112742] xl:col-span-2">
+    <div className="h-[230px] rounded-[22px] border border-black/5 bg-white p-3 overflow-hidden shadow-[0_8px_28px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-[#112742] xl:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -382,7 +380,7 @@ function RoiPorOrigemCard({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="max-h-[150px] space-y-3 overflow-y-auto pr-1">
         {items.slice(0, 5).map((item, index) => {
           const largura = item.roi > 0 ? (item.roi / maiorRoi) * 100 : 4
 
@@ -803,7 +801,7 @@ return (
         </div>
 
         <div className="rounded-[28px] bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard
           title="Entrada"
