@@ -762,6 +762,8 @@ return (
     })}
   </div>
 
+</div>
+
   <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
     <div className="text-xs font-bold text-emerald-600">
       Investimento selecionado
@@ -771,7 +773,7 @@ return (
       {formatMoneyBR(investimento)}
     </div>
   </div>
-</div>
+
     </div></div>  </aside>
 
       <section className="space-y-5">
