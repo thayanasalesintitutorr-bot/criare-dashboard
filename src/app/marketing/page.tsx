@@ -14,7 +14,15 @@ import {
   CalendarCheck,
   BadgeDollarSign,
   BriefcaseMedical,
+  BarChart3,
+  Wallet,
+  TrendingUp,
+  Target,
+  Receipt,
+  MousePointerClick,
 } from 'lucide-react'
+
+const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 
 const ORIGENS_COLORS = [
   '#4f8cff',
@@ -27,6 +35,68 @@ const ORIGENS_COLORS = [
   '#e879f9',
 ]
 
+function formatMoneyBR(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
+}
+
+function parseMoney(value: string) {
+  return Number(
+    value
+      .replace(/\D/g, '')
+      .replace(/^0+/, '')
+  ) / 100 || 0
+}
+
+function formatMoneyInput(value: string) {
+  const number = parseMoney(value)
+
+  return number.toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
+function getInvestimentosSalvos() {
+  if (typeof window === 'undefined') return {}
+
+  try {
+    return JSON.parse(localStorage.getItem(INVESTIMENTO_STORAGE_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+function sumQtd(items: any[]) {
+  return items.reduce(
+    (total, item) => total + (item.quantidade ?? item.qtd ?? 0),
+    0
+  )
+}
+
+function sumValor(items: any[]) {
+  return items.reduce((total, item) => total + (item.valor ?? 0), 0)
+}
+
+function metaLabel(
+  atual: number,
+  meta: number,
+  tipo: 'minimo' | 'maximo' = 'minimo'
+) {
+  const diferenca = atual - meta
+  const abs = Math.abs(Math.round(diferenca))
+
+  if (tipo === 'maximo') {
+    if (atual <= meta) return `Dentro do limite de ${meta}%`
+    return `+${abs}% acima do limite`
+  }
+
+  if (atual >= meta) return `+${abs}% acima da meta`
+  return `-${abs}% abaixo da meta`
+}
+
 function MarketingMetricCard({
   title,
   value,
@@ -35,6 +105,7 @@ function MarketingMetricCard({
   status,
   percent = 0,
   children,
+  extra,
 }: {
   title: string
   value: number
@@ -43,6 +114,7 @@ function MarketingMetricCard({
   status: 'green' | 'red' | 'blue'
   percent?: number
 children?: ReactNode
+extra?: ReactNode
 }) {
   const Icon =
   icon === 'entrada'
@@ -118,11 +190,16 @@ children?: ReactNode
       {subtitle}
     </div>
   )}
+  {extra && (
+  <div className="mt-3 grid grid-cols-2 gap-2">
+    {extra}
+  </div>
+)}
 </div>
 
 <div className="relative mt-3 flex-1">
  
-  <div className="space-y-3">
+  <div className="max-h-[280px] space-y-3 overflow-y-auto pr-1">
 
     {children}
   </div>
@@ -276,6 +353,93 @@ function OrigemStageCard({
   )
 }
 
+function RoiPorOrigemCard({
+  items,
+}: {
+  items: {
+    origem: string
+    retorno: number
+    investimento: number
+    roi: number
+  }[]
+}) {
+  const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
+
+  return (
+    <div className="min-h-[350px] rounded-[28px] border border-black/5 bg-white p-5 shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]">
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
+            ROI por origem
+          </div>
+          <div className="mt-1 text-xs font-bold text-slate-400">
+            Retorno sobre investimento
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-violet-50 px-3 py-2 text-xs font-black text-violet-600">
+          ROI
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {items.slice(0, 5).map((item, index) => {
+          const largura = item.roi > 0 ? (item.roi / maiorRoi) * 100 : 4
+
+          return (
+            <div key={item.origem} className="space-y-1.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor:
+                        ORIGENS_COLORS[index % ORIGENS_COLORS.length],
+                    }}
+                  />
+
+                  <span className="truncate text-sm font-black text-slate-700">
+                    {item.origem}
+                  </span>
+                </div>
+
+                <div className="text-sm font-black text-slate-900">
+                  {item.roi.toFixed(2)}x
+                </div>
+              </div>
+
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-violet-500"
+                  style={{ width: `${Math.min(Math.max(largura, 4), 100)}%` }}
+                />
+              </div>
+
+             <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-slate-500">
+  <div>
+    <div className="uppercase text-slate-400">Retorno</div>
+    <div className="text-slate-700">{formatMoneyBR(item.retorno)}</div>
+  </div>
+
+  <div className="text-right">
+    <div className="uppercase text-slate-400">Investimento</div>
+    <div className="text-slate-700">{formatMoneyBR(item.investimento)}</div>
+  </div>
+</div>
+            </div>
+          )
+        })}
+
+        {items.length === 0 && (
+          <div className="flex h-[42px] items-center rounded-2xl border border-slate-200 bg-transparent px-5 text-sm font-semibold text-slate-400">
+            Sem dados de ROI
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function MarketingPage() {
 
     const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
@@ -284,6 +448,10 @@ const [data, setData] = useState<any>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
 const [tagsSelecionadas, setTagsSelecionadas] = useState<('A' | 'B' | 'C' | 'D')[]>([])
+const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
+const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
+  () => getInvestimentosSalvos()
+)
 useEffect(() => {
   async function loadData() {
     try {
@@ -325,6 +493,19 @@ const interval = setInterval(() => {
 
 return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])
+useEffect(() => {
+  localStorage.setItem(
+    INVESTIMENTO_STORAGE_KEY,
+    JSON.stringify(investimentosPorOrigem)
+  )
+}, [investimentosPorOrigem])
+
+function atualizarInvestimentoOrigem(origem: string, valor: string) {
+  setInvestimentosPorOrigem((atual) => ({
+    ...atual,
+    [origem]: formatMoneyInput(valor),
+  }))
+}
 
 const marketing = data?.kpis?.marketing
 const origensPorEtapa = data?.origensPorEtapa || {
@@ -357,17 +538,8 @@ const qualificadosFiltrados =
     ? origensQualificadosPorTag.todas
     : tagsSelecionadas.flatMap((tag) => origensQualificadosPorTag[tag])
 
-    const totalAgendados =
-  origensPorEtapa.agendado?.reduce(
-    (total: number, item: any) => total + (item.quantidade ?? item.qtd ?? 0),
-    0
-  ) || 0
 
-const conversaoAgendados =
-  totalQualificadosSelecionados > 0
-    ? (totalAgendados / totalQualificadosSelecionados) * 100
-    : 0
-
+   
 const origensVendaConsulta: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
   data?.origensVendaConsulta || []
 
@@ -388,31 +560,265 @@ const valorVendaConsulta =
 const valorProcedimentos =
   data?.kpis?.comercialVendas?.valorTotalVendas || 0
 
+  const todasOrigens = Array.from(
+  new Set([
+    ...origensPorEtapa.entrada.map((item: any) => item.nome),
+    ...origensPorEtapa.naoQualificado.map((item: any) => item.nome),
+    ...origensPorEtapa.agendado.map((item: any) => item.nome),
+    ...origensVendaConsulta.map((item: any) => item.nome),
+    ...origensPropostasFechadas.map((item: any) => item.nome),
+  ])
+).filter(Boolean)
+
+const origemAtiva = (nome: string) => {
+  if (origensSelecionadas.length === 0) return true
+  return origensSelecionadas.includes(nome)
+}
+
+const filtrarOrigem = (items: any[]) =>
+  items.filter((item) => origemAtiva(item.nome))
+const qualificadosFiltradosPorOrigem =
+  filtrarOrigem(qualificadosFiltrados)
+const entradaFiltrada = filtrarOrigem(origensPorEtapa.entrada)
+const naoQualificadosFiltrado = filtrarOrigem(origensPorEtapa.naoQualificado)
+const agendadosFiltrado = filtrarOrigem(origensPorEtapa.agendado)
+const consultasFiltrado = filtrarOrigem(origensVendaConsulta)
+const procedimentosFiltrado = filtrarOrigem(origensPropostasFechadas)
+
+const totalEntradaFiltrada = sumQtd(entradaFiltrada)
+const totalNaoQualificadosFiltrado = sumQtd(naoQualificadosFiltrado)
+const totalAgendadosFiltrado = sumQtd(agendadosFiltrado)
+const conversaoAgendados =
+  totalQualificadosSelecionados > 0
+    ? (totalAgendadosFiltrado / totalQualificadosSelecionados) * 100
+    : 0
+const valorConsultasFiltrado = sumValor(consultasFiltrado)
+const valorProcedimentosFiltrado = sumValor(procedimentosFiltrado)
+const retornoMarketing = valorConsultasFiltrado + valorProcedimentosFiltrado
+
+const origensRoi =
+  origensSelecionadas.length === 0 ? todasOrigens : origensSelecionadas
+const retornoPorOrigem = origensRoi
+  .map((origem) => {
+    const consulta = origensVendaConsulta.find(
+      (item: any) => item.nome === origem
+    )
+
+    const procedimento = origensPropostasFechadas.find(
+      (item: any) => item.nome === origem
+    )
+
+    const retorno = (consulta?.valor || 0) + (procedimento?.valor || 0)
+
+    const investimentoOrigem = parseMoney(
+      investimentosPorOrigem[origem] || ''
+    )
+
+    const roiOrigem =
+      investimentoOrigem > 0 ? retorno / investimentoOrigem : 0
+
+    return {
+      origem,
+      retorno,
+      investimento: investimentoOrigem,
+      roi: roiOrigem,
+    }
+  })
+  .filter((item) => item.retorno > 0 || item.investimento > 0)
+  .sort((a, b) => b.roi - a.roi)
+const origensParaInvestimento =
+  origensSelecionadas.length === 0 ? todasOrigens : origensSelecionadas
+
+const investimento = origensParaInvestimento.reduce((total, origem) => {
+  return total + parseMoney(investimentosPorOrigem[origem] || '')
+}, 0)
+const lucroMarketing = retornoMarketing - investimento
+
+const roi =
+  investimento > 0 ? retornoMarketing / investimento : 0
+
+const cac =
+  totalAgendadosFiltrado > 0 ? investimento / totalAgendadosFiltrado : 0
+
+const cpl =
+  totalEntradaFiltrada > 0 ? investimento / totalEntradaFiltrada : 0
+
 return (
   <AppShell title="Marketing">
-    <div className="space-y-8">
-      <div className="sticky top-[96px] z-20 rounded-[34px] bg-white p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+  <div className="space-y-5">
+    <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
+      <aside className="rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
+        <div className="mb-4">
+          <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+            Origens
+          </div>
+          <div className="mt-1 text-xs font-semibold text-slate-500">
+            Filtre campanhas para calcular o ROI
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => setOrigensSelecionadas([])}
+            className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black ${
+              origensSelecionadas.length === 0
+                ? 'border-violet-500 bg-violet-50 text-violet-600'
+                : 'border-slate-200 text-slate-600'
+            }`}
+          >
+            Todas as origens
+          </button>
+
+          {todasOrigens.map((origem) => {
+            const ativo = origensSelecionadas.includes(origem)
+
+            return (
+              <button
+                key={origem}
+                type="button"
+                onClick={() =>
+                  setOrigensSelecionadas((atual) =>
+                    atual.includes(origem)
+                      ? atual.filter((item) => item !== origem)
+                      : [...atual, origem]
+                  )
+                }
+                className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold ${
+                  ativo
+                    ? 'border-violet-500 bg-violet-50 text-violet-600'
+                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                <span
+                  className={`h-3 w-3 rounded border ${
+                    ativo ? 'border-violet-500 bg-violet-500' : 'border-slate-300'
+                  }`}
+                />
+                <span className="truncate">{origem}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="mt-5 border-t border-slate-200 pt-5">
+  <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+    Investimento por origem
+  </div>
+
+  <div className="mt-2 text-xs font-semibold text-slate-500">
+    Informe quanto foi investido em cada campanha
+  </div>
+
+  <div className="mt-4 max-h-[320px] space-y-3 overflow-y-auto pr-1">
+    {todasOrigens.map((origem) => {
+      const ativo =
+        origensSelecionadas.length === 0 ||
+        origensSelecionadas.includes(origem)
+
+      return (
+        <div
+          key={`investimento-${origem}`}
+          className={`rounded-2xl border p-3 ${
+            ativo
+              ? 'border-violet-200 bg-violet-50/50'
+              : 'border-slate-200 bg-white opacity-50'
+          }`}
+        >
+          <div className="mb-2 truncate text-[11px] font-black uppercase text-slate-500">
+            {origem}
+          </div>
+
+          <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="flex items-center bg-slate-50 px-2 text-xs font-black text-slate-500">
+              R$
+            </div>
+
+            <input
+              value={investimentosPorOrigem[origem] || ''}
+              onChange={(e) =>
+                atualizarInvestimentoOrigem(origem, e.target.value)
+              }
+              placeholder="0,00"
+              className="w-full px-2 py-2 text-xs font-black outline-none"
+            />
+          </div>
+        </div>
+      )
+    })}
+  </div>
+
+  <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+    <div className="text-xs font-bold text-emerald-600">
+      Investimento selecionado
+    </div>
+
+    <div className="mt-1 text-lg font-black text-emerald-700">
+      {formatMoneyBR(investimento)}
+    </div>
+  </div>
+</div>
+      </aside>
+
+      <section className="space-y-5">
+        <div className="grid rounded-[26px] border border-violet-200 bg-violet-50/60 p-4 shadow-[0_14px_45px_rgba(15,23,42,0.06)] xl:grid-cols-6">
+          <div className="flex items-center gap-3 border-r border-violet-200 px-3">
+            <Wallet className="text-violet-600" size={28} />
+            <div>
+              <div className="text-xs font-black uppercase text-slate-500">Investimento</div>
+              <div className="text-xl font-black text-slate-900">{formatMoneyBR(investimento)}</div>
+            </div>
+          </div>
+
+          <div className="border-r border-violet-200 px-4">
+            <div className="text-xs font-black uppercase text-slate-500">Retorno</div>
+            <div className="text-xl font-black text-slate-900">{formatMoneyBR(retornoMarketing)}</div>
+          </div>
+
+          <div className="border-r border-violet-200 px-4">
+            <div className="text-xs font-black uppercase text-slate-500">Lucro</div>
+            <div className="text-xl font-black text-slate-900">{formatMoneyBR(lucroMarketing)}</div>
+          </div>
+
+          <div className="border-r border-violet-200 px-4">
+            <div className="text-xs font-black uppercase text-slate-500">ROI</div>
+            <div className="text-xl font-black text-violet-600">{roi.toFixed(2)}x</div>
+          </div>
+
+          <div className="border-r border-violet-200 px-4">
+            <div className="text-xs font-black uppercase text-slate-500">CAC</div>
+            <div className="text-xl font-black text-slate-900">{formatMoneyBR(cac)}</div>
+          </div>
+
+          <div className="px-4">
+            <div className="text-xs font-black uppercase text-slate-500">CPL</div>
+            <div className="text-xl font-black text-slate-900">{formatMoneyBR(cpl)}</div>
+          </div>
+        </div>
+
+        <div className="rounded-[34px] bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            
         <MarketingMetricCard
           title="Entrada"
-          value={marketing?.totalEntradas || 0}
+          value={totalEntradaFiltrada}
           subtitle=""
           icon="entrada"
           status="blue"
         >
-          <OrigemStageCard items={origensPorEtapa.entrada} status="blue" />
+          <OrigemStageCard items={entradaFiltrada} status="blue" />
         </MarketingMetricCard>
 
         <MarketingMetricCard
           title="Não qualificados"
-          value={marketing?.naoQualificados || 0}
-          subtitle={`${Math.round(marketing?.naoQualificadosPercent || 0)}% de 10%`}
+          value={totalNaoQualificadosFiltrado}
+          subtitle={metaLabel(marketing?.naoQualificadosPercent || 0, 10, 'maximo')}
           icon="naoQualificado"
           status={(marketing?.naoQualificadosPercent || 0) > 10 ? 'red' : 'green'}
           percent={marketing?.naoQualificadosPercent || 0}
         >
           <OrigemStageCard
-            items={origensPorEtapa.naoQualificado}
+            items={naoQualificadosFiltrado}
             status={(marketing?.naoQualificadosPercent || 0) > 10 ? 'red' : 'green'}
           />
         </MarketingMetricCard>
@@ -429,7 +835,7 @@ return (
         return total + (marketing?.leadD || 0)
       }, 0)
 }
-          subtitle={`${Math.round(marketing?.leadsAceitosPercent || 0)}% de 90%`}
+          subtitle={metaLabel(marketing?.leadsAceitosPercent || 0, 90)}
           icon="qualificado"
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percent={marketing?.leadsAceitosPercent || 0}
@@ -471,34 +877,59 @@ return (
   })}
 </div>
           <OrigemStageCard
-            items={qualificadosFiltrados}
+            items={qualificadosFiltradosPorOrigem}
             status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           />
         </MarketingMetricCard>
 
         <MarketingMetricCard
           title="Agendados"
-          value={totalAgendados}
-          subtitle={`${Math.round(conversaoAgendados)}% de conversão`}
+          value={totalAgendadosFiltrado}
+          subtitle={metaLabel(conversaoAgendados, 30)}
           icon="agendado"
           status={conversaoAgendados >= 30 ? 'green' : 'red'}
           percent={conversaoAgendados}
         >
           <OrigemStageCard
-            items={origensPorEtapa.agendado}
+            items={agendadosFiltrado}
             status={conversaoAgendados >= 30 ? 'green' : 'red'}
           />
         </MarketingMetricCard>
 
        <MarketingMetricCard
   title="Consultas Ganhas"
-  value={data?.kpis?.comercialConsulta?.quantidadeConsulta || 0}
-  subtitle={formatMoney(valorVendaConsulta)}
+ value={sumQtd(consultasFiltrado)}
+subtitle={formatMoney(valorConsultasFiltrado)}
   icon="consulta"
   status="blue"
+  extra={
+  <>
+    <div className="rounded-xl bg-slate-50 p-3">
+      <div className="text-[10px] font-black uppercase text-slate-400">
+        Valor
+      </div>
+      <div className="text-sm font-black text-slate-900">
+        {formatMoney(valorConsultasFiltrado)}
+      </div>
+    </div>
+
+    <div className="rounded-xl bg-slate-50 p-3">
+      <div className="text-[10px] font-black uppercase text-slate-400">
+        Ticket
+      </div>
+      <div className="text-sm font-black text-slate-900">
+        {formatMoney(
+          sumQtd(consultasFiltrado) > 0
+            ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
+            : 0
+        )}
+      </div>
+    </div>
+  </>
+}
 >
   <OrigemStageCard
-  items={origensVendaConsulta}
+items={consultasFiltrado}
   status="blue"
   tooltipType="consulta"
 />
@@ -506,18 +937,46 @@ return (
 
 <MarketingMetricCard
   title="Procedimentos"
-  value={data?.kpis?.comercialVendas?.propostasFechadas || 0}
-  subtitle={formatMoney(valorProcedimentos)}
+  value={sumQtd(procedimentosFiltrado)}
+subtitle={formatMoney(valorProcedimentosFiltrado)}
   icon="procedimento"
   status="blue"
+  extra={
+  <>
+    <div className="rounded-xl bg-slate-50 p-3">
+      <div className="text-[10px] font-black uppercase text-slate-400">
+        Valor
+      </div>
+      <div className="text-sm font-black text-slate-900">
+        {formatMoney(valorProcedimentosFiltrado)}
+      </div>
+    </div>
+
+    <div className="rounded-xl bg-slate-50 p-3">
+      <div className="text-[10px] font-black uppercase text-slate-400">
+        Ticket
+      </div>
+      <div className="text-sm font-black text-slate-900">
+        {formatMoney(
+          sumQtd(procedimentosFiltrado) > 0
+            ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)
+            : 0
+        )}
+      </div>
+    </div>
+  </>
+}
 >
   <OrigemStageCard
-  items={origensPropostasFechadas}
+  items={procedimentosFiltrado}
   status="blue"
   tooltipType="procedimento"
 />
 </MarketingMetricCard>
-            </div>
+<RoiPorOrigemCard items={retornoPorOrigem} />
+                      </div>
+        </div>
+      </section>
     </div>
   </div>
 </AppShell>

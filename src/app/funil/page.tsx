@@ -702,7 +702,7 @@ const ticketProcedimentosMedico =
 
   <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid grid-cols-5 gap-2'}>
     <MetricMini
-      label="Finalizados"
+      label="Atendimentos"
       value={medico.atendimentos || 0}
       color="green"
       icon={UserCheck}
