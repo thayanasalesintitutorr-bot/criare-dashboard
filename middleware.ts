@@ -26,7 +26,13 @@ if (!session) {
 
 // Usuário Marketing
 if (session === 'marketing') {
-  if (req.nextUrl.pathname !== '/marketing') {
+  const pathname = req.nextUrl.pathname
+
+  const podeAcessar =
+    pathname === '/marketing' ||
+    pathname.startsWith('/api/')
+
+  if (!podeAcessar) {
     return NextResponse.redirect(new URL('/marketing', req.url))
   }
 
