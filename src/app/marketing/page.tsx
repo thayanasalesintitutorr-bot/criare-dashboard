@@ -647,123 +647,115 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-     <aside className="sticky top-5 flex h-[calc(100vh-120px)] flex-col rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
-       <div className="min-h-0 flex-1 overflow-y-auto pr-2">
-          <div className="mb-4">
-          <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
-            Origens
-          </div>
-          <div className="mt-1 text-xs font-semibold text-slate-500">
-            Filtre campanhas para calcular o ROI
+    <aside className="sticky top-5 flex h-[calc(100vh-120px)] flex-col rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
+  <div className="min-h-0 flex-1 overflow-y-auto pr-2">
+    <div className="mb-4">
+      <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+        Origens
+      </div>
 
-        </div>
+      <div className="mt-1 text-xs font-semibold text-slate-500">
+        Filtre campanhas para calcular o ROI
+      </div>
+    </div>
 
-        <div className="space-y-3">
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={() => setOrigensSelecionadas([])}
+        className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black ${
+          origensSelecionadas.length === 0
+            ? 'border-violet-500 bg-violet-50 text-violet-600'
+            : 'border-slate-200 text-slate-600'
+        }`}
+      >
+        Todas as origens
+      </button>
+
+      {todasOrigens.map((origem) => {
+        const ativo = origensSelecionadas.includes(origem)
+
+        return (
           <button
+            key={origem}
             type="button"
-            onClick={() => setOrigensSelecionadas([])}
-            className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black ${
-              origensSelecionadas.length === 0
+            onClick={() =>
+              setOrigensSelecionadas((atual) =>
+                atual.includes(origem)
+                  ? atual.filter((item) => item !== origem)
+                  : [...atual, origem]
+              )
+            }
+            className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold ${
+              ativo
                 ? 'border-violet-500 bg-violet-50 text-violet-600'
-                : 'border-slate-200 text-slate-600'
+                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
-            Todas as origens
-          </button>
-
-          {todasOrigens.map((origem) => {
-            const ativo = origensSelecionadas.includes(origem)
-
-            return (
-              <button
-                key={origem}
-                type="button"
-                onClick={() =>
-                  setOrigensSelecionadas((atual) =>
-                    atual.includes(origem)
-                      ? atual.filter((item) => item !== origem)
-                      : [...atual, origem]
-                  )
-                }
-                className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold ${
-                  ativo
-                    ? 'border-violet-500 bg-violet-50 text-violet-600'
-                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <span
-  className={`
-    flex
-    h-4
-    w-4
-    shrink-0
-    items-center
-    justify-center
-    rounded-md
-    border-2
-    transition-all
-    ${
-      ativo
-        ? 'border-violet-500 bg-violet-500'
-        : 'border-slate-300 bg-white'
-    }
-  `}
-/>
-                <span className="truncate">{origem}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="mt-5 border-t border-slate-200 pt-5">
-  <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
-    Investimento por origem
-  </div>
-
-  <div className="mt-2 text-xs font-semibold text-slate-500">
-    Informe quanto foi investido em cada campanha
-  </div>
-
-  <div className="mt-4 max-h-[320px] space-y-3 overflow-y-auto pr-1">
-    {todasOrigens.map((origem) => {
-      const ativo =
-        origensSelecionadas.length === 0 ||
-        origensSelecionadas.includes(origem)
-
-      return (
-        <div
-          key={`investimento-${origem}`}
-          className={`rounded-2xl border p-3 ${
-            ativo
-              ? 'border-violet-200 bg-violet-50/50'
-              : 'border-slate-200 bg-white opacity-50'
-          }`}
-        >
-          <div className="mb-2 truncate text-[11px] font-black uppercase text-slate-500">
-            {origem}
-          </div>
-
-          <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white">
-            <div className="flex items-center bg-slate-50 px-2 text-xs font-black text-slate-500">
-              R$
-            </div>
-
-            <input
-              value={investimentosPorOrigem[origem] || ''}
-              onChange={(e) =>
-                atualizarInvestimentoOrigem(origem, e.target.value)
-              }
-              placeholder="0,00"
-              className="w-full px-2 py-2 text-xs font-black outline-none"
+            <span
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-all ${
+                ativo
+                  ? 'border-violet-500 bg-violet-500'
+                  : 'border-slate-300 bg-white'
+              }`}
             />
-          </div>
-        </div>
-      )
-    })}
-  </div>
-</div>
 
-  <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <span className="truncate">{origem}</span>
+          </button>
+        )
+      })}
+    </div>
+
+    <div className="mt-5 border-t border-slate-200 pt-5">
+      <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+        Investimento por origem
+      </div>
+
+      <div className="mt-2 text-xs font-semibold text-slate-500">
+        Informe quanto foi investido em cada campanha
+      </div>
+
+      <div className="mt-4 space-y-3">
+        {todasOrigens.map((origem) => {
+          const ativo =
+            origensSelecionadas.length === 0 ||
+            origensSelecionadas.includes(origem)
+
+          return (
+            <div
+              key={`investimento-${origem}`}
+              className={`rounded-2xl border p-3 ${
+                ativo
+                  ? 'border-violet-200 bg-violet-50/50'
+                  : 'border-slate-200 bg-white opacity-50'
+              }`}
+            >
+              <div className="mb-2 truncate text-[11px] font-black uppercase text-slate-500">
+                {origem}
+              </div>
+
+              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white">
+                <div className="flex items-center bg-slate-50 px-2 text-xs font-black text-slate-500">
+                  R$
+                </div>
+
+                <input
+                  value={investimentosPorOrigem[origem] || ''}
+                  onChange={(e) =>
+                    atualizarInvestimentoOrigem(origem, e.target.value)
+                  }
+                  placeholder="0,00"
+                  className="w-full px-2 py-2 text-xs font-black outline-none"
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  </div>
+
+  <div className="mt-4 shrink-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
     <div className="text-xs font-bold text-emerald-600">
       Investimento selecionado
     </div>
@@ -772,8 +764,7 @@ return (
       {formatMoneyBR(investimento)}
     </div>
   </div>
-
-    </div> </aside>
+</aside>
 
       <section className="space-y-5">
         <div className="grid rounded-[26px] border border-violet-200 bg-violet-50/60 p-4 shadow-[0_14px_45px_rgba(15,23,42,0.06)] xl:grid-cols-6">
