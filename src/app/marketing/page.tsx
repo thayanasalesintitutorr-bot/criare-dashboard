@@ -647,8 +647,11 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-      <aside className="rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
-        <div className="mb-4">
+      <aside className="sticky top-5 h-[calc(100vh-120px)] overflow-hidden rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
+        <div className="h-full overflow-y-auto pr-2">
+          </div>
+          
+          <div className="mb-4">
           <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
             Origens
           </div>
@@ -691,10 +694,23 @@ return (
                 }`}
               >
                 <span
-                  className={`h-3 w-3 rounded border ${
-                    ativo ? 'border-violet-500 bg-violet-500' : 'border-slate-300'
-                  }`}
-                />
+  className={`
+    flex
+    h-4
+    w-4
+    shrink-0
+    items-center
+    justify-center
+    rounded-md
+    border-2
+    transition-all
+    ${
+      ativo
+        ? 'border-violet-500 bg-violet-500'
+        : 'border-slate-300 bg-white'
+    }
+  `}
+/>
                 <span className="truncate">{origem}</span>
               </button>
             )
