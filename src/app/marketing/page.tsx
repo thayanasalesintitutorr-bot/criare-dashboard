@@ -65,7 +65,7 @@ children?: ReactNode
         : 'bg-[#d4af5f]'
 
  return (
-  <div className={`min-h-[420px] rounded-[28px] border border-black/5 bg-white p-5 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
+  <div className={`min-h-[350px] rounded-[28px] border border-black/5 bg-white p-5 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
   
   <div className="mb-1 flex min-h-[40px] items-start gap-3">
   <div className="flex shrink-0 items-center justify-center">
@@ -205,7 +205,7 @@ function OrigemStageCard({
                   ? 'Detalhes da consulta'
                   : tooltipType === 'procedimento'
                     ? 'Detalhes do procedimento'
-                    : 'Origem dos leads'}
+                    : 'Detalhes'}
               </div>
 
               <div className="space-y-3">
@@ -342,11 +342,25 @@ const origensQualificadosPorTag =
     D: [],
   }
 
+const totalQualificadosSelecionados =
+  tagsSelecionadas.length === 0
+    ? marketing?.leadsAceitos || 0
+    : tagsSelecionadas.reduce((total, tag) => {
+        if (tag === 'A') return total + (marketing?.leadA || 0)
+        if (tag === 'B') return total + (marketing?.leadB || 0)
+        if (tag === 'C') return total + (marketing?.leadC || 0)
+        return total + (marketing?.leadD || 0)
+      }, 0)
+
+const conversaoAgendados =
+  totalQualificadosSelecionados > 0
+    ? ((marketing?.agendados || 0) / totalQualificadosSelecionados) * 100
+    : 0
+
 const qualificadosFiltrados =
   tagsSelecionadas.length === 0
     ? origensQualificadosPorTag.todas
     : tagsSelecionadas.flatMap((tag) => origensQualificadosPorTag[tag])
-
 
 const origensVendaConsulta: { nome: string; quantidade?: number; qtd?: number; valor?: number }[] =
   data?.origensVendaConsulta || []
@@ -414,7 +428,7 @@ return (
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percent={marketing?.leadsAceitosPercent || 0}
         >
-          <div className="mb-4 grid grid-cols-4 gap-4">
+          <div className="mb-3 grid grid-cols-4 gap-2">
   {(['A', 'B', 'C', 'D'] as const).map((tag) => {
     const ativo = tagsSelecionadas.includes(tag)
 
@@ -438,13 +452,13 @@ return (
               : [...atual, tag]
           )
         }
-        className={`rounded-2xl border px-4 py-3 text-center font-black transition ${
+       className={`rounded-xl border px-2 py-2 text-center font-black transition ${
           ativo
             ? 'border-emerald-400 bg-emerald-50/80 text-emerald-500'
             : 'border-slate-200 bg-white/40 text-slate-600 hover:bg-white/70'
         }`}
       >
-        <div className="text-xl">{tag}</div>
+       <div className="text-base">{tag}</div>
         <div className="text-xs opacity-80">{quantidade}</div>
       </button>
     )
@@ -459,14 +473,14 @@ return (
         <MarketingMetricCard
           title="Agendados"
           value={marketing?.agendados || 0}
-          subtitle={`${Math.round(marketing?.agendadosPercent || 0)}% de 30%`}
+          subtitle={`${Math.round(conversaoAgendados)}% de conversão`}
           icon="agendado"
-          status={(marketing?.agendadosPercent || 0) >= 30 ? 'green' : 'red'}
-          percent={marketing?.agendadosPercent || 0}
+          status={conversaoAgendados >= 30 ? 'green' : 'red'}
+          percent={conversaoAgendados}
         >
           <OrigemStageCard
             items={origensPorEtapa.agendado}
-            status={(marketing?.agendadosPercent || 0) >= 30 ? 'green' : 'red'}
+            status={conversaoAgendados >= 30 ? 'green' : 'red'}
           />
         </MarketingMetricCard>
 

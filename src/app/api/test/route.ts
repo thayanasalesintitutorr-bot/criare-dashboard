@@ -706,9 +706,14 @@ const leadD = consultaBasePeriodo.filter((l) =>
   )
 }).length
 
-    const agendadosFunil = consultaBasePeriodo.filter((l) =>
-      statusIs(l, 'AGENDADO')
-    ).length
+    const agendadosLeadsPeriodo = consultaLeads.filter((l) => {
+  return (
+    statusIs(l, 'AGENDADO') &&
+    inRange(parseDateLocal(l.scheduled_at), range.start, range.end)
+  )
+})
+
+const agendadosFunil = agendadosLeadsPeriodo.length
 
    const consultaGanhosLeads = consultaLeads.filter((l) => {
   return (
@@ -1276,13 +1281,11 @@ const origensQualificadosPorTag = {
   D: buildOrigens(leadsQualificadosD),
 }
 
-const leadsAgendados = consultaLeads.filter((l) =>
-  statusIs(l, 'AGENDADO') &&
-  inRange(parseDateLocal(l.scheduled_at), range.start, range.end)
-)
-const origensVendaConsulta = buildOrigens(consultaGanhosLeads)
+const leadsAgendados = agendadosLeadsPeriodo
 
-const origensPropostasFechadas = buildOrigens(propostasFechadasLeads)
+const origensVendaConsulta = campanhasConsulta
+
+const origensPropostasFechadas = campanhasVendidas
 
   const npsResponse = await fetch(
   'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/nps?select=*',
