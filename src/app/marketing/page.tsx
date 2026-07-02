@@ -137,7 +137,7 @@ extra?: ReactNode
         : 'bg-[#d4af5f]'
 
  return (
-  <div className={`min-h-[350px] rounded-[28px] border border-black/5 bg-white p-5 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
+  <div className="min-h-[255px] rounded-[24px] border border-black/5 bg-white p-4 flex flex-col shadow-[0_10px_35px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-[#112742]">
   
   <div className="mb-1 flex min-h-[40px] items-start gap-3">
   <div className="flex shrink-0 items-center justify-center">
@@ -168,7 +168,7 @@ extra?: ReactNode
 </div>
 
 <div className="mt-1 min-h-[48px] flex flex-col justify-start">
-  <div className="text-4xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+ <div className="text-3xl font-black tracking-[-0.06em] text-[var(--foreground)]">
     {value}
   </div>
 
@@ -199,7 +199,7 @@ extra?: ReactNode
 
 <div className="relative mt-3 flex-1">
  
-  <div className="max-h-[280px] space-y-3 overflow-y-auto pr-1">
+  <div className="space-y-2">
 
     {children}
   </div>
@@ -366,7 +366,7 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="min-h-[350px] rounded-[28px] border border-black/5 bg-white p-5 shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]">
+    <div className="min-h-[255px] rounded-[24px] border border-black/5 bg-white p-4 shadow-[0_10px_35px_rgba(15,23,42,0.06)] dark:border-white/5 dark:bg-[#112742] xl:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -802,10 +802,10 @@ return (
           </div>
         </div>
 
-        <div className="rounded-[34px] bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,0.08)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            
-        <MarketingMetricCard
+        <div className="rounded-[28px] bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
+  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+
+<MarketingMetricCard
           title="Entrada"
           value={totalEntradaFiltrada}
           subtitle=""
