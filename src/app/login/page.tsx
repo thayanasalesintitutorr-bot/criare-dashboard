@@ -25,16 +25,24 @@ export default function LoginPage() {
   const senhaDigitada = password.trim()
 
   if (
-  emailDigitado === 'altuusclinic@gmail.com' &&
-  senhaDigitada === 'Altuus@2026#'
-) {
-  localStorage.setItem('access_token', 'criare-auth')
+    emailDigitado === 'altuusclinic@gmail.com' &&
+    senhaDigitada === 'Altuus@2026#'
+  ) {
+    localStorage.setItem('access_token', 'criare-auth')
+    document.cookie = 'criare-auth=admin; path=/'
+    router.push('/dashboard')
+    return
+  }
 
-  document.cookie = 'criare-auth=true; path=/'
-
-  router.push('/dashboard')
-  return
-}
+  if (
+    emailDigitado === 'brunofontanella.ads@gmail.com' &&
+    senhaDigitada === 'Criare@Mkt9274#'
+  ) {
+    localStorage.setItem('access_token', 'criare-auth')
+    document.cookie = 'criare-auth=marketing; path=/'
+    router.push('/marketing')
+    return
+  }
 
   setError('E-mail ou senha incorretos')
   setLoading(false)

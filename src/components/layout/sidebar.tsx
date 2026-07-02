@@ -72,37 +72,44 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 space-y-2 px-3 pb-6">
-          {items.map((item) => {
-            const active = pathname === item.href
-            const Icon = item.icon
+  {items
+    .filter((item) => {
+      if (typeof document === 'undefined') return true
 
-            return (
-              <Link
-  key={item.href}
-  href={item.href}
-  className={`flex items-center justify-center group-hover:justify-start gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-    active
-      ? 'bg-white/12 text-white'
-      : 'text-white/70 hover:bg-white/8 hover:text-white'
-  }`}
->
-                <Icon
-  size={18}
-  className={item.href === '/marketing' ? 'text-[var(--accent)]' : ''}
-/>
-                <span
-  className="
-    hidden
-    group-hover:block
-    whitespace-nowrap
-  "
->
-  {item.label}
-</span>
-              </Link>
-            )
-          })}
-        </nav>
+      const isMarketingUser = document.cookie.includes('criare-auth=marketing')
+
+      if (isMarketingUser) {
+        return item.href === '/marketing'
+      }
+
+      return true
+    })
+    .map((item) => {
+      const active = pathname === item.href
+      const Icon = item.icon
+
+      return (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`flex items-center justify-center group-hover:justify-start gap-3 rounded-2xl px-4 py-3 text-sm transition ${
+            active
+              ? 'bg-white/12 text-white'
+              : 'text-white/70 hover:bg-white/8 hover:text-white'
+          }`}
+        >
+          <Icon
+            size={18}
+            className={item.href === '/marketing' ? 'text-[var(--accent)]' : ''}
+          />
+
+          <span className="hidden group-hover:block whitespace-nowrap">
+            {item.label}
+          </span>
+        </Link>
+      )
+    })}
+</nav>
       </div>
     </aside>
       </>

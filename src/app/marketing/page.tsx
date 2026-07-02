@@ -65,12 +65,12 @@ children?: ReactNode
         : 'bg-[#d4af5f]'
 
  return (
-  <div className={`min-h-[420px] rounded-[28px] border border-black/5 bg-white p-6 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
+  <div className={`min-h-[420px] rounded-[28px] border border-black/5 bg-white p-5 flex flex-col shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:bg-[#112742]`}>
   
-  <div className="mb-2 flex min-h-[48px] items-start gap-3">
-  <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[15px] bg-[#F3E7C7]/65 dark:bg-[#F3E7C7]/10">
+  <div className="mb-1 flex min-h-[40px] items-start gap-3">
+  <div className="flex shrink-0 items-center justify-center">
     <Icon
-      size={21}
+      size={26}
       strokeWidth={2.2}
       className="text-[#D7B46A]"
     />
@@ -95,21 +95,21 @@ children?: ReactNode
 </div>
 </div>
 
-<div className="mt-2 min-h-[58px] flex flex-col justify-start">
-  <div className="text-5xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+<div className="mt-1 min-h-[48px] flex flex-col justify-start">
+  <div className="text-4xl font-black tracking-[-0.06em] text-[var(--foreground)]">
     {value}
   </div>
 
-  <div className="mt-2 h-3">
+  <div className="mt-2 h-2">
     {icon !== 'entrada' ? (
-      <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
+      <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${progressColor}`}
           style={{ width: `${Math.min(Math.max(percent, 4), 100)}%` }}
         />
       </div>
     ) : (
-      <div className="h-3" />
+      <div className="h-2" />
     )}
   </div>
 
@@ -120,7 +120,7 @@ children?: ReactNode
   )}
 </div>
 
-<div className="relative mt-5 flex-1">
+<div className="relative mt-3 flex-1">
  
   <div className="space-y-3">
 
@@ -141,26 +141,28 @@ function OrigemStageCard({
     qtd?: number
     valor?: number
     detalhes?: {
-      nome: string
-      quantidade: number
+      nome?: string
+      quantidade?: number
+      medico?: string
+      atendimento?: string
+      convenio?: string
+      produto?: string
+      valor?: number
     }[]
   }[]
   status: 'green' | 'red' | 'blue'
   tooltipType?: 'origem' | 'consulta' | 'procedimento'
 }) {
-  const innerBg =
-    status === 'green'
-      ? 'bg-emerald-700/20 dark:bg-[#063D38]'
-      : status === 'red'
-        ? 'bg-rose-700/20 dark:bg-[#341024]'
-        : 'bg-slate-700/10 dark:bg-[#183047]'
+  const formatMoney = (value?: number) =>
+    (value || 0).toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
 
   return (
     <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-white/10">
       {items.length === 0 && (
-        <div
-          className={`rounded-[16px] ${innerBg} p-5 text-sm font-bold text-[var(--foreground)]`}
-        >
+        <div className="flex h-[42px] items-center rounded-2xl border border-slate-200 bg-transparent px-5 text-sm font-semibold text-slate-400 dark:border-white/10 dark:text-white/40">
           Sem dados
         </div>
       )}
@@ -191,35 +193,80 @@ function OrigemStageCard({
 
             {item.valor !== undefined && (
               <div className="text-xs font-bold text-slate-500 dark:text-white/50">
-                {item.valor.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })}
+                {formatMoney(item.valor)}
               </div>
             )}
           </div>
 
           {item.detalhes && item.detalhes.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[420px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
-              <div className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
-                Origem dos Leads
+            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
+              <div className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+                {tooltipType === 'consulta'
+                  ? 'Detalhes da consulta'
+                  : tooltipType === 'procedimento'
+                    ? 'Detalhes do procedimento'
+                    : 'Origem dos leads'}
               </div>
 
-              <div className="space-y-2">
-                {item.detalhes.slice(0, 6).map((detalhe) => (
-                  <div
-                    key={detalhe.nome}
-                    className="flex items-center justify-between gap-3 text-xs"
-                  >
-                    <span className="truncate font-bold text-slate-700 dark:text-white/80">
-                      {detalhe.nome}
-                    </span>
+              <div className="space-y-3">
+                {item.detalhes.slice(0, 8).map((detalhe, detalheIndex) => {
+                  if (tooltipType === 'consulta') {
+                    return (
+                      <div
+                        key={`${detalhe.medico}-${detalheIndex}`}
+                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-slate-50 p-3 text-xs dark:bg-white/5"
+                      >
+                        <div className="truncate font-black text-slate-900 dark:text-white">
+                          {detalhe.medico || 'Sem médico'}
+                        </div>
 
-                    <span className="font-black text-slate-900 dark:text-white">
-                      {detalhe.quantidade}
-                    </span>
-                  </div>
-                ))}
+                        <div className="truncate font-bold text-slate-500 dark:text-white/60">
+                          {detalhe.atendimento || detalhe.convenio || 'Sem atendimento'}
+                        </div>
+
+                        <div className="text-right font-black text-slate-900 dark:text-white">
+                          {formatMoney(detalhe.valor)}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  if (tooltipType === 'procedimento') {
+                    return (
+                      <div
+                        key={`${detalhe.medico}-${detalheIndex}`}
+                        className="grid grid-cols-[1fr_140px_90px] gap-3 rounded-xl bg-slate-50 p-3 text-xs dark:bg-white/5"
+                      >
+                        <div className="truncate font-black text-slate-900 dark:text-white">
+                          {detalhe.medico || 'Sem médico'}
+                        </div>
+
+                        <div className="truncate font-bold text-slate-500 dark:text-white/60">
+                          {detalhe.produto || 'Sem produto'}
+                        </div>
+
+                        <div className="text-right font-black text-slate-900 dark:text-white">
+                          {formatMoney(detalhe.valor)}
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div
+                      key={detalhe.nome || detalheIndex}
+                      className="flex items-center justify-between gap-3 text-xs"
+                    >
+                      <span className="truncate font-bold text-slate-700 dark:text-white/80">
+                        {detalhe.nome}
+                      </span>
+
+                      <span className="font-black text-slate-900 dark:text-white">
+                        {detalhe.quantidade}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )}

@@ -17,14 +17,28 @@ export function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Verifica autenticação
-  const hasSession = req.cookies.get('criare-auth')
+ // Verifica autenticação
+const session = req.cookies.get('criare-auth')?.value
 
-  if (!hasSession) {
-    return NextResponse.redirect(new URL('/login', req.url))
+if (!session) {
+  return NextResponse.redirect(new URL('/login', req.url))
+}
+
+// Usuário Marketing
+if (session === 'marketing') {
+  if (req.nextUrl.pathname !== '/marketing') {
+    return NextResponse.redirect(new URL('/marketing', req.url))
   }
 
   return NextResponse.next()
+}
+
+// Usuário Admin
+if (session === 'admin') {
+  return NextResponse.next()
+}
+
+return NextResponse.redirect(new URL('/login', req.url))
 }
 
 export const config = {
