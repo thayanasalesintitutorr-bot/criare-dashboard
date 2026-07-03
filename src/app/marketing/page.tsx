@@ -166,10 +166,16 @@ extra?: ReactNode
 </div>
 </div>
 
-<div className="mt-1 min-h-[48px] flex flex-col justify-start">
- <div className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+<div className="mt-1 min-h-[70px] flex items-start justify-between gap-3">
+  <div className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
     {value}
   </div>
+
+  {extra && (
+    <div className="w-[125px] shrink-0">
+      {extra}
+    </div>
+  )}
 
   <div className="mt-2 h-2">
   {icon !== 'entrada' && icon !== 'consulta' && icon !== 'procedimento' ? (
@@ -189,11 +195,7 @@ extra?: ReactNode
     {subtitle}
   </div>
 )}
- {extra && (
-  <div className="mt-2">
-    {extra}
-  </div>
-)}
+
 </div>
 
 <div className="relative mt-3 flex-1">
@@ -897,7 +899,7 @@ subtitle={formatMoney(valorConsultasFiltrado)}
   icon="consulta"
   status="blue"
  extra={
-  <div className="grid grid-cols-2 gap-2">
+  <div className="space-y-1">
     <div className="rounded-xl bg-slate-50 p-2">
       <div className="text-[9px] font-black uppercase text-slate-400">
         Valor
@@ -936,7 +938,7 @@ subtitle={formatMoney(valorProcedimentosFiltrado)}
   icon="procedimento"
   status="blue"
   extra={
-  <div className="grid grid-cols-2 gap-2">
+  <div className="space-y-1">
     <div className="rounded-xl bg-slate-50 p-2">
       <div className="text-[9px] font-black uppercase text-slate-400">
         Valor
