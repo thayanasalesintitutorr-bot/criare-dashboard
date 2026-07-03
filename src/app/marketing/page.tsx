@@ -172,7 +172,7 @@ extra?: ReactNode
   </div>
 
   <div className="mt-2 h-2">
-    {icon !== 'entrada' ? (
+  {icon !== 'entrada' && icon !== 'consulta' && icon !== 'procedimento' ? (
       <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
         <div
           className={`h-full rounded-full ${progressColor}`}
@@ -184,13 +184,13 @@ extra?: ReactNode
     )}
   </div>
 
-  {icon !== 'entrada' && (
-    <div className="mt-2 text-right text-xs font-black text-[var(--muted-foreground)] dark:text-white/70">
-      {subtitle}
-    </div>
-  )}
-  {extra && (
-  <div className="mt-2 grid grid-cols-2 gap-2">
+ {icon !== 'entrada' && icon !== 'consulta' && icon !== 'procedimento' && (
+  <div className="mt-2 text-right text-xs font-black text-[var(--muted-foreground)] dark:text-white/70">
+    {subtitle}
+  </div>
+)}
+ {extra && (
+  <div className="mt-2">
     {extra}
   </div>
 )}
@@ -844,18 +844,9 @@ return (
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percent={marketing?.leadsAceitosPercent || 0}
         >
-          <div className="mb-3 grid grid-cols-4 gap-2">
+         <div className="mb-2 flex gap-1.5">
   {(['A', 'B', 'C', 'D'] as const).map((tag) => {
     const ativo = tagsSelecionadas.includes(tag)
-
-    const quantidade =
-      tag === 'A'
-        ? marketing?.leadA || 0
-        : tag === 'B'
-          ? marketing?.leadB || 0
-          : tag === 'C'
-            ? marketing?.leadC || 0
-            : marketing?.leadD || 0
 
     return (
       <button
@@ -868,14 +859,13 @@ return (
               : [...atual, tag]
           )
         }
-       className={`rounded-xl border px-2 py-2 text-center font-black transition ${
+        className={`h-7 w-7 rounded-lg border text-xs font-black transition ${
           ativo
-            ? 'border-emerald-400 bg-emerald-50/80 text-emerald-500'
-            : 'border-slate-200 bg-white/40 text-slate-600 hover:bg-white/70'
+            ? 'border-emerald-400 bg-emerald-50 text-emerald-500'
+            : 'border-slate-200 bg-white text-slate-500'
         }`}
       >
-       <div className="text-base">{tag}</div>
-        <div className="text-xs opacity-80">{quantidade}</div>
+        {tag}
       </button>
     )
   })}
@@ -906,22 +896,22 @@ return (
 subtitle={formatMoney(valorConsultasFiltrado)}
   icon="consulta"
   status="blue"
-  extra={
-  <>
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-[10px] font-black uppercase text-slate-400">
+ extra={
+  <div className="grid grid-cols-2 gap-2">
+    <div className="rounded-xl bg-slate-50 p-2">
+      <div className="text-[9px] font-black uppercase text-slate-400">
         Valor
       </div>
-      <div className="text-sm font-black text-slate-900">
+      <div className="text-xs font-black text-slate-900">
         {formatMoney(valorConsultasFiltrado)}
       </div>
     </div>
 
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-[10px] font-black uppercase text-slate-400">
-        Ticket
+    <div className="rounded-xl bg-slate-50 p-2">
+      <div className="text-[9px] font-black uppercase text-slate-400">
+        TM
       </div>
-      <div className="text-sm font-black text-slate-900">
+      <div className="text-xs font-black text-slate-900">
         {formatMoney(
           sumQtd(consultasFiltrado) > 0
             ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
@@ -929,7 +919,7 @@ subtitle={formatMoney(valorConsultasFiltrado)}
         )}
       </div>
     </div>
-  </>
+  </div>
 }
 >
   <OrigemStageCard
@@ -946,21 +936,21 @@ subtitle={formatMoney(valorProcedimentosFiltrado)}
   icon="procedimento"
   status="blue"
   extra={
-  <>
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-[10px] font-black uppercase text-slate-400">
+  <div className="grid grid-cols-2 gap-2">
+    <div className="rounded-xl bg-slate-50 p-2">
+      <div className="text-[9px] font-black uppercase text-slate-400">
         Valor
       </div>
-      <div className="text-sm font-black text-slate-900">
+      <div className="text-xs font-black text-slate-900">
         {formatMoney(valorProcedimentosFiltrado)}
       </div>
     </div>
 
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-[10px] font-black uppercase text-slate-400">
-        Ticket
+    <div className="rounded-xl bg-slate-50 p-2">
+      <div className="text-[9px] font-black uppercase text-slate-400">
+        TM
       </div>
-      <div className="text-sm font-black text-slate-900">
+      <div className="text-xs font-black text-slate-900">
         {formatMoney(
           sumQtd(procedimentosFiltrado) > 0
             ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)
@@ -968,7 +958,7 @@ subtitle={formatMoney(valorProcedimentosFiltrado)}
         )}
       </div>
     </div>
-  </>
+  </div>
 }
 >
   <OrigemStageCard
