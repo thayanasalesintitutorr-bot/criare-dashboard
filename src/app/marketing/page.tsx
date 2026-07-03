@@ -766,8 +766,8 @@ return (
   </div>
 </aside>
 
-      <section className="space-y-5">
-        <div className="grid rounded-[26px] border border-violet-200 bg-violet-50/60 p-4 shadow-[0_14px_45px_rgba(15,23,42,0.06)] xl:grid-cols-6">
+      <section className="flex h-[700px] flex-col space-y-4 overflow-hidden">
+        <div className="shrink-0 grid rounded-[26px] border border-violet-200 bg-violet-50/60 p-4 shadow-[0_14px_45px_rgba(15,23,42,0.06)] xl:grid-cols-6">
           <div className="flex items-center gap-3 border-r border-violet-200 px-3">
             <Wallet className="text-violet-600" size={28} />
             <div>
@@ -802,8 +802,8 @@ return (
           </div>
         </div>
 
-        <div className="rounded-[28px] bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-[28px] bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
+<div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard
           title="Entrada"
