@@ -136,7 +136,7 @@ function parseLocalDate(dateString?: string) {
 <div className="flex shrink-0 items-center gap-3">
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3"
+              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
             >
               {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
               <span className="font-medium">
@@ -146,7 +146,7 @@ function parseLocalDate(dateString?: string) {
 
             <button
               onClick={handleRefresh}
-              className="rounded-2xl bg-[var(--card)] p-3"
+              className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
             >
               <RefreshCw size={18} />
             </button>
@@ -154,12 +154,12 @@ function parseLocalDate(dateString?: string) {
             <button
   onClick={toggleFullscreen}
   title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-  className="rounded-2xl bg-[var(--card)] p-3"
+  className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
 >
   {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
 </button>
 
-            <button className="rounded-2xl bg-[var(--card)] p-3">
+            <button className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]">
               <Search size={18} />
             </button>
 
@@ -171,7 +171,7 @@ function parseLocalDate(dateString?: string) {
   setShowNotifications((v) => !v)
   setHideNotifications(false)
 }}
-                className="relative rounded-2xl bg-[var(--card)] p-3"
+                className="relative rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
               >
                 <Bell size={18} />
                 {hasNotification && (
@@ -209,7 +209,7 @@ function parseLocalDate(dateString?: string) {
             <div ref={profileRef} className="relative">
               <button
   onClick={() => setShowProfile((v) => !v)}
-  className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[var(--accent)] text-[var(--background)]"
+  className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[var(--accent)] text-[var(--background)] ring-2 ring-transparent transition-all duration-200 hover:ring-[var(--accent)]/40"
 >
   <img
     src="/altuus-logo.png"

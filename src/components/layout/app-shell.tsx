@@ -16,7 +16,7 @@ export function AppShell({ title, children }: AppShellProps) {
       <div className="flex min-h-screen">
         <Sidebar />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col pl-[76px]">
           <Topbar title={title} />
 
           <motion.main

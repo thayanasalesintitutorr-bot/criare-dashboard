@@ -7,6 +7,7 @@ import {
   Stethoscope,
   Users,
   ChartNoAxesCombined,
+  UserRound,
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
@@ -59,6 +60,7 @@ type DashboardResponse = {
       propostasFechadasPercent: number
       valorTotalVendas: number
       ticketMedioVendas: number
+      cicloVendaDias: number
       metaPropostasFechadasPercent: number
       metaValorTotalVendas: number
       metaTicketMedio: number
@@ -211,7 +213,7 @@ function textSecondary() {
 }
 
 function cardBg() {
-  return 'border border-black/5 bg-[var(--card)] shadow-[0_16px_50px_rgba(15,23,42,0.08)] dark:border-white/5 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]'
+  return 'border border-black/5 bg-[var(--card)] shadow-[0_16px_50px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/25 hover:shadow-[0_20px_60px_rgba(217,182,107,0.12)] dark:border-white/5 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]'
 }
 
 function metricCardBg() {
@@ -222,9 +224,37 @@ function metricCardBg() {
     bg-[var(--metric-card)]
     px-4 py-2
     shadow-[0_10px_30px_rgba(15,23,42,0.08)]
+    transition-all
+    duration-300
+    hover:border-[var(--accent)]/20
     dark:border-white/5
     dark:shadow-[0_10px_30px_rgba(0,0,0,0.30)]
   `
+}
+
+function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {
+  if (!lastUpdated) return null
+
+  const seconds = Math.max(0, Math.floor((now.getTime() - lastUpdated.getTime()) / 1000))
+  const label =
+    seconds < 5
+      ? 'atualizado agora mesmo'
+      : seconds < 60
+        ? `atualizado há ${seconds}s`
+        : `atualizado há ${Math.floor(seconds / 60)}min`
+
+  const stale = seconds > 30
+
+  return (
+    <div className={`flex items-center gap-2 text-[12px] font-semibold ${textSecondary()}`}>
+      <span
+        className={`inline-flex h-2 w-2 rounded-full ${
+          stale ? 'bg-amber-400' : 'bg-emerald-400'
+        }`}
+      />
+      <span>{label}</span>
+    </div>
+  )
 }
 
 function GroupCard({
@@ -240,9 +270,9 @@ function GroupCard({
   const isMobile = viewMode === 'mobile'
 
   return (
-    <section className={`rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-2'} ${cardBg()}`}>
+    <section className={`relative z-0 hover:z-20 rounded-[24px] ${isMobile ? 'p-6' : 'px-4 py-2'} ${cardBg()}`}>
       <div className={`${isMobile ? 'mb-5' : 'mb-2'} flex items-center gap-3`}>
-  <div className="text-[#D7B46A]">
+  <div className={`flex items-center justify-center rounded-2xl bg-[var(--accent)]/12 text-[var(--accent)] ${isMobile ? 'h-14 w-14' : 'h-9 w-9'}`}>
     {icon}
   </div>
 
@@ -266,12 +296,14 @@ function SimpleMetric({
   value,
   previousValue,
   showCompare = false,
+  empty = false,
   children,
 }: {
   label: string
   value: number | string
   previousValue?: number
   showCompare?: boolean
+  empty?: boolean
   children?: React.ReactNode
 }) {
   const { viewMode } = useFilters()
@@ -287,6 +319,32 @@ const diff =
     : 0
 
 const isUp = diff >= 0
+
+  if (empty) {
+    return (
+      <div className="space-y-1">
+        <h4
+          className={`${
+            isMobile ? 'text-[26px] font-black' : 'text-[14px] font-semibold'
+          } ${textPrimary()}`}
+        >
+          {label}
+        </h4>
+
+        <div
+          className={`${
+            isMobile ? 'text-[64px]' : 'text-[32px]'
+          } font-black tracking-[-0.04em] leading-none text-[var(--muted-foreground)]/40`}
+        >
+          —
+        </div>
+
+        <p className={`${isMobile ? 'text-[22px]' : 'text-[11px]'} font-semibold ${textSecondary()}`}>
+          Sem dados no período
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative space-y-1">
@@ -333,6 +391,7 @@ function GoalMetric({
   target,
   mode,
   metaLabel,
+  empty = false,
 }: {
   label: string
   value: ReactNode
@@ -340,13 +399,39 @@ function GoalMetric({
   target: number
   mode: 'max' | 'min'
   metaLabel?: string
+  empty?: boolean
 }) {
   const { viewMode } = useFilters()
   const s = getMetricStatus(percent, target, mode)
 
   const isMobile = viewMode === 'mobile'
 
-  
+  if (empty) {
+    return (
+      <div className={isMobile ? 'space-y-2' : 'space-y-1'}>
+        <h4
+          className={`${
+            isMobile ? 'text-[28px] font-black' : 'text-[14px] font-semibold'
+          } leading-tight ${textPrimary()}`}
+        >
+          {label}
+        </h4>
+
+        <div
+          className={`${
+            isMobile ? 'text-[64px]' : 'text-[32px]'
+          } font-black tracking-[-0.05em] text-[var(--muted-foreground)]/40`}
+        >
+          —
+        </div>
+
+        <p className={`${isMobile ? 'text-[22px]' : 'text-[11px]'} font-semibold ${textSecondary()}`}>
+          Sem dados no período
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className={isMobile ? 'space-y-2' : 'space-y-1'}>
       <h4
@@ -418,6 +503,72 @@ function GoalMetric({
 
 }
 
+function getAvatarMedico(nome: string) {
+  const n = nome.toUpperCase()
+
+  if (n.includes('RODOLPHO')) return '/medicos/rodolpho.png'
+  if (n.includes('BRENO')) return '/medicos/breno.png'
+  if (n.includes('CLAUDIA')) return '/medicos/claudia.png'
+  if (n.includes('JESSICA')) return '/medicos/jessica.png'
+
+  return null
+}
+
+function MedicoSnapshotCard({
+  nome,
+  atendimentos,
+  ticketConsulta,
+  valorVendas,
+  percentualMeta,
+}: {
+  nome: string
+  atendimentos?: number
+  ticketConsulta?: number
+  valorVendas?: number
+  percentualMeta?: number
+}) {
+  const { viewMode } = useFilters()
+  const isMobile = viewMode === 'mobile'
+  const avatar = getAvatarMedico(nome)
+  const metaOk = (percentualMeta || 0) >= 100
+
+  return (
+    <div className={`flex items-center gap-4 ${isMobile ? 'p-6' : 'p-3'} ${metricCardBg()}`}>
+      <div className={`shrink-0 overflow-hidden rounded-full bg-[var(--accent)]/15 ${isMobile ? 'h-20 w-20' : 'h-12 w-12'}`}>
+        {avatar ? (
+          <img src={avatar} alt={nome} className="h-full w-full object-cover" />
+        ) : (
+          <div className={`flex h-full w-full items-center justify-center font-black text-[var(--accent)] ${isMobile ? 'text-[28px]' : 'text-[16px]'}`}>
+            {nome.charAt(0)}
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className={`truncate font-black ${textPrimary()} ${isMobile ? 'text-[24px]' : 'text-[14px]'}`}>
+          {nome}
+        </p>
+
+        <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isMobile ? 'text-[18px]' : 'text-[12px]'} font-semibold`}>
+          <span>{atendimentos ?? 0} atend.</span>
+          <span>{formatMoney(ticketConsulta || 0)} ticket</span>
+          {valorVendas !== undefined && (
+            <span
+              className={
+                metaOk
+                  ? 'font-bold text-emerald-500 dark:text-emerald-400'
+                  : 'font-bold text-rose-500 dark:text-rose-400'
+              }
+            >
+              {formatMoneyShort(valorVendas)} · {formatPercent(percentualMeta || 0)} da meta
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const ORIGENS_COLORS = [
   '#4f8cff',
   '#34d399',
@@ -440,6 +591,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [leadsSelecionados, setLeadsSelecionados] = useState<('A' | 'B' | 'C' | 'D')[]>(['A'])
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [now, setNow] = useState<Date>(new Date())
+
+  useEffect(() => {
+    const tick = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(tick)
+  }, [])
 
 
 
@@ -482,6 +640,8 @@ export default function DashboardPage() {
 
         return json
       })
+
+      setLastUpdated(new Date())
     } catch (err: any) {
       setError(err.message || 'Erro inesperado')
     } finally {
@@ -505,6 +665,39 @@ export default function DashboardPage() {
   const origens = data?.origens || []
   const experienciaCliente = (data as any)?.kpis?.experienciaCliente
   const comparativo = data?.comparativo
+  const consultaPorMedico = data?.consultaPorMedico || []
+  const vendasPorMedico = data?.vendasPorMedico || []
+
+  const medicosSnapshotMap = new Map<
+    string,
+    {
+      nome: string
+      atendimentos?: number
+      ticketConsulta?: number
+      valorVendas?: number
+      percentualMeta?: number
+    }
+  >()
+
+  consultaPorMedico.forEach((m) => {
+    medicosSnapshotMap.set(m.medico, {
+      ...medicosSnapshotMap.get(m.medico),
+      nome: m.medico,
+      atendimentos: m.atendimentos,
+      ticketConsulta: m.ticketMedio,
+    })
+  })
+
+  vendasPorMedico.forEach((m) => {
+    medicosSnapshotMap.set(m.nome, {
+      ...medicosSnapshotMap.get(m.nome),
+      nome: m.nome,
+      valorVendas: m.valor,
+      percentualMeta: (m.percentual || 0) * 100,
+    })
+  })
+
+  const medicosSnapshot = Array.from(medicosSnapshotMap.values())
   if (loading) {
     return (
       <AppShell title="Visão Geral">
@@ -556,7 +749,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   return (
     <AppShell title="Visão Geral">
      <div className="space-y-3">
-       
+       <div className="flex justify-end">
+         <LiveIndicator lastUpdated={lastUpdated} now={now} />
+       </div>
+
     <div
   className={`grid gap-3 ${
     viewMode === 'mobile'
@@ -666,10 +862,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       : [...atual, item]
   )
 }
-        className={`rounded-lg border py-1.5 font-black transition ${
+        className={`rounded-lg border py-1.5 font-black transition-all duration-200 ${
           leadsSelecionados.includes(item)
-            ? 'border-emerald-400 bg-emerald-50 text-emerald-500'
-            : 'border-slate-200 bg-white text-slate-600'
+            ? 'border-emerald-400 bg-emerald-400/10 text-emerald-500'
+            : 'border-black/10 bg-[var(--metric-card)] text-[var(--muted-foreground)] hover:border-[var(--accent)]/40 hover:text-[var(--foreground)] dark:border-white/10'
         } ${viewMode === 'mobile' ? 'text-[28px]' : 'text-[14px]'}`}
       >
         {item}
@@ -737,6 +933,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   percent={convertidosFiltradoPercent}
   target={30}
   mode="min"
+  empty={quantidadeLeadSelecionado === 0}
 />
           </GroupCard>
 
@@ -768,6 +965,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={formatMoney(comercialConsulta?.ticketMedioConsulta || 0)}
   previousValue={comparativo?.comercialConsulta?.ticketMedioConsultaAnterior}
   showCompare={comparar}
+  empty={!comercialConsulta?.quantidadeConsulta}
 />
     </div>
 
@@ -798,6 +996,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={formatMoney(comercialConsulta?.ticketMedioReabord || 0)}
   previousValue={comparativo?.comercialConsulta?.ticketMedioReabordAnterior}
   showCompare={comparar}
+  empty={!comercialConsulta?.quantidadeReabord}
 />
     </div>
   </div>
@@ -830,6 +1029,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={formatMoney(comercialConsulta?.ticketMedioTotal || 0)}
   previousValue={comparativo?.comercialConsulta?.ticketMedioTotalAnterior}
   showCompare={comparar}
+  empty={!comercialConsulta?.quantidadeTotal}
 />
     </div>
   </div>
@@ -849,6 +1049,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   percent={comercialVendas?.propostasFechadasPercent || 0}
   target={comercialVendas?.metaPropostasFechadasPercent || 70}
   mode="min"
+  empty={!comercialVendas?.propostasEnviadas}
 />
 
 <SimpleMetric
@@ -863,6 +1064,13 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={formatMoney(comercialVendas?.ticketMedioVendas || 0)}
   previousValue={comparativo?.comercialVendas?.ticketMedioVendasAnterior}
   showCompare={comparar}
+  empty={!comercialVendas?.propostasFechadas}
+/>
+
+<SimpleMetric
+  label="Ciclo de venda"
+  value={`${(comercialVendas?.cicloVendaDias || 0).toFixed(1)} dias`}
+  empty={!comercialVendas?.propostasFechadas}
 />
           </GroupCard>
 
@@ -899,7 +1107,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   className={`${
     viewMode === 'mobile'
       ? 'text-[26px]'
-      : 'text-lg'
+      : 'text-[14px]'
   } font-black uppercase tracking-wide ${textSecondary()}`}
 >
     Experiência do Cliente
@@ -1011,6 +1219,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     value={formatMoney(consolidado?.ticketMedio || 0)}
     previousValue={comparativo?.consolidado?.ticketMedioAnterior}
     showCompare={comparar}
+    empty={!consolidado?.qtdVendas}
   />
 
   <div
@@ -1056,8 +1265,44 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </div>
           </div>
         </section>
-  
 
+        {medicosSnapshot.length > 0 && (
+          <section className={`rounded-[24px] px-4 py-2 ${cardBg()}`}>
+            <div className="mb-3 flex items-center gap-3">
+              <div
+                className={`${
+                  viewMode === 'mobile' ? 'h-12 w-12' : 'h-6 w-6'
+                } flex shrink-0 items-center justify-center text-[var(--accent)]`}
+              >
+                <UserRound size={26} />
+              </div>
+              <h3
+                className={`${
+                  viewMode === 'mobile' ? 'text-[42px]' : 'text-[20px]'
+                } font-black tracking-[-0.05em] ${textPrimary()}`}
+              >
+                Médicos
+              </h3>
+            </div>
+
+            <div
+              className={`grid gap-2 ${
+                viewMode === 'mobile' ? 'grid-cols-1' : 'grid-cols-2 xl:grid-cols-4'
+              }`}
+            >
+              {medicosSnapshot.map((m) => (
+                <MedicoSnapshotCard
+                  key={m.nome}
+                  nome={m.nome}
+                  atendimentos={m.atendimentos}
+                  ticketConsulta={m.ticketConsulta}
+                  valorVendas={m.valorVendas}
+                  percentualMeta={m.percentualMeta}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
       </div>
     </AppShell>

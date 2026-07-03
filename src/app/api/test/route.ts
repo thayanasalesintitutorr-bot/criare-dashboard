@@ -20,6 +20,7 @@ type Lead = {
   Atendimento?: string | null
   Convenio?: string | null
   Data_de_atendimento?: string | null
+  utm_campaing?: string | null
 }
 
 function normalize(value: unknown) {
@@ -294,15 +295,28 @@ function safePercent(part: number, total: number) {
 const MEDICOS_VASCULAR = ['DR. RODOLPHO REIS', 'DRA. CLAUDIA LAMEIRA']
 const MEDICOS_EMAGRECIMENTO = ['DR. BRENO PITANGUI']
 
+function segmentoDoLead(lead: Lead): 'vascular' | 'emagrecimento' | null {
+  const utm = normalize(lead.utm_campaing)
+  const med = normalize(lead.medico)
+
+  if (utm.includes('BRENO') || med.includes('BRENO')) return 'emagrecimento'
+
+  if (
+    utm.includes('RODOLPHO') ||
+    utm.includes('CLAUDIA') ||
+    med.includes('RODOLPHO') ||
+    med.includes('CLAUDIA')
+  ) {
+    return 'vascular'
+  }
+
+  return null
+}
+
 function filterBySegmento(leads: Lead[], segmento: string) {
   if (segmento === 'geral') return leads
 
-  const allowed = segmento === 'vascular' ? MEDICOS_VASCULAR : MEDICOS_EMAGRECIMENTO
-
-  return leads.filter((lead) => {
-    const med = normalize(lead.medico)
-    return allowed.some((m) => normalize(m) === med)
-  })
+  return leads.filter((lead) => segmentoDoLead(lead) === segmento)
 }
 
 const META_MENSAL_VENDAS = 750000
@@ -487,7 +501,7 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio&offset=${from}&limit=${pageSize}`,
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio,utm_campaing&offset=${from}&limit=${pageSize}`,
   {
     headers: {
   apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -854,6 +868,24 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
         inRange(parseDateLocal(l.closed_at), range.start, range.end)
       )
     })
+
+    const cicloVendaDiasLista = propostasFechadasLeads
+      .map((l) => {
+        const inicio = parseDateLocal(l.created_at)
+        const fim = parseDateLocal(l.closed_at)
+
+        if (!inicio || !fim) return null
+
+        const dias = (fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24)
+
+        return dias >= 0 ? dias : null
+      })
+      .filter((d): d is number => d !== null)
+
+    const cicloVendaDias =
+      cicloVendaDiasLista.length > 0
+        ? cicloVendaDiasLista.reduce((acc, d) => acc + d, 0) / cicloVendaDiasLista.length
+        : 0
 
     const produtosMap: Record<string, { qtd: number; valor: number }> = {}
     const campanhasMap: Record<
@@ -2072,6 +2104,7 @@ const painelAtendimento = {
   valorTotalVendas,
   ticketMedioVendas,
   leadsParadosVendas,
+  cicloVendaDias,
   metaPropostasFechadasPercent: 70,
   metaValorTotalVendas,
   metaTicketMedio: META_TICKET_MEDIO,

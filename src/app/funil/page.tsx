@@ -1,6 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from 'recharts'
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
 import {
@@ -123,6 +132,31 @@ function formatMoney(v: number) {
   })
 }
 
+function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {
+  if (!lastUpdated) return null
+
+  const seconds = Math.max(0, Math.floor((now.getTime() - lastUpdated.getTime()) / 1000))
+  const label =
+    seconds < 5
+      ? 'atualizado agora mesmo'
+      : seconds < 60
+        ? `atualizado há ${seconds}s`
+        : `atualizado há ${Math.floor(seconds / 60)}min`
+
+  const stale = seconds > 30
+
+  return (
+    <div className="flex items-center gap-2 text-[12px] font-semibold text-[var(--muted-foreground)]">
+      <span
+        className={`inline-flex h-2 w-2 rounded-full ${
+          stale ? 'bg-amber-400' : 'bg-emerald-400'
+        }`}
+      />
+      <span>{label}</span>
+    </div>
+  )
+}
+
 function getFotoMedico(nome: string) {
   const n = nome
     .normalize('NFD')
@@ -175,7 +209,13 @@ const isImac = viewMode === 'desktop'
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [now, setNow] = useState<Date>(new Date())
 
+  useEffect(() => {
+    const tick = setInterval(() => setNow(new Date()), 1000)
+    return () => clearInterval(tick)
+  }, [])
 
   useEffect(() => {
   async function loadData(showLoading = false) {
@@ -216,6 +256,8 @@ const isImac = viewMode === 'desktop'
 
         return json
       })
+
+      setLastUpdated(new Date())
     } catch (err: any) {
       setError(err.message || 'Erro inesperado')
     } finally {
@@ -238,6 +280,19 @@ const isImac = viewMode === 'desktop'
 
   const vendasPorMedico = data?.vendasPorMedico || []
   const painelAtendimento = data?.painelAtendimento
+
+  const atendimentoPorDiaChart = useMemo(() => {
+    return (painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
+      const dataObj = new Date(`${item.data}T00:00:00`)
+      const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
+      return { ...item, fimDeSemana }
+    })
+  }, [painelAtendimento?.atendimentoPorDia])
+
+  const evolucaoFaturamentoChart = useMemo(() => {
+    return painelAtendimento?.evolucaoFaturamento || []
+  }, [painelAtendimento?.evolucaoFaturamento])
+
   const totalAgendamentosOrigem =
   painelAtendimento?.totalAgendamentos || 0
   const totalConsultasComReabord =
@@ -296,6 +351,10 @@ const ticketMedioConsultaComReabord =
   return (
   <AppShell title="Consulta (Funil)">
     <div className="space-y-5">
+<div className="flex justify-end">
+  <LiveIndicator lastUpdated={lastUpdated} now={now} />
+</div>
+
 <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
  <div className="flex shrink-0 items-center justify-center">
@@ -340,6 +399,7 @@ const ticketMedioConsultaComReabord =
       value={formatMoney(faturamentoConsultaComReabord)}
       description="vendas de consulta"
       tone="green"
+      empty={totalConsultasComReabord === 0}
       previousValue={comparativo?.comercialConsulta?.valorTotalAnterior}
       showCompare={comparar}
     />
@@ -352,6 +412,7 @@ const ticketMedioConsultaComReabord =
       tone="purple"
       previousValue={comparativo?.comercialConsulta?.ticketMedioTotalAnterior}
       showCompare={comparar}
+      empty={totalConsultasComReabord === 0}
     />
   </div>
 
@@ -377,50 +438,44 @@ const ticketMedioConsultaComReabord =
     </div>
   </div>
 
-  <div className="overflow-x-auto">
-    <div className="flex h-[118px] w-full items-end justify-between gap-2 pb-1">
-      {(painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
-        const maior = Math.max(
-          ...(painelAtendimento?.atendimentoPorDia || []).map((x: any) =>
-            Number(x.quantidade || 0)
-          ),
-          1
-        )
-
-        const dataObj = new Date(`${item.data}T00:00:00`)
-        const fimDeSemana =
-          dataObj.getDay() === 0 || dataObj.getDay() === 6
-
-        const altura = Math.max(
-          (Number(item.quantidade || 0) / maior) * 46,
-          Number(item.quantidade || 0) > 0 ? 8 : 2
-        )
-
-        return (
-          <div
-            key={item.data}
-            className="flex w-[34px] shrink-0 flex-col items-center"
-          >
-            <div className="flex h-[52px] items-end">
-              <div
-                className={`w-[18px] rounded-full ${
-                  fimDeSemana ? 'bg-gray-300' : 'bg-[#D7B46A]'
-                }`}
-                style={{ height: `${altura}px` }}
-              />
-            </div>
-
-            <span className="mt-2 text-[11px] font-bold text-[var(--muted-foreground)]">
-              {item.label}
-            </span>
-
-            <span className="mt-1 text-[14px] font-black text-[var(--foreground)]">
-              {item.quantidade || 0}
-            </span>
-          </div>
-        )
-      })}
-    </div>
+  <div className="h-[150px] w-full">
+    {atendimentoPorDiaChart.length > 0 ? (
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={atendimentoPorDiaChart}
+          margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
+        >
+          <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            cursor={{ fill: 'var(--metric-card)' }}
+            contentStyle={{
+              background: 'var(--background)',
+              border: '1px solid var(--border)',
+              borderRadius: 12,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--foreground)',
+            }}
+            formatter={(value: any) => [value, 'Atendimentos']}
+          />
+          <Bar dataKey="quantidade" radius={[6, 6, 0, 0]} maxBarSize={18} isAnimationActive={false} label={{ position: 'top', fontSize: 11, fontWeight: 900, fill: 'var(--foreground)' }}>
+            {atendimentoPorDiaChart.map((item: any, index: number) => (
+              <Cell key={item.data || index} fill={item.fimDeSemana ? '#d1d5db' : '#D7B46A'} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    ) : (
+      <div className="flex h-full items-center justify-center text-[13px] font-semibold text-[var(--muted-foreground)]">
+        Sem dados no período
+      </div>
+    )}
   </div>
 </div>
 
@@ -429,51 +484,54 @@ const ticketMedioConsultaComReabord =
     Evolução de faturamento
   </h3>
 
-  <div className="mt-4 overflow-x-auto">
-  <div className="flex h-[150px] w-full items-end justify-between gap-3 pb-1">
-    {(() => {
-      const dados = painelAtendimento?.evolucaoFaturamento || []
-
-      const maior = Math.max(
-        ...dados.map((x: any) => Number(x.valor || 0)),
-        1
-      )
-
-      return dados.map((item: any) => {
-        const valor = Number(item.valor || 0)
-
-        const altura =
-          valor > 0
-            ? Math.max((valor / maior) * 90, 10)
-            : 2
-
-        return (
-          <div
-            key={item.data}
-            className="flex w-[48px] shrink-0 flex-col items-center"
-          >
-            <span className="mb-2 text-[10px] font-black text-[var(--foreground)]">
-              {formatMoney(valor)}
-            </span>
-
-            <div className="flex h-[95px] items-end">
-              <div
-                className="w-[22px] rounded-t-lg bg-emerald-500"
-                style={{ height: `${altura}px` }}
-              />
-            </div>
-
-            <span className="mt-2 text-[11px] font-bold text-[var(--muted-foreground)]">
-              {item.label}
-            </span>
-          </div>
-        )
-      })
-    })()}
+  <div className="mt-4 h-[170px] w-full">
+    {evolucaoFaturamentoChart.length > 0 ? (
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={evolucaoFaturamentoChart}
+          margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
+        >
+          <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            cursor={{ fill: 'var(--metric-card)' }}
+            contentStyle={{
+              background: 'var(--background)',
+              border: '1px solid var(--border)',
+              borderRadius: 12,
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--foreground)',
+            }}
+            formatter={(value: any) => [formatMoney(Number(value || 0)), 'Faturamento']}
+          />
+          <Bar
+            dataKey="valor"
+            radius={[6, 6, 0, 0]}
+            maxBarSize={22}
+            fill="#10b981"
+            isAnimationActive={false}
+            label={{
+              position: 'top',
+              fontSize: 10,
+              fontWeight: 900,
+              fill: 'var(--foreground)',
+              formatter: (value: any) => formatMoney(Number(value || 0)),
+            }}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    ) : (
+      <div className="flex h-full items-center justify-center text-[13px] font-semibold text-[var(--muted-foreground)]">
+        Sem dados no período
+      </div>
+    )}
   </div>
-</div>
-
-          
 </div>
 
     <div className="mt-3 grid grid-cols-3 gap-3">
@@ -511,9 +569,9 @@ const ticketMedioConsultaComReabord =
 
   </div>
 
-<div className="min-w-0 space-y-3 xl:col-span-4">
+<div className="flex min-w-0 flex-col gap-3 xl:col-span-4">
 
- <div className="self-start rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+ <div className="shrink-0 rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
   <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
     Status da agenda
   </h3>
@@ -526,8 +584,8 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-   <div className="h-[247px] min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
-  <div className="mb-4 flex items-center justify-between">
+   <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+  <div className="mb-4 flex shrink-0 items-center justify-between">
   <h3 className="text-[18px] font-black text-[var(--foreground)]">
     Origen dos agendamentos
   </h3>
@@ -537,7 +595,7 @@ const ticketMedioConsultaComReabord =
   </span>
 </div>
 
-  <div className="max-h-[185px] space-y-2 overflow-y-auto pr-2">
+  <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-2">
     {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
       const maior = Math.max(
         ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
@@ -633,11 +691,10 @@ const ticketProcedimentosMedico =
   isImac ? 'p-3' : 'p-4'
 }`}
 >
-      <div className="mb-4 flex items-center gap-4">
-        
+      <div className="mb-4 flex items-center gap-4 border-b border-[color:var(--border)] pb-4">
           <div
   className={[
-    isImac ? 'h-16 w-16' : 'h-28 w-28',
+    isImac ? 'h-14 w-14' : 'h-20 w-20',
     'shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10',
   ].join(' ')}
 >
@@ -655,41 +712,57 @@ const ticketProcedimentosMedico =
 )}
   </div>
 
- <div className="flex-1">
-  <div className="flex items-center justify-between gap-4">
-    
-    <div className="flex flex-1 flex-col justify-center pl-2">
-  <div>
+ <div className="flex flex-1 items-center justify-between gap-4">
+    <div className="flex flex-col justify-center">
   <h3 className={`${isImac ? 'text-[17px]' : 'text-[20px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
 
-  <p className={`mt-2 ${isImac ? 'text-[13px]' : 'text-[20px]'} font-semibold text-[var(--muted-foreground)]`}>
+  <p className={`mt-1 ${isImac ? 'text-[12px]' : 'text-[16px]'} font-semibold text-[var(--muted-foreground)]`}>
     {infoMedico.crm} • {infoMedico.especialidade}
-  </p></div>
+  </p>
 </div>
 
-    <div className="min-w-[120px]">
-      <p className="text-sm text-[var(--muted-foreground)]">
+    <div className={isImac ? 'w-[140px] shrink-0' : 'w-[160px] shrink-0'}>
+      <p className={`${isImac ? 'text-[10px]' : 'text-[12px]'} font-bold uppercase tracking-[0.06em] text-[var(--muted-foreground)]`}>
         Ocupação da agenda
       </p>
 
-      <p className="mt-1 text-[42px] font-black text-emerald-500">
-        {medico.capacidadeAgenda || 0}%
-      </p>
+      {(() => {
+        const ocupacao = medico.capacidadeAgenda || 0
+        const corOcupacao =
+          ocupacao >= 80
+            ? 'text-emerald-500'
+            : ocupacao >= 50
+              ? 'text-yellow-500'
+              : 'text-red-500'
+        const barraOcupacao =
+          ocupacao >= 80
+            ? 'bg-emerald-500'
+            : ocupacao >= 50
+              ? 'bg-yellow-400'
+              : 'bg-red-500'
 
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
-        <div
-          className="h-full rounded-full bg-emerald-500"
-          style={{
-            width: `${medico.capacidadeAgenda || 0}%`,
-          }}
-        />
-      </div>
+        return (
+          <>
+            <p className={`mt-1 ${isImac ? 'text-[24px]' : 'text-[30px]'} font-black leading-none ${corOcupacao}`}>
+              {ocupacao}%
+            </p>
+
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+              <div
+                className={`h-full rounded-full ${barraOcupacao}`}
+                style={{
+                  width: `${ocupacao}%`,
+                }}
+              />
+            </div>
+          </>
+        )
+      })()}
     </div>
 
   </div>
-</div>
 </div>
 
 <div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
@@ -736,8 +809,8 @@ const ticketProcedimentosMedico =
       icon={CalendarClock}
     />
   </div>
-</div>
-  <div className={isImac ? `col-span-12 grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid grid-cols-3 gap-2'}>
+
+    <div className={`mt-3 ${isImac ? `grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid grid-cols-3 gap-2'}`}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -764,7 +837,7 @@ const ticketProcedimentosMedico =
 
   />
 )}
-  
+
   {medico.medico?.toUpperCase().includes('BRENO') && (
   <>
     <MetricCard
@@ -800,9 +873,8 @@ const ticketProcedimentosMedico =
     />
   </>
 )}
-
-
  </div>
+</div>
 
   <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
     <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
@@ -810,14 +882,26 @@ FINANCEIRO
 </h4>
 
 
-  <div className={isImac ? 'grid grid-cols-6 gap-3' : 'grid grid-cols-6 gap-2'}>
-  <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
-  <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
-  <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" />
-  <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
-  <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
-  <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" />
-</div> </div>
+  <div className={isImac ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4'}>
+    <div>
+      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Consultas</p>
+      <div className="grid grid-cols-3 gap-2">
+        <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
+        <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
+        <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} />
+      </div>
+    </div>
+
+    <div className={isImac ? 'border-l border-[color:var(--border)] pl-4' : 'border-t border-[color:var(--border)] pt-4'}>
+      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Procedimentos</p>
+      <div className="grid grid-cols-3 gap-2">
+        <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
+        <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
+        <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} />
+      </div>
+    </div>
+  </div>
+</div>
 
 <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
   <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
@@ -831,6 +915,19 @@ CONSOLIDADO
       metaConsolidada > 0
         ? Math.round((faturamentoConsolidado / metaConsolidada) * 100)
         : 0
+
+    if (metaConsolidada === 0) {
+      return (
+        <>
+          <p className="text-[30px] font-black text-[var(--muted-foreground)]/40">
+            —
+          </p>
+          <p className="mt-2 text-[13px] font-semibold text-[var(--muted-foreground)]">
+            Sem meta definida para este médico
+          </p>
+        </>
+      )
+    }
 
     return (
       <>
@@ -879,248 +976,9 @@ CONSOLIDADO
 )
 })}
 </div>
-   
-
 </section>
-
-
-<section className="grid gap-6 xl:grid-cols-2">
-
-  
-
-  </section>
  </div>
     </AppShell>
-  )
-}
-function ResumoSection({
-  title,
-  children,
-  extra,
-}: any) {
-  return (
-  <div className="rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="h-9 w-[6px] rounded-full bg-[#D7B46A]" />
-
-          <h3 className="text-[23px] font-black text-[var(--foreground)]">
-            {title}
-          </h3>
-        </div>
-
-        {extra}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function ResumoCard({
-  label,
-  value,
-  rawValue,
-  previousValue = 0,
-  icon: Icon,
-}: any) {
-  const atual = Number(rawValue ?? value ?? 0)
-  const anterior = Number(previousValue || 0)
-
-  const percentual =
-    anterior > 0
-      ? Math.round(((atual - anterior) / anterior) * 100)
-      : 0
-
-  const positivo = percentual > 0
-  const negativo = percentual < 0
-  const isMoneyValue = typeof value === 'string' && value.includes('R$')
-  const previousLabel = isMoneyValue ? formatMoney(anterior) : anterior
-
-  return (
-    <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-      <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[var(--icon-bg)]">
-          <Icon className="h-5 w-5 text-[#D7B46A]" />
-        </div>
-
-       <p className="text-[15px] font-black leading-tight text-[var(--foreground)]">
-          {label}
-        </p>
-      </div>
-
-      <p className="text-[34px] font-black leading-none text-[var(--foreground)]">
-        {value}
-      </p>
-
-      <p className="mt-2 text-[13px] font-semibold text-[var(--muted-foreground)]">
-  fechamentos no período
-</p>
-
-      <div className="mt-3 flex items-center justify-between rounded-[12px] border border-[color:var(--border)] bg-[var(--card)] px-3 py-2">
-        <div>
-          <p
-            className={`text-[18px] font-black ${
-              positivo
-                ? 'text-emerald-500'
-                : negativo
-                ? 'text-red-500'
-                : 'text-[var(--muted-foreground)]'
-            }`}
-          >
-            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
-          </p>
-
-          <p className="text-[11px] text-[var(--muted-foreground)]">
-            {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-          </p>
-        </div>
-<div className="flex items-center">
-  <span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
-    {previousLabel}
-  </span>
-
-  <div
-    className={`flex h-8 w-8 items-center justify-center rounded-full ${
-            positivo
-              ? 'bg-emerald-500/15'
-              : negativo
-              ? 'bg-red-500/15'
-              : 'bg-gray-500/15'
-          }`}
-        >
-          <span
-           className={`text-lg ${
-              positivo
-                ? 'text-emerald-500'
-                : negativo
-                ? 'text-red-500'
-                : 'text-gray-400'
-            }`}
-          >
-            {positivo ? '↗' : negativo ? '↘' : '→'}
-           </span>
-        </div>
-      </div>
-    </div>
-  </div>
-)
-}
-function ResumoCardMeta({
-    label,
-    value,
-    meta,
-    dot,
-    isMoney,
-    previousValue = 0,
-}: any) {
-  const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
-  const anterior = Number(previousValue || 0)
-
-const percentualComparativo =
-  anterior > 0 ? Math.round(((value - anterior) / anterior) * 100) : 0
-
-const positivoComparativo = percentualComparativo > 0
-const negativoComparativo = percentualComparativo < 0
-
-const previousLabel = isMoney ? formatMoney(anterior) : anterior
-  const dots: any = {
-  blue: 'bg-[#0EA5E9]',
-  gold: 'bg-[#D7B46A]',
-  green: 'bg-[#10B981]',
-}
-
-  const cor =
-    percentual >= 100
-      ? 'bg-emerald-500 text-emerald-500'
-      : percentual >= 50
-      ? 'bg-yellow-400 text-yellow-500'
-      : 'bg-red-500 text-red-500'
-
-  return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-      <div className="mb-4 flex items-center gap-3">
-  <span className={`h-3 w-3 rounded-full ${dots[dot]}`} />
-
-  <p className="text-[15px] font-black text-[var(--foreground)]">
-    {label}
-  </p>
-</div>
-
-<p className="text-[36px] font-black leading-none text-[var(--foreground)]">
-  {isMoney ? formatMoney(value) : value}
-</p>
-
-   <div className="mt-3 h-4 overflow-hidden rounded-full bg-[var(--progress-bg)]">
-        <div
-          className={`h-full rounded-full ${cor.split(' ')[0]}`}
-          style={{ width: `${Math.min(percentual, 100)}%` }}
-        />
-      </div>
-
-     <div className="mt-3 flex items-center justify-between">
-  <span className="text-[16px] font-bold text-[var(--muted-foreground)]">
-    Meta {isMoney ? formatMoney(meta) : meta}
-  </span>
-
-  <span
-    className={`text-[24px] font-black ${cor.split(' ')[1]}`}
-  >
-    {percentual}%
-  </span>
-</div>
-
-<div className="mt-3 flex items-center justify-between rounded-[12px] border border-[color:var(--border)] bg-[var(--card)] px-3 py-2">
-  <div>
-    <p
-      className={`text-[18px] font-black ${
-        positivoComparativo
-          ? 'text-emerald-500'
-          : negativoComparativo
-          ? 'text-red-500'
-          : 'text-[var(--muted-foreground)]'
-      }`}
-    >
-      {positivoComparativo ? '▲' : negativoComparativo ? '▼' : '＝'} {Math.abs(percentualComparativo)}%
-    </p>
-
-    <p className="text-[11px] text-[var(--muted-foreground)]">
-      {percentualComparativo === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-    </p>
-  </div>
-
-  <div className="flex items-center">
-    <span className="mr-3 text-[15px] font-black text-[var(--muted-foreground)]">
-      {previousLabel}
-    </span>
-
-    <div
-      className={`flex h-8 w-8 items-center justify-center rounded-full ${
-        positivoComparativo
-          ? 'bg-emerald-500/15'
-          : negativoComparativo
-          ? 'bg-red-500/15'
-          : 'bg-gray-500/15'
-      }`}
-    >
-      <span
-        className={`text-lg ${
-          positivoComparativo
-            ? 'text-emerald-500'
-            : negativoComparativo
-            ? 'text-red-500'
-            : 'text-gray-400'
-        }`}
-      >
-        {positivoComparativo ? '↗' : negativoComparativo ? '↘' : '→'}
-      </span>
-    </div>
-  </div>
-</div>
-
-    </div>
   )
 }
 function MetricMini({
@@ -1190,6 +1048,7 @@ function MetricCard({
   tone = 'blue',
   previousValue,
   showCompare = false,
+  empty = false,
 }: {
   icon: any
   label: string
@@ -1198,24 +1057,25 @@ function MetricCard({
   tone?: 'blue' | 'green' | 'red' | 'purple'
   previousValue?: number
   showCompare?: boolean
+  empty?: boolean
 }) {
 
-  
+
 
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
   const tones = {
     blue:
-'border border-[color:var(--border)] bg-[var(--metric-card)]',
+'border border-[color:var(--border)] bg-[var(--metric-card)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30',
 
 green:
-'border border-[color:var(--border)] bg-[var(--metric-card)]',
+'border border-[color:var(--border)] bg-[var(--metric-card)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30',
 
 red:
-'border border-[color:var(--border)] bg-[var(--metric-card)]',
+'border border-[color:var(--border)] bg-[var(--metric-card)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30',
 
 purple:
-'border border-[color:var(--border)] bg-[var(--metric-card)]',
+'border border-[color:var(--border)] bg-[var(--metric-card)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30',
   }
 
   const iconColors = {
@@ -1238,9 +1098,29 @@ const diff =
 const positivo = diff > 0
 const negativo = diff < 0
 
+  if (empty) {
+    return (
+      <div className={`relative z-0 hover:z-10 rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
+        <div className="flex items-center gap-2">
+          <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
+          <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+        </div>
+
+        <div className="mt-3">
+          <div className={`${isImac ? 'text-[20px]' : 'text-[34px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>
+            —
+          </div>
+
+          <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
+            Sem dados no período
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className={`rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
+    <div className={`relative z-0 hover:z-10 rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
        <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
@@ -1252,9 +1132,11 @@ const negativo = diff < 0
       {value}
     </div>
 
-   <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
-  {description}
-</p>
+   {description && (
+  <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
+    {description}
+  </p>
+)}
 
 {showCompare && (
   <div className="mt-2 flex items-center gap-2 text-[12px] font-black">

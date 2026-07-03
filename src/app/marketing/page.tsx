@@ -80,39 +80,33 @@ function sumValor(items: any[]) {
   return items.reduce((total, item) => total + (item.valor ?? 0), 0)
 }
 
-function metaLabel(
+function metaPercentBadge(
   atual: number,
   meta: number,
   tipo: 'minimo' | 'maximo' = 'minimo'
-) {
-  const diferenca = atual - meta
-  const abs = Math.abs(Math.round(diferenca))
+): { text: string; positive: boolean } {
+  const diferenca = tipo === 'maximo' ? meta - atual : atual - meta
+  const rounded = Math.round(diferenca)
 
-  if (tipo === 'maximo') {
-    if (atual <= meta) return `Dentro do limite de ${meta}%`
-    return `+${abs}% acima do limite`
+  return {
+    text: `${rounded >= 0 ? '+' : ''}${rounded}%`,
+    positive: rounded >= 0,
   }
-
-  if (atual >= meta) return `+${abs}% acima da meta`
-  return `-${abs}% abaixo da meta`
 }
 
 function MarketingMetricCard({
   title,
   value,
-  subtitle,
   icon,
-  status,
-  percent = 0,
+  percentBadge,
   children,
   extra,
 }: {
   title: string
   value: number
-  subtitle: string
   icon: 'entrada' | 'naoQualificado' | 'qualificado' | 'agendado' | 'consulta' | 'procedimento'
   status: 'green' | 'red' | 'blue'
-  percent?: number
+  percentBadge?: { text: string; positive: boolean }
 children?: ReactNode
 extra?: ReactNode
 }) {
@@ -129,21 +123,14 @@ extra?: ReactNode
             ? BadgeDollarSign
             : BriefcaseMedical
 
-  const progressColor =
-    status === 'green'
-      ? 'bg-emerald-500'
-      : status === 'red'
-        ? 'bg-rose-500'
-        : 'bg-[#d4af5f]'
-
  return (
-  <div className="h-[230px] rounded-[22px] border border-black/5 bg-white p-3 flex flex-col overflow-hidden shadow-[0_8px_28px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-[#112742]">
-  <div className="mb-1 flex min-h-[40px] items-start gap-3">
-  <div className="flex shrink-0 items-center justify-center">
+  <div className="h-[230px] rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] p-3 flex flex-col overflow-hidden shadow-[var(--card-shadow)]">
+  <div className="mb-1 flex min-h-[40px] items-center gap-3">
+  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)]">
     <Icon
-      size={22}
+      size={18}
       strokeWidth={2.2}
-      className="text-[#D7B46A]"
+      className="text-[var(--accent)]"
     />
   </div>
 
@@ -166,9 +153,21 @@ extra?: ReactNode
 </div>
 </div>
 
-<div className="mt-1 min-h-[70px] flex items-start justify-between gap-3">
-  <div className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
-    {value}
+<div className="mt-1 min-h-[70px] flex items-center justify-between gap-3">
+  <div className="flex items-center gap-2">
+    <span className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+      {value}
+    </span>
+
+    {percentBadge && (
+      <span
+        className={`text-xs font-black ${
+          percentBadge.positive ? 'text-emerald-500' : 'text-rose-500'
+        }`}
+      >
+        {percentBadge.text}
+      </span>
+    )}
   </div>
 
   {extra && (
@@ -176,26 +175,6 @@ extra?: ReactNode
       {extra}
     </div>
   )}
-
-  <div className="mt-2 h-2">
-  {icon !== 'entrada' && icon !== 'consulta' && icon !== 'procedimento' ? (
-      <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-        <div
-          className={`h-full rounded-full ${progressColor}`}
-          style={{ width: `${Math.min(Math.max(percent, 4), 100)}%` }}
-        />
-      </div>
-    ) : (
-      <div className="h-2" />
-    )}
-  </div>
-
- {icon !== 'entrada' && icon !== 'consulta' && icon !== 'procedimento' && (
-  <div className="mt-2 text-right text-xs font-black text-[var(--muted-foreground)] dark:text-white/70">
-    {subtitle}
-  </div>
-)}
-
 </div>
 
 <div className="relative mt-3 flex-1">
@@ -237,9 +216,9 @@ function OrigemStageCard({
     })
 
   return (
-    <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-white/10">
+    <div className="space-y-3 border-t border-[color:var(--border)] pt-4">
       {items.length === 0 && (
-        <div className="flex h-[42px] items-center rounded-2xl border border-slate-200 bg-transparent px-5 text-sm font-semibold text-slate-400 dark:border-white/10 dark:text-white/40">
+        <div className="flex h-[42px] items-center rounded-2xl border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
           Sem dados
         </div>
       )}
@@ -258,26 +237,26 @@ function OrigemStageCard({
               }}
             />
 
-            <span className="truncate text-sm font-semibold text-slate-700 dark:text-white/75">
+            <span className="truncate text-sm font-semibold text-[var(--foreground)]">
               {item.nome}
             </span>
           </div>
 
           <div className="ml-auto shrink-0 text-right">
-            <div className="text-base font-black text-slate-900 dark:text-white">
+            <div className="text-base font-black text-[var(--foreground)]">
               {item.quantidade ?? item.qtd ?? 0}
             </div>
 
             {item.valor !== undefined && (
-              <div className="text-xs font-bold text-slate-500 dark:text-white/50">
+              <div className="text-xs font-bold text-[var(--muted-foreground)]">
                 {formatMoney(item.valor)}
               </div>
             )}
           </div>
 
           {item.detalhes && item.detalhes.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-2xl border border-black/10 bg-white p-4 shadow-2xl group-hover:block dark:border-white/10 dark:bg-[#112742]">
-              <div className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-2xl border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] group-hover:block">
+              <div className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
                 {tooltipType === 'consulta'
                   ? 'Detalhes da consulta'
                   : tooltipType === 'procedimento'
@@ -291,17 +270,17 @@ function OrigemStageCard({
                     return (
                       <div
                         key={`${detalhe.medico}-${detalheIndex}`}
-                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-slate-50 p-2 text-xs dark:bg-white/5"
+                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-[var(--metric-card)] p-2 text-xs"
                       >
-                        <div className="truncate font-black text-slate-900 dark:text-white">
+                        <div className="truncate font-black text-[var(--foreground)]">
                           {detalhe.medico || 'Sem médico'}
                         </div>
 
-                        <div className="truncate font-bold text-slate-500 dark:text-white/60">
+                        <div className="truncate font-bold text-[var(--muted-foreground)]">
                           {detalhe.atendimento || detalhe.convenio || 'Sem atendimento'}
                         </div>
 
-                        <div className="text-right font-black text-slate-900 dark:text-white">
+                        <div className="text-right font-black text-[var(--foreground)]">
                           {formatMoney(detalhe.valor)}
                         </div>
                       </div>
@@ -312,17 +291,17 @@ function OrigemStageCard({
                     return (
                       <div
                         key={`${detalhe.medico}-${detalheIndex}`}
-                        className="grid grid-cols-[1fr_140px_90px] gap-3 rounded-xl bg-slate-50 p-3 text-xs dark:bg-white/5"
+                        className="grid grid-cols-[1fr_140px_90px] gap-3 rounded-xl bg-[var(--metric-card)] p-3 text-xs"
                       >
-                        <div className="truncate font-black text-slate-900 dark:text-white">
+                        <div className="truncate font-black text-[var(--foreground)]">
                           {detalhe.medico || 'Sem médico'}
                         </div>
 
-                        <div className="truncate font-bold text-slate-500 dark:text-white/60">
+                        <div className="truncate font-bold text-[var(--muted-foreground)]">
                           {detalhe.produto || 'Sem produto'}
                         </div>
 
-                        <div className="text-right font-black text-slate-900 dark:text-white">
+                        <div className="text-right font-black text-[var(--foreground)]">
                           {formatMoney(detalhe.valor)}
                         </div>
                       </div>
@@ -334,11 +313,11 @@ function OrigemStageCard({
                       key={detalhe.nome || detalheIndex}
                       className="flex items-center justify-between gap-3 text-xs"
                     >
-                      <span className="truncate font-bold text-slate-700 dark:text-white/80">
+                      <span className="truncate font-bold text-[var(--foreground)]">
                         {detalhe.nome}
                       </span>
 
-                      <span className="font-black text-slate-900 dark:text-white">
+                      <span className="font-black text-[var(--foreground)]">
                         {detalhe.quantidade}
                       </span>
                     </div>
@@ -366,18 +345,18 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="h-[230px] rounded-[22px] border border-black/5 bg-white p-3 overflow-hidden shadow-[0_8px_28px_rgba(15,23,42,0.05)] dark:border-white/5 dark:bg-[#112742] xl:col-span-2">
+    <div className="h-[230px] rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] p-3 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
             ROI por origem
           </div>
-          <div className="mt-1 text-xs font-bold text-slate-400">
+          <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
             Retorno sobre investimento
           </div>
         </div>
 
-        <div className="rounded-xl bg-violet-50 px-3 py-2 text-xs font-black text-violet-600">
+        <div className="rounded-xl bg-[var(--metric-card)] px-3 py-2 text-xs font-black text-[var(--accent)]">
           ROI
         </div>
       </div>
@@ -398,32 +377,32 @@ function RoiPorOrigemCard({
                     }}
                   />
 
-                  <span className="truncate text-sm font-black text-slate-700">
+                  <span className="truncate text-sm font-black text-[var(--foreground)]">
                     {item.origem}
                   </span>
                 </div>
 
-                <div className="text-sm font-black text-slate-900">
+                <div className="text-sm font-black text-[var(--foreground)]">
                   {item.roi.toFixed(2)}x
                 </div>
               </div>
 
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--metric-card)]">
                 <div
-                  className="h-full rounded-full bg-violet-500"
+                  className="h-full rounded-full bg-[var(--accent)]"
                   style={{ width: `${Math.min(Math.max(largura, 4), 100)}%` }}
                 />
               </div>
 
-             <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-slate-500">
+             <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-[var(--muted-foreground)]">
   <div>
-    <div className="uppercase text-slate-400">Retorno</div>
-    <div className="text-slate-700">{formatMoneyBR(item.retorno)}</div>
+    <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
+    <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
   </div>
 
   <div className="text-right">
-    <div className="uppercase text-slate-400">Investimento</div>
-    <div className="text-slate-700">{formatMoneyBR(item.investimento)}</div>
+    <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
+    <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
   </div>
 </div>
             </div>
@@ -431,7 +410,7 @@ function RoiPorOrigemCard({
         })}
 
         {items.length === 0 && (
-          <div className="flex h-[42px] items-center rounded-2xl border border-slate-200 bg-transparent px-5 text-sm font-semibold text-slate-400">
+          <div className="flex h-[42px] items-center rounded-2xl border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
             Sem dados de ROI
           </div>
         )}
@@ -647,14 +626,14 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-  <aside className="sticky top-5 flex h-[700px] flex-col rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
+  <aside className="sticky top-5 flex h-[700px] flex-col rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
-      <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+      <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
         Origens
       </div>
 
-      <div className="mt-1 text-xs font-semibold text-slate-500">
+      <div className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">
         Filtre campanhas para calcular o ROI
       </div>
     </div>
@@ -663,10 +642,10 @@ return (
       <button
         type="button"
         onClick={() => setOrigensSelecionadas([])}
-        className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black ${
+        className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black transition-colors ${
           origensSelecionadas.length === 0
-            ? 'border-violet-500 bg-violet-50 text-violet-600'
-            : 'border-slate-200 text-slate-600'
+            ? 'border-[color:var(--accent)] bg-[var(--metric-card)] text-[var(--accent)]'
+            : 'border-[color:var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
         }`}
       >
         Todas as origens
@@ -686,17 +665,17 @@ return (
                   : [...atual, origem]
               )
             }
-            className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold ${
+            className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold transition-colors ${
               ativo
-                ? 'border-violet-500 bg-violet-50 text-violet-600'
-                : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                ? 'border-[color:var(--accent)] bg-[var(--metric-card)] text-[var(--accent)]'
+                : 'border-[color:var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
             }`}
           >
             <span
               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-all ${
                 ativo
-                  ? 'border-violet-500 bg-violet-500'
-                  : 'border-slate-300 bg-white'
+                  ? 'border-[color:var(--accent)] bg-[var(--accent)]'
+                  : 'border-[color:var(--border)] bg-transparent'
               }`}
             />
 
@@ -706,12 +685,12 @@ return (
       })}
     </div>
 
-    <div className="mt-5 border-t border-slate-200 pt-5">
-      <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
+    <div className="mt-5 border-t border-[color:var(--border)] pt-5">
+      <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
         Investimento por origem
       </div>
 
-      <div className="mt-2 text-xs font-semibold text-slate-500">
+      <div className="mt-2 text-xs font-semibold text-[var(--muted-foreground)]">
         Informe quanto foi investido em cada campanha
       </div>
 
@@ -724,18 +703,18 @@ return (
           return (
             <div
               key={`investimento-${origem}`}
-              className={`rounded-2xl border p-3 ${
+              className={`rounded-2xl border p-3 transition-colors ${
                 ativo
-                  ? 'border-violet-200 bg-violet-50/50'
-                  : 'border-slate-200 bg-white opacity-50'
+                  ? 'border-[color:var(--accent)]/40 bg-[var(--metric-card)]'
+                  : 'border-[color:var(--border)] bg-transparent opacity-50'
               }`}
             >
-              <div className="mb-2 truncate text-[11px] font-black uppercase text-slate-500">
+              <div className="mb-2 truncate text-[11px] font-black uppercase text-[var(--muted-foreground)]">
                 {origem}
               </div>
 
-              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="flex items-center bg-slate-50 px-2 text-xs font-black text-slate-500">
+              <div className="flex overflow-hidden rounded-xl border border-[color:var(--border)] bg-[var(--card)]">
+                <div className="flex items-center bg-[var(--metric-card)] px-2 text-xs font-black text-[var(--muted-foreground)]">
                   R$
                 </div>
 
@@ -745,7 +724,7 @@ return (
                     atualizarInvestimentoOrigem(origem, e.target.value)
                   }
                   placeholder="0,00"
-                  className="w-full px-2 py-2 text-xs font-black outline-none"
+                  className="w-full px-2 py-2 text-xs font-black text-[var(--foreground)] outline-none"
                 />
               </div>
             </div>
@@ -755,60 +734,59 @@ return (
     </div>
   </div>
 
-  <div className="mt-4 shrink-0 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-    <div className="text-xs font-bold text-emerald-600">
+  <div className="mt-4 shrink-0 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+    <div className="text-xs font-bold text-emerald-500">
       Investimento selecionado
     </div>
 
-    <div className="mt-1 text-lg font-black text-emerald-700">
+    <div className="mt-1 text-lg font-black text-emerald-500">
       {formatMoneyBR(investimento)}
     </div>
   </div>
 </aside>
 
       <section className="flex h-[700px] flex-col space-y-4 overflow-hidden">
-        <div className="shrink-0 grid rounded-[26px] border border-violet-200 bg-violet-50/60 p-4 shadow-[0_14px_45px_rgba(15,23,42,0.06)] xl:grid-cols-6">
-          <div className="flex items-center gap-3 border-r border-violet-200 px-3">
-            <Wallet className="text-violet-600" size={28} />
+        <div className="shrink-0 grid rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
+          <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
+            <Wallet className="text-[var(--accent)]" size={28} />
             <div>
-              <div className="text-xs font-black uppercase text-slate-500">Investimento</div>
-              <div className="text-xl font-black text-slate-900">{formatMoneyBR(investimento)}</div>
+              <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Investimento</div>
+              <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(investimento)}</div>
             </div>
           </div>
 
-          <div className="border-r border-violet-200 px-4">
-            <div className="text-xs font-black uppercase text-slate-500">Retorno</div>
-            <div className="text-xl font-black text-slate-900">{formatMoneyBR(retornoMarketing)}</div>
+          <div className="border-r border-[color:var(--border)] px-4">
+            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Retorno</div>
+            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(retornoMarketing)}</div>
           </div>
 
-          <div className="border-r border-violet-200 px-4">
-            <div className="text-xs font-black uppercase text-slate-500">Lucro</div>
-            <div className="text-xl font-black text-slate-900">{formatMoneyBR(lucroMarketing)}</div>
+          <div className="border-r border-[color:var(--border)] px-4">
+            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Lucro</div>
+            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(lucroMarketing)}</div>
           </div>
 
-          <div className="border-r border-violet-200 px-4">
-            <div className="text-xs font-black uppercase text-slate-500">ROI</div>
-            <div className="text-xl font-black text-violet-600">{roi.toFixed(2)}x</div>
+          <div className="border-r border-[color:var(--border)] px-4">
+            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">ROI</div>
+            <div className="text-xl font-black text-[var(--accent)]">{roi.toFixed(2)}x</div>
           </div>
 
-          <div className="border-r border-violet-200 px-4">
-            <div className="text-xs font-black uppercase text-slate-500">CAC</div>
-            <div className="text-xl font-black text-slate-900">{formatMoneyBR(cac)}</div>
+          <div className="border-r border-[color:var(--border)] px-4">
+            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">CAC</div>
+            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cac)}</div>
           </div>
 
           <div className="px-4">
-            <div className="text-xs font-black uppercase text-slate-500">CPL</div>
-            <div className="text-xl font-black text-slate-900">{formatMoneyBR(cpl)}</div>
+            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">CPL</div>
+            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cpl)}</div>
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden rounded-[28px] bg-white p-4 shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:bg-[#112742] dark:shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-[28px] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
 <div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard
           title="Entrada"
           value={totalEntradaFiltrada}
-          subtitle=""
           icon="entrada"
           status="blue"
         >
@@ -818,10 +796,9 @@ return (
         <MarketingMetricCard
           title="Não qualificados"
           value={totalNaoQualificadosFiltrado}
-          subtitle={metaLabel(marketing?.naoQualificadosPercent || 0, 10, 'maximo')}
           icon="naoQualificado"
           status={(marketing?.naoQualificadosPercent || 0) > 10 ? 'red' : 'green'}
-          percent={marketing?.naoQualificadosPercent || 0}
+          percentBadge={metaPercentBadge(marketing?.naoQualificadosPercent || 0, 10, 'maximo')}
         >
           <OrigemStageCard
             items={naoQualificadosFiltrado}
@@ -841,10 +818,9 @@ return (
         return total + (marketing?.leadD || 0)
       }, 0)
 }
-          subtitle={metaLabel(marketing?.leadsAceitosPercent || 0, 90)}
           icon="qualificado"
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
-          percent={marketing?.leadsAceitosPercent || 0}
+          percentBadge={metaPercentBadge(marketing?.leadsAceitosPercent || 0, 90)}
         >
          <div className="mb-2 flex gap-1.5">
   {(['A', 'B', 'C', 'D'] as const).map((tag) => {
@@ -881,10 +857,9 @@ return (
         <MarketingMetricCard
           title="Agendados"
           value={totalAgendadosFiltrado}
-          subtitle={metaLabel(conversaoAgendados, 30)}
           icon="agendado"
           status={conversaoAgendados >= 30 ? 'green' : 'red'}
-          percent={conversaoAgendados}
+          percentBadge={metaPercentBadge(conversaoAgendados, 30)}
         >
           <OrigemStageCard
             items={agendadosFiltrado}
@@ -895,25 +870,24 @@ return (
        <MarketingMetricCard
   title="Consultas Ganhas"
  value={sumQtd(consultasFiltrado)}
-subtitle={formatMoney(valorConsultasFiltrado)}
   icon="consulta"
   status="blue"
  extra={
   <div className="space-y-1">
-    <div className="rounded-xl bg-slate-50 p-2">
-      <div className="text-[9px] font-black uppercase text-slate-400">
+    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </div>
-      <div className="text-xs font-black text-slate-900">
+      <div className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(valorConsultasFiltrado)}
       </div>
     </div>
 
-    <div className="rounded-xl bg-slate-50 p-2">
-      <div className="text-[9px] font-black uppercase text-slate-400">
+    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </div>
-      <div className="text-xs font-black text-slate-900">
+      <div className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(
           sumQtd(consultasFiltrado) > 0
             ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
@@ -934,25 +908,24 @@ items={consultasFiltrado}
 <MarketingMetricCard
   title="Procedimentos"
   value={sumQtd(procedimentosFiltrado)}
-subtitle={formatMoney(valorProcedimentosFiltrado)}
   icon="procedimento"
   status="blue"
   extra={
   <div className="space-y-1">
-    <div className="rounded-xl bg-slate-50 p-2">
-      <div className="text-[9px] font-black uppercase text-slate-400">
+    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </div>
-      <div className="text-xs font-black text-slate-900">
+      <div className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(valorProcedimentosFiltrado)}
       </div>
     </div>
 
-    <div className="rounded-xl bg-slate-50 p-2">
-      <div className="text-[9px] font-black uppercase text-slate-400">
+    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </div>
-      <div className="text-xs font-black text-slate-900">
+      <div className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(
           sumQtd(procedimentosFiltrado) > 0
             ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)
