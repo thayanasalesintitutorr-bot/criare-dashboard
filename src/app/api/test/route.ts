@@ -907,7 +907,11 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
     valor: number
     produtos: Record<string, number>
   }
-> = {}
+> = {
+  'DR. RODOLPHO REIS': { valor: 0, produtos: {} },
+  'DRA. CLAUDIA LAMEIRA': { valor: 0, produtos: {} },
+  'DR. BRENO PITANGUI': { valor: 0, produtos: {} },
+}
 
 vendasLeads
   .filter((l) =>
@@ -916,7 +920,15 @@ vendasLeads
     inRange(parseDateLocal(l.closed_at), range.start, range.end)
   )
   .forEach((lead) => {
-  const medico = (lead.medico || '').trim() || 'Sem médico'
+  const medicoRaw = (lead.medico || '').trim() || 'Sem médico'
+  const medicoNorm = normalize(medicoRaw)
+  const medico = medicoNorm.includes('RODOLPHO')
+    ? 'DR. RODOLPHO REIS'
+    : medicoNorm.includes('CLAUDIA')
+    ? 'DRA. CLAUDIA LAMEIRA'
+    : medicoNorm.includes('BRENO')
+    ? 'DR. BRENO PITANGUI'
+    : medicoRaw
   const valorVenda = toNumber(lead.venda)
   const produtosRaw = lead.Produto
 
