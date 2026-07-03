@@ -647,7 +647,7 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-    <aside className="sticky top-5 flex h-[calc(100vh-120px)] flex-col rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
+   <aside className="sticky top-5 flex h-[700px] flex-col rounded-[26px] border border-black/5 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,0.07)]">
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
       <div className="text-sm font-black uppercase tracking-[0.08em] text-slate-900">
