@@ -1030,7 +1030,7 @@ const res = await fetch(url, {
 
 const interval = setInterval(() => {
   loadData()
-}, 5000)
+}, 60000)
 
 return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])
