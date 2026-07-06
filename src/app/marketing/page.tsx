@@ -357,8 +357,8 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
-      <div className="mb-5 flex items-center justify-between">
+    <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
+      <div className="mb-5 flex shrink-0 items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
             ROI por origem
@@ -373,7 +373,7 @@ function RoiPorOrigemCard({
         </div>
       </div>
 
-      <div className="max-h-[150px] space-y-3 overflow-y-auto pr-1">
+      <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {items.slice(0, 5).map((item, index) => {
           const largura = item.roi > 0 ? (item.roi / maiorRoi) * 100 : 4
 
@@ -582,7 +582,7 @@ function UtmLinksCard({
 
       <form
         onSubmit={criarLink}
-        className="mb-5 grid gap-2 rounded-[18px] bg-[var(--metric-card)] p-3 md:grid-cols-6"
+        className="mb-5 grid gap-2 rounded-[18px] bg-[var(--metric-card)] p-3 md:grid-cols-4"
       >
         <input
           value={form.nome}
@@ -639,7 +639,7 @@ function UtmLinksCard({
         />
 
         {erro && (
-          <div className="text-xs font-bold text-[var(--danger)] md:col-span-6">
+          <div className="text-xs font-bold text-[var(--danger)] md:col-span-4">
             {erro}
           </div>
         )}
@@ -647,7 +647,7 @@ function UtmLinksCard({
         <button
           type="submit"
           disabled={criando}
-          className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--background)] transition disabled:opacity-50 md:col-span-6"
+          className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--background)] transition disabled:opacity-50 md:col-span-4"
         >
           {criando ? 'Criando...' : 'Criar link de rastreamento'}
         </button>
