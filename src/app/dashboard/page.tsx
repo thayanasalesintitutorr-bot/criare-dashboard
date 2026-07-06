@@ -645,7 +645,7 @@ export default function DashboardPage() {
 
   const interval = setInterval(() => {
     loadData(false)
-  }, 10000)
+  }, 60000)
 
   return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])

@@ -272,9 +272,9 @@ const isApresentacao = viewMode === 'apresentacao'
   loadData(true)
 
   // Atualização automática a cada 10 segundos
-  const interval = setInterval(() => {
-    loadData(false)
-  }, 10000)
+ const interval = setInterval(() => {
+  loadData(false)
+}, 60000)
 
   return () => clearInterval(interval)
 }, [periodo, tipoData, segmento, dataInicio, dataFim])
