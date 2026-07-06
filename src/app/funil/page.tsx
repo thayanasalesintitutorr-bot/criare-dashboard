@@ -149,7 +149,7 @@ function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Da
     <div className="flex items-center gap-2 text-[12px] font-semibold text-[var(--muted-foreground)]">
       <span
         className={`inline-flex h-2 w-2 rounded-full ${
-          stale ? 'bg-amber-400' : 'bg-emerald-400'
+          stale ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'
         }`}
       />
       <span>{label}</span>
@@ -205,6 +205,7 @@ function getInfoMedico(nome: string) {
 export default function FunilPage() {
 const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar } = useFilters()
 const isImac = viewMode === 'desktop'
+const isApresentacao = viewMode === 'apresentacao'
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -331,7 +332,7 @@ const ticketMedioConsultaComReabord =
   if (loading) {
     return (
       <AppShell title="Consulta (Funil)">
-        <div className="rounded-[28px] bg-[var(--card)] p-6">
+        <div className="rounded-[18px] bg-[var(--card)] p-6">
           Carregando consultas...
         </div>
       </AppShell>
@@ -341,7 +342,7 @@ const ticketMedioConsultaComReabord =
   if (error) {
     return (
       <AppShell title="Consulta (Funil)">
-        <div className="rounded-[28px] border border-red-500/20 bg-red-500/10 p-6 text-red-300">
+        <div className="rounded-[18px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
           {error}
         </div>
       </AppShell>
@@ -355,7 +356,7 @@ const ticketMedioConsultaComReabord =
   <LiveIndicator lastUpdated={lastUpdated} now={now} />
 </div>
 
-<section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
+<section className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
  <div className="flex shrink-0 items-center justify-center">
   <ChartNoAxesCombined className="h-6 w-6 text-[var(--accent)]" />
@@ -419,7 +420,7 @@ const ticketMedioConsultaComReabord =
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
   <div className="min-w-0 space-y-3 xl:col-span-8">
 
-    <div className="min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+    <div className="min-w-0 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
       Atendimento por dia
@@ -427,12 +428,12 @@ const ticketMedioConsultaComReabord =
 
     <div className="flex items-center gap-3 text-[11px] font-bold text-[var(--muted-foreground)]">
       <span className="flex items-center gap-1">
-        <span className="h-2 w-2 rounded-full bg-[#D7B46A]" />
+        <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
         Seg a sex
       </span>
 
       <span className="flex items-center gap-1">
-        <span className="h-2 w-2 rounded-full bg-gray-300" />
+        <span className="h-2 w-2 rounded-full bg-[var(--muted-foreground)]/40" />
         Sáb e dom
       </span>
     </div>
@@ -466,7 +467,11 @@ const ticketMedioConsultaComReabord =
           />
           <Bar dataKey="quantidade" radius={[6, 6, 0, 0]} maxBarSize={18} isAnimationActive={false} label={{ position: 'top', fontSize: 11, fontWeight: 900, fill: 'var(--foreground)' }}>
             {atendimentoPorDiaChart.map((item: any, index: number) => (
-              <Cell key={item.data || index} fill={item.fimDeSemana ? '#d1d5db' : '#D7B46A'} />
+              <Cell
+                key={item.data || index}
+                fill={item.fimDeSemana ? 'var(--muted-foreground)' : 'var(--accent)'}
+                fillOpacity={item.fimDeSemana ? 0.35 : 1}
+              />
             ))}
           </Bar>
         </BarChart>
@@ -479,7 +484,7 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-   <div className="min-w-0 overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+   <div className="min-w-0 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
   <h3 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
     Evolução de faturamento
   </h3>
@@ -514,7 +519,7 @@ const ticketMedioConsultaComReabord =
             dataKey="valor"
             radius={[6, 6, 0, 0]}
             maxBarSize={22}
-            fill="#10b981"
+            fill="var(--success)"
             isAnimationActive={false}
             label={{
               position: 'top',
@@ -547,7 +552,7 @@ const ticketMedioConsultaComReabord =
     return (
       <div
   key={nome}
-  className="rounded-[18px] border border-[color:var(--border)] bg-[var(--background)] px-3 py-2"
+  className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4"
 >
         <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
           {nome}
@@ -571,7 +576,7 @@ const ticketMedioConsultaComReabord =
 
 <div className="flex min-w-0 flex-col gap-3 xl:col-span-4">
 
- <div className="shrink-0 rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+ <div className="shrink-0 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
   <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
     Status da agenda
   </h3>
@@ -584,7 +589,7 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-   <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-[color:var(--border)] bg-[var(--background)] p-3">
+   <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
   <div className="mb-4 flex shrink-0 items-center justify-between">
   <h3 className="text-[18px] font-black text-[var(--foreground)]">
     Origen dos agendamentos
@@ -614,9 +619,9 @@ const ticketMedioConsultaComReabord =
             </span>
           </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-[var(--metric-card)]">
+          <div className="h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
             <div
-              className="h-full rounded-full bg-[#D7B46A]"
+              className="h-full rounded-full bg-[var(--accent)]"
               style={{
                 width: `${Math.max((Number(item.quantidade || 0) / maior) * 100, 4)}%`,
               }}
@@ -632,7 +637,7 @@ const ticketMedioConsultaComReabord =
 </div>
 </section>
 
-       <section className={`rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : 'p-6'}`}>
+       <section className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : isApresentacao ? 'p-6' : 'p-5'}`}>
   <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
     <h2 className="text-[22px] font-black text-[var(--foreground)]">Consultas por médico</h2>
@@ -687,15 +692,15 @@ const ticketProcedimentosMedico =
   return (
       <div
   key={medico.medico}
-  className={`w-full rounded-[24px] border border-[color:var(--border)] bg-[var(--background)] ${
-  isImac ? 'p-3' : 'p-4'
+  className={`w-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] ${
+  isImac ? 'p-3' : isApresentacao ? 'p-4' : 'p-4'
 }`}
 >
       <div className="mb-4 flex items-center gap-4 border-b border-[color:var(--border)] pb-4">
           <div
   className={[
-    isImac ? 'h-14 w-14' : 'h-20 w-20',
-    'shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10',
+    isImac ? 'h-14 w-14' : isApresentacao ? 'h-20 w-20' : 'h-16 w-16',
+    'shrink-0 overflow-hidden rounded-full border border-[var(--accent)]/40 bg-[var(--accent)]/10',
   ].join(' ')}
 >
 
@@ -706,25 +711,25 @@ const ticketProcedimentosMedico =
   className="h-full w-full object-cover object-center"
 />
    ) : (
-  <div className="flex h-full w-full items-center justify-center text-lg font-black text-[#D7B46A]">
+  <div className="flex h-full w-full items-center justify-center text-lg font-black text-[var(--accent)]">
     DR
   </div>
 )}
   </div>
 
- <div className="flex flex-1 items-center justify-between gap-4">
+ <div className={`flex flex-1 gap-4 ${viewMode === 'iphone' ? 'flex-col' : 'items-center justify-between'}`}>
     <div className="flex flex-col justify-center">
-  <h3 className={`${isImac ? 'text-[17px]' : 'text-[20px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
+  <h3 className={`${isImac ? 'text-[17px]' : isApresentacao ? 'text-[20px]' : 'text-[16px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
 
-  <p className={`mt-1 ${isImac ? 'text-[12px]' : 'text-[16px]'} font-semibold text-[var(--muted-foreground)]`}>
+  <p className={`mt-1 ${isImac ? 'text-[12px]' : isApresentacao ? 'text-[16px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
     {infoMedico.crm} • {infoMedico.especialidade}
   </p>
 </div>
 
-    <div className={isImac ? 'w-[140px] shrink-0' : 'w-[160px] shrink-0'}>
-      <p className={`${isImac ? 'text-[10px]' : 'text-[12px]'} font-bold uppercase tracking-[0.06em] text-[var(--muted-foreground)]`}>
+    <div className={isImac ? 'w-[140px] shrink-0' : isApresentacao ? 'w-[160px] shrink-0' : 'w-full shrink-0'}>
+      <p className={`${isImac ? 'text-[10px]' : isApresentacao ? 'text-[12px]' : 'text-[11px]'} font-bold uppercase tracking-[0.06em] text-[var(--muted-foreground)]`}>
         Ocupação da agenda
       </p>
 
@@ -732,20 +737,20 @@ const ticketProcedimentosMedico =
         const ocupacao = medico.capacidadeAgenda || 0
         const corOcupacao =
           ocupacao >= 80
-            ? 'text-emerald-500'
+            ? 'text-[var(--success)]'
             : ocupacao >= 50
-              ? 'text-yellow-500'
-              : 'text-red-500'
+              ? 'text-[var(--warning)]'
+              : 'text-[var(--danger)]'
         const barraOcupacao =
           ocupacao >= 80
-            ? 'bg-emerald-500'
+            ? 'bg-[var(--success)]'
             : ocupacao >= 50
-              ? 'bg-yellow-400'
-              : 'bg-red-500'
+              ? 'bg-[var(--warning)]'
+              : 'bg-[var(--danger)]'
 
         return (
           <>
-            <p className={`mt-1 ${isImac ? 'text-[24px]' : 'text-[30px]'} font-black leading-none ${corOcupacao}`}>
+            <p className={`mt-1 ${isImac ? 'text-[24px]' : isApresentacao ? 'text-[30px]' : 'text-[26px]'} font-black leading-none ${corOcupacao}`}>
               {ocupacao}%
             </p>
 
@@ -765,15 +770,13 @@ const ticketProcedimentosMedico =
   </div>
 </div>
 
-<div className={isImac ? 'grid grid-cols-12 gap-3' : 'space-y-4'}>
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${
-  isImac ? 'col-span-12 px-3 py-2' : 'px-3 py-2'
-}`}>
-  <h4 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
+<div className={isImac ? 'grid grid-cols-12 gap-3' : isApresentacao ? 'space-y-4' : 'space-y-3'}>
+  <div className={isImac ? 'col-span-12' : ''}>
+  <h4 className="section-title mb-3">
     AGENDA
   </h4>
 
-  <div className={isImac ? 'grid grid-cols-5 gap-3' : 'grid grid-cols-5 gap-2'}>
+  <div className={isImac ? 'grid grid-cols-5 gap-3' : isApresentacao ? 'grid grid-cols-5 gap-2' : 'grid grid-cols-2 gap-2'}>
     <MetricMini
       label="Atendimentos"
       value={medico.atendimentos || 0}
@@ -810,7 +813,7 @@ const ticketProcedimentosMedico =
     />
   </div>
 
-    <div className={`mt-3 ${isImac ? `grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : 'grid grid-cols-3 gap-2'}`}>
+    <div className={`mt-3 ${isImac ? `grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -876,8 +879,8 @@ const ticketProcedimentosMedico =
  </div>
 </div>
 
-  <div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
-    <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+  <div className={`border-t border-[color:var(--border)] pt-4 mt-4 ${isImac ? 'col-span-12' : ''}`}>
+    <h4 className="section-title mb-4">
 FINANCEIRO
 </h4>
 
@@ -885,7 +888,7 @@ FINANCEIRO
   <div className={isImac ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4'}>
     <div>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Consultas</p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-3 gap-2'}>
         <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
         <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
         <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} />
@@ -894,7 +897,7 @@ FINANCEIRO
 
     <div className={isImac ? 'border-l border-[color:var(--border)] pl-4' : 'border-t border-[color:var(--border)] pt-4'}>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Procedimentos</p>
-      <div className="grid grid-cols-3 gap-2">
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-3 gap-2'}>
         <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
         <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
         <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} />
@@ -903,8 +906,8 @@ FINANCEIRO
   </div>
 </div>
 
-<div className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] ${isImac ? 'col-span-12 px-3 py-2' : 'p-5'}`}>
-  <h4 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
+<div className={`border-t border-[color:var(--border)] pt-4 mt-4 ${isImac ? 'col-span-12' : ''}`}>
+  <h4 className="section-title mb-4">
 CONSOLIDADO
 </h4>
 
@@ -939,10 +942,10 @@ CONSOLIDADO
           <div
   className={`h-full rounded-full ${
     percentualConsolidado >= 100
-      ? 'bg-emerald-500'
+      ? 'bg-[var(--success)]'
       : percentualConsolidado >= 50
-      ? 'bg-yellow-400'
-      : 'bg-red-500'
+      ? 'bg-[var(--warning)]'
+      : 'bg-[var(--danger)]'
   }`}
   style={{
     width: `${Math.min(percentualConsolidado, 100)}%`,
@@ -958,10 +961,10 @@ CONSOLIDADO
 <span
   className={`text-[22px] font-black ${
     percentualConsolidado >= 100
-      ? 'text-emerald-500'
+      ? 'text-[var(--success)]'
       : percentualConsolidado >= 50
-      ? 'text-yellow-500'
-      : 'text-red-500'
+      ? 'text-[var(--warning)]'
+      : 'text-[var(--danger)]'
   }`}
 >
   {percentualConsolidado}%
@@ -994,19 +997,20 @@ function MetricMini({
 }) {
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
+  const isApresentacao = viewMode === 'apresentacao'
   const colors = {
-   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-blue)]',
-orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-orange)]',
-green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-green)]',
-pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-pink)]',
-red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-red)]',
-darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--chart-darkRed)]',
+   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--accent)]',
+orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--accent)]',
+green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--success)]',
+pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
+red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
+darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
   }
 
   return (
   <div
-    className={`rounded-[16px] text-center shadow-none ${colors[color]} ${
-      isImac ? 'px-3 py-2' : 'p-4'
+    className={`rounded-[18px] text-center shadow-none ${colors[color]} ${
+      isImac ? 'px-3 py-2' : isApresentacao ? 'p-4' : 'p-3'
     }`}
   >
     <div
@@ -1017,12 +1021,12 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
       }`}
     >
       {Icon && (
-        <Icon className={`${isImac ? 'h-4 w-4' : 'h-6 w-6'}`} />
+        <Icon className={`${isImac ? 'h-4 w-4' : isApresentacao ? 'h-6 w-6' : 'h-5 w-5'}`} />
       )}
 
       <p
-        className={`${
-          isImac ? 'text-[10px]' : 'text-[18px]'
+        className={`w-full break-words ${
+          isImac ? 'text-[10px]' : isApresentacao ? 'text-[18px]' : 'text-[12px]'
         } font-black uppercase tracking-[0.08em] text-[var(--foreground)]`}
       >
         {label}
@@ -1031,7 +1035,7 @@ darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(
 
     <p
       className={`mt-2 ${
-        isImac ? 'text-[18px]' : 'text-[34px]'
+        isImac ? 'text-[18px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'
       } font-black text-[var(--foreground)]`}
     >
       {value}
@@ -1064,6 +1068,7 @@ function MetricCard({
 
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
+  const isApresentacao = viewMode === 'apresentacao'
   const tones = {
     blue:
 'border border-[color:var(--border)] bg-[var(--metric-card)] transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30',
@@ -1079,10 +1084,10 @@ purple:
   }
 
   const iconColors = {
-  blue: 'text-[var(--chart-blue)]',
-  green: 'text-[var(--chart-green)]',
-  red: 'text-[var(--chart-red)]',
-  purple: 'text-[var(--chart-purple)]',
+  blue: 'text-[var(--accent)]',
+  green: 'text-[var(--success)]',
+  red: 'text-[var(--danger)]',
+  purple: 'text-[var(--accent)]',
 }
 
 const atual =
@@ -1100,18 +1105,18 @@ const negativo = diff < 0
 
   if (empty) {
     return (
-      <div className={`relative z-0 hover:z-10 rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
+      <div className={`relative z-0 hover:z-10 rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
         <div className="flex items-center gap-2">
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
-          <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+          <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
         </div>
 
         <div className="mt-3">
-          <div className={`${isImac ? 'text-[20px]' : 'text-[34px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>
+          <div className={`${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>
             —
           </div>
 
-          <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
+          <p className={`mt-2 ${isImac ? 'text-[12px]' : isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
             Sem dados no período
           </p>
         </div>
@@ -1120,20 +1125,20 @@ const negativo = diff < 0
   }
 
   return (
-    <div className={`relative z-0 hover:z-10 rounded-[16px] shadow-none px-3 py-2 ${tones[tone]}`}>
+    <div className={`relative z-0 hover:z-10 rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[15px]' : 'text-[20px]'} font-black text-[var(--foreground)]`}>{label}</p>
+       <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
       <div className="mt-3">
   <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : 'text-[34px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
    {description && (
-  <p className={`mt-2 ${isImac ? 'text-[12px]' : 'text-[18px]'} font-medium text-[var(--muted-foreground)]`}>
+  <p className={`mt-2 ${isImac ? 'text-[12px]' : isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
     {description}
   </p>
 )}
@@ -1143,9 +1148,9 @@ const negativo = diff < 0
     <span
       className={
         positivo
-          ? 'text-emerald-500'
+          ? 'text-[var(--success)]'
           : negativo
-          ? 'text-red-500'
+          ? 'text-[var(--danger)]'
           : 'text-[var(--muted-foreground)]'
       }
     >

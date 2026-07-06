@@ -19,6 +19,7 @@ import {
   X,
   Monitor,
   Smartphone,
+  Presentation,
   Maximize2,
   Minimize2,
   SlidersHorizontal,
@@ -126,7 +127,7 @@ function parseLocalDate(dateString?: string) {
   return new Date(year, month - 1, day)
 }
   return (
-    <header className="z-30 border-b border-white/5 bg-[var(--background)]">
+    <header className="z-30 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="flex flex-col gap-3 px-6 pt-4 pb-1 md:px-8">
         <div className="flex items-start justify-between gap-6">
        
@@ -136,7 +137,7 @@ function parseLocalDate(dateString?: string) {
 <div className="flex shrink-0 items-center gap-3">
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="inline-flex items-center gap-3 rounded-2xl bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
+              className="inline-flex items-center gap-3 rounded-[18px] bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
             >
               {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
               <span className="font-medium">
@@ -146,7 +147,7 @@ function parseLocalDate(dateString?: string) {
 
             <button
               onClick={handleRefresh}
-              className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
+              className="rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
             >
               <RefreshCw size={18} />
             </button>
@@ -154,12 +155,12 @@ function parseLocalDate(dateString?: string) {
             <button
   onClick={toggleFullscreen}
   title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-  className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
+  className="rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
 >
   {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
 </button>
 
-            <button className="rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]">
+            <button className="rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]">
               <Search size={18} />
             </button>
 
@@ -171,18 +172,18 @@ function parseLocalDate(dateString?: string) {
   setShowNotifications((v) => !v)
   setHideNotifications(false)
 }}
-                className="relative rounded-2xl bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
+                className="relative rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
               >
                 <Bell size={18} />
                 {hasNotification && (
-  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--danger)] px-1 text-[10px] font-bold text-white">
     1
   </span>
 )}
               </button>
 
               {showNotifications && !hideNotifications && (
-  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-4 shadow-2xl">
+  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xl">
     <div className="mb-4 flex items-center justify-between">
       <div className="text-lg font-bold">Notificações</div>
 
@@ -191,14 +192,14 @@ function parseLocalDate(dateString?: string) {
   setHideNotifications(true)
   setHasNotification(false)
 }}
-        className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+        className="rounded-full p-2 text-[var(--muted-foreground)] hover:bg-[var(--metric-card)] hover:text-[var(--foreground)]"
       >
         <X size={18} />
       </button>
     </div>
 
     <div className="space-y-3">
-      <div className="rounded-2xl bg-emerald-50 p-4 text-emerald-500">
+      <div className="rounded-[18px] bg-[var(--success)]/10 p-4 text-[var(--success)]">
         Propostas fechadas acima de 70% da meta. Continue assim!
       </div>
     </div>
@@ -219,7 +220,7 @@ function parseLocalDate(dateString?: string) {
 </button>
 
               {showProfile && (
-                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[28px] border border-white/10 bg-[var(--card)] p-5 shadow-2xl">
+                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl">
                   <div className="mb-5 flex items-center justify-between">
                     <div className="text-2xl font-bold">Minha conta</div>
                     <button onClick={() => setShowProfile(false)}>
@@ -259,7 +260,7 @@ function parseLocalDate(dateString?: string) {
 
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-3 text-rose-500"
+                    className="flex items-center gap-3 text-[var(--danger)]"
                   >
                     <LogOut size={20} />
                     Sair
@@ -271,7 +272,7 @@ function parseLocalDate(dateString?: string) {
               </div>
            
 
-<div className="rounded-[28px] bg-[var(--card)] px-5 py-3 shadow-sm">
+<div className="rounded-[18px] bg-[var(--card)] px-5 py-3 shadow-sm">
 
   <div
     onClick={() => setShowFilters(!showFilters)}
@@ -284,11 +285,11 @@ function parseLocalDate(dateString?: string) {
         Filtros aplicados
       </div>
 
-      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
         {tipoData === 'criado' ? 'Criado' : 'Fechado'}
       </div>
 
-      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
   {periodo === 'hoje'
     ? 'Hoje'
     : periodo === 'ontem'
@@ -304,7 +305,7 @@ function parseLocalDate(dateString?: string) {
     : 'Personalizado'}
 </div>
 
-      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
         {segmento === 'vascular'
           ? 'Vascular'
           : segmento === 'emagrecimento'
@@ -312,10 +313,14 @@ function parseLocalDate(dateString?: string) {
           : 'Geral'}
       </div>
 
-      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-        {viewMode === 'desktop' ? 'iMac' : 'iPhone'}
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+        {viewMode === 'desktop'
+          ? 'iMac'
+          : viewMode === 'iphone'
+          ? 'iPhone'
+          : 'Apresentação'}
       </div>
-      <div className="rounded-xl border border-black/10 bg-[var(--background)] px-4 py-2 text-sm font-semibold">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
   {comparar ? 'Comparando' : 'Sem comparação'}
 </div>
     </div>
@@ -328,7 +333,7 @@ function parseLocalDate(dateString?: string) {
 
   </div>
   {showFilters && (
-    <div className="mt-6 grid grid-cols-5 gap-6 border-t border-black/5 pt-6">
+    <div className="mt-6 grid grid-cols-5 gap-6 border-t border-[var(--border)] pt-6">
       <div>
         <div className="mb-3 flex items-center gap-2 font-bold">
           <Database size={18} className="text-[var(--accent)]" />
@@ -406,8 +411,8 @@ function parseLocalDate(dateString?: string) {
             </button>
 
             {showCalendar && (
-              <div className="absolute left-1/2 top-full z-50 mt-3 w-[360px] -translate-x-1/2 rounded-[20px] border border-white/10 bg-[var(--card)] shadow-2xl">
-                <div className="flex items-center gap-3 border-b border-black/5 px-4 py-3">
+              <div className="absolute left-1/2 top-full z-50 mt-3 w-[360px] -translate-x-1/2 rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
+                <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
                     <CalendarDays size={20} />
                   </div>
@@ -454,31 +459,31 @@ function parseLocalDate(dateString?: string) {
                       nav:
 'absolute left-1/2 top-[100px] z-10 flex w-[300px] -translate-x-1/2 items-center justify-between',
                       button_previous:
-                        'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
+                        'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--foreground)] hover:bg-[var(--metric-card)]',
                       button_next:
-                        'flex h-10 w-10 items-center justify-center rounded-xl text-black hover:bg-[var(--muted)]',
-                      chevron: 'h-6 w-6 text-black',
+                        'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--foreground)] hover:bg-[var(--metric-card)]',
+                      chevron: 'h-6 w-6 text-[var(--foreground)]',
                       weekdays: 'grid grid-cols-7 gap-2 text-center',
                       weekday: 'text-sm font-bold text-[var(--muted-foreground)]',
                       weeks: 'space-y-2',
                       week: 'grid grid-cols-7 gap-2',
                       day: 'h-8 w-8',
                       day_button:
-'flex h-8 w-8 items-center justify-center rounded-lg bg-[#F7F1E8] text-[13px] font-semibold text-[#0F172A] transition hover:bg-[var(--accent)]/25',
+'flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--metric-card)] text-[13px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--accent)]/25',
                       selected:
-                        'bg-[#DFBA62] text-[#0F172A] rounded-2xl',
+                        'bg-[var(--accent)] text-white rounded-2xl',
                       range_start:
-                        '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+                        '[&>button]:bg-[var(--accent)] [&>button]:text-white',
                       range_end:
-                        '[&>button]:bg-[#DFBA62] [&>button]:text-white',
+                        '[&>button]:bg-[var(--accent)] [&>button]:text-white',
                       range_middle:
-                        '[&>button]:bg-[#EFE6D8] [&>button]:text-[#0F172A]',
+                        '[&>button]:bg-[var(--accent)]/15 [&>button]:text-[var(--foreground)]',
                       today:
-                        '[&>button]:bg-[#F7F1E8] [&>button]:border [&>button]:border-[#DFBA62] [&>button]:text-[#0F172A]',
+                        '[&>button]:bg-[var(--metric-card)] [&>button]:border [&>button]:border-[var(--accent)] [&>button]:text-[var(--foreground)]',
                     }}
                   />
 
-                  <div className="mt-3 flex w-full items-center justify-between gap-3 border-t border-black/5 pt-3">
+                  <div className="mt-3 flex w-full items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
                     <div>
                       <p className="text-sm text-[var(--muted-foreground)]">
                         Período selecionado
@@ -496,7 +501,7 @@ function parseLocalDate(dateString?: string) {
                           setDataInicio('')
                           setDataFim('')
                         }}
-                        className="rounded-xl border border-black/10 px-5 py-2.5 text-sm font-semibold"
+                        className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold"
                       >
                         Limpar
                       </button>
@@ -568,11 +573,19 @@ function parseLocalDate(dateString?: string) {
           </button>
 
           <button
-            onClick={() => setViewMode('mobile')}
-            className={`${pillBase} ${viewMode === 'mobile' ? pillActive : pillInactive}`}
+            onClick={() => setViewMode('iphone')}
+            className={`${pillBase} ${viewMode === 'iphone' ? pillActive : pillInactive}`}
           >
             <Smartphone size={20} />
             iPhone
+          </button>
+
+          <button
+            onClick={() => setViewMode('apresentacao')}
+            className={`${pillBase} ${viewMode === 'apresentacao' ? pillActive : pillInactive}`}
+          >
+            <Presentation size={20} />
+            Apresentação
           </button>
         </div>
       </div>

@@ -20,12 +20,13 @@ import {
   Target,
   Receipt,
   MousePointerClick,
+  AlertTriangle,
 } from 'lucide-react'
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 
 const ORIGENS_COLORS = [
-  '#4f8cff',
+  '#22D3EE',
   '#34d399',
   '#f59e0b',
   '#f87171',
@@ -80,6 +81,14 @@ function sumValor(items: any[]) {
   return items.reduce((total, item) => total + (item.valor ?? 0), 0)
 }
 
+function normalizeTexto(value: unknown) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toUpperCase()
+}
+
 function metaPercentBadge(
   atual: number,
   meta: number,
@@ -124,7 +133,7 @@ extra?: ReactNode
             : BriefcaseMedical
 
  return (
-  <div className="h-[230px] rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] p-3 flex flex-col overflow-hidden shadow-[var(--card-shadow)]">
+  <div className="h-[230px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-hidden shadow-[var(--card-shadow)]">
   <div className="mb-1 flex min-h-[40px] items-center gap-3">
   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)]">
     <Icon
@@ -162,7 +171,7 @@ extra?: ReactNode
     {percentBadge && (
       <span
         className={`text-xs font-black ${
-          percentBadge.positive ? 'text-emerald-500' : 'text-rose-500'
+          percentBadge.positive ? 'text-[var(--success)]' : 'text-[var(--danger)]'
         }`}
       >
         {percentBadge.text}
@@ -218,7 +227,7 @@ function OrigemStageCard({
   return (
     <div className="space-y-3 border-t border-[color:var(--border)] pt-4">
       {items.length === 0 && (
-        <div className="flex h-[42px] items-center rounded-2xl border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
+        <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
           Sem dados
         </div>
       )}
@@ -255,7 +264,7 @@ function OrigemStageCard({
           </div>
 
           {item.detalhes && item.detalhes.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-2xl border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] group-hover:block">
+            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] group-hover:block">
               <div className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
                 {tooltipType === 'consulta'
                   ? 'Detalhes da consulta'
@@ -345,7 +354,7 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="h-[230px] rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] p-3 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
+    <div className="h-[230px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -410,10 +419,464 @@ function RoiPorOrigemCard({
         })}
 
         {items.length === 0 && (
-          <div className="flex h-[42px] items-center rounded-2xl border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
+          <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
             Sem dados de ROI
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function UtmLinksCard({
+  leadsOrigemTotais,
+}: {
+  leadsOrigemTotais: { nome: string; quantidade?: number; qtd?: number }[]
+}) {
+  const [links, setLinks] = useState<any[]>([])
+  const [loadingLinks, setLoadingLinks] = useState(true)
+  const [criando, setCriando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [copiadoSlug, setCopiadoSlug] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    nome: '',
+    destinoUrl: 'https://linktr.ee/altuusclinic',
+    utmSource: 'ig',
+    utmMedium: 'social',
+    utmCampaign: '',
+    utmContent: 'link_in_bio',
+  })
+
+  async function carregarLinks() {
+    setLoadingLinks(true)
+
+    try {
+      const res = await fetch('/api/utm-links')
+      const data = await res.json()
+      setLinks(data.links || [])
+    } finally {
+      setLoadingLinks(false)
+    }
+  }
+
+  useEffect(() => {
+    carregarLinks()
+  }, [])
+
+  async function criarLink(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!form.nome.trim() || !form.destinoUrl.trim()) return
+
+    setCriando(true)
+    setErro(null)
+
+    try {
+      const res = await fetch('/api/utm-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setErro(data.error || 'Falha ao criar link')
+        return
+      }
+
+      setForm((atual) => ({ ...atual, nome: '', utmCampaign: '' }))
+      await carregarLinks()
+    } finally {
+      setCriando(false)
+    }
+  }
+
+  function copiarLink(slug: string) {
+    const url = `${window.location.origin}/l/${slug}`
+    navigator.clipboard.writeText(url)
+    setCopiadoSlug(slug)
+    setTimeout(() => setCopiadoSlug(null), 1500)
+  }
+
+  function leadsDoLink(link: any) {
+    const alvo = normalizeTexto(link.utm_campaign || link.nome)
+
+    if (!alvo) return 0
+
+    return leadsOrigemTotais
+      .filter((item) => {
+        const nomeOrigem = normalizeTexto(item.nome)
+        return nomeOrigem.includes(alvo) || alvo.includes(nomeOrigem)
+      })
+      .reduce((total, item) => total + (item.quantidade ?? item.qtd ?? 0), 0)
+  }
+
+  const totalCliques = links.reduce(
+    (total, link) => total + (link.clicks || 0),
+    0
+  )
+
+  return (
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
+            <MousePointerClick size={18} className="text-[var(--accent)]" />
+            Rastreamento de links (UTM)
+          </div>
+          <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
+            Crie links para o link da bio / redes sociais e acompanhe cliques e leads gerados
+          </div>
+        </div>
+
+        <div className="flex gap-5 text-right">
+          <div>
+            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+              Links criados
+            </div>
+            <div className="text-xl font-black text-[var(--foreground)]">
+              {links.length}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+              Cliques totais
+            </div>
+            <div className="text-xl font-black text-[var(--accent)]">
+              {totalCliques}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form
+        onSubmit={criarLink}
+        className="mb-5 grid gap-2 rounded-[18px] bg-[var(--metric-card)] p-3 md:grid-cols-6"
+      >
+        <input
+          value={form.nome}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, nome: e.target.value }))
+          }
+          placeholder="Nome (ex: Bio Instagram - Promo Botox)"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-2"
+        />
+
+        <input
+          value={form.destinoUrl}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, destinoUrl: e.target.value }))
+          }
+          placeholder="URL de destino"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-2"
+        />
+
+        <input
+          value={form.utmSource}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, utmSource: e.target.value }))
+          }
+          placeholder="utm_source"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
+        />
+
+        <input
+          value={form.utmMedium}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, utmMedium: e.target.value }))
+          }
+          placeholder="utm_medium"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
+        />
+
+        <input
+          value={form.utmCampaign}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, utmCampaign: e.target.value }))
+          }
+          placeholder="utm_campaign (identificador único)"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
+        />
+
+        <input
+          value={form.utmContent}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, utmContent: e.target.value }))
+          }
+          placeholder="utm_content"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
+        />
+
+        {erro && (
+          <div className="text-xs font-bold text-[var(--danger)] md:col-span-6">
+            {erro}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={criando}
+          className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--background)] transition disabled:opacity-50 md:col-span-6"
+        >
+          {criando ? 'Criando...' : 'Criar link de rastreamento'}
+        </button>
+      </form>
+
+      {loadingLinks ? (
+        <div className="text-xs font-semibold text-[var(--muted-foreground)]">
+          Carregando links...
+        </div>
+      ) : links.length === 0 ? (
+        <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
+          Nenhum link criado ainda
+        </div>
+      ) : (
+        <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1">
+          {links.map((link) => (
+            <div
+              key={link.id}
+              className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3"
+            >
+              <div className="min-w-0">
+                <div className="truncate text-sm font-black text-[var(--foreground)]">
+                  {link.nome}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => copiarLink(link.slug)}
+                  className="mt-0.5 truncate text-xs font-bold text-[var(--accent)] hover:underline"
+                >
+                  {copiadoSlug === link.slug
+                    ? 'Copiado!'
+                    : `${typeof window !== 'undefined' ? window.location.origin : ''}/l/${link.slug}`}
+                </button>
+              </div>
+
+              <div className="flex gap-5 text-right">
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-[var(--muted-foreground)]">
+                    Cliques
+                  </div>
+                  <div className="text-base font-black text-[var(--foreground)]">
+                    {link.clicks || 0}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[10px] font-bold uppercase text-[var(--muted-foreground)]">
+                    Leads (aprox.)
+                  </div>
+                  <div className="text-base font-black text-[var(--success)]">
+                    {leadsDoLink(link)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+type Insight = {
+  severidade: 'critico' | 'atencao' | 'bom'
+  titulo: string
+  descricao: string
+}
+
+function buildInsights(params: {
+  investimento: number
+  roi: number
+  naoQualificadosPercent: number
+  leadsAceitosPercent: number
+  conversaoAgendados: number
+  retornoPorOrigem: { origem: string; retorno: number; investimento: number; roi: number }[]
+  todasOrigens: string[]
+  entradaFiltrada: { nome: string; quantidade?: number; qtd?: number }[]
+  investimentosPorOrigem: Record<string, string>
+}): Insight[] {
+  const {
+    investimento,
+    roi,
+    naoQualificadosPercent,
+    leadsAceitosPercent,
+    conversaoAgendados,
+    retornoPorOrigem,
+    todasOrigens,
+    entradaFiltrada,
+    investimentosPorOrigem,
+  } = params
+
+  const insights: Insight[] = []
+
+  if (investimento === 0) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'Investimento não informado',
+      descricao:
+        'Adicione o valor investido por origem na barra lateral para calcular ROI, CAC e CPL reais.',
+    })
+  } else if (roi < 1) {
+    insights.push({
+      severidade: 'critico',
+      titulo: 'Marketing no prejuízo',
+      descricao: `Cada R$ 1 investido está retornando R$ ${roi.toFixed(2)}. Revise as origens com pior ROI abaixo.`,
+    })
+  } else if (roi < 2) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'ROI abaixo do ideal',
+      descricao: `ROI atual de ${roi.toFixed(2)}x. Concentre a verba nas origens com melhor retorno para chegar a 2x ou mais.`,
+    })
+  } else {
+    insights.push({
+      severidade: 'bom',
+      titulo: 'Bom retorno sobre investimento',
+      descricao: `ROI de ${roi.toFixed(2)}x. Considere aumentar o investimento nas origens que mais convertem.`,
+    })
+  }
+
+  if (naoQualificadosPercent > 25) {
+    insights.push({
+      severidade: 'critico',
+      titulo: 'Muitos leads não qualificados',
+      descricao: `${Math.round(naoQualificadosPercent)}% dos leads que entram não são qualificados. Revise a segmentação dos anúncios e o texto de captação.`,
+    })
+  } else if (naoQualificadosPercent > 10) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'Taxa de não qualificados acima da meta',
+      descricao: `${Math.round(naoQualificadosPercent)}% dos leads não são qualificados (meta: até 10%).`,
+    })
+  }
+
+  if (leadsAceitosPercent > 0 && leadsAceitosPercent < 90) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'Qualificação abaixo da meta',
+      descricao: `Apenas ${Math.round(leadsAceitosPercent)}% dos leads são aceitos como qualificados (meta: 90%).`,
+    })
+  }
+
+  if (conversaoAgendados > 0 && conversaoAgendados < 30) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'Conversão para agendamento baixa',
+      descricao: `Só ${Math.round(conversaoAgendados)}% dos qualificados viram agendamento (meta: 30%). Reforce o follow-up.`,
+    })
+  }
+
+  retornoPorOrigem
+    .filter((item) => item.investimento > 0 && item.roi < 1)
+    .slice(0, 3)
+    .forEach((item) => {
+      insights.push({
+        severidade: 'critico',
+        titulo: `Origem "${item.origem}" no prejuízo`,
+        descricao: `Retorno de ${item.roi.toFixed(2)}x sobre o investimento. Considere pausar ou revisar essa campanha.`,
+      })
+    })
+
+  const origensSemInvestimento = todasOrigens.filter((origem) => {
+    const temEntrada = entradaFiltrada.some(
+      (item) => item.nome === origem && (item.quantidade ?? item.qtd ?? 0) > 0
+    )
+    const temInvestimento = parseMoney(investimentosPorOrigem[origem] || '') > 0
+
+    return temEntrada && !temInvestimento
+  })
+
+  if (origensSemInvestimento.length > 0) {
+    insights.push({
+      severidade: 'atencao',
+      titulo: 'Origens sem investimento registrado',
+      descricao: `${origensSemInvestimento.slice(0, 3).join(', ')}${
+        origensSemInvestimento.length > 3 ? ' e outras' : ''
+      } estão gerando leads mas sem custo informado — o ROI e o CAC gerais podem estar distorcidos.`,
+    })
+  }
+
+  const ordem = { critico: 0, atencao: 1, bom: 2 }
+  return insights.sort((a, b) => ordem[a.severidade] - ordem[b.severidade])
+}
+
+function IndicadoresCard({ insights }: { insights: Insight[] }) {
+  const criticos = insights.filter((item) => item.severidade === 'critico').length
+  const atencoes = insights.filter((item) => item.severidade === 'atencao').length
+
+  return (
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
+            <AlertTriangle size={18} className="text-[var(--accent)]" />
+            Painel de indicadores
+          </div>
+          <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
+            O que está bom e o que dá para melhorar agora
+          </div>
+        </div>
+
+        <div className="flex gap-5 text-right">
+          <div>
+            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+              Críticos
+            </div>
+            <div className="text-xl font-black text-[var(--danger)]">{criticos}</div>
+          </div>
+
+          <div>
+            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+              Atenção
+            </div>
+            <div className="text-xl font-black text-[var(--warning)]">{atencoes}</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {insights.map((insight, index) => (
+          <div
+            key={index}
+            className={`flex items-start gap-3 rounded-[18px] border p-3 ${
+              insight.severidade === 'critico'
+                ? 'border-[var(--danger)]/30 bg-[var(--danger)]/10'
+                : insight.severidade === 'atencao'
+                  ? 'border-[var(--warning)]/30 bg-[var(--warning)]/10'
+                  : 'border-[var(--success)]/30 bg-[var(--success)]/10'
+            }`}
+          >
+            <span
+              className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
+                insight.severidade === 'critico'
+                  ? 'bg-[var(--danger)]'
+                  : insight.severidade === 'atencao'
+                    ? 'bg-[var(--warning)]'
+                    : 'bg-[var(--success)]'
+              }`}
+            />
+
+            <div className="min-w-0">
+              <div
+                className={`text-xs font-black uppercase tracking-wide ${
+                  insight.severidade === 'critico'
+                    ? 'text-[var(--danger)]'
+                    : insight.severidade === 'atencao'
+                      ? 'text-[var(--warning)]'
+                      : 'text-[var(--success)]'
+                }`}
+              >
+                {insight.titulo}
+              </div>
+              <div className="mt-0.5 text-xs font-semibold text-[var(--muted-foreground)]">
+                {insight.descricao}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -622,11 +1085,23 @@ const cac =
 const cpl =
   totalEntradaFiltrada > 0 ? investimento / totalEntradaFiltrada : 0
 
+const insights = buildInsights({
+  investimento,
+  roi,
+  naoQualificadosPercent: marketing?.naoQualificadosPercent || 0,
+  leadsAceitosPercent: marketing?.leadsAceitosPercent || 0,
+  conversaoAgendados,
+  retornoPorOrigem,
+  todasOrigens,
+  entradaFiltrada,
+  investimentosPorOrigem,
+})
+
 return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-  <aside className="sticky top-5 flex h-[700px] flex-col rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+  <aside className="sticky top-5 flex h-[700px] flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
       <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
@@ -703,7 +1178,7 @@ return (
           return (
             <div
               key={`investimento-${origem}`}
-              className={`rounded-2xl border p-3 transition-colors ${
+              className={`rounded-[18px] border p-3 transition-colors ${
                 ativo
                   ? 'border-[color:var(--accent)]/40 bg-[var(--metric-card)]'
                   : 'border-[color:var(--border)] bg-transparent opacity-50'
@@ -734,54 +1209,54 @@ return (
     </div>
   </div>
 
-  <div className="mt-4 shrink-0 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-    <div className="text-xs font-bold text-emerald-500">
+  <div className="mt-4 shrink-0 rounded-[18px] border border-[var(--success)]/30 bg-[var(--success)]/10 p-4">
+    <div className="text-xs font-bold text-[var(--success)]">
       Investimento selecionado
     </div>
 
-    <div className="mt-1 text-lg font-black text-emerald-500">
+    <div className="mt-1 text-lg font-black text-[var(--success)]">
       {formatMoneyBR(investimento)}
     </div>
   </div>
 </aside>
 
       <section className="flex h-[700px] flex-col space-y-4 overflow-hidden">
-        <div className="shrink-0 grid rounded-[26px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
+        <div className="shrink-0 grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
-              <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Investimento</div>
+              <div className="metric-label">Investimento</div>
               <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(investimento)}</div>
             </div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Retorno</div>
+            <div className="metric-label">Retorno</div>
             <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(retornoMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">Lucro</div>
+            <div className="metric-label">Lucro</div>
             <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(lucroMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">ROI</div>
+            <div className="metric-label">ROI</div>
             <div className="text-xl font-black text-[var(--accent)]">{roi.toFixed(2)}x</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">CAC</div>
+            <div className="metric-label">CAC</div>
             <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cac)}</div>
           </div>
 
           <div className="px-4">
-            <div className="text-xs font-black uppercase text-[var(--muted-foreground)]">CPL</div>
+            <div className="metric-label">CPL</div>
             <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cpl)}</div>
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden rounded-[28px] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+        <div className="min-h-0 flex-1 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
 <div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard
@@ -839,8 +1314,8 @@ return (
         }
         className={`h-7 w-7 rounded-lg border text-xs font-black transition ${
           ativo
-            ? 'border-emerald-400 bg-emerald-50 text-emerald-500'
-            : 'border-slate-200 bg-white text-slate-500'
+            ? 'border-[var(--success)]/60 bg-[var(--success)]/10 text-[var(--success)]'
+            : 'border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--muted-foreground)]'
         }`}
       >
         {tag}
@@ -873,8 +1348,8 @@ return (
   icon="consulta"
   status="blue"
  extra={
-  <div className="space-y-1">
-    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+  <div className="space-y-1.5 rounded-[18px] border border-[color:var(--border)] p-2">
+    <div>
       <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </div>
@@ -883,7 +1358,7 @@ return (
       </div>
     </div>
 
-    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+    <div>
       <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </div>
@@ -911,8 +1386,8 @@ items={consultasFiltrado}
   icon="procedimento"
   status="blue"
   extra={
-  <div className="space-y-1">
-    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+  <div className="space-y-1.5 rounded-[18px] border border-[color:var(--border)] p-2">
+    <div>
       <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </div>
@@ -921,7 +1396,7 @@ items={consultasFiltrado}
       </div>
     </div>
 
-    <div className="rounded-xl bg-[var(--metric-card)] p-2">
+    <div>
       <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </div>
@@ -947,6 +1422,10 @@ items={consultasFiltrado}
         </div>
       </section>
     </div>
+
+    <IndicadoresCard insights={insights} />
+
+    <UtmLinksCard leadsOrigemTotais={origensPorEtapa.entrada} />
   </div>
 </AppShell>
 )

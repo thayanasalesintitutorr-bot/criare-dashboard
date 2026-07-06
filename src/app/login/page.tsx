@@ -30,7 +30,7 @@ export default function LoginPage() {
   ) {
     localStorage.setItem('access_token', 'criare-auth')
     document.cookie = 'criare-auth=admin; path=/'
-    router.push('/dashboard')
+    router.push('/dispositivo')
     return
   }
 
@@ -40,7 +40,7 @@ export default function LoginPage() {
   ) {
     localStorage.setItem('access_token', 'criare-auth')
     document.cookie = 'criare-auth=marketing; path=/'
-    router.push('/marketing')
+    router.push('/dispositivo')
     return
   }
 

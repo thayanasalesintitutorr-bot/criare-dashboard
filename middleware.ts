@@ -30,6 +30,7 @@ if (session === 'marketing') {
 
   const podeAcessar =
     pathname === '/marketing' ||
+    pathname === '/dispositivo' ||
     pathname.startsWith('/api/')
 
   if (!podeAcessar) {

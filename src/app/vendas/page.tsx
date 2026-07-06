@@ -191,7 +191,7 @@ const res = await fetch(url, {
   if (loading) {
     return (
       <AppShell title="Vendas (Procedimentos)">
-        <div className="rounded-[28px] bg-[var(--card)] p-6">
+        <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
           Carregando vendas...
         </div>
       </AppShell>
@@ -201,7 +201,7 @@ const res = await fetch(url, {
   if (error) {
     return (
       <AppShell title="Vendas (Procedimentos)">
-        <div className="rounded-[28px] border border-red-500/20 bg-red-500/10 p-6 text-red-300">
+        <div className="rounded-[18px] border border-[color:var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
           {error}
         </div>
       </AppShell>
@@ -274,10 +274,10 @@ const res = await fetch(url, {
         <div className="grid gap-5">
 
 
-          <section className="flex h-full flex-col rounded-[30px] border border-white/5 bg-[var(--card)] p-4">
+          <section className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5">
             <div className="mb-4 flex items-center gap-3">
               <Package className="h-6 w-6 text-[var(--accent)]" />
-              <h2 className="text-[22px] font-black">
+              <h2 className="section-title">
                 Performance por produto vendido
               </h2>
             </div>
@@ -313,7 +313,7 @@ const res = await fetch(url, {
                     <div className="h-7 rounded-xl bg-[var(--muted)] p-1">
                       <div
                         className="h-full rounded-xl flex items-center px-2 text-white text-[12px] font-semibold"
-                        style={{ width: `${width}%`, backgroundColor: '#6366F1' }}
+                        style={{ width: `${width}%`, backgroundColor: 'var(--accent)' }}
                       >
                         {produto.qtd}
                       </div>
@@ -324,7 +324,7 @@ const res = await fetch(url, {
             </div>
 
 
-            <div className="mt-4 border-t border-white/5 pt-3">
+            <div className="mt-4 border-t border-[color:var(--border)] pt-3">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-xs uppercase text-[var(--muted-foreground)]">
@@ -348,11 +348,11 @@ const res = await fetch(url, {
           </section>
         </div>
 
-<section className="rounded-[30px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+<section className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5">
  <div className="mb-4 flex items-center justify-between">
     <div className="flex items-center gap-3">
       <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-      <h2 className="text-[20px] font-black text-[var(--foreground)]">
+      <h2 className="section-title">
         Vendas por médico
       </h2>
     </div>
@@ -387,11 +387,11 @@ const res = await fetch(url, {
         return (
           <div
             key={medico.nome}
-            className="rounded-[30px] border border-[color:var(--border)] bg-[var(--background)] p-4"
+            className="rounded-[18px] border border-[color:var(--border)] bg-[var(--background)] p-4"
           >
             <div className="mb-3 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-[#D7B46A]/40 bg-[#D7B46A]/10">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-[color:var(--accent)]/40 bg-[var(--accent)]/10">
                   {getFotoMedico(medico.nome) ? (
                     <img
                       src={getFotoMedico(medico.nome) || ''}
@@ -399,7 +399,7 @@ const res = await fetch(url, {
                       className="h-full w-full object-cover object-center"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-base font-black text-[#D7B46A]">
+                    <div className="flex h-full w-full items-center justify-center text-base font-black text-[var(--accent)]">
                       DR
                     </div>
                   )}
@@ -407,7 +407,7 @@ const res = await fetch(url, {
 
                 <div>
                   {isTop && (
-                    <span className="mb-2 inline-flex rounded-full bg-[#D7B46A]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#D7B46A]">
+                    <span className="mb-2 inline-flex rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--accent)]">
                       Top vendedor
                     </span>
                   )}
@@ -427,16 +427,18 @@ const res = await fetch(url, {
                   {formatMoney(medico.valor)}
                 </p>
 
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                <div className="progress-bar mt-2 h-2">
                   <div
-                    className={`h-full rounded-full ${
-                      percentualMeta >= 100
-                        ? 'bg-emerald-500'
-                        : percentualMeta >= 70
-                        ? 'bg-yellow-400'
-                        : 'bg-red-500'
-                    }`}
-                    style={{ width: `${Math.min(percentualMeta, 100)}%` }}
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.min(percentualMeta, 100)}%`,
+                      backgroundColor:
+                        percentualMeta >= 100
+                          ? 'var(--success)'
+                          : percentualMeta >= 70
+                          ? 'var(--warning)'
+                          : 'var(--danger)',
+                    }}
                   />
                 </div>
 
@@ -446,13 +448,15 @@ const res = await fetch(url, {
                   </span>
 
                   <span
-                    className={`font-black ${
-                      percentualMeta >= 100
-                        ? 'text-emerald-500'
-                        : percentualMeta >= 70
-                        ? 'text-yellow-500'
-                        : 'text-red-500'
-                    }`}
+                    className="font-black"
+                    style={{
+                      color:
+                        percentualMeta >= 100
+                          ? 'var(--success)'
+                          : percentualMeta >= 70
+                          ? 'var(--warning)'
+                          : 'var(--danger)',
+                    }}
                   >
                     {percentualMeta}%
                   </span>
@@ -514,8 +518,8 @@ const res = await fetch(url, {
 
 function MiniInfo({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-1.5">
-      <p className="text-xs font-bold text-[var(--muted-foreground)]">
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-1.5">
+      <p className="metric-label">
         {label}
       </p>
 
@@ -551,45 +555,49 @@ function CardMeta({
   const previousLabel = isMoney ? formatMoney(anterior) : anterior
 
   return (
-    <div className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5">
       <div className="mb-3 flex items-center gap-3">
         <CircleDollarSign className="h-6 w-6 text-[var(--accent)]" />
 
-        <p className="text-sm font-black uppercase tracking-[0.16em] text-[var(--muted-foreground)]">
+        <p className="metric-label">
           {title}
         </p>
       </div>
 
-      <p className="text-[30px] font-black leading-none text-[var(--foreground)]">
+      <p className="metric-value text-[30px] leading-none">
         {isMoney ? formatMoney(value) : value}
       </p>
 
-      <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+      <div className="progress-bar mt-4 h-3">
         <div
-          className={`h-full rounded-full ${
-            percentual >= 100
-              ? 'bg-emerald-500'
-              : percentual >= 70
-              ? 'bg-yellow-400'
-              : 'bg-red-500'
-          }`}
-          style={{ width: `${Math.min(percentual, 100)}%` }}
+          className="h-full rounded-full"
+          style={{
+            width: `${Math.min(percentual, 100)}%`,
+            backgroundColor:
+              percentual >= 100
+                ? 'var(--success)'
+                : percentual >= 70
+                ? 'var(--warning)'
+                : 'var(--danger)',
+          }}
         />
       </div>
 
       <div className="mt-3 flex items-center justify-between">
-        <span className="text-base font-bold text-[var(--muted-foreground)]">
+        <span className="metric-helper text-base">
           Meta {isMoney ? formatMoney(meta) : meta}
         </span>
 
         <span
-          className={`text-2xl font-black ${
-            percentual >= 100
-              ? 'text-emerald-500'
-              : percentual >= 70
-              ? 'text-yellow-500'
-              : 'text-red-500'
-          }`}
+          className="text-2xl font-black"
+          style={{
+            color:
+              percentual >= 100
+                ? 'var(--success)'
+                : percentual >= 70
+                ? 'var(--warning)'
+                : 'var(--danger)',
+          }}
         >
           {percentual}%
         </span>
@@ -598,18 +606,19 @@ function CardMeta({
       <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
   <div>
     <p
-      className={`text-[18px] font-black ${
-        positivo
-          ? 'text-emerald-500'
+      className="text-[18px] font-black"
+      style={{
+        color: positivo
+          ? 'var(--success)'
           : negativo
-          ? 'text-red-500'
-          : 'text-[var(--muted-foreground)]'
-      }`}
+          ? 'var(--danger)'
+          : 'var(--muted-foreground)',
+      }}
     >
       {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentualAnterior)}%
     </p>
 
-    <p className="text-xs text-[var(--muted-foreground)]">
+    <p className="metric-helper">
       {percentualAnterior === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
     </p>
   </div>
@@ -644,7 +653,7 @@ function CardMini({
 
   return (
     <div
-      className={`rounded-[24px] border border-[color:var(--border)] p-4 shadow-[var(--card-shadow)] ${
+      className={`rounded-[18px] border border-[color:var(--border)] p-5 ${
         statusClass || 'bg-[var(--card)]'
       }`}
     >
@@ -653,17 +662,17 @@ function CardMini({
           <Icon className="h-5 w-5 text-[var(--accent)]" />
         </div>
 
-        <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--muted-foreground)]">
+        <p className="metric-label">
           {title}
         </p>
       </div>
 
-      <h3 className="text-[28px] font-black tracking-[-0.05em] text-[var(--foreground)]">
+      <h3 className="metric-value text-[28px] tracking-[-0.05em]">
         {value}
       </h3>
 
       {subtitle && (
-        <p className="mt-2 text-sm font-semibold text-[var(--muted-foreground)]">
+        <p className="metric-helper mt-2 text-sm">
           {subtitle}
         </p>
       )}
@@ -671,18 +680,19 @@ function CardMini({
       <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
   <div>
     <p
-      className={`text-[18px] font-black ${
-        positivo
-          ? 'text-emerald-500'
+      className="text-[18px] font-black"
+      style={{
+        color: positivo
+          ? 'var(--success)'
           : negativo
-          ? 'text-red-500'
-          : 'text-[var(--muted-foreground)]'
-      }`}
+          ? 'var(--danger)'
+          : 'var(--muted-foreground)',
+      }}
     >
       {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
     </p>
 
-    <p className="text-xs text-[var(--muted-foreground)]">
+    <p className="metric-helper">
       {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
     </p>
   </div>
