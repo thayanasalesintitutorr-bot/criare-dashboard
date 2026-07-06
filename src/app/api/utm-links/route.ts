@@ -100,3 +100,30 @@ export async function POST(request: Request) {
 
   return Response.json({ link: data[0] })
 }
+
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+
+  if (!id) {
+    return Response.json({ error: 'ID é obrigatório' }, { status: 400 })
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/utm_links?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: 'DELETE',
+      headers: supabaseHeaders(),
+    }
+  )
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    return Response.json(
+      { error: 'Falha ao excluir link', details: errorText },
+      { status: 500 }
+    )
+  }
+
+  return Response.json({ ok: true })
+}

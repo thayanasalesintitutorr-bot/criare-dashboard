@@ -21,6 +21,7 @@ import {
   Receipt,
   MousePointerClick,
   AlertTriangle,
+  Trash2,
 } from 'lucide-react'
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
@@ -133,7 +134,7 @@ extra?: ReactNode
             : BriefcaseMedical
 
  return (
-  <div className="h-[230px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-hidden shadow-[var(--card-shadow)]">
+  <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
   <div className="mb-1 flex min-h-[40px] items-center gap-3">
   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)]">
     <Icon
@@ -162,35 +163,37 @@ extra?: ReactNode
 </div>
 </div>
 
-<div className="mt-1 min-h-[70px] flex items-center justify-between gap-3">
-  <div className="flex items-center gap-2">
+<div className="mt-1 flex flex-1 items-center justify-between gap-3">
+  <div className="group relative flex cursor-default items-center gap-2">
     <span className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
       {value}
     </span>
 
     {percentBadge && (
       <span
-        className={`text-xs font-black ${
-          percentBadge.positive ? 'text-[var(--success)]' : 'text-[var(--danger)]'
+        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-black ${
+          percentBadge.positive
+            ? 'bg-[var(--success)]/10 text-[var(--success)]'
+            : 'bg-[var(--danger)]/10 text-[var(--danger)]'
         }`}
       >
-        {percentBadge.text}
+        <span>{percentBadge.positive ? '▲' : '▼'}</span>
+        {percentBadge.text.replace(/^[+-]/, '')}
       </span>
+    )}
+
+    {children && (
+      <div className="invisible absolute left-0 top-full z-50 mt-2 w-[280px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-3 opacity-0 shadow-[var(--card-shadow)] transition-opacity duration-150 group-hover:visible group-hover:opacity-100">
+        {children}
+      </div>
     )}
   </div>
 
   {extra && (
-    <div className="w-[125px] shrink-0">
+    <div className="shrink-0">
       {extra}
     </div>
   )}
-</div>
-
-<div className="relative mt-3 flex-1">
- <div className="max-h-[92px] space-y-2 overflow-y-auto pr-1">
-
-    {children}
-  </div>
 </div>
   </div>
 )
@@ -354,7 +357,7 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="h-[230px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
+    <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -438,6 +441,9 @@ function UtmLinksCard({
   const [criando, setCriando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [copiadoSlug, setCopiadoSlug] = useState<string | null>(null)
+  const [linkParaExcluir, setLinkParaExcluir] = useState<{ id: string; nome: string } | null>(null)
+  const [confirmacaoExclusao, setConfirmacaoExclusao] = useState('')
+  const [excluindo, setExcluindo] = useState(false)
   const [form, setForm] = useState({
     nome: '',
     destinoUrl: 'https://linktr.ee/altuusclinic',
@@ -488,6 +494,30 @@ function UtmLinksCard({
       await carregarLinks()
     } finally {
       setCriando(false)
+    }
+  }
+
+  async function excluirLink() {
+    if (!linkParaExcluir || confirmacaoExclusao !== 'EXCLUIR') return
+
+    setExcluindo(true)
+
+    try {
+      const res = await fetch(`/api/utm-links?id=${linkParaExcluir.id}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setErro(data.error || 'Falha ao excluir link')
+        return
+      }
+
+      setLinkParaExcluir(null)
+      setConfirmacaoExclusao('')
+      await carregarLinks()
+    } finally {
+      setExcluindo(false)
     }
   }
 
@@ -672,9 +702,78 @@ function UtmLinksCard({
                     {leadsDoLink(link)}
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLinkParaExcluir({ id: link.id, nome: link.nome })
+                    setConfirmacaoExclusao('')
+                  }}
+                  title="Excluir link"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[var(--muted-foreground)] transition hover:bg-[var(--danger)]/10 hover:text-[var(--danger)]"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {linkParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-sm rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[var(--danger)]/10 text-[var(--danger)]">
+                <AlertTriangle size={18} />
+              </div>
+              <h3 className="text-[16px] font-black text-[var(--foreground)]">
+                Excluir link de rastreamento
+              </h3>
+            </div>
+
+            <p className="text-sm font-semibold text-[var(--muted-foreground)]">
+              Você está prestes a excluir o link{' '}
+              <span className="text-[var(--foreground)]">
+                &ldquo;{linkParaExcluir.nome}&rdquo;
+              </span>
+              . Todas as informações de cliques e leads associadas a ele serão perdidas
+              permanentemente e essa ação não pode ser desfeita.
+            </p>
+
+            <p className="mt-4 text-xs font-bold uppercase text-[var(--muted-foreground)]">
+              Digite EXCLUIR para confirmar
+            </p>
+
+            <input
+              value={confirmacaoExclusao}
+              onChange={(e) => setConfirmacaoExclusao(e.target.value)}
+              placeholder="EXCLUIR"
+              className="mt-2 w-full rounded-xl border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 text-sm font-bold text-[var(--foreground)] outline-none focus:border-[var(--danger)]"
+            />
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setLinkParaExcluir(null)
+                  setConfirmacaoExclusao('')
+                }}
+                className="rounded-xl px-4 py-2 text-xs font-black text-[var(--muted-foreground)] transition hover:bg-[var(--metric-card)]"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                onClick={excluirLink}
+                disabled={confirmacaoExclusao !== 'EXCLUIR' || excluindo}
+                className="rounded-xl bg-[var(--danger)] px-4 py-2 text-xs font-black text-white transition disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {excluindo ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -1348,27 +1447,27 @@ return (
   icon="consulta"
   status="blue"
  extra={
-  <div className="space-y-1.5 rounded-[18px] border border-[color:var(--border)] p-2">
-    <div>
-      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+  <div className="space-y-1 text-right">
+    <div className="flex items-baseline justify-end gap-1.5">
+      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
-      </div>
-      <div className="text-xs font-black text-[var(--foreground)]">
+      </span>
+      <span className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(valorConsultasFiltrado)}
-      </div>
+      </span>
     </div>
 
-    <div>
-      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+    <div className="flex items-baseline justify-end gap-1.5">
+      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
-      </div>
-      <div className="text-xs font-black text-[var(--foreground)]">
+      </span>
+      <span className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(
           sumQtd(consultasFiltrado) > 0
             ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
             : 0
         )}
-      </div>
+      </span>
     </div>
   </div>
 }
@@ -1386,27 +1485,27 @@ items={consultasFiltrado}
   icon="procedimento"
   status="blue"
   extra={
-  <div className="space-y-1.5 rounded-[18px] border border-[color:var(--border)] p-2">
-    <div>
-      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+  <div className="space-y-1 text-right">
+    <div className="flex items-baseline justify-end gap-1.5">
+      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
-      </div>
-      <div className="text-xs font-black text-[var(--foreground)]">
+      </span>
+      <span className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(valorProcedimentosFiltrado)}
-      </div>
+      </span>
     </div>
 
-    <div>
-      <div className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+    <div className="flex items-baseline justify-end gap-1.5">
+      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
-      </div>
-      <div className="text-xs font-black text-[var(--foreground)]">
+      </span>
+      <span className="text-xs font-black text-[var(--foreground)]">
         {formatMoney(
           sumQtd(procedimentosFiltrado) > 0
             ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)
             : 0
         )}
-      </div>
+      </span>
     </div>
   </div>
 }

@@ -582,10 +582,10 @@ const ticketMedioConsultaComReabord =
   </h3>
 
   <div className="grid grid-cols-2 gap-2">
-    <MetricMini label="Finalizados" value={painelAtendimento?.statusAgenda?.finalizados || 0} color="green" icon={UserCheck} />
-    <MetricMini label="No Show" value={painelAtendimento?.statusAgenda?.noShow || 0} color="pink" icon={UserX} />
-    <MetricMini label="Reagendados" value={painelAtendimento?.statusAgenda?.reagendados || 0} color="darkRed" icon={CalendarClock} />
-    <MetricMini label="Cancelados" value={painelAtendimento?.statusAgenda?.cancelados || 0} color="red" icon={CalendarX2} />
+    <MetricMini label="Finalizados" value={painelAtendimento?.statusAgenda?.finalizados || 0} color="green" icon={UserCheck} bordered={false} />
+    <MetricMini label="No Show" value={painelAtendimento?.statusAgenda?.noShow || 0} color="pink" icon={UserX} bordered={false} />
+    <MetricMini label="Reagendados" value={painelAtendimento?.statusAgenda?.reagendados || 0} color="darkRed" icon={CalendarClock} bordered={false} />
+    <MetricMini label="Cancelados" value={painelAtendimento?.statusAgenda?.cancelados || 0} color="red" icon={CalendarX2} bordered={false} />
   </div>
 </div>
 
@@ -989,27 +989,31 @@ function MetricMini({
   value,
   color = 'blue',
   icon: Icon,
+  bordered = true,
 }: {
   label: string
   value: number | string
   color?: 'blue' | 'red' | 'green' | 'orange' | 'pink' | 'darkRed'
   icon?: any
+  bordered?: boolean
 }) {
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
   const isApresentacao = viewMode === 'apresentacao'
-  const colors = {
-   blue: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--accent)]',
-orange: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--accent)]',
-green: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--success)]',
-pink: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
-red: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
-darkRed: 'border border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--danger)]',
+  const textColors = {
+    blue: 'text-[var(--accent)]',
+    orange: 'text-[var(--accent)]',
+    green: 'text-[var(--success)]',
+    pink: 'text-[var(--danger)]',
+    red: 'text-[var(--danger)]',
+    darkRed: 'text-[var(--danger)]',
   }
 
   return (
   <div
-    className={`rounded-[18px] text-center shadow-none ${colors[color]} ${
+    className={`rounded-[18px] text-center shadow-none ${textColors[color]} ${
+      bordered ? 'border border-[color:var(--border)] bg-[var(--metric-card)]' : ''
+    } ${
       isImac ? 'px-3 py-2' : isApresentacao ? 'p-4' : 'p-3'
     }`}
   >
