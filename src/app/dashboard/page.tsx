@@ -739,11 +739,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
 
   return (
-    <AppShell title="Visão Geral">
+    <AppShell title="Visão Geral" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
      <div className="space-y-3">
-       <div className="flex justify-end">
-         <LiveIndicator lastUpdated={lastUpdated} now={now} />
-       </div>
 
     <div
   className={`grid gap-3 ${

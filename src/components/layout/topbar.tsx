@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   Activity,
   BarChart3,
@@ -34,8 +34,10 @@ import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
 import { ptBR } from 'date-fns/locale'
 
+const NOTIF_SEEN_KEY = 'criare-notif-propostas-seen-percent'
+const NOTIF_AUTO_CLOSE_MS = 30000
 
-export function Topbar({ title }: { title: string }) {
+export function Topbar({ title, statusIndicator }: { title: string; statusIndicator?: ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme()
   const {
   periodo,
@@ -61,18 +63,95 @@ export function Topbar({ title }: { title: string }) {
   const [showCalendar, setShowCalendar] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
-  const [hideNotifications, setHideNotifications] = useState(false)
-  const [hasNotification, setHasNotification] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
   const [showFilters, setShowFilters] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
+  const notificationCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [propostasPercent, setPropostasPercent] = useState<number | null>(null)
+  const [lastSeenPercent, setLastSeenPercent] = useState<number | null>(null)
+  const [openMessage, setOpenMessage] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
+
+    const stored = localStorage.getItem(NOTIF_SEEN_KEY)
+    if (stored) setLastSeenPercent(Number(stored))
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPropostasPercent() {
+      try {
+        const token = localStorage.getItem('access_token')
+
+        let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}`
+        if (periodo === 'personalizado' && dataInicio && dataFim) {
+          url += `&inicio=${dataInicio}&fim=${dataFim}`
+        }
+
+        const res = await fetch(url, {
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const json = await res.json()
+        if (cancelled || !json.ok) return
+
+        const percent = json?.kpis?.comercialVendas?.propostasFechadasPercent
+        if (typeof percent === 'number') {
+          setPropostasPercent(Math.round(percent))
+        }
+      } catch {
+        // silencioso: notificação depende de dado real, sem dado não há notificação
+      }
+    }
+
+    loadPropostasPercent()
+    const interval = setInterval(loadPropostasPercent, 60000)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [periodo, tipoData, segmento, dataInicio, dataFim])
+
+  useEffect(() => {
+    return () => {
+      if (notificationCloseTimer.current) clearTimeout(notificationCloseTimer.current)
+    }
+  }, [])
+
+  const notificationMessage =
+    propostasPercent !== null && propostasPercent >= 70
+      ? `Propostas fechadas acima de ${propostasPercent}% da meta. Continue assim!`
+      : null
+
+  const hasNotification =
+    notificationMessage !== null && propostasPercent !== lastSeenPercent
+
+  function handleOpenNotifications() {
+    if (!hasNotification || !notificationMessage || propostasPercent === null) return
+
+    setOpenMessage(notificationMessage)
+    setShowNotifications(true)
+    localStorage.setItem(NOTIF_SEEN_KEY, String(propostasPercent))
+    setLastSeenPercent(propostasPercent)
+
+    if (notificationCloseTimer.current) clearTimeout(notificationCloseTimer.current)
+    notificationCloseTimer.current = setTimeout(() => {
+      setShowNotifications(false)
+    }, NOTIF_AUTO_CLOSE_MS)
+  }
+
+  function handleCloseNotifications() {
+    setShowNotifications(false)
+    if (notificationCloseTimer.current) clearTimeout(notificationCloseTimer.current)
+  }
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -166,12 +245,7 @@ function parseLocalDate(dateString?: string) {
 
             <div ref={notificationRef} className="relative">
               <button
-                onClick={() => {
-  if (!hasNotification) return
-
-  setShowNotifications((v) => !v)
-  setHideNotifications(false)
-}}
+                onClick={handleOpenNotifications}
                 className="relative rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
               >
                 <Bell size={18} />
@@ -182,16 +256,13 @@ function parseLocalDate(dateString?: string) {
 )}
               </button>
 
-              {showNotifications && !hideNotifications && (
+              {showNotifications && openMessage && (
   <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xl">
     <div className="mb-4 flex items-center justify-between">
       <div className="text-lg font-bold">Notificações</div>
 
       <button
-        onClick={() => {
-  setHideNotifications(true)
-  setHasNotification(false)
-}}
+        onClick={handleCloseNotifications}
         className="rounded-full p-2 text-[var(--muted-foreground)] hover:bg-[var(--metric-card)] hover:text-[var(--foreground)]"
       >
         <X size={18} />
@@ -200,7 +271,7 @@ function parseLocalDate(dateString?: string) {
 
     <div className="space-y-3">
       <div className="rounded-[18px] bg-[var(--success)]/10 p-4 text-[var(--success)]">
-        Propostas fechadas acima de 70% da meta. Continue assim!
+        {openMessage}
       </div>
     </div>
   </div>
@@ -325,8 +396,12 @@ function parseLocalDate(dateString?: string) {
 </div>
     </div>
 
-    <div className="ml-auto text-[var(--accent)]">
-  {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+    <div className="ml-auto flex items-center gap-4">
+  {statusIndicator}
+
+  <div className="text-[var(--accent)]">
+    {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+  </div>
 </div>
 
   </div>

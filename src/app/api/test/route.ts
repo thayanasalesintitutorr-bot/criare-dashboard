@@ -21,6 +21,7 @@ type Lead = {
   Convenio?: string | null
   Data_de_atendimento?: string | null
   utm_campaing?: string | null
+  utm_content?: string | null
 }
 
 function normalize(value: unknown) {
@@ -82,6 +83,21 @@ function normalizeCampaignName(name?: string | null) {
   }
 
   return normalized.toUpperCase()
+}
+
+// Retorna o campo bruto de origem do lead de acordo com o modo escolhido:
+// 'campanha' agrupa por utm_campaing (campanha), 'anuncio' agrupa por utm_content (anúncio).
+// Sempre cai para o campo legado "campanha" e depois "source" quando o utm específico não existir.
+function origemField(lead: Lead, modo: 'campanha' | 'anuncio') {
+  const utmEspecifico =
+    modo === 'anuncio' ? lead.utm_content : lead.utm_campaing
+
+  return (
+    (utmEspecifico || '').trim() ||
+    (lead.campanha || '').trim() ||
+    (lead.source || '').trim() ||
+    ''
+  )
 }
 
 // PARSE LOCAL MANUAL — sem UTC
@@ -320,8 +336,6 @@ function filterBySegmento(leads: Lead[], segmento: string) {
 }
 
 const META_MENSAL_VENDAS = 750000
-const META_SEMANAL_VENDAS = META_MENSAL_VENDAS / 4
-const META_DIARIA_VENDAS = META_SEMANAL_VENDAS / 7
 const META_TICKET_MEDIO = 2800
 const META_MENSAL_NPS = 25
 
@@ -343,6 +357,41 @@ function countDiasUteis(start: Date, end: Date) {
   return count
 }
 
+// Quantidade de dias úteis (segunda a sexta) de um mês específico.
+// Não desconta feriados.
+function getBusinessDaysInMonth(ano: number, mes: number) {
+  const inicio = new Date(ano, mes, 1)
+  const fim = new Date(ano, mes + 1, 0)
+
+  return countDiasUteis(inicio, fim)
+}
+
+// Meta diária do mês ao qual a data pertence: meta mensal fixa dividida
+// apenas pelos dias úteis daquele mês (nunca pelos dias corridos).
+function getDailyGoalForMonth(data: Date) {
+  const diasUteisDoMes = getBusinessDaysInMonth(data.getFullYear(), data.getMonth())
+
+  return diasUteisDoMes > 0 ? META_MENSAL_VENDAS / diasUteisDoMes : 0
+}
+
+// Soma a meta diária (do mês correspondente a cada dia) de todo dia útil
+// dentro do intervalo. Se o intervalo atravessar meses diferentes, cada dia
+// usa a meta diária do seu próprio mês.
+function sumDailyGoalsInRange(start: Date, end: Date) {
+  let total = 0
+  const current = startOfDay(new Date(start))
+  const fim = startOfDay(new Date(end))
+
+  while (current <= fim) {
+    if (isDiaUtil(current)) {
+      total += getDailyGoalForMonth(current)
+    }
+    current.setDate(current.getDate() + 1)
+  }
+
+  return total
+}
+
 function getMetaNps(start: Date, end: Date) {
   const mesInicio = new Date(start.getFullYear(), start.getMonth(), 1)
   const mesFim = new Date(start.getFullYear(), start.getMonth() + 1, 0)
@@ -353,9 +402,16 @@ function getMetaNps(start: Date, end: Date) {
   return Math.round((META_MENSAL_NPS / diasUteisMes) * diasUteisPeriodo)
 }
 
-function getMetaVendas(periodo: string, start: Date, end: Date) {
-  const startDay = startOfDay(start)
-  const endDay = startOfDay(end)
+// Função única para obter a meta de vendas de qualquer período.
+//
+// Regras:
+// - Mês atual / mês passado / mês inteiro selecionado: meta mensal cheia (R$ 750.000).
+// - Hoje / ontem: meta diária do mês da data (750.000 / dias úteis do mês).
+// - Semana / personalizado / qualquer intervalo parcial: soma da meta diária
+//   de cada dia útil dentro do intervalo (usando a meta diária do mês de cada dia).
+function getGoalForPeriod(startDate: Date, endDate: Date, periodType: string) {
+  const startDay = startOfDay(startDate)
+  const endDay = startOfDay(endDate)
 
   const mesCompletoInicio = startOfDay(
     new Date(startDay.getFullYear(), startDay.getMonth(), 1)
@@ -370,25 +426,22 @@ function getMetaVendas(periodo: string, start: Date, end: Date) {
     endDay.getTime() === mesCompletoFim.getTime()
 
   if (
-    periodo === 'mes-atual' ||
-    periodo === 'mes-passado' ||
+    periodType === 'mes-atual' ||
+    periodType === 'mes-passado' ||
     selecionouMesInteiro
   ) {
     return META_MENSAL_VENDAS
   }
 
-  if (periodo === 'semana') {
-    return META_SEMANAL_VENDAS
+  if (periodType === 'hoje' || periodType === 'ontem') {
+    return getDailyGoalForMonth(startDay)
   }
 
-  if (periodo === 'hoje' || periodo === 'ontem') {
-    return Math.round(META_DIARIA_VENDAS)
-  }
+  return sumDailyGoalsInRange(startDay, endDay)
+}
 
-  const diff = endDay.getTime() - startDay.getTime()
-  const days = Math.max(1, Math.floor(diff / (1000 * 60 * 60 * 24)) + 1)
-
-  return Math.round(META_DIARIA_VENDAS * days)
+function getMetaVendas(periodo: string, start: Date, end: Date) {
+  return getGoalForPeriod(start, end, periodo)
 }
 
 function buildEvolucaoDiaria(
@@ -446,7 +499,7 @@ function buildEvolucaoDiaria(
   return result
 }
 
-function buildOrigens(leads: Lead[]) {
+function buildOrigens(leads: Lead[], modo: 'campanha' | 'anuncio' = 'campanha') {
   const map: Record<
     string,
     {
@@ -456,10 +509,7 @@ function buildOrigens(leads: Lead[]) {
   > = {}
 
   for (const lead of leads) {
-    const origem =
-      (lead.campanha || '').trim() ||
-      (lead.source || '').trim() ||
-      'Sem origem'
+    const origem = origemField(lead, modo) || 'Sem origem'
 
     const pipeline = lead.pipeline_id || 'SEM PIPELINE'
     const status = lead.status_id || 'SEM STATUS'
@@ -501,7 +551,7 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio,utm_campaing&offset=${from}&limit=${pageSize}`,
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio,utm_campaing,utm_content&offset=${from}&limit=${pageSize}`,
   {
     headers: {
   apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -538,6 +588,8 @@ const data = await response.json()
     const segmento = searchParams.get('segmento') || 'geral'
     const customStart = searchParams.get('inicio') || ''
     const customEnd = searchParams.get('fim') || ''
+    const origemModo =
+      searchParams.get('origemModo') === 'anuncio' ? 'anuncio' : 'campanha'
 
     const range = getGlobalRange(periodo, customStart, customEnd)
     const previousRange = getPreviousRange(
@@ -760,7 +812,7 @@ const agendadosFunil = agendadosLeadsPeriodo.length
 > = {}
 
 consultaGanhosLeads.forEach((lead) => {
-  const campanha = normalizeCampaignName(lead.campanha)
+  const campanha = normalizeCampaignName(origemField(lead, origemModo))
   const valorConsulta = toNumber(lead.faturamento)
 
   if (valorConsulta <= 0) return
@@ -999,7 +1051,7 @@ const vendasPorMedico = Object.entries(medicosMap)
 
 propostasFechadasLeads.forEach((lead) => {
   const valorVenda = toNumber(lead.venda)
-  const campanha = normalizeCampaignName(lead.campanha)
+  const campanha = normalizeCampaignName(origemField(lead, origemModo))
   const produtosRaw = lead.Produto
 
   const produtos = Array.isArray(produtosRaw)
@@ -1290,7 +1342,7 @@ const consolidadoTicketMedio =
       range
     )
 
-    const origens = buildOrigens(consultaBasePeriodo)
+    const origens = buildOrigens(consultaBasePeriodo, origemModo)
 
     const leadsEntrada = consultaBasePeriodo
 
@@ -1318,11 +1370,11 @@ const leadsQualificadosD = leadsQualificados.filter((l) =>
 )
 
 const origensQualificadosPorTag = {
-  todas: buildOrigens(leadsQualificados),
-  A: buildOrigens(leadsQualificadosA),
-  B: buildOrigens(leadsQualificadosB),
-  C: buildOrigens(leadsQualificadosC),
-  D: buildOrigens(leadsQualificadosD),
+  todas: buildOrigens(leadsQualificados, origemModo),
+  A: buildOrigens(leadsQualificadosA, origemModo),
+  B: buildOrigens(leadsQualificadosB, origemModo),
+  C: buildOrigens(leadsQualificadosC, origemModo),
+  D: buildOrigens(leadsQualificadosD, origemModo),
 }
 
 const leadsAgendados = agendadosLeadsPeriodo
@@ -1364,23 +1416,39 @@ const npsGoogle = npsFiltrado.reduce((total: number, item: any) => {
 const metaNpsGoogle = getMetaNps(range.start, range.end)
 const npsGooglePercent = safePercent(npsGoogle, metaNpsGoogle)
 
-const noShowResponse = await fetch(
-  'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*',
-  {
-    headers: {
-  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-  'Accept-Profile': 'kommo',
-},
+let noShowData: any[] = []
+{
+  let from = 0
+  const pageSize = 1000
+
+  while (true) {
+    const noShowResponse = await fetch(
+      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*&offset=${from}&limit=${pageSize}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+          'Accept-Profile': 'kommo',
+        },
+      }
+    )
+
+    if (!noShowResponse.ok) {
+      const errorText = await noShowResponse.text()
+      throw new Error(errorText)
+    }
+
+    const page = await noShowResponse.json()
+
+    if (!page || page.length === 0) break
+
+    noShowData = noShowData.concat(page)
+
+    if (page.length < pageSize) break
+
+    from += pageSize
   }
-)
-
-if (!noShowResponse.ok) {
-  const errorText = await noShowResponse.text()
-  throw new Error(errorText)
 }
-
-const noShowData = await noShowResponse.json()
 
 const noShowFiltrado = (noShowData || []).filter((item: any) => {
   const data = parseDataAmplimed(item['Data e hora Agendada'])
@@ -1469,6 +1537,21 @@ const totalPrimeiraVezAnterior = noShowFiltradoAnterior.filter((item: any) => {
     procedimento.includes(normalize(consulta))
   )
 }).length
+
+const totalNoShowAnterior = noShowFiltradoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+
+  return (
+    status.includes('NAO COMPARECEU') ||
+    status.includes('NO SHOW') ||
+    status.includes('NCOMPARECEU') ||
+    status.includes('N COMPARECEU')
+  )
+}).length
+
+const totalFinalizadosAnterior = noShowFiltradoAnterior.filter((item: any) =>
+  normalize(item['Status']).includes('FINALIZADO')
+).length
 
 const noShowPercent = safePercent(totalNoShow, totalAtendimentos)
 
@@ -1968,6 +2051,38 @@ const totalCancelados = consultaPorMedico.reduce(
   0
 )
 
+const totalReagendadosAnterior = medicosPermitidos.reduce((acc, medico) => {
+  const med = normalize(medico)
+
+  const atendimentosAgendaMedicoAnterior = noShowFiltradoAnterior.filter((item: any) => {
+    const profissional = normalize(item['Profissional'])
+    return profissional.includes(med.split(' ')[1] || med)
+  })
+
+  return (
+    acc +
+    atendimentosAgendaMedicoAnterior.filter((item: any) =>
+      normalize(item['Status']).includes('REAGENDADO')
+    ).length
+  )
+}, 0)
+
+const totalCanceladosAnterior = medicosPermitidos.reduce((acc, medico) => {
+  const med = normalize(medico)
+
+  const atendimentosAgendaMedicoAnterior = noShowFiltradoAnterior.filter((item: any) => {
+    const profissional = normalize(item['Profissional'])
+    return profissional.includes(med.split(' ')[1] || med)
+  })
+
+  return (
+    acc +
+    atendimentosAgendaMedicoAnterior.filter((item: any) =>
+      normalize(item['Status']).includes('CANCELADO')
+    ).length
+  )
+}, 0)
+
 const totalAgendamentosExperiencia =
   totalAtendimentos + totalReagendados + totalCancelados
 
@@ -2057,7 +2172,7 @@ const painelAtendimento = {
     }
   }),
 
-  agendamentosPorOrigem: buildOrigens(leadsAgendados),
+  agendamentosPorOrigem: buildOrigens(leadsAgendados, origemModo),
 
   finalizadosParticularConvenio: atendimentoConsulta,
 }
@@ -2209,6 +2324,13 @@ painelAtendimento,
     valorVendasAnterior: valorAnteriorConsolidado,
     ticketMedioAnterior: ticketAnteriorConsolidado,
   },
+
+  statusAgenda: {
+    finalizadosAnterior: totalFinalizadosAnterior,
+    noShowAnterior: totalNoShowAnterior,
+    reagendadosAnterior: totalReagendadosAnterior,
+    canceladosAnterior: totalCanceladosAnterior,
+  },
 },
 
       funil,
@@ -2224,10 +2346,10 @@ painelAtendimento,
       conveniosConsulta,
 
       origensPorEtapa: {
-      entrada: buildOrigens(leadsEntrada),
-      naoQualificado: buildOrigens(leadsNaoQualificados),
-      qualificado: buildOrigens(leadsQualificados),
-      agendado: buildOrigens(leadsAgendados),
+      entrada: buildOrigens(leadsEntrada, origemModo),
+      naoQualificado: buildOrigens(leadsNaoQualificados, origemModo),
+      qualificado: buildOrigens(leadsQualificados, origemModo),
+      agendado: buildOrigens(leadsAgendados, origemModo),
 },
 
 origensQualificadosPorTag,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Bar,
   BarChart,
@@ -121,6 +121,13 @@ ticketMedioTotal: number
     valorVendasAnterior: number
     ticketMedioAnterior: number
   }
+
+  statusAgenda?: {
+    finalizadosAnterior: number
+    noShowAnterior: number
+    reagendadosAnterior: number
+    canceladosAnterior: number
+  }
 }
 }
 
@@ -213,10 +220,24 @@ const isApresentacao = viewMode === 'apresentacao'
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [now, setNow] = useState<Date>(new Date())
 
+  const colunaGraficosRef = useRef<HTMLDivElement>(null)
+  const [alturaColunaGraficos, setAlturaColunaGraficos] = useState<number | null>(null)
+
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(tick)
   }, [])
+
+  useEffect(() => {
+    function medirAlturaColunaGraficos() {
+      const elemento = colunaGraficosRef.current
+      if (elemento) setAlturaColunaGraficos(elemento.offsetHeight)
+    }
+
+    medirAlturaColunaGraficos()
+    window.addEventListener('resize', medirAlturaColunaGraficos)
+    return () => window.removeEventListener('resize', medirAlturaColunaGraficos)
+  }, [loading, data])
 
   useEffect(() => {
   async function loadData(showLoading = false) {
@@ -350,12 +371,8 @@ const ticketMedioConsultaComReabord =
   }
 
   return (
-  <AppShell title="Consulta (Funil)">
+  <AppShell title="Consulta (Funil)" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
     <div className="space-y-5">
-<div className="flex justify-end">
-  <LiveIndicator lastUpdated={lastUpdated} now={now} />
-</div>
-
 <section className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
  <div className="flex shrink-0 items-center justify-center">
@@ -418,7 +435,7 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
-  <div className="min-w-0 space-y-3 xl:col-span-8">
+  <div ref={colunaGraficosRef} className="min-w-0 space-y-3 xl:col-span-8">
 
     <div className="min-w-0 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
   <div className="mb-3 flex items-center justify-between">
@@ -539,69 +556,20 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-    <div className="mt-3 grid grid-cols-3 gap-3">
-  {['PARTICULAR', 'CONVÊNIO', 'CORTESIA'].map((nome) => {
-    const item =
-      (painelAtendimento?.finalizadosParticularConvenio || []).find(
-        (x: any) =>
-          String(x.nome || '')
-            .toUpperCase()
-            .includes(nome)
-      )
-
-    return (
-      <div
-  key={nome}
-  className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4"
->
-        <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-          {nome}
-        </p>
-
-        <div className="mt-2 flex items-end justify-between">
-          <p className="text-[26px] font-black text-[var(--foreground)]">
-            {item?.qtd || 0}
-          </p>
-
-          <p className="text-[14px] font-black text-[var(--foreground)]">
-            {formatMoney(item?.valor || 0)}
-          </p>
-        </div>
-      </div>
-    )
-  })}
-</div>
-
   </div>
 
-<div className="flex min-w-0 flex-col gap-3 xl:col-span-4">
+<div className="flex min-h-0 min-w-0 flex-col gap-3 xl:col-span-4">
 
- <div className="shrink-0 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-  <h3 className="mb-4 text-[18px] font-black text-[var(--foreground)]">
-    Status da agenda
+   <div
+     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4 xl:max-h-[var(--altura-coluna-graficos)]"
+     style={alturaColunaGraficos ? ({ '--altura-coluna-graficos': `${alturaColunaGraficos}px` } as React.CSSProperties) : undefined}
+   >
+  <h3 className="mb-4 shrink-0 text-[18px] font-black text-[var(--foreground)]">
+    Origem dos agendamentos
   </h3>
-
-  <div className="grid grid-cols-2 gap-2">
-    <MetricMini label="Finalizados" value={painelAtendimento?.statusAgenda?.finalizados || 0} color="green" icon={UserCheck} bordered={false} />
-    <MetricMini label="No Show" value={painelAtendimento?.statusAgenda?.noShow || 0} color="pink" icon={UserX} bordered={false} />
-    <MetricMini label="Reagendados" value={painelAtendimento?.statusAgenda?.reagendados || 0} color="darkRed" icon={CalendarClock} bordered={false} />
-    <MetricMini label="Cancelados" value={painelAtendimento?.statusAgenda?.cancelados || 0} color="red" icon={CalendarX2} bordered={false} />
-  </div>
-</div>
-
-   <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-  <div className="mb-4 flex shrink-0 items-center justify-between">
-  <h3 className="text-[18px] font-black text-[var(--foreground)]">
-    Origen dos agendamentos
-  </h3>
-
-  <span className="text-[22px] font-black text-[var(--accent)]">
-    {totalAgendamentosOrigem}
-  </span>
-</div>
 
   <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-2">
-    {(painelAtendimento?.agendamentosPorOrigem || []).slice(0, 12).map((item: any) => {
+    {(painelAtendimento?.agendamentosPorOrigem || []).map((item: any) => {
       const maior = Math.max(
         ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
         1
@@ -631,8 +599,76 @@ const ticketMedioConsultaComReabord =
       )
     })}
   </div>
+
+  <div className="mt-3 shrink-0 border-t border-[color:var(--border)] pt-3 text-right">
+    <span className="text-sm font-bold text-[var(--muted-foreground)]">
+      Total: <span className="font-black text-[var(--foreground)]">{totalAgendamentosOrigem}</span>
+    </span>
+  </div>
 </div>
 
+  </div>
+</div>
+
+<div className="mt-3 grid grid-cols-4 gap-3">
+  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+      Finalizados
+    </p>
+    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+      {painelAtendimento?.statusAgenda?.finalizados || 0}
+    </p>
+    {comparar && (
+      <ComparativoBadge
+        atual={painelAtendimento?.statusAgenda?.finalizados || 0}
+        anterior={comparativo?.statusAgenda?.finalizadosAnterior}
+      />
+    )}
+  </div>
+
+  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+      No Show
+    </p>
+    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+      {painelAtendimento?.statusAgenda?.noShow || 0}
+    </p>
+    {comparar && (
+      <ComparativoBadge
+        atual={painelAtendimento?.statusAgenda?.noShow || 0}
+        anterior={comparativo?.statusAgenda?.noShowAnterior}
+      />
+    )}
+  </div>
+
+  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+      Reagendados
+    </p>
+    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+      {painelAtendimento?.statusAgenda?.reagendados || 0}
+    </p>
+    {comparar && (
+      <ComparativoBadge
+        atual={painelAtendimento?.statusAgenda?.reagendados || 0}
+        anterior={comparativo?.statusAgenda?.reagendadosAnterior}
+      />
+    )}
+  </div>
+
+  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+      Cancelados
+    </p>
+    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+      {painelAtendimento?.statusAgenda?.cancelados || 0}
+    </p>
+    {comparar && (
+      <ComparativoBadge
+        atual={painelAtendimento?.statusAgenda?.cancelados || 0}
+        anterior={comparativo?.statusAgenda?.canceladosAnterior}
+      />
+    )}
   </div>
 </div>
 </section>
@@ -1048,6 +1084,31 @@ function MetricMini({
 )
 }
 
+function ComparativoBadge({ atual, anterior }: { atual: number; anterior?: number }) {
+  const base = Number(anterior || 0)
+  const diff = base > 0 ? Math.round(((atual - base) / base) * 100) : 0
+  const positivo = diff > 0
+  const negativo = diff < 0
+
+  return (
+    <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+      <span
+        className={
+          positivo
+            ? 'text-[var(--success)]'
+            : negativo
+            ? 'text-[var(--danger)]'
+            : 'text-[var(--muted-foreground)]'
+        }
+      >
+        {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
+      </span>
+
+      <span className="text-[var(--muted-foreground)]">vs anterior</span>
+    </div>
+  )
+}
+
 function MetricCard({
   icon: Icon,
   label,
@@ -1107,10 +1168,12 @@ const diff =
 const positivo = diff > 0
 const negativo = diff < 0
 
+  const labelMinH = isApresentacao ? 'min-h-[52px]' : 'min-h-[40px]'
+
   if (empty) {
     return (
-      <div className={`relative z-0 hover:z-10 rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
-        <div className="flex items-center gap-2">
+      <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
+        <div className={`flex items-center gap-2 ${labelMinH}`}>
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
           <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
         </div>
@@ -1129,8 +1192,8 @@ const negativo = diff < 0
   }
 
   return (
-    <div className={`relative z-0 hover:z-10 rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
-      <div className="flex items-center gap-2">
+    <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
+      <div className={`flex items-center gap-2 ${labelMinH}`}>
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
        <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>

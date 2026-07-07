@@ -7,6 +7,8 @@ import { AppShell } from '@/components/layout/app-shell'
 
 import { useFilters } from '@/store/use-filters'
 
+import { ProjecaoMedicosCard } from '@/components/marketing/projecao-medicos/projecao-medicos-card'
+
 import {
   CircleDot,
   UserX,
@@ -16,7 +18,6 @@ import {
   BriefcaseMedical,
   BarChart3,
   Wallet,
-  TrendingUp,
   Target,
   Receipt,
   MousePointerClick,
@@ -82,6 +83,21 @@ function sumValor(items: any[]) {
   return items.reduce((total, item) => total + (item.valor ?? 0), 0)
 }
 
+function useHoverCapaz() {
+  const [hoverCapaz, setHoverCapaz] = useState(true)
+
+  useEffect(() => {
+    const media = window.matchMedia('(hover: hover) and (pointer: fine)')
+    setHoverCapaz(media.matches)
+
+    const atualizar = (event: MediaQueryListEvent) => setHoverCapaz(event.matches)
+    media.addEventListener('change', atualizar)
+    return () => media.removeEventListener('change', atualizar)
+  }, [])
+
+  return hoverCapaz
+}
+
 function normalizeTexto(value: unknown) {
   return String(value || '')
     .normalize('NFD')
@@ -111,6 +127,7 @@ function MarketingMetricCard({
   percentBadge,
   children,
   extra,
+  extraAoLado,
 }: {
   title: string
   value: number
@@ -119,6 +136,7 @@ function MarketingMetricCard({
   percentBadge?: { text: string; positive: boolean }
 children?: ReactNode
 extra?: ReactNode
+extraAoLado?: ReactNode
 }) {
   const Icon =
   icon === 'entrada'
@@ -132,6 +150,9 @@ extra?: ReactNode
           : icon === 'consulta'
             ? BadgeDollarSign
             : BriefcaseMedical
+
+  const hoverCapaz = useHoverCapaz()
+  const [detalheAberto, setDetalheAberto] = useState(false)
 
  return (
   <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
@@ -164,7 +185,12 @@ extra?: ReactNode
 </div>
 
 <div className="mt-1 flex flex-1 items-center justify-between gap-3">
-  <div className="group relative flex cursor-default items-center gap-2">
+  <div
+    className={`relative flex items-center gap-2 ${hoverCapaz ? 'cursor-default' : 'cursor-pointer'}`}
+    onMouseEnter={hoverCapaz ? () => setDetalheAberto(true) : undefined}
+    onMouseLeave={hoverCapaz ? () => setDetalheAberto(false) : undefined}
+    onClick={!hoverCapaz ? () => setDetalheAberto((aberto) => !aberto) : undefined}
+  >
     <span className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
       {value}
     </span>
@@ -182,8 +208,14 @@ extra?: ReactNode
       </span>
     )}
 
-    {children && (
-      <div className="invisible absolute left-0 top-full z-50 mt-2 w-[280px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-3 opacity-0 shadow-[var(--card-shadow)] transition-opacity duration-150 group-hover:visible group-hover:opacity-100">
+    {extraAoLado && (
+      <div onClick={(event) => event.stopPropagation()} className="flex items-center">
+        {extraAoLado}
+      </div>
+    )}
+
+    {children && detalheAberto && (
+      <div className="absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-[320px] overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-3 shadow-[var(--card-shadow)]">
         {children}
       </div>
     )}
@@ -227,6 +259,9 @@ function OrigemStageCard({
       currency: 'BRL',
     })
 
+  const hoverCapaz = useHoverCapaz()
+  const [indiceAberto, setIndiceAberto] = useState<number | null>(null)
+
   return (
     <div className="space-y-3 border-t border-[color:var(--border)] pt-4">
       {items.length === 0 && (
@@ -235,117 +270,140 @@ function OrigemStageCard({
         </div>
       )}
 
-      {items.slice(0, 3).map((item, index) => (
-        <div
-          key={`${item.nome}-${index}`}
-          className="group relative flex cursor-pointer items-center justify-between gap-3"
-        >
-          <div className="flex min-w-0 items-center gap-3">
-            <span
-              className="h-2.5 w-2.5 shrink-0 rounded-full"
-              style={{
-                backgroundColor:
-                  ORIGENS_COLORS[index % ORIGENS_COLORS.length],
-              }}
-            />
+      {items.slice(0, 3).map((item, index) => {
+        const temDetalhes = item.detalhes && item.detalhes.length > 0
+        const aberto = temDetalhes && indiceAberto === index
 
-            <span className="truncate text-sm font-semibold text-[var(--foreground)]">
-              {item.nome}
-            </span>
-          </div>
+        return (
+          <div
+            key={`${item.nome}-${index}`}
+            className={temDetalhes ? 'rounded-xl' : undefined}
+          >
+            <div
+              className="flex cursor-pointer items-center justify-between gap-3"
+              onMouseEnter={hoverCapaz ? () => setIndiceAberto(index) : undefined}
+              onMouseLeave={
+                hoverCapaz
+                  ? () => setIndiceAberto((atual) => (atual === index ? null : atual))
+                  : undefined
+              }
+              onClick={
+                !hoverCapaz
+                  ? () => setIndiceAberto((atual) => (atual === index ? null : index))
+                  : undefined
+              }
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{
+                    backgroundColor:
+                      ORIGENS_COLORS[index % ORIGENS_COLORS.length],
+                  }}
+                />
 
-          <div className="ml-auto shrink-0 text-right">
-            <div className="text-base font-black text-[var(--foreground)]">
-              {item.quantidade ?? item.qtd ?? 0}
+                <span className="truncate text-sm font-semibold text-[var(--foreground)]">
+                  {item.nome}
+                </span>
+              </div>
+
+              <div className="ml-auto shrink-0 text-right">
+                <div className="text-base font-black text-[var(--foreground)]">
+                  {item.quantidade ?? item.qtd ?? 0}
+                </div>
+
+                {item.valor !== undefined && (
+                  <div className="text-xs font-bold text-[var(--muted-foreground)]">
+                    {formatMoney(item.valor)}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {item.valor !== undefined && (
-              <div className="text-xs font-bold text-[var(--muted-foreground)]">
-                {formatMoney(item.valor)}
+            {aberto && (
+              <div className="mt-2 max-h-[260px] overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[var(--metric-card)] p-2.5">
+                <div className="mb-2 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
+                  {tooltipType === 'consulta'
+                    ? 'Detalhes da consulta'
+                    : tooltipType === 'procedimento'
+                      ? 'Detalhes do procedimento'
+                      : 'Detalhes'}
+                </div>
+
+                <div className="space-y-1.5">
+                  {item.detalhes!.slice(0, 8).map((detalhe, detalheIndex) => {
+                    if (tooltipType === 'consulta') {
+                      return (
+                        <div
+                          key={`${detalhe.medico}-${detalheIndex}`}
+                          className="flex items-center justify-between gap-2 rounded-lg bg-[var(--card)] p-2 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-black text-[var(--foreground)]">
+                              {detalhe.medico || 'Sem médico'}
+                            </div>
+                            <div className="truncate font-bold text-[var(--muted-foreground)]">
+                              {detalhe.atendimento || detalhe.convenio || 'Sem atendimento'}
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 text-right font-black text-[var(--foreground)]">
+                            {formatMoney(detalhe.valor)}
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    if (tooltipType === 'procedimento') {
+                      return (
+                        <div
+                          key={`${detalhe.medico}-${detalheIndex}`}
+                          className="flex items-center justify-between gap-2 rounded-lg bg-[var(--card)] p-2 text-xs"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-black text-[var(--foreground)]">
+                              {detalhe.medico || 'Sem médico'}
+                            </div>
+                            <div className="truncate font-bold text-[var(--muted-foreground)]">
+                              {detalhe.produto || 'Sem produto'}
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 text-right font-black text-[var(--foreground)]">
+                            {formatMoney(detalhe.valor)}
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    return (
+                      <div
+                        key={detalhe.nome || detalheIndex}
+                        className="flex items-center justify-between gap-3 text-xs"
+                      >
+                        <span className="truncate font-bold text-[var(--foreground)]">
+                          {detalhe.nome}
+                        </span>
+
+                        <span className="shrink-0 font-black text-[var(--foreground)]">
+                          {detalhe.quantidade}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )}
           </div>
-
-          {item.detalhes && item.detalhes.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-2 hidden w-[460px] rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] group-hover:block">
-              <div className="mb-3 text-xs font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-                {tooltipType === 'consulta'
-                  ? 'Detalhes da consulta'
-                  : tooltipType === 'procedimento'
-                    ? 'Detalhes do procedimento'
-                    : 'Detalhes'}
-              </div>
-
-              <div className="space-y-3">
-                {item.detalhes.slice(0, 8).map((detalhe, detalheIndex) => {
-                  if (tooltipType === 'consulta') {
-                    return (
-                      <div
-                        key={`${detalhe.medico}-${detalheIndex}`}
-                        className="grid grid-cols-[1fr_120px_90px] gap-3 rounded-xl bg-[var(--metric-card)] p-2 text-xs"
-                      >
-                        <div className="truncate font-black text-[var(--foreground)]">
-                          {detalhe.medico || 'Sem médico'}
-                        </div>
-
-                        <div className="truncate font-bold text-[var(--muted-foreground)]">
-                          {detalhe.atendimento || detalhe.convenio || 'Sem atendimento'}
-                        </div>
-
-                        <div className="text-right font-black text-[var(--foreground)]">
-                          {formatMoney(detalhe.valor)}
-                        </div>
-                      </div>
-                    )
-                  }
-
-                  if (tooltipType === 'procedimento') {
-                    return (
-                      <div
-                        key={`${detalhe.medico}-${detalheIndex}`}
-                        className="grid grid-cols-[1fr_140px_90px] gap-3 rounded-xl bg-[var(--metric-card)] p-3 text-xs"
-                      >
-                        <div className="truncate font-black text-[var(--foreground)]">
-                          {detalhe.medico || 'Sem médico'}
-                        </div>
-
-                        <div className="truncate font-bold text-[var(--muted-foreground)]">
-                          {detalhe.produto || 'Sem produto'}
-                        </div>
-
-                        <div className="text-right font-black text-[var(--foreground)]">
-                          {formatMoney(detalhe.valor)}
-                        </div>
-                      </div>
-                    )
-                  }
-
-                  return (
-                    <div
-                      key={detalhe.nome || detalheIndex}
-                      className="flex items-center justify-between gap-3 text-xs"
-                    >
-                      <span className="truncate font-bold text-[var(--foreground)]">
-                        {detalhe.nome}
-                      </span>
-
-                      <span className="font-black text-[var(--foreground)]">
-                        {detalhe.quantidade}
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
 
 function RoiPorOrigemCard({
   items,
+  modo,
 }: {
   items: {
     origem: string
@@ -353,15 +411,16 @@ function RoiPorOrigemCard({
     investimento: number
     roi: number
   }[]
+  modo: 'campanha' | 'anuncio'
 }) {
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)] xl:col-span-2">
+    <div className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)]">
       <div className="mb-5 flex shrink-0 items-center justify-between">
         <div>
           <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
-            ROI por origem
+            ROI por {modo === 'anuncio' ? 'anúncio' : 'campanha'}
           </div>
           <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
             Retorno sobre investimento
@@ -989,6 +1048,7 @@ const [data, setData] = useState<any>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
 const [tagsSelecionadas, setTagsSelecionadas] = useState<('A' | 'B' | 'C' | 'D')[]>([])
+const [origemModo, setOrigemModo] = useState<'campanha' | 'anuncio'>('campanha')
 const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
 const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
   () => getInvestimentosSalvos()
@@ -999,7 +1059,7 @@ useEffect(() => {
       setLoading(true)
       setError(null)
 
-      let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}`
+      let url = `/api/test?periodo=${periodo}&tipo=${tipoData}&segmento=${segmento}&origemModo=${origemModo}`
 
       if (periodo === 'personalizado' && dataInicio && dataFim) {
         url += `&inicio=${dataInicio}&fim=${dataFim}`
@@ -1033,7 +1093,12 @@ const interval = setInterval(() => {
 }, 60000)
 
 return () => clearInterval(interval)
-}, [periodo, tipoData, segmento, dataInicio, dataFim])
+}, [periodo, tipoData, segmento, dataInicio, dataFim, origemModo])
+
+useEffect(() => {
+  setOrigensSelecionadas([])
+}, [origemModo])
+
 useEffect(() => {
   localStorage.setItem(
     INVESTIMENTO_STORAGE_KEY,
@@ -1200,7 +1265,7 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-  <aside className="sticky top-5 flex h-[700px] flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+  <aside className="sticky top-5 flex max-h-[calc(100vh-40px)] flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
       <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
@@ -1209,6 +1274,32 @@ return (
 
       <div className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">
         Filtre campanhas para calcular o ROI
+      </div>
+
+      <div className="mt-3 flex overflow-hidden rounded-xl border border-[color:var(--border)]">
+        <button
+          type="button"
+          onClick={() => setOrigemModo('campanha')}
+          className={`flex-1 px-3 py-2 text-xs font-black uppercase tracking-[0.04em] transition-colors ${
+            origemModo === 'campanha'
+              ? 'bg-[var(--accent)] text-[var(--background)]'
+              : 'bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
+          }`}
+        >
+          Campanha
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setOrigemModo('anuncio')}
+          className={`flex-1 px-3 py-2 text-xs font-black uppercase tracking-[0.04em] transition-colors ${
+            origemModo === 'anuncio'
+              ? 'bg-[var(--accent)] text-[var(--background)]'
+              : 'bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
+          }`}
+        >
+          Anúncio
+        </button>
       </div>
     </div>
 
@@ -1319,8 +1410,8 @@ return (
   </div>
 </aside>
 
-      <section className="flex h-[700px] flex-col space-y-4 overflow-hidden">
-        <div className="shrink-0 grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
+      <section className="flex flex-col space-y-4">
+        <div className="grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
@@ -1355,8 +1446,8 @@ return (
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
-<div className="grid h-full grid-rows-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard
           title="Entrada"
@@ -1395,33 +1486,35 @@ return (
           icon="qualificado"
           status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
           percentBadge={metaPercentBadge(marketing?.leadsAceitosPercent || 0, 90)}
-        >
-         <div className="mb-2 flex gap-1.5">
-  {(['A', 'B', 'C', 'D'] as const).map((tag) => {
-    const ativo = tagsSelecionadas.includes(tag)
+          extraAoLado={
+            <div className="flex gap-1">
+              {(['A', 'B', 'C', 'D'] as const).map((tag) => {
+                const ativo = tagsSelecionadas.includes(tag)
 
-    return (
-      <button
-        key={tag}
-        type="button"
-        onClick={() =>
-          setTagsSelecionadas((atual) =>
-            atual.includes(tag)
-              ? atual.filter((item) => item !== tag)
-              : [...atual, tag]
-          )
-        }
-        className={`h-7 w-7 rounded-lg border text-xs font-black transition ${
-          ativo
-            ? 'border-[var(--success)]/60 bg-[var(--success)]/10 text-[var(--success)]'
-            : 'border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--muted-foreground)]'
-        }`}
-      >
-        {tag}
-      </button>
-    )
-  })}
-</div>
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() =>
+                      setTagsSelecionadas((atual) =>
+                        atual.includes(tag)
+                          ? atual.filter((item) => item !== tag)
+                          : [...atual, tag]
+                      )
+                    }
+                    className={`h-6 w-6 rounded-lg border text-[11px] font-black transition ${
+                      ativo
+                        ? 'border-[var(--success)]/60 bg-[var(--success)]/10 text-[var(--success)]'
+                        : 'border-[color:var(--border)] bg-[var(--metric-card)] text-[var(--muted-foreground)]'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                )
+              })}
+            </div>
+          }
+        >
           <OrigemStageCard
             items={qualificadosFiltradosPorOrigem}
             status={(marketing?.leadsAceitosPercent || 0) >= 90 ? 'green' : 'red'}
@@ -1440,6 +1533,9 @@ return (
             status={conversaoAgendados >= 30 ? 'green' : 'red'}
           />
         </MarketingMetricCard>
+</div>
+
+<div className="mt-3 grid gap-3 md:grid-cols-2">
 
        <MarketingMetricCard
   title="Consultas Ganhas"
@@ -1516,8 +1612,11 @@ items={consultasFiltrado}
   tooltipType="procedimento"
 />
 </MarketingMetricCard>
-<RoiPorOrigemCard items={retornoPorOrigem} />
-                      </div>
+</div>
+
+<div className="mt-3">
+<RoiPorOrigemCard items={retornoPorOrigem} modo={origemModo} />
+</div>
         </div>
       </section>
     </div>
@@ -1525,6 +1624,8 @@ items={consultasFiltrado}
     <IndicadoresCard insights={insights} />
 
     <UtmLinksCard leadsOrigemTotais={origensPorEtapa.entrada} />
+
+    <ProjecaoMedicosCard />
   </div>
 </AppShell>
 )

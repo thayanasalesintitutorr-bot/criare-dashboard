@@ -8,16 +8,17 @@ import { Topbar } from './topbar'
 type AppShellProps = {
   title: string
   children: ReactNode
+  statusIndicator?: ReactNode
 }
 
-export function AppShell({ title, children }: AppShellProps) {
+export function AppShell({ title, children, statusIndicator }: AppShellProps) {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
         <Sidebar />
 
         <div className="flex min-w-0 flex-1 flex-col pl-[76px]">
-          <Topbar title={title} />
+          <Topbar title={title} statusIndicator={statusIndicator} />
 
           <motion.main
             initial={{ opacity: 0, y: 8 }}
