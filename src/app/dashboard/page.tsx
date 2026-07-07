@@ -257,7 +257,7 @@ function GroupCard({
   const isApresentacao = viewMode === 'apresentacao'
 
   return (
-    <section className={`relative z-0 hover:z-20 ${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'px-4 py-2'} ${cardBg()}`}>
+    <section className={`relative z-0 min-w-0 overflow-hidden hover:z-20 ${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'px-4 py-2'} ${cardBg()}`}>
       <div className={`${isApresentacao ? 'mb-5' : viewMode === 'iphone' ? 'mb-3' : 'mb-2'} flex items-center gap-3`}>
   <div className={`flex items-center justify-center rounded-2xl bg-[var(--accent)]/12 text-[var(--accent)] ${isApresentacao ? 'h-14 w-14' : viewMode === 'iphone' ? 'h-10 w-10' : 'h-9 w-9'}`}>
     {icon}
@@ -311,9 +311,9 @@ const isUp = diff >= 0
 
   if (empty) {
     return (
-      <div className="space-y-1">
+      <div className="min-w-0 space-y-1">
         <h4
-          className={`${
+          className={`truncate ${
             isApresentacao ? 'text-[26px] font-semibold' : viewMode === 'iphone' ? 'text-[15px] font-semibold' : 'text-[14px] font-medium'
           } ${textSecondary()}`}
         >
@@ -336,19 +336,19 @@ const isUp = diff >= 0
   }
 
   return (
-    <div className="relative space-y-1">
+    <div className="relative min-w-0 space-y-1">
       <h4
-        className={`${
+        className={`truncate ${
           isApresentacao ? 'text-[26px] font-semibold' : viewMode === 'iphone' ? 'text-[15px] font-semibold' : 'text-[14px] font-medium'
         } ${textSecondary()}`}
       >
         {label}
       </h4>
 
-      <div className={`relative group ${viewMode === 'iphone' ? 'block w-full' : 'inline-block'}`}>
+      <div className="relative group block w-full min-w-0">
   <div
     onClick={viewMode === 'iphone' ? iphoneOnValueClick : undefined}
-    className={`${
+    className={`truncate ${
       isApresentacao ? 'text-[64px]' : viewMode === 'iphone' ? 'text-[28px]' : 'text-[32px]'
     } font-bold tracking-[-0.02em] leading-none cursor-pointer ${textPrimary()}`}
   >
@@ -746,7 +746,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   className={`grid gap-3 ${
     viewMode === 'apresentacao' || viewMode === 'iphone'
   ? 'grid-cols-1'
-  : 'grid-cols-4'
+  : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4'
   }`}
 >
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>
@@ -946,11 +946,11 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-  <div className="grid grid-cols-2 gap-7">
-    <div className="space-y-2">
+  <div className="grid grid-cols-2 gap-4 md:gap-7">
+    <div className="min-w-0 space-y-2">
       <div className="flex items-center gap-3">
-        <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-        <h4 className={`${viewMode === 'apresentacao' ? 'text-[26px]' : viewMode === 'iphone' ? 'text-[13px]' : 'text-[14px]'} font-bold uppercase tracking-wide ${textSecondary()}`}>
+        <span className="h-3 w-3 shrink-0 rounded-full bg-[var(--accent)]" />
+        <h4 className={`truncate ${viewMode === 'apresentacao' ? 'text-[26px]' : viewMode === 'iphone' ? 'text-[13px]' : 'text-[14px]'} font-bold uppercase tracking-wide ${textSecondary()}`}>
           Consulta
         </h4>
       </div>
@@ -977,10 +977,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 />
     </div>
 
-    <div className="space-y-2">
+    <div className="min-w-0 space-y-2">
       <div className="flex items-center gap-3">
-        <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
-        <h4 className={`${viewMode === 'apresentacao' ? 'text-[26px]' : viewMode === 'iphone' ? 'text-[13px]' : 'text-[14px]'} font-bold uppercase tracking-wide ${textSecondary()}`}>
+        <span className="h-3 w-3 shrink-0 rounded-full bg-[var(--accent)]" />
+        <h4 className={`truncate ${viewMode === 'apresentacao' ? 'text-[26px]' : viewMode === 'iphone' ? 'text-[13px]' : 'text-[14px]'} font-bold uppercase tracking-wide ${textSecondary()}`}>
           Reabord
         </h4>
       </div>

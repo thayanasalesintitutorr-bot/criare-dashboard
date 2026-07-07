@@ -37,6 +37,42 @@ import { ptBR } from 'date-fns/locale'
 const NOTIF_SEEN_KEY = 'criare-notif-propostas-seen-percent'
 const NOTIF_AUTO_CLOSE_MS = 30000
 
+function FiltroResumoCard({
+  icon,
+  label,
+  valor,
+  aberto,
+  onClick,
+}: {
+  icon: ReactNode
+  label: string
+  valor: string
+  aberto: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 text-left text-sm transition-colors ${
+        aberto
+          ? 'border-[var(--accent)] bg-[var(--accent)]/10'
+          : 'border-[var(--border)] bg-[var(--card)] hover:bg-[var(--metric-card)]'
+      }`}
+    >
+      <span className="flex items-center gap-1.5 font-bold">
+        {icon}
+        {label}
+      </span>
+
+      <span className="flex shrink-0 items-center gap-1.5 text-[var(--muted-foreground)]">
+        <span className="whitespace-nowrap font-semibold text-[var(--foreground)]">{valor}</span>
+        {aberto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+      </span>
+    </button>
+  )
+}
+
 export function Topbar({ title, statusIndicator }: { title: string; statusIndicator?: ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme()
   const {
@@ -67,6 +103,9 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [isFullscreen, setIsFullscreen] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [categoriaAberta, setCategoriaAberta] = useState<
+    'tipoData' | 'periodo' | 'segmento' | 'dispositivo' | 'comparacao' | null
+  >(null)
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const notificationCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -195,7 +234,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
   const groupClass = 'flex flex-wrap items-center gap-1.5 rounded-[20px] bg-[var(--card)] p-2'
  const pillBase =
-  'inline-flex items-center gap-3 rounded-xl px-5 py-3 text-[18px] font-semibold transition-all whitespace-nowrap'
+  'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all whitespace-nowrap'
   const pillActive = 'bg-[var(--accent)] text-[var(--background)] shadow-sm'
   const pillInactive = 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
 
@@ -346,7 +385,10 @@ function parseLocalDate(dateString?: string) {
 <div className="rounded-[18px] bg-[var(--card)] px-5 py-3 shadow-sm">
 
   <div
-    onClick={() => setShowFilters(!showFilters)}
+    onClick={() => {
+      setShowFilters((atual) => !atual)
+      setCategoriaAberta(null)
+    }}
     className="flex cursor-pointer items-center justify-between gap-3"
   >
   <div className="flex items-center justify-between gap-3">
@@ -408,69 +450,115 @@ function parseLocalDate(dateString?: string) {
 
   </div>
   {showFilters && (
-    <div className="mt-6 grid grid-cols-5 gap-6 border-t border-[var(--border)] pt-6">
+    <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-4 sm:grid-cols-3 xl:grid-cols-5">
       <div>
-        <div className="mb-3 flex items-center gap-2 font-bold">
-          <Database size={18} className="text-[var(--accent)]" />
-          Tipo de data
-        </div>
+        <FiltroResumoCard
+          icon={<Database size={15} className="text-[var(--accent)]" />}
+          label="Tipo de data"
+          valor={tipoData === 'criado' ? 'Criado' : 'Fechado'}
+          aberto={categoriaAberta === 'tipoData'}
+          onClick={() =>
+            setCategoriaAberta((atual) => (atual === 'tipoData' ? null : 'tipoData'))
+          }
+        />
 
-        <div className={groupClass}>
-          <button
-            onClick={() => setTipoData('criado')}
-            className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
-          >
-            <Database size={20} />
-            Criado
-          </button>
+        {categoriaAberta === 'tipoData' && (
+          <div className={`${groupClass} mt-3`}>
+            <button
+              onClick={() => {
+                setTipoData('criado')
+                setCategoriaAberta(null)
+              }}
+              className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
+            >
+              <Database size={16} />
+              Criado
+            </button>
 
-          <button
-            onClick={() => setTipoData('fechado')}
-            className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
-          >
-            <Database size={20} />
-            Fechado
-          </button>
-        </div>
+            <button
+              onClick={() => {
+                setTipoData('fechado')
+                setCategoriaAberta(null)
+              }}
+              className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
+            >
+              <Database size={16} />
+              Fechado
+            </button>
+          </div>
+        )}
       </div>
 
       <div>
-        <div className="mb-3 flex items-center gap-2 font-bold">
-          <CalendarDays size={18} className="text-[var(--accent)]" />
-          Período
-        </div>
+        <FiltroResumoCard
+          icon={<CalendarDays size={15} className="text-[var(--accent)]" />}
+          label="Período"
+          valor={
+            periodo === 'hoje'
+              ? 'Hoje'
+              : periodo === 'ontem'
+                ? 'Ontem'
+                : periodo === 'semana'
+                  ? 'Semana'
+                  : periodo === 'mes-atual'
+                    ? 'Mês atual'
+                    : periodo === 'mes-passado'
+                      ? 'Mês passado'
+                      : 'Personalizado'
+          }
+          aberto={categoriaAberta === 'periodo'}
+          onClick={() =>
+            setCategoriaAberta((atual) => (atual === 'periodo' ? null : 'periodo'))
+          }
+        />
 
-        <div className={groupClass}>
+        {categoriaAberta === 'periodo' && (
+        <div className={`${groupClass} mt-3`}>
           <button
-            onClick={() => setPeriodo('hoje')}
+            onClick={() => {
+              setPeriodo('hoje')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${periodo === 'hoje' ? pillActive : pillInactive}`}
           >
             Hoje
           </button>
 
           <button
-            onClick={() => setPeriodo('ontem')}
+            onClick={() => {
+              setPeriodo('ontem')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${periodo === 'ontem' ? pillActive : pillInactive}`}
           >
             Ontem
           </button>
 
           <button
-            onClick={() => setPeriodo('semana')}
+            onClick={() => {
+              setPeriodo('semana')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${periodo === 'semana' ? pillActive : pillInactive}`}
           >
             Semana
           </button>
 
           <button
-            onClick={() => setPeriodo('mes-atual')}
+            onClick={() => {
+              setPeriodo('mes-atual')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${periodo === 'mes-atual' ? pillActive : pillInactive}`}
           >
             Mês atual
           </button>
 
           <button
-            onClick={() => setPeriodo('mes-passado')}
+            onClick={() => {
+              setPeriodo('mes-passado')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${periodo === 'mes-passado' ? pillActive : pillInactive}`}
           >
             Mês passado
@@ -481,7 +569,7 @@ function parseLocalDate(dateString?: string) {
               onClick={() => setShowCalendar((v) => !v)}
               className={`${pillBase} ${periodo === 'personalizado' ? pillActive : pillInactive}`}
             >
-              <CalendarDays size={20} />
+              <CalendarDays size={16} />
               Personalizado
             </button>
 
@@ -489,7 +577,7 @@ function parseLocalDate(dateString?: string) {
               <div className="absolute left-1/2 top-full z-50 mt-3 w-[360px] -translate-x-1/2 rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
                 <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
-                    <CalendarDays size={20} />
+                    <CalendarDays size={16} />
                   </div>
 
                   <div>
@@ -597,100 +685,158 @@ function parseLocalDate(dateString?: string) {
             )}
           </div>
         </div>
+        )}
       </div>
 
       <div>
-        <div className="mb-3 flex items-center gap-2 font-bold">
-          <Activity size={18} className="text-[var(--accent)]" />
-          Segmento
-        </div>
+        <FiltroResumoCard
+          icon={<Activity size={15} className="text-[var(--accent)]" />}
+          label="Segmento"
+          valor={
+            segmento === 'vascular'
+              ? 'Vascular'
+              : segmento === 'emagrecimento'
+                ? 'Emagrecimento'
+                : 'Geral'
+          }
+          aberto={categoriaAberta === 'segmento'}
+          onClick={() =>
+            setCategoriaAberta((atual) => (atual === 'segmento' ? null : 'segmento'))
+          }
+        />
 
-        <div className={groupClass}>
+        {categoriaAberta === 'segmento' && (
+        <div className={`${groupClass} mt-3`}>
           <button
-            onClick={() => setSegmento('vascular')}
+            onClick={() => {
+              setSegmento('vascular')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${segmento === 'vascular' ? pillActive : pillInactive}`}
           >
-            <Activity size={20} />
+            <Activity size={16} />
             Vascular
           </button>
 
           <button
-            onClick={() => setSegmento('emagrecimento')}
+            onClick={() => {
+              setSegmento('emagrecimento')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${segmento === 'emagrecimento' ? pillActive : pillInactive}`}
           >
-            <Heart size={20} />
+            <Heart size={16} />
             Emagrecimento
           </button>
 
           <button
-            onClick={() => setSegmento('geral')}
+            onClick={() => {
+              setSegmento('geral')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
           >
-            <BarChart3 size={20} />
+            <BarChart3 size={16} />
             Geral
           </button>
         </div>
+        )}
       </div>
 
       <div>
-        <div className="mb-3 flex items-center gap-2 font-bold">
-          <Monitor size={18} className="text-[var(--accent)]" />
-          Dispositivo
-        </div>
+        <FiltroResumoCard
+          icon={<Monitor size={15} className="text-[var(--accent)]" />}
+          label="Dispositivo"
+          valor={
+            viewMode === 'desktop'
+              ? 'iMac'
+              : viewMode === 'iphone'
+                ? 'iPhone'
+                : 'Apresentação'
+          }
+          aberto={categoriaAberta === 'dispositivo'}
+          onClick={() =>
+            setCategoriaAberta((atual) => (atual === 'dispositivo' ? null : 'dispositivo'))
+          }
+        />
 
-        <div className={groupClass}>
+        {categoriaAberta === 'dispositivo' && (
+        <div className={`${groupClass} mt-3`}>
           <button
-            onClick={() => setViewMode('desktop')}
+            onClick={() => {
+              setViewMode('desktop')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${viewMode === 'desktop' ? pillActive : pillInactive}`}
           >
-            <Monitor size={20} />
+            <Monitor size={16} />
             iMac
           </button>
 
           <button
-            onClick={() => setViewMode('iphone')}
+            onClick={() => {
+              setViewMode('iphone')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${viewMode === 'iphone' ? pillActive : pillInactive}`}
           >
-            <Smartphone size={20} />
+            <Smartphone size={16} />
             iPhone
           </button>
 
           <button
-            onClick={() => setViewMode('apresentacao')}
+            onClick={() => {
+              setViewMode('apresentacao')
+              setCategoriaAberta(null)
+            }}
             className={`${pillBase} ${viewMode === 'apresentacao' ? pillActive : pillInactive}`}
           >
-            <Presentation size={20} />
+            <Presentation size={16} />
             Apresentação
           </button>
         </div>
+        )}
       </div>
+
       <div>
+        <FiltroResumoCard
+          icon={<BarChart3 size={15} className="text-[var(--accent)]" />}
+          label="Comparação"
+          valor={comparar ? 'Comparar' : 'Sem comparar'}
+          aberto={categoriaAberta === 'comparacao'}
+          onClick={() =>
+            setCategoriaAberta((atual) => (atual === 'comparacao' ? null : 'comparacao'))
+          }
+        />
 
-  <div className="mb-3 flex items-center gap-2 font-bold">
-    <BarChart3 size={18} className="text-[var(--accent)]" />
-    Comparação
-  </div>
+        {categoriaAberta === 'comparacao' && (
+        <div className={`${groupClass} mt-3`}>
+          <button
+            onClick={() => {
+              setComparar(false)
+              setCategoriaAberta(null)
+            }}
+            className={`${pillBase} ${!comparar ? pillActive : pillInactive}`}
+          >
+            Sem comparar
+          </button>
 
-  <div className={groupClass}>
-    <button
-      onClick={() => setComparar(false)}
-      className={`${pillBase} ${!comparar ? pillActive : pillInactive}`}
-    >
-      Sem comparar
-    </button>
-
-    <button
-      onClick={() => setComparar(true)}
-      className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
-    >
-      Comparar
-    </button>
-  </div>
-</div>
+          <button
+            onClick={() => {
+              setComparar(true)
+              setCategoriaAberta(null)
+            }}
+            className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
+          >
+            Comparar
+          </button>
+        </div>
+        )}
+      </div>
 
     </div>
   )}
-</div>          
+</div>
           </div>
 
     </header>

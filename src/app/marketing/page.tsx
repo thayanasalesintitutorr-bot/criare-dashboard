@@ -215,7 +215,7 @@ extraAoLado?: ReactNode
     )}
 
     {children && detalheAberto && (
-      <div className="absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-[320px] overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-3 shadow-[var(--card-shadow)]">
+      <div className="absolute left-0 top-full z-50 mt-2 max-h-[70vh] w-[320px] max-w-[calc(100vw-2.5rem)] overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-3 shadow-[var(--card-shadow)]">
         {children}
       </div>
     )}
@@ -1265,7 +1265,7 @@ return (
   <AppShell title="Marketing">
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-  <aside className="sticky top-5 flex max-h-[calc(100vh-40px)] flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+  <aside className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
       <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
