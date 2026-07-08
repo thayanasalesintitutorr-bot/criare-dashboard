@@ -48,30 +48,30 @@ export default function LoginPage() {
   setLoading(false)
 }
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#f0eeff] via-white to-[#e8e4ff]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE]">
       {/* Animação sutil de fundo */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
           animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.08, 0.95, 1] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#7c5cfc]/8 blur-[100px]"
+          className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#2563EB]/8 blur-[100px]"
         />
         <motion.div
           animate={{ x: [0, -30, 40, 0], y: [0, 20, -30, 0], scale: [1, 0.95, 1.1, 1] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -bottom-32 -right-32 h-[600px] w-[600px] rounded-full bg-[#7c5cfc]/6 blur-[120px]"
+          className="absolute -bottom-32 -right-32 h-[600px] w-[600px] rounded-full bg-[#2563EB]/6 blur-[120px]"
         />
         <motion.div
           animate={{ x: [0, 20, -15, 0], y: [0, -20, 15, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-1/2 top-1/3 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#a78bfa]/5 blur-[80px]"
+          className="absolute left-1/2 top-1/3 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#60A5FA]/5 blur-[80px]"
         />
 
         {/* Grid sutil */}
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(124,92,252,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,252,0.3) 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(rgba(37,99,235,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.25) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
           }}
         />
@@ -89,7 +89,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 }}
-            className="rounded-full border border-[#7c5cfc]/20 bg-white/60 px-6 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#7c5cfc] backdrop-blur-sm"
+            className="rounded-full border border-[#2563EB]/20 bg-white/60 px-6 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#2563EB] backdrop-blur-sm"
           >
             Painel Inteligente
           </motion.div>
@@ -98,7 +98,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-[100px] font-black leading-none tracking-[-0.06em] text-[#7c5cfc]"
+            className="text-[100px] font-black leading-none tracking-[-0.06em] text-[#2563EB]"
             style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
           >
             Criare
@@ -125,7 +125,7 @@ export default function LoginPage() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setStep('form')}
-            className="mt-4 rounded-2xl bg-[#7c5cfc] px-12 py-4 text-base font-semibold text-white shadow-lg shadow-[#7c5cfc]/30 transition hover:bg-[#6a4ce0]"
+            className="mt-4 rounded-2xl bg-[#2563EB] px-12 py-4 text-base font-semibold text-white shadow-lg shadow-[#2563EB]/30 transition hover:bg-[#1D4ED8]"
           >
             Acessar painel
           </motion.button>
@@ -136,9 +136,9 @@ export default function LoginPage() {
             transition={{ delay: 0.8 }}
             className="mt-6 flex gap-2"
           >
-            <span className="h-2.5 w-2.5 rounded-full bg-[#7c5cfc]/30" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#7c5cfc]/50" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#7c5cfc]/30" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/30" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/50" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/30" />
           </motion.div>
         </motion.div>
       )}
@@ -161,7 +161,7 @@ export default function LoginPage() {
           <div className="rounded-3xl border border-white/60 bg-white/70 p-8 shadow-xl backdrop-blur-xl">
             <div className="mb-6 text-center">
               <h2
-                className="text-4xl font-black tracking-[-0.04em] text-[#7c5cfc]"
+                className="text-4xl font-black tracking-[-0.04em] text-[#2563EB]"
                 style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
               >
                 Criare
@@ -182,7 +182,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                   placeholder="seu@email.com"
-                  className="w-full rounded-xl border-0 bg-[#e8e4ff]/40 px-4 py-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#e8e4ff]/60 focus:ring-2 focus:ring-[#7c5cfc]/30"
+                  className="w-full rounded-xl border-0 bg-[#DBEAFE]/40 px-4 py-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#DBEAFE]/60 focus:ring-2 focus:ring-[#2563EB]/30"
                 />
               </div>
 
@@ -197,7 +197,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border-0 bg-[#e8e4ff]/40 px-4 py-3.5 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#e8e4ff]/60 focus:ring-2 focus:ring-[#7c5cfc]/30"
+                    className="w-full rounded-xl border-0 bg-[#DBEAFE]/40 px-4 py-3.5 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#DBEAFE]/60 focus:ring-2 focus:ring-[#2563EB]/30"
                   />
                   <button
                     type="button"
@@ -222,7 +222,7 @@ export default function LoginPage() {
               <button
                 onClick={handleLogin}
                 disabled={loading || !email || !password}
-                className="w-full rounded-xl bg-[#7c5cfc] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#7c5cfc]/25 transition hover:bg-[#6a4ce0] disabled:opacity-50"
+                className="w-full rounded-xl bg-[#2563EB] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1D4ED8] disabled:opacity-50"
               >
                 {loading ? 'Entrando...' : 'Entrar'}
               </button>

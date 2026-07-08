@@ -233,13 +233,13 @@ function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Da
   const stale = seconds > 30
 
   return (
-    <div className={`flex items-center gap-2 text-[12px] font-semibold ${textSecondary()}`}>
+    <div className={`flex items-start gap-2 text-[12px] font-semibold ${textSecondary()}`}>
       <span
-        className={`inline-flex h-2 w-2 rounded-full ${
+        className={`mt-1 inline-flex h-2 w-2 shrink-0 rounded-full ${
           stale ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'
         }`}
       />
-      <span>{label}</span>
+      <span className="min-w-0">{label}</span>
     </div>
   )
 }

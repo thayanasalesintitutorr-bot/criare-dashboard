@@ -574,7 +574,12 @@ function parseLocalDate(dateString?: string) {
             </button>
 
             {showCalendar && (
-              <div className="absolute left-1/2 top-full z-50 mt-3 w-[360px] -translate-x-1/2 rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
+              <>
+              <div
+                className="fixed inset-0 z-40 bg-black/40"
+                onClick={() => setShowCalendar(false)}
+              />
+              <div className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
                 <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
                     <CalendarDays size={16} />
@@ -614,13 +619,13 @@ function parseLocalDate(dateString?: string) {
                     numberOfMonths={1}
                     className="text-sm"
                     classNames={{
-                      months: 'flex justify-center',
-                      month: 'w-[300px] space-y-1',
+                      months: 'relative flex w-full justify-center',
+                      month: 'w-full max-w-[300px] space-y-1',
                       month_caption:
-'relative flex items-center justify-center text-[18px] font-bold capitalize',
+'relative flex h-10 items-center justify-center text-[18px] font-bold capitalize',
                       caption_label: 'text-[18px] font-bold capitalize',
                       nav:
-'absolute left-1/2 top-[100px] z-10 flex w-[300px] -translate-x-1/2 items-center justify-between',
+'absolute left-1/2 top-0 z-10 flex h-10 w-full max-w-[300px] -translate-x-1/2 items-center justify-between',
                       button_previous:
                         'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--foreground)] hover:bg-[var(--metric-card)]',
                       button_next:
@@ -682,6 +687,7 @@ function parseLocalDate(dateString?: string) {
                   </div>
                 </div>
               </div>
+              </>
             )}
           </div>
         </div>
