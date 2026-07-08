@@ -30,6 +30,10 @@ type FiltersState = {
   setDataFim: (dataFim: string) => void
   comparar: boolean
 setComparar: (value: boolean) => void
+  compararInicio: string
+  compararFim: string
+  setCompararInicio: (data: string) => void
+  setCompararFim: (data: string) => void
 }
 
 export const useFilters = create<FiltersState>()(
@@ -42,6 +46,8 @@ export const useFilters = create<FiltersState>()(
       dataInicio: '',
       dataFim: '',
       comparar: false,
+      compararInicio: '',
+      compararFim: '',
       setPeriodo: (periodo) => set({ periodo }),
       setTipoData: (tipoData) => set({ tipoData }),
       setSegmento: (segmento) => set({ segmento }),
@@ -49,6 +55,8 @@ export const useFilters = create<FiltersState>()(
       setDataInicio: (dataInicio) => set({ dataInicio }),
       setDataFim: (dataFim) => set({ dataFim }),
       setComparar: (comparar) => set({ comparar }),
+      setCompararInicio: (compararInicio) => set({ compararInicio }),
+      setCompararFim: (compararFim) => set({ compararFim }),
     }),
     {
       name: 'criare-filters',

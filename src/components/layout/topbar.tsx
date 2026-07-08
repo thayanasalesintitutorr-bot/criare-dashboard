@@ -103,6 +103,10 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   setViewMode,
   comparar,
   setComparar,
+  compararInicio,
+  setCompararInicio,
+  compararFim,
+  setCompararFim,
 } = useFilters()
 
   const { logout } = useAuth()
@@ -110,12 +114,14 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [showCompararCalendar, setShowCompararCalendar] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [sessao, setSessao] = useState<string | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
+  const compararCalendarRef = useRef<HTMLDivElement>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [categoriaAberta, setCategoriaAberta] = useState<
     'tipoData' | 'periodo' | 'segmento' | 'dispositivo' | 'comparacao' | null
@@ -217,6 +223,10 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
       if (calendarRef.current && !calendarRef.current.contains(target)) {
         setShowCalendar(false)
+      }
+
+      if (compararCalendarRef.current && !compararCalendarRef.current.contains(target)) {
+        setShowCompararCalendar(false)
       }
 
       if (profileRef.current && !profileRef.current.contains(target)) {
@@ -824,7 +834,13 @@ function parseLocalDate(dateString?: string) {
         <FiltroResumoCard
           icon={<BarChart3 size={15} className="text-[var(--accent)]" />}
           label="Comparação"
-          valor={comparar ? 'Comparar' : 'Sem comparar'}
+          valor={
+            !comparar
+              ? 'Sem comparar'
+              : compararInicio && compararFim
+                ? `${parseLocalDate(compararInicio)?.toLocaleDateString('pt-BR')} a ${parseLocalDate(compararFim)?.toLocaleDateString('pt-BR')}`
+                : 'Período anterior'
+          }
           aberto={categoriaAberta === 'comparacao'}
           onClick={() =>
             setCategoriaAberta((atual) => (atual === 'comparacao' ? null : 'comparacao'))
@@ -844,14 +860,150 @@ function parseLocalDate(dateString?: string) {
           </button>
 
           <button
-            onClick={() => {
-              setComparar(true)
-              setCategoriaAberta(null)
-            }}
+            onClick={() => setComparar(true)}
             className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
           >
             Comparar
           </button>
+
+          {comparar && (
+            <>
+              <button
+                onClick={() => {
+                  setCompararInicio('')
+                  setCompararFim('')
+                  setCategoriaAberta(null)
+                }}
+                className={`${pillBase} ${!compararInicio && !compararFim ? pillActive : pillInactive}`}
+              >
+                Período anterior
+              </button>
+
+              <div ref={compararCalendarRef} className="relative">
+                <button
+                  onClick={() => setShowCompararCalendar((v) => !v)}
+                  className={`${pillBase} ${compararInicio && compararFim ? pillActive : pillInactive}`}
+                >
+                  <CalendarDays size={16} />
+                  Personalizado
+                </button>
+
+                {showCompararCalendar && (
+                  <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/40"
+                    onClick={() => setShowCompararCalendar(false)}
+                  />
+                  <div className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
+                    <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
+                        <CalendarDays size={16} />
+                      </div>
+
+                      <div>
+                        <p className="text-lg font-bold">Período de comparação</p>
+                        <p className="text-sm text-[var(--muted-foreground)]">
+                          Escolha a data inicial e final para comparar
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="relative flex flex-col items-center px-4 py-3">
+                      <DayPicker
+                        locale={ptBR}
+                        mode="range"
+                        selected={{
+                          from: parseLocalDate(compararInicio),
+                          to: parseLocalDate(compararFim),
+                        }}
+                        onSelect={(range) => {
+                          if (range?.from) {
+                            const ano = range.from.getFullYear()
+                            const mes = String(range.from.getMonth() + 1).padStart(2, '0')
+                            const dia = String(range.from.getDate()).padStart(2, '0')
+                            setCompararInicio(`${ano}-${mes}-${dia}`)
+                          }
+
+                          if (range?.to) {
+                            const ano = range.to.getFullYear()
+                            const mes = String(range.to.getMonth() + 1).padStart(2, '0')
+                            const dia = String(range.to.getDate()).padStart(2, '0')
+                            setCompararFim(`${ano}-${mes}-${dia}`)
+                          }
+                        }}
+                        numberOfMonths={1}
+                        className="text-sm"
+                        classNames={{
+                          months: 'relative flex w-full justify-center',
+                          month: 'w-full max-w-[300px] space-y-1',
+                          month_caption:
+                            'relative flex h-10 items-center justify-center text-[18px] font-bold capitalize',
+                          caption_label: 'text-[18px] font-bold capitalize',
+                          nav:
+                            'absolute left-1/2 top-0 z-10 flex h-10 w-full max-w-[300px] -translate-x-1/2 items-center justify-between',
+                          button_previous:
+                            'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--foreground)] hover:bg-[var(--metric-card)]',
+                          button_next:
+                            'flex h-10 w-10 items-center justify-center rounded-xl text-[var(--foreground)] hover:bg-[var(--metric-card)]',
+                          chevron: 'h-6 w-6 text-[var(--foreground)]',
+                          weekdays: 'grid grid-cols-7 gap-2 text-center',
+                          weekday: 'text-sm font-bold text-[var(--muted-foreground)]',
+                          weeks: 'space-y-2',
+                          week: 'grid grid-cols-7 gap-2',
+                          day: 'h-8 w-8',
+                          day_button:
+                            'flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--metric-card)] text-[13px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--accent)]/25',
+                          selected: 'bg-[var(--accent)] text-white rounded-2xl',
+                          range_start: '[&>button]:bg-[var(--accent)] [&>button]:text-white',
+                          range_end: '[&>button]:bg-[var(--accent)] [&>button]:text-white',
+                          range_middle:
+                            '[&>button]:bg-[var(--accent)]/15 [&>button]:text-[var(--foreground)]',
+                          today:
+                            '[&>button]:bg-[var(--metric-card)] [&>button]:border [&>button]:border-[var(--accent)] [&>button]:text-[var(--foreground)]',
+                        }}
+                      />
+
+                      <div className="mt-3 flex w-full items-center justify-between gap-3 border-t border-[var(--border)] pt-3">
+                        <div>
+                          <p className="text-sm text-[var(--muted-foreground)]">
+                            Período selecionado
+                          </p>
+                          <p className="font-semibold">
+                            {compararInicio && compararFim
+                              ? `${parseLocalDate(compararInicio)?.toLocaleDateString('pt-BR')} até ${parseLocalDate(compararFim)?.toLocaleDateString('pt-BR')}`
+                              : 'Selecione início e fim'}
+                          </p>
+                        </div>
+
+                        <div className="flex shrink-0 gap-3">
+                          <button
+                            onClick={() => {
+                              setCompararInicio('')
+                              setCompararFim('')
+                            }}
+                            className="rounded-xl border border-[var(--border)] px-5 py-2.5 text-sm font-semibold"
+                          >
+                            Limpar
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setShowCompararCalendar(false)
+                              setCategoriaAberta(null)
+                            }}
+                            className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--background)]"
+                          >
+                            Aplicar período
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  </>
+                )}
+              </div>
+            </>
+          )}
         </div>
         )}
       </div>

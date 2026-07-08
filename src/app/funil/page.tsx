@@ -210,7 +210,7 @@ function getInfoMedico(nome: string) {
 }
 
 export default function FunilPage() {
-const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar } = useFilters()
+const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar, compararInicio, compararFim } = useFilters()
 const isImac = viewMode === 'desktop'
 const isApresentacao = viewMode === 'apresentacao'
 
@@ -256,6 +256,10 @@ const isApresentacao = viewMode === 'apresentacao'
         url += `&inicio=${dataInicio}&fim=${dataFim}`
       }
 
+      if (comparar && compararInicio && compararFim) {
+        url += `&compararInicio=${compararInicio}&compararFim=${compararFim}`
+      }
+
       const token = localStorage.getItem('access_token')
 
       const res = await fetch(url, {
@@ -298,7 +302,7 @@ const isApresentacao = viewMode === 'apresentacao'
 }, 60000)
 
   return () => clearInterval(interval)
-}, [periodo, tipoData, segmento, dataInicio, dataFim])
+}, [periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim])
 
   const vendasPorMedico = data?.vendasPorMedico || []
   const painelAtendimento = data?.painelAtendimento

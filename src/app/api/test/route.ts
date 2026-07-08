@@ -588,15 +588,19 @@ const data = await response.json()
     const segmento = searchParams.get('segmento') || 'geral'
     const customStart = searchParams.get('inicio') || ''
     const customEnd = searchParams.get('fim') || ''
+    const compararInicio = searchParams.get('compararInicio') || ''
+    const compararFim = searchParams.get('compararFim') || ''
     const origemModo =
       searchParams.get('origemModo') === 'anuncio' ? 'anuncio' : 'campanha'
 
     const range = getGlobalRange(periodo, customStart, customEnd)
-    const previousRange = getPreviousRange(
-  periodo,
-  range.start,
-  range.end
-)
+    const previousRange =
+      compararInicio && compararFim
+        ? {
+            start: parseLocalDate(compararInicio),
+            end: parseLocalDate(compararFim, true),
+          }
+        : getPreviousRange(periodo, range.start, range.end)
     const [consultaBase, vendasBase, reabordBase] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA'),
       fetchAllLeadsByPipeline('VENDAS'),

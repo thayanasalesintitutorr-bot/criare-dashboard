@@ -576,7 +576,7 @@ const ORIGENS_COLORS = [
 ]
 
 export default function DashboardPage() {
-  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar, compararInicio, compararFim } = useFilters()
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -607,6 +607,10 @@ export default function DashboardPage() {
 
       if (periodo === 'personalizado' && dataInicio && dataFim) {
         url += `&inicio=${dataInicio}&fim=${dataFim}`
+      }
+
+      if (comparar && compararInicio && compararFim) {
+        url += `&compararInicio=${compararInicio}&compararFim=${compararFim}`
       }
 
       const token = localStorage.getItem('access_token')
@@ -648,7 +652,7 @@ export default function DashboardPage() {
   }, 60000)
 
   return () => clearInterval(interval)
-}, [periodo, tipoData, segmento, dataInicio, dataFim])
+}, [periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim])
 
   const marketing = data?.kpis?.marketing
   const comercialConsulta = data?.kpis?.comercialConsulta

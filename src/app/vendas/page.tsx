@@ -103,7 +103,7 @@ function getFotoMedico(nome: string) {
 
 export default function VendasPage() {
 
-  const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim } = useFilters()
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -119,6 +119,10 @@ export default function VendasPage() {
 
         if (periodo === 'personalizado' && dataInicio && dataFim) {
           url += `&inicio=${dataInicio}&fim=${dataFim}`
+        }
+
+        if (comparar && compararInicio && compararFim) {
+          url += `&compararInicio=${compararInicio}&compararFim=${compararFim}`
         }
 
         const token = localStorage.getItem('access_token')
@@ -143,7 +147,7 @@ const res = await fetch(url, {
     }
 
     loadData()
-  }, [periodo, tipoData, segmento, dataInicio, dataFim])
+  }, [periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim])
 
   const vendas = data?.kpis?.comercialVendas
   const funil = data?.funilVendas
@@ -226,6 +230,7 @@ const res = await fetch(url, {
   rawValue={funil?.orcamentoEntregue || 0}
   previousValue={data?.comparativo?.comercialVendas?.propostasEnviadasAnterior || 0}
   subtitle="no período"
+  comparar={comparar}
 />
 
   <CardMini
@@ -235,6 +240,7 @@ const res = await fetch(url, {
     rawValue={funil?.vendaGanha || 0}
     previousValue={data?.comparativo?.comercialVendas?.propostasFechadasAnterior || 0}
     subtitle="fechamentos"
+    comparar={comparar}
   />
 
   <CardMini
@@ -244,6 +250,7 @@ const res = await fetch(url, {
     rawValue={funil?.vendaPerdida || 0}
     previousValue={data?.comparativo?.comercialVendas?.propostasPerdidasAnterior || 0}
     subtitle="perdidas no período"
+    comparar={comparar}
   />
 
  <CardMini
@@ -254,6 +261,7 @@ const res = await fetch(url, {
   previousValue={data?.comparativo?.comercialVendas?.propostasFechadasPercentAnterior || 0}
   subtitle="ganhas sobre orçamentos"
   formatAnterior={(v) => `${Math.round(v)}%`}
+  comparar={comparar}
 />
 </div>
 
@@ -266,6 +274,7 @@ const res = await fetch(url, {
   isMoney
   previousValue={data?.comparativo?.comercialVendas?.valorTotalVendasAnterior || 0}
   metaSucessoPercent={70}
+  comparar={comparar}
 />
 
 <CardMeta
@@ -275,6 +284,7 @@ const res = await fetch(url, {
   meta={2800}
   isMoney
   previousValue={data?.comparativo?.comercialVendas?.ticketMedioVendasAnterior || 0}
+  comparar={comparar}
 />
 </div>
 
@@ -567,6 +577,7 @@ function CardMeta({
   isMoney,
   previousValue = 0,
   metaSucessoPercent = 100,
+  comparar = false,
 }: {
   icon: typeof CircleDollarSign
   title: string
@@ -575,6 +586,7 @@ function CardMeta({
   isMoney?: boolean
   previousValue?: number
   metaSucessoPercent?: number
+  comparar?: boolean
 }) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
   const empty = value === 0
@@ -625,11 +637,13 @@ function CardMeta({
           </span>
         </div>
 
-        <CompareRow
-          atual={value}
-          anterior={anterior}
-          anteriorLabel={anterior > 0 ? (isMoney ? formatMoney(anterior) : String(anterior)) : undefined}
-        />
+        {comparar && (
+          <CompareRow
+            atual={value}
+            anterior={anterior}
+            anteriorLabel={anterior > 0 ? (isMoney ? formatMoney(anterior) : String(anterior)) : undefined}
+          />
+        )}
       </div>
     </div>
   )
@@ -643,6 +657,7 @@ function CardMini({
   previousValue = 0,
   subtitle,
   formatAnterior = (v: number) => String(Math.round(v)),
+  comparar = false,
 }: {
   icon: typeof CircleDollarSign
   title: string
@@ -651,6 +666,7 @@ function CardMini({
   previousValue?: number
   subtitle?: string
   formatAnterior?: (v: number) => string
+  comparar?: boolean
 }) {
   const atual = Number(rawValue ?? value ?? 0)
   const anterior = Number(previousValue || 0)
@@ -686,11 +702,13 @@ function CardMini({
           <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">{subtitle}</p>
         )}
 
-        <CompareRow
-          atual={atual}
-          anterior={anterior}
-          anteriorLabel={anterior > 0 ? formatAnterior(anterior) : undefined}
-        />
+        {comparar && (
+          <CompareRow
+            atual={atual}
+            anterior={anterior}
+            anteriorLabel={anterior > 0 ? formatAnterior(anterior) : undefined}
+          />
+        )}
       </div>
     </div>
   )
