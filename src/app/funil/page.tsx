@@ -929,18 +929,18 @@ FINANCEIRO
     <div>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Consultas</p>
       <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
-        <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
-        <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
-        <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} />
+        <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" centered />
+        <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" centered />
+        <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} centered />
       </div>
     </div>
 
     <div className={isImac ? 'border-t border-[color:var(--border)] pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0' : 'border-t border-[color:var(--border)] pt-4'}>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Procedimentos</p>
       <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
-        <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
-        <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
-        <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} />
+        <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" centered />
+        <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" centered />
+        <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} centered />
       </div>
     </div>
   </div>
@@ -1122,6 +1122,7 @@ function MetricCard({
   previousValue,
   showCompare = false,
   empty = false,
+  centered = false,
 }: {
   icon: any
   label: string
@@ -1131,6 +1132,7 @@ function MetricCard({
   previousValue?: number
   showCompare?: boolean
   empty?: boolean
+  centered?: boolean
 }) {
 
 
@@ -1177,12 +1179,12 @@ const negativo = diff < 0
   if (empty) {
     return (
       <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-        <div className={`flex min-w-0 items-center gap-2 ${labelMinH}`}>
+        <div className={`flex min-w-0 items-center gap-2 ${centered ? 'justify-center text-center' : ''} ${labelMinH}`}>
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
           <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
         </div>
 
-        <div className="mt-3">
+        <div className={`mt-3 ${centered ? 'text-center' : ''}`}>
           <div className={`${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>
             —
           </div>
@@ -1197,14 +1199,14 @@ const negativo = diff < 0
 
   return (
     <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-      <div className={`flex min-w-0 items-center gap-2 ${labelMinH}`}>
+      <div className={`flex min-w-0 items-center gap-2 ${centered ? 'justify-center text-center' : ''} ${labelMinH}`}>
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
        <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
-      <div className="mt-3 min-w-0">
+      <div className={`mt-3 min-w-0 ${centered ? 'text-center' : ''}`}>
   <div className="min-w-0">
-    <div className={`flex w-full min-w-0 items-center justify-between gap-2 ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full min-w-0 items-center gap-2 ${centered ? 'justify-center' : 'justify-between'} ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
@@ -1215,7 +1217,7 @@ const negativo = diff < 0
 )}
 
 {showCompare && (
-  <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+  <div className={`mt-2 flex items-center gap-2 text-[12px] font-black ${centered ? 'justify-center' : ''}`}>
     <span
       className={
         positivo
