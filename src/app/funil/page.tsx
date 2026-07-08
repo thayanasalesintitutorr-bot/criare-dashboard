@@ -816,7 +816,7 @@ const ticketProcedimentosMedico =
     AGENDA
   </h4>
 
-  <div className={isImac ? 'grid grid-cols-5 gap-3' : isApresentacao ? 'grid grid-cols-5 gap-2' : 'grid grid-cols-2 gap-2'}>
+  <div className={isImac ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5' : isApresentacao ? 'grid grid-cols-5 gap-2' : 'grid grid-cols-2 gap-2'}>
     <MetricMini
       label="Atendimentos"
       value={medico.atendimentos || 0}
@@ -853,7 +853,7 @@ const ticketProcedimentosMedico =
     />
   </div>
 
-    <div className={`mt-3 ${isImac ? `grid ${medico.medico?.toUpperCase().includes('BRENO') ? 'grid-cols-4' : 'grid-cols-3'} gap-3` : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
+    <div className={`mt-3 ${isImac ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3' : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -888,9 +888,9 @@ const ticketProcedimentosMedico =
       label="Injetáveis vendidos"
       value={
         <>
-          <span>{medico.injetaveisVendidos || 0}</span>
+          <span className="shrink-0">{medico.injetaveisVendidos || 0}</span>
 
-          <span className="ml-auto">
+          <span className="min-w-0 truncate text-right">
             {formatMoney(medico.valorInjetaveisVendidos || 0)}
           </span>
         </>
@@ -904,9 +904,9 @@ const ticketProcedimentosMedico =
       label="Protocolos vendidos"
       value={
         <>
-          <span>{medico.protocolosVendidos || 0}</span>
+          <span className="shrink-0">{medico.protocolosVendidos || 0}</span>
 
-          <span className="ml-auto">
+          <span className="min-w-0 truncate text-right">
             {formatMoney(medico.valorProtocolosVendidos || 0)}
           </span>
         </>
@@ -925,19 +925,19 @@ FINANCEIRO
 </h4>
 
 
-  <div className={isImac ? 'grid grid-cols-2 gap-4' : 'grid grid-cols-1 gap-4'}>
+  <div className={isImac ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'grid grid-cols-1 gap-4'}>
     <div>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Consultas</p>
-      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-3 gap-2'}>
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
         <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" />
         <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" />
         <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} />
       </div>
     </div>
 
-    <div className={isImac ? 'border-l border-[color:var(--border)] pl-4' : 'border-t border-[color:var(--border)] pt-4'}>
+    <div className={isImac ? 'border-t border-[color:var(--border)] pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0' : 'border-t border-[color:var(--border)] pt-4'}>
       <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Procedimentos</p>
-      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-3 gap-2'}>
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
         <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" />
         <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" />
         <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} />
@@ -1051,7 +1051,7 @@ function MetricMini({
 
   return (
   <div
-    className={`rounded-[22px] text-center shadow-[var(--card-shadow)] ${textColors[color]} ${
+    className={`min-w-0 rounded-[22px] text-center shadow-[var(--card-shadow)] ${textColors[color]} ${
       bordered ? 'border border-[color:var(--border)] bg-[var(--metric-card)]' : ''
     } ${
       isImac ? 'px-3 py-2' : isApresentacao ? 'p-4' : 'p-3'
@@ -1176,10 +1176,10 @@ const negativo = diff < 0
 
   if (empty) {
     return (
-      <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-        <div className={`flex items-center gap-2 ${labelMinH}`}>
+      <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
+        <div className={`flex min-w-0 items-center gap-2 ${labelMinH}`}>
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
-          <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
+          <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
         </div>
 
         <div className="mt-3">
@@ -1196,20 +1196,20 @@ const negativo = diff < 0
   }
 
   return (
-    <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-      <div className={`flex items-center gap-2 ${labelMinH}`}>
+    <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
+      <div className={`flex min-w-0 items-center gap-2 ${labelMinH}`}>
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
-       <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
+       <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
 
-      <div className="mt-3">
-  <div>
-    <div className={`flex w-full items-center justify-between ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
+      <div className="mt-3 min-w-0">
+  <div className="min-w-0">
+    <div className={`flex w-full min-w-0 items-center justify-between gap-2 ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
    {description && (
-  <p className={`mt-2 ${isImac ? 'text-[12px]' : isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
+  <p className={`mt-2 truncate ${isImac ? 'text-[12px]' : isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
     {description}
   </p>
 )}
