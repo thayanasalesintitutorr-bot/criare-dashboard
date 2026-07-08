@@ -961,7 +961,7 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
   string,
   {
     valor: number
-    produtos: Record<string, number>
+    produtos: Record<string, { qtd: number; valor: number }>
   }
 > = {
   'DR. RODOLPHO REIS': { valor: 0, produtos: {} },
@@ -1007,8 +1007,12 @@ vendasLeads
   medicosMap[medico].valor += valorVenda
 
   produtos.forEach((produto) => {
-    medicosMap[medico].produtos[produto] =
-      (medicosMap[medico].produtos[produto] || 0) + 1
+    if (!medicosMap[medico].produtos[produto]) {
+      medicosMap[medico].produtos[produto] = { qtd: 0, valor: 0 }
+    }
+
+    medicosMap[medico].produtos[produto].qtd += 1
+    medicosMap[medico].produtos[produto].valor += valorVenda / produtos.length
   })
 })
 
@@ -1024,9 +1028,10 @@ const vendasPorMedico = Object.entries(medicosMap)
     meta,
     percentual,
     produtos: Object.entries(item.produtos)
-      .map(([produto, qtd]) => ({
+      .map(([produto, dado]) => ({
         produto,
-        qtd,
+        qtd: dado.qtd,
+        valor: dado.valor,
       }))
       .sort((a, b) => b.qtd - a.qtd),
   }

@@ -51,6 +51,7 @@ type DashboardResponse = {
     produtos?: {
       produto: string
       qtd: number
+      valor: number
     }[]
   }[]
   tarefasProximaSemana?: {
@@ -75,6 +76,15 @@ function formatMoney(v: number) {
     style: 'currency',
     currency: 'BRL',
     maximumFractionDigits: 0,
+  })
+}
+
+function formatMoneyDecimal(v: number) {
+  return v.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   })
 }
 
@@ -108,6 +118,7 @@ export default function VendasPage() {
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [medicoAberto, setMedicoAberto] = useState<string | null>(null)
 
   useEffect(() => {
     async function loadData() {
@@ -390,12 +401,27 @@ const res = await fetch(url, {
   ) : (
    <div className="grid gap-4">
       {vendasPorMedico.map((medico, index) => {
-        const totalProdutosMedico =
-          medico.produtos?.reduce(
-  (acc: number, item: { produto: string; qtd: number }) =>
-    acc + Number(item.qtd || 0),
-  0
-) || 0
+        const produtosDetalhados = (medico.produtos || []).map(
+          (item: { produto: string; qtd: number; valor: number }) => ({
+            produto: item.produto,
+            qtd: Number(item.qtd || 0),
+            valor: Number(item.valor || 0),
+            ticketMedio: item.qtd > 0 ? Number(item.valor || 0) / item.qtd : 0,
+          })
+        )
+
+        const totalProdutosMedico = produtosDetalhados.reduce(
+          (acc: number, item: { qtd: number }) => acc + item.qtd,
+          0
+        )
+
+        const totalValorProdutosMedico = produtosDetalhados.reduce(
+          (acc: number, item: { valor: number }) => acc + item.valor,
+          0
+        )
+
+        const ticketMedioGeralProdutos =
+          totalProdutosMedico > 0 ? totalValorProdutosMedico / totalProdutosMedico : 0
 
         const ticketMedico =
           totalProdutosMedico > 0 ? medico.valor / totalProdutosMedico : 0
@@ -404,6 +430,7 @@ const res = await fetch(url, {
           medico.meta > 0 ? Math.round((medico.valor / medico.meta) * 100) : 0
 
         const isTop = index === 0
+        const produtosAberto = medicoAberto === medico.nome
 
         return (
           <div
@@ -473,46 +500,114 @@ const res = await fetch(url, {
               </div>
             </div>
 
-            <div className="mb-2 grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <MiniInfo label="Valor vendido" value={formatMoney(medico.valor)} />
-              <MiniInfo label="Produtos" value={totalProdutosMedico} />
+              <MiniInfo
+                label="Produtos"
+                value={totalProdutosMedico}
+                helper="Clique para ver detalhes"
+                active={produtosAberto}
+                onClick={() =>
+                  setMedicoAberto((atual) => (atual === medico.nome ? null : medico.nome))
+                }
+              />
               <MiniInfo label="Ticket médio" value={formatMoney(ticketMedico)} />
             </div>
 
-            <div>
-              <div className="mb-2 flex items-center justify-between">
-                <h4 className="text-sm font-black uppercase tracking-[0.12em] text-[var(--muted-foreground)]">
-                  Produtos vendidos
-                </h4>
-
-                <span className="text-xs font-bold text-[var(--muted-foreground)]">
-                  qtd.
-                </span>
+            {produtosAberto && (
+              <div className="flex justify-center">
+                <div className="h-0 w-0 border-x-[7px] border-t-[7px] border-x-transparent border-t-[var(--accent)]" />
               </div>
+            )}
 
-              <div className="space-y-1">
-                {(medico.produtos || []).map(
-                  (item: { produto: string; qtd: number }, itemIndex: number) => (
-                    <div
-                      key={`${medico.nome}-${item.produto}-${itemIndex}`}
-                      className="flex items-center justify-between rounded-lg bg-[var(--card)] px-2 py-1"
-                    >
-                      <div>
-                        <p className="text-[12px] font-semibold text-[var(--foreground)]">
-                          {item.produto}
-                        </p>
+            {produtosAberto && (
+              <div className="mt-2 overflow-hidden rounded-[14px] border border-[color:var(--border)] bg-[var(--card)]">
+                <div className="flex items-center justify-between border-b border-[color:var(--border)] px-3 py-2.5">
+                  <div>
+                    <h4 className="text-sm font-black text-[var(--foreground)]">
+                      Detalhamento de produtos
+                    </h4>
 
-    
-                      </div>
+                    <p className="mt-0.5 text-[11px] font-semibold text-[var(--muted-foreground)]">
+                      Visualizando {produtosDetalhados.length} de {produtosDetalhados.length} produtos
+                    </p>
+                  </div>
 
-                      <span className="text-[13px] font-black text-[var(--foreground)]">
-                        {item.qtd}
-                      </span>
-                    </div>
-                  )
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setMedicoAberto(null)}
+                    className="shrink-0 rounded-lg border border-[color:var(--border)] px-3 py-1.5 text-xs font-bold text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)]"
+                  >
+                    Recolher
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[440px] border-collapse text-[12px]">
+                    <thead>
+                      <tr className="bg-[var(--accent)]/5">
+                        <th className="px-3 py-2 text-left text-[10px] font-black uppercase tracking-[0.06em] text-[var(--accent)]">
+                          Produto
+                        </th>
+                        <th className="px-3 py-2 text-center text-[10px] font-black uppercase tracking-[0.06em] text-[var(--accent)]">
+                          Qtd.
+                        </th>
+                        <th className="px-3 py-2 text-right text-[10px] font-black uppercase tracking-[0.06em] text-[var(--accent)]">
+                          Valor
+                        </th>
+                        <th className="px-3 py-2 text-right text-[10px] font-black uppercase tracking-[0.06em] text-[var(--accent)]">
+                          T.M por produto
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {produtosDetalhados.map(
+                        (
+                          item: { produto: string; qtd: number; valor: number; ticketMedio: number },
+                          itemIndex: number
+                        ) => (
+                          <tr
+                            key={`${medico.nome}-${item.produto}-${itemIndex}`}
+                            className="border-t border-[color:var(--border)]"
+                          >
+                            <td className="px-3 py-2 text-left font-semibold text-[var(--foreground)]">
+                              {item.produto}
+                            </td>
+                            <td className="px-3 py-2 text-center font-bold text-[var(--foreground)]">
+                              {item.qtd}
+                            </td>
+                            <td className="px-3 py-2 text-right font-bold text-[var(--foreground)]">
+                              {formatMoneyDecimal(item.valor)}
+                            </td>
+                            <td className="px-3 py-2 text-right font-semibold text-[var(--muted-foreground)]">
+                              {formatMoneyDecimal(item.ticketMedio)}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+
+                    <tfoot>
+                      <tr className="border-t border-[color:var(--border)] bg-[var(--accent)]/10">
+                        <td className="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.06em] text-[var(--foreground)]">
+                          Total
+                        </td>
+                        <td className="px-3 py-2 text-center font-black text-[var(--foreground)]">
+                          {totalProdutosMedico}
+                        </td>
+                        <td className="px-3 py-2 text-right font-black text-[var(--accent)]">
+                          {formatMoneyDecimal(totalValorProdutosMedico)}
+                        </td>
+                        <td className="px-3 py-2 text-right font-black text-[var(--accent)]">
+                          {formatMoneyDecimal(ticketMedioGeralProdutos)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )
       })}
@@ -525,9 +620,29 @@ const res = await fetch(url, {
   )
 }
 
-function MiniInfo({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-1.5">
+function MiniInfo({
+  label,
+  value,
+  onClick,
+  active,
+  helper,
+}: {
+  label: string
+  value: string | number
+  onClick?: () => void
+  active?: boolean
+  helper?: string
+}) {
+  const clickable = Boolean(onClick)
+
+  const className = `w-full rounded-[18px] border px-3 py-1.5 text-left transition-colors duration-200 ${
+    active
+      ? 'border-[var(--accent)] bg-[var(--accent)]/5'
+      : 'border-[color:var(--border)] bg-[var(--metric-card)]'
+  } ${clickable ? 'cursor-pointer hover:border-[var(--accent)]/50' : ''}`
+
+  const content = (
+    <>
       <p className="metric-label">
         {label}
       </p>
@@ -535,8 +650,28 @@ function MiniInfo({ label, value }: { label: string; value: string | number }) {
       <p className="mt-1 text-[15px] font-black text-[var(--foreground)]">
         {value}
       </p>
-    </div>
+
+      {helper && (
+        <p
+          className={`mt-0.5 text-[10px] font-semibold ${
+            active ? 'text-[var(--accent)]' : 'text-[var(--muted-foreground)]'
+          }`}
+        >
+          {helper}
+        </p>
+      )}
+    </>
   )
+
+  if (clickable) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {content}
+      </button>
+    )
+  }
+
+  return <div className={className}>{content}</div>
 }
 
 function CompareRow({
