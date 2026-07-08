@@ -6,6 +6,9 @@ import { useFilters } from '@/store/use-filters'
 import {
   CircleDollarSign,
   TrendingUp,
+  TrendingDown,
+  Percent,
+  Receipt,
   Target,
   Funnel,
   Package,
@@ -56,14 +59,13 @@ type DashboardResponse = {
     total: number
   }
   comparativo?: {
-  vendas?: {
-    orcamentosAnterior: number
-    negociacaoAnterior: number
-    ganhasAnterior: number
-    perdidasAnterior: number
-    conversaoAnterior: number
-    valorAnterior: number
-    ticketAnterior: number
+  comercialVendas?: {
+    propostasEnviadasAnterior: number
+    propostasFechadasAnterior: number
+    propostasPerdidasAnterior: number
+    propostasFechadasPercentAnterior: number
+    valorTotalVendasAnterior: number
+    ticketMedioVendasAnterior: number
   }
 }
 }
@@ -82,9 +84,7 @@ function formatPercent(v: number) {
 
 function metaColor(percentual: number, hasValor: boolean) {
   if (!hasValor) return 'var(--muted-foreground)'
-  if (percentual >= 100) return 'var(--success)'
-  if (percentual >= 70) return 'var(--warning)'
-  return 'var(--danger)'
+  return percentual >= 100 ? 'var(--success)' : 'var(--danger)'
 }
 
 function getFotoMedico(nome: string) {
@@ -224,7 +224,7 @@ const res = await fetch(url, {
   title="Orçamentos entregues"
   value={funil?.orcamentoEntregue || 0}
   rawValue={funil?.orcamentoEntregue || 0}
-  previousValue={data?.comparativo?.vendas?.orcamentosAnterior || 0}
+  previousValue={data?.comparativo?.comercialVendas?.propostasEnviadasAnterior || 0}
   subtitle="no período"
 />
 
@@ -233,44 +233,46 @@ const res = await fetch(url, {
     title="Vendas ganhas"
     value={funil?.vendaGanha || 0}
     rawValue={funil?.vendaGanha || 0}
-    previousValue={data?.comparativo?.vendas?.ganhasAnterior || 0}
+    previousValue={data?.comparativo?.comercialVendas?.propostasFechadasAnterior || 0}
     subtitle="fechamentos"
   />
 
   <CardMini
-    icon={CircleDollarSign}
+    icon={TrendingDown}
     title="Vendas perdidas"
     value={funil?.vendaPerdida || 0}
     rawValue={funil?.vendaPerdida || 0}
-    previousValue={data?.comparativo?.vendas?.perdidasAnterior || 0}
+    previousValue={data?.comparativo?.comercialVendas?.propostasPerdidasAnterior || 0}
     subtitle="perdidas no período"
   />
 
  <CardMini
-  icon={TrendingUp}
+  icon={Percent}
   title="Conversão"
   value={`${Math.round(vendas?.propostasFechadasPercent || 0)}%`}
   rawValue={vendas?.propostasFechadasPercent || 0}
-  previousValue={data?.comparativo?.vendas?.conversaoAnterior || 0}
+  previousValue={data?.comparativo?.comercialVendas?.propostasFechadasPercentAnterior || 0}
   subtitle="ganhas sobre orçamentos"
 />
 </div>
 
 <div className="grid gap-5 md:grid-cols-2">
   <CardMeta
+  icon={CircleDollarSign}
   title="Valor vendido"
   value={vendas?.valorTotalVendas || 0}
   meta={metaVendas}
   isMoney
-  previousValue={data?.comparativo?.vendas?.valorAnterior || 0}
+  previousValue={data?.comparativo?.comercialVendas?.valorTotalVendasAnterior || 0}
 />
 
 <CardMeta
+  icon={Receipt}
   title="Ticket médio"
   value={vendas?.ticketMedioVendas || 0}
   meta={2800}
   isMoney
-  previousValue={data?.comparativo?.vendas?.ticketAnterior || 0}
+  previousValue={data?.comparativo?.comercialVendas?.ticketMedioVendasAnterior || 0}
 />
 </div>
 
@@ -526,12 +528,14 @@ function MiniInfo({ label, value }: { label: string; value: string | number }) {
 }
 
 function CardMeta({
+  icon: Icon,
   title,
   value,
   meta,
   isMoney,
   previousValue = 0,
 }: {
+  icon: typeof CircleDollarSign
   title: string
   value: number
   meta: number
@@ -553,7 +557,7 @@ function CardMeta({
   return (
     <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 transition-colors duration-200 hover:border-[var(--accent)]/30">
       <div className="mb-3 flex items-center gap-3">
-        <CircleDollarSign className="h-6 w-6 text-[var(--accent)]" />
+        <Icon className="h-6 w-6 text-[var(--accent)]" />
 
         <p className="metric-label">
           {title}

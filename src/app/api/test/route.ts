@@ -2312,6 +2312,7 @@ painelAtendimento,
   comercialVendas: {
     propostasEnviadasAnterior: orcamentosAnterior,
     propostasFechadasAnterior: ganhasAnterior,
+    propostasPerdidasAnterior: perdidasAnterior,
     propostasFechadasPercentAnterior: conversaoAnterior,
     valorTotalVendasAnterior: valorAnteriorVendas,
     ticketMedioVendasAnterior: ticketAnteriorVendas,
