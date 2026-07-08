@@ -527,6 +527,26 @@ function MiniInfo({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+function CompareRow({ atual, anterior }: { atual: number; anterior: number }) {
+  const diff = anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
+  const positivo = diff > 0
+  const negativo = diff < 0
+
+  return (
+    <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+      <span
+        className={
+          positivo ? 'text-[var(--success)]' : negativo ? 'text-[var(--danger)]' : 'text-[var(--muted-foreground)]'
+        }
+      >
+        {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
+      </span>
+
+      <span className="text-[var(--muted-foreground)]">vs anterior</span>
+    </div>
+  )
+}
+
 function CardMeta({
   icon: Icon,
   title,
@@ -544,83 +564,55 @@ function CardMeta({
 }) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
   const empty = value === 0
-
   const anterior = Number(previousValue || 0)
 
-  const percentualAnterior =
-    anterior > 0 ? Math.round(((value - anterior) / anterior) * 100) : 0
+  if (empty) {
+    return (
+      <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
+        <div className="flex min-h-[40px] items-center gap-2">
+          <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+          <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+        </div>
 
-  const positivo = percentualAnterior > 0
-  const negativo = percentualAnterior < 0
-  const previousLabel = isMoney ? formatMoney(anterior) : anterior
+        <div className="mt-3">
+          <div className="text-[24px] font-black leading-none text-[var(--muted-foreground)]/40">—</div>
+          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">Sem dados no período</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 transition-colors duration-200 hover:border-[var(--accent)]/30">
-      <div className="mb-3 flex items-center gap-3">
-        <Icon className="h-6 w-6 text-[var(--accent)]" />
-
-        <p className="metric-label">
-          {title}
-        </p>
+    <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
+      <div className="flex min-h-[40px] items-center gap-2">
+        <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+        <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
       </div>
 
-      <p className={`metric-value text-[30px] leading-none ${empty ? 'text-[var(--muted-foreground)]/40' : ''}`}>
-        {empty ? '—' : isMoney ? formatMoney(value) : value}
-      </p>
+      <div className="mt-3">
+        <div className="text-[24px] font-black leading-none text-[var(--foreground)]">
+          {isMoney ? formatMoney(value) : value}
+        </div>
 
-      {empty ? (
-        <p className="metric-helper mt-4">Sem dados no período</p>
-      ) : (
-        <>
-          <div className="progress-bar mt-4 h-3">
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.min(percentual, 100)}%`,
-                backgroundColor: metaColor(percentual, true),
-              }}
-            />
-          </div>
+        <div className="progress-bar mt-3 h-2">
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${Math.min(percentual, 100)}%`,
+              backgroundColor: metaColor(percentual, true),
+            }}
+          />
+        </div>
 
-          <div className="mt-3 flex items-center justify-between">
-            <span className="metric-helper text-base">
-              Meta {isMoney ? formatMoney(meta) : meta}
-            </span>
+        <div className="mt-2 flex items-center justify-between text-[13px] font-medium text-[var(--muted-foreground)]">
+          <span>Meta {isMoney ? formatMoney(meta) : meta}</span>
+          <span className="text-[14px] font-black" style={{ color: metaColor(percentual, true) }}>
+            {percentual}%
+          </span>
+        </div>
 
-            <span
-              className="text-2xl font-black"
-              style={{ color: metaColor(percentual, true) }}
-            >
-              {percentual}%
-            </span>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
-            <div>
-              <p
-                className="text-[18px] font-black"
-                style={{
-                  color: positivo
-                    ? 'var(--success)'
-                    : negativo
-                    ? 'var(--danger)'
-                    : 'var(--muted-foreground)',
-                }}
-              >
-                {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentualAnterior)}%
-              </p>
-
-              <p className="metric-helper">
-                {percentualAnterior === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-              </p>
-            </div>
-
-            <span className="text-[14px] font-black text-[var(--muted-foreground)]">
-              {previousLabel}
-            </span>
-          </div>
-        </>
-      )}
+        <CompareRow atual={value} anterior={anterior} />
+      </div>
     </div>
   )
 }
@@ -632,70 +624,50 @@ function CardMini({
   rawValue,
   previousValue = 0,
   subtitle,
-  statusClass,
-}: any) {
+}: {
+  icon: typeof CircleDollarSign
+  title: string
+  value: string | number
+  rawValue?: number
+  previousValue?: number
+  subtitle?: string
+}) {
   const atual = Number(rawValue ?? value ?? 0)
   const anterior = Number(previousValue || 0)
   const empty = atual === 0
 
-  const percentual =
-    anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
+  if (empty) {
+    return (
+      <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
+        <div className="flex min-h-[40px] items-center gap-2">
+          <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+          <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+        </div>
 
-  const positivo = percentual > 0
-  const negativo = percentual < 0
-  const isMoneyValue = typeof value === 'string' && value.includes('R$')
-  const previousLabel = isMoneyValue ? formatMoney(anterior) : anterior
+        <div className="mt-3">
+          <div className="text-[24px] font-black leading-none text-[var(--muted-foreground)]/40">—</div>
+          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">Sem dados no período</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className={`rounded-[18px] border border-[color:var(--border)] p-5 transition-colors duration-200 hover:border-[var(--accent)]/30 ${
-        statusClass || 'bg-[var(--card)]'
-      }`}
-    >
-      <div className="mb-3 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[var(--icon-bg)]">
-          <Icon className="h-5 w-5 text-[var(--accent)]" />
-        </div>
-
-        <p className="metric-label">
-          {title}
-        </p>
+    <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
+      <div className="flex min-h-[40px] items-center gap-2">
+        <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
+        <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
       </div>
 
-      <h3 className={`metric-value text-[28px] tracking-[-0.05em] ${empty ? 'text-[var(--muted-foreground)]/40' : ''}`}>
-        {empty ? '—' : value}
-      </h3>
+      <div className="mt-3">
+        <div className="text-[24px] font-black leading-none text-[var(--foreground)]">{value}</div>
 
-      <p className="metric-helper mt-2 text-sm">
-        {empty ? 'Sem dados no período' : subtitle}
-      </p>
+        {subtitle && (
+          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">{subtitle}</p>
+        )}
 
-      {!empty && (
-        <div className="mt-3 flex items-center justify-between rounded-[14px] bg-[var(--background)] px-3 py-2">
-          <div>
-            <p
-              className="text-[18px] font-black"
-              style={{
-                color: positivo
-                  ? 'var(--success)'
-                  : negativo
-                  ? 'var(--danger)'
-                  : 'var(--muted-foreground)',
-              }}
-            >
-              {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(percentual)}%
-            </p>
-
-            <p className="metric-helper">
-              {percentual === 0 ? 'igual ao período anterior' : 'vs. período anterior'}
-            </p>
-          </div>
-
-          <span className="text-[14px] font-black text-[var(--muted-foreground)]">
-            {previousLabel}
-          </span>
-        </div>
-      )}
+        <CompareRow atual={atual} anterior={anterior} />
+      </div>
     </div>
   )
 }
