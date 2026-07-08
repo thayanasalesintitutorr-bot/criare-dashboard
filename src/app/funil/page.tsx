@@ -860,6 +860,7 @@ const ticketProcedimentosMedico =
   value={medico.consultasPrimeiraVez || 0}
   description=""
   tone="green"
+  centerTitle
 />
 
     <MetricCard
@@ -868,6 +869,7 @@ const ticketProcedimentosMedico =
   value={medico.procedimentos || 0}
   description=""
   tone="blue"
+  centerTitle
 />
 
 {!medico.medico?.toUpperCase().includes('BRENO') && (
@@ -877,7 +879,7 @@ const ticketProcedimentosMedico =
     value={medico.cirurgias || 0}
     description=""
     tone="purple"
-
+    centerTitle
   />
 )}
 
@@ -897,6 +899,7 @@ const ticketProcedimentosMedico =
       }
       description=""
       tone="red"
+      centerTitle
     />
 
     <MetricCard
@@ -913,6 +916,7 @@ const ticketProcedimentosMedico =
       }
       description=""
       tone="purple"
+      centerTitle
     />
   </>
 )}
@@ -1123,6 +1127,7 @@ function MetricCard({
   showCompare = false,
   empty = false,
   centered = false,
+  centerTitle = false,
 }: {
   icon: any
   label: string
@@ -1133,6 +1138,7 @@ function MetricCard({
   showCompare?: boolean
   empty?: boolean
   centered?: boolean
+  centerTitle?: boolean
 }) {
 
 
@@ -1179,7 +1185,7 @@ const negativo = diff < 0
   if (empty) {
     return (
       <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-        <div className={`flex min-w-0 items-center gap-2 ${centered ? 'justify-center text-center' : ''} ${labelMinH}`}>
+        <div className={`flex min-w-0 items-center gap-2 ${(centered || centerTitle) ? 'justify-center text-center' : ''} ${labelMinH}`}>
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
           <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
         </div>
@@ -1199,7 +1205,7 @@ const negativo = diff < 0
 
   return (
     <div className={`relative z-0 hover:z-10 flex h-full min-w-0 flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
-      <div className={`flex min-w-0 items-center gap-2 ${centered ? 'justify-center text-center' : ''} ${labelMinH}`}>
+      <div className={`flex min-w-0 items-center gap-2 ${(centered || centerTitle) ? 'justify-center text-center' : ''} ${labelMinH}`}>
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
        <p className={`truncate ${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
       </div>
