@@ -434,7 +434,7 @@ const ticketMedioConsultaComReabord =
     />
   </div>
 
-  <div className="mt-3 grid gap-3 xl:grid-cols-12">
+  <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
   <div ref={colunaGraficosRef} className="min-w-0 space-y-3 xl:col-span-8">
 
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
