@@ -969,6 +969,28 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
   'DR. BRENO PITANGUI': { valor: 0, produtos: {} },
 }
 
+const propostasPorMedicoMap: Record<string, number> = {
+  'DR. RODOLPHO REIS': 0,
+  'DRA. CLAUDIA LAMEIRA': 0,
+  'DR. BRENO PITANGUI': 0,
+}
+
+vendasLeads
+  .filter((l) => inRange(parseDateLocal(l.created_at), range.start, range.end))
+  .forEach((lead) => {
+    const medicoRaw = (lead.medico || '').trim() || 'Sem médico'
+    const medicoNorm = normalize(medicoRaw)
+    const medico = medicoNorm.includes('RODOLPHO')
+      ? 'DR. RODOLPHO REIS'
+      : medicoNorm.includes('CLAUDIA')
+      ? 'DRA. CLAUDIA LAMEIRA'
+      : medicoNorm.includes('BRENO')
+      ? 'DR. BRENO PITANGUI'
+      : medicoRaw
+
+    propostasPorMedicoMap[medico] = (propostasPorMedicoMap[medico] || 0) + 1
+  })
+
 vendasLeads
   .filter((l) =>
     normalize(l.status_id).includes('GANHA') &&
@@ -1027,6 +1049,7 @@ const vendasPorMedico = Object.entries(medicosMap)
     valor: item.valor,
     meta,
     percentual,
+    propostasEnviadas: propostasPorMedicoMap[nome] || 0,
     produtos: Object.entries(item.produtos)
       .map(([produto, dado]) => ({
         produto,

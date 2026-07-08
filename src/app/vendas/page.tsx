@@ -13,6 +13,7 @@ import {
   Funnel,
   Package,
   Stethoscope,
+  Medal,
 } from 'lucide-react'
 
 type DashboardResponse = {
@@ -48,6 +49,7 @@ type DashboardResponse = {
     valor: number
     meta: number
     percentual: number
+    propostasEnviadas?: number
     produtos?: {
       produto: string
       qtd: number
@@ -176,6 +178,7 @@ const res = await fetch(url, {
     if (existente) {
       existente.valor += medico.valor || 0
       existente.meta += medico.meta || 0
+      existente.propostasEnviadas += medico.propostasEnviadas || 0
       existente.produtos = [
         ...(existente.produtos || []),
         ...(medico.produtos || []),
@@ -189,6 +192,7 @@ const res = await fetch(url, {
         valor: medico.valor || 0,
         meta: medico.meta || 0,
         percentual: medico.percentual || 0,
+        propostasEnviadas: medico.propostasEnviadas || 0,
         produtos: medico.produtos || [],
       })
     }
@@ -455,7 +459,8 @@ const res = await fetch(url, {
 
                 <div>
                   {isTop && (
-                    <span className="mb-2 inline-flex rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--accent)]">
+                    <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--accent)]">
+                      <Medal size={12} strokeWidth={2.5} />
                       Top vendedor
                     </span>
                   )}
@@ -500,8 +505,8 @@ const res = await fetch(url, {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              <MiniInfo label="Valor vendido" value={formatMoney(medico.valor)} />
+            <div className="grid grid-cols-4 gap-2">
+              <MiniInfo label="Propostas enviadas" value={medico.propostasEnviadas || 0} />
               <MiniInfo
                 label="Produtos"
                 value={totalProdutosMedico}
@@ -511,6 +516,7 @@ const res = await fetch(url, {
                   setMedicoAberto((atual) => (atual === medico.nome ? null : medico.nome))
                 }
               />
+              <MiniInfo label="Valor vendido" value={formatMoney(medico.valor)} />
               <MiniInfo label="Ticket médio" value={formatMoney(ticketMedico)} />
             </div>
 
