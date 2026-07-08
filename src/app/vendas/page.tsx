@@ -82,9 +82,9 @@ function formatPercent(v: number) {
   return `${Math.round(v)}%`
 }
 
-function metaColor(percentual: number, hasValor: boolean) {
+function metaColor(percentual: number, hasValor: boolean, sucessoPercent = 100) {
   if (!hasValor) return 'var(--muted-foreground)'
-  return percentual >= 100 ? 'var(--success)' : 'var(--danger)'
+  return percentual >= sucessoPercent ? 'var(--success)' : 'var(--danger)'
 }
 
 function getFotoMedico(nome: string) {
@@ -264,6 +264,7 @@ const res = await fetch(url, {
   meta={metaVendas}
   isMoney
   previousValue={data?.comparativo?.comercialVendas?.valorTotalVendasAnterior || 0}
+  metaSucessoPercent={70}
 />
 
 <CardMeta
@@ -441,7 +442,7 @@ const res = await fetch(url, {
                     className="h-full rounded-full"
                     style={{
                       width: `${Math.min(percentualMeta, 100)}%`,
-                      backgroundColor: metaColor(percentualMeta, medico.valor > 0),
+                      backgroundColor: metaColor(percentualMeta, medico.valor > 0, 70),
                     }}
                   />
                 </div>
@@ -453,7 +454,7 @@ const res = await fetch(url, {
 
                   <span
                     className="font-black"
-                    style={{ color: metaColor(percentualMeta, medico.valor > 0) }}
+                    style={{ color: metaColor(percentualMeta, medico.valor > 0, 70) }}
                   >
                     {medico.valor > 0 ? `${percentualMeta}%` : '—'}
                   </span>
@@ -554,6 +555,7 @@ function CardMeta({
   meta,
   isMoney,
   previousValue = 0,
+  metaSucessoPercent = 100,
 }: {
   icon: typeof CircleDollarSign
   title: string
@@ -561,6 +563,7 @@ function CardMeta({
   meta: number
   isMoney?: boolean
   previousValue?: number
+  metaSucessoPercent?: number
 }) {
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
   const empty = value === 0
@@ -599,14 +602,14 @@ function CardMeta({
             className="h-full rounded-full"
             style={{
               width: `${Math.min(percentual, 100)}%`,
-              backgroundColor: metaColor(percentual, true),
+              backgroundColor: metaColor(percentual, true, metaSucessoPercent),
             }}
           />
         </div>
 
         <div className="mt-2 flex items-center justify-between text-[13px] font-medium text-[var(--muted-foreground)]">
           <span>Meta {isMoney ? formatMoney(meta) : meta}</span>
-          <span className="text-[14px] font-black" style={{ color: metaColor(percentual, true) }}>
+          <span className="text-[14px] font-black" style={{ color: metaColor(percentual, true, metaSucessoPercent) }}>
             {percentual}%
           </span>
         </div>
