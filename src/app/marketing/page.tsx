@@ -27,6 +27,31 @@ import {
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 
+function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {
+  if (!lastUpdated) return null
+
+  const seconds = Math.max(0, Math.floor((now.getTime() - lastUpdated.getTime()) / 1000))
+  const label =
+    seconds < 5
+      ? 'atualizado agora mesmo'
+      : seconds < 60
+        ? `atualizado há ${seconds}s`
+        : `atualizado há ${Math.floor(seconds / 60)}min`
+
+  const stale = seconds > 30
+
+  return (
+    <div className="flex items-start gap-2 text-[12px] font-semibold text-[var(--muted-foreground)]">
+      <span
+        className={`mt-1 inline-flex h-2 w-2 shrink-0 rounded-full ${
+          stale ? 'bg-[var(--warning)]' : 'bg-[var(--success)]'
+        }`}
+      />
+      <span className="min-w-0">{label}</span>
+    </div>
+  )
+}
+
 const ORIGENS_COLORS = [
   '#22D3EE',
   '#34d399',
@@ -1053,6 +1078,14 @@ const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
 const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
   () => getInvestimentosSalvos()
 )
+const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+const [now, setNow] = useState<Date>(new Date())
+
+useEffect(() => {
+  const tick = setInterval(() => setNow(new Date()), 1000)
+  return () => clearInterval(tick)
+}, [])
+
 useEffect(() => {
   async function loadData() {
     try {
@@ -1079,6 +1112,7 @@ const res = await fetch(url, {
       if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
 
       setData(json)
+      setLastUpdated(new Date())
     } catch (err: any) {
       setError(err.message || 'Erro inesperado')
     } finally {
@@ -1262,7 +1296,7 @@ const insights = buildInsights({
 })
 
 return (
-  <AppShell title="Marketing">
+  <AppShell title="Marketing" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
   <div className="space-y-5">
     <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
   <aside className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
