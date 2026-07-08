@@ -37,6 +37,19 @@ import { ptBR } from 'date-fns/locale'
 const NOTIF_SEEN_KEY = 'criare-notif-propostas-seen-percent'
 const NOTIF_AUTO_CLOSE_MS = 30000
 
+const CONTAS: Record<string, { nome: string; email: string; senha: string }> = {
+  admin: {
+    nome: 'Altuus Clinic',
+    email: 'altuusclinic@gmail.com',
+    senha: 'Altuus@2026#',
+  },
+  marketing: {
+    nome: 'Bruno Fontanella',
+    email: 'brunofontanella.ads@gmail.com',
+    senha: 'Criare@Mkt9274#',
+  },
+}
+
 function FiltroResumoCard({
   icon,
   label,
@@ -101,6 +114,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [showNotifications, setShowNotifications] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [sessao, setSessao] = useState<string | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [categoriaAberta, setCategoriaAberta] = useState<
@@ -119,7 +133,12 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
     const stored = localStorage.getItem(NOTIF_SEEN_KEY)
     if (stored) setLastSeenPercent(Number(stored))
+
+    const cookie = document.cookie.split('; ').find((c) => c.startsWith('criare-auth='))
+    setSessao(cookie?.split('=')[1] || null)
   }, [])
+
+  const conta = CONTAS[sessao || 'admin'] || CONTAS.admin
 
   useEffect(() => {
     let cancelled = false
@@ -348,8 +367,8 @@ function parseLocalDate(dateString?: string) {
 </div>
 
                     <div>
-                      <div className="text-xl font-semibold">Usuário</div>
-                      <div className="text-[var(--muted-foreground)]">—</div>
+                      <div className="text-xl font-semibold">{conta.nome}</div>
+                      <div className="text-[var(--muted-foreground)]">{conta.email}</div>
                     </div>
                   </div>
 
@@ -358,7 +377,7 @@ function parseLocalDate(dateString?: string) {
                   </div>
 
                   <div className="mb-4 flex items-center justify-between rounded-2xl bg-[var(--background)] px-4 py-3">
-                    <span>{showPassword ? 'Altuus@2026#' : '••••••••'}</span>
+                    <span>{showPassword ? conta.senha : '••••••••'}</span>
                     <button onClick={() => setShowPassword((v) => !v)}>
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
