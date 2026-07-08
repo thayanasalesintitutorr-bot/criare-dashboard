@@ -408,7 +408,7 @@ function parseLocalDate(dateString?: string) {
       setShowFilters((atual) => !atual)
       setCategoriaAberta(null)
     }}
-    className="flex cursor-pointer items-start justify-between gap-3"
+    className="flex cursor-pointer items-center justify-between gap-3"
   >
   <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 pr-3 font-bold">

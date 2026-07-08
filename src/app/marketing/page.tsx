@@ -211,7 +211,7 @@ extraAoLado?: ReactNode
 
 <div className="mt-1 flex flex-1 items-center justify-between gap-3">
   <div
-    className={`relative flex items-center gap-2 ${hoverCapaz ? 'cursor-default' : 'cursor-pointer'}`}
+    className={`relative flex flex-wrap items-center gap-2 ${hoverCapaz ? 'cursor-default' : 'cursor-pointer'}`}
     onMouseEnter={hoverCapaz ? () => setDetalheAberto(true) : undefined}
     onMouseLeave={hoverCapaz ? () => setDetalheAberto(false) : undefined}
     onClick={!hoverCapaz ? () => setDetalheAberto((aberto) => !aberto) : undefined}
