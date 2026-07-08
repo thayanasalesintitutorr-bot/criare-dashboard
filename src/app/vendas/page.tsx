@@ -253,6 +253,7 @@ const res = await fetch(url, {
   rawValue={vendas?.propostasFechadasPercent || 0}
   previousValue={data?.comparativo?.comercialVendas?.propostasFechadasPercentAnterior || 0}
   subtitle="ganhas sobre orçamentos"
+  formatAnterior={(v) => `${Math.round(v)}%`}
 />
 </div>
 
@@ -528,13 +529,21 @@ function MiniInfo({ label, value }: { label: string; value: string | number }) {
   )
 }
 
-function CompareRow({ atual, anterior }: { atual: number; anterior: number }) {
+function CompareRow({
+  atual,
+  anterior,
+  anteriorLabel,
+}: {
+  atual: number
+  anterior: number
+  anteriorLabel?: string
+}) {
   const diff = anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
   const positivo = diff > 0
   const negativo = diff < 0
 
   return (
-    <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] font-black">
       <span
         className={
           positivo ? 'text-[var(--success)]' : negativo ? 'text-[var(--danger)]' : 'text-[var(--muted-foreground)]'
@@ -543,7 +552,9 @@ function CompareRow({ atual, anterior }: { atual: number; anterior: number }) {
         {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
       </span>
 
-      <span className="text-[var(--muted-foreground)]">vs anterior</span>
+      <span className="font-medium text-[var(--muted-foreground)]">
+        vs anterior{anteriorLabel ? ` · ${anteriorLabel}` : ''}
+      </span>
     </div>
   )
 }
@@ -614,7 +625,11 @@ function CardMeta({
           </span>
         </div>
 
-        <CompareRow atual={value} anterior={anterior} />
+        <CompareRow
+          atual={value}
+          anterior={anterior}
+          anteriorLabel={anterior > 0 ? (isMoney ? formatMoney(anterior) : String(anterior)) : undefined}
+        />
       </div>
     </div>
   )
@@ -627,6 +642,7 @@ function CardMini({
   rawValue,
   previousValue = 0,
   subtitle,
+  formatAnterior = (v: number) => String(Math.round(v)),
 }: {
   icon: typeof CircleDollarSign
   title: string
@@ -634,6 +650,7 @@ function CardMini({
   rawValue?: number
   previousValue?: number
   subtitle?: string
+  formatAnterior?: (v: number) => string
 }) {
   const atual = Number(rawValue ?? value ?? 0)
   const anterior = Number(previousValue || 0)
@@ -669,7 +686,11 @@ function CardMini({
           <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">{subtitle}</p>
         )}
 
-        <CompareRow atual={atual} anterior={anterior} />
+        <CompareRow
+          atual={atual}
+          anterior={anterior}
+          anteriorLabel={anterior > 0 ? formatAnterior(anterior) : undefined}
+        />
       </div>
     </div>
   )
