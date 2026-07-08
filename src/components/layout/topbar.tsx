@@ -408,10 +408,9 @@ function parseLocalDate(dateString?: string) {
       setShowFilters((atual) => !atual)
       setCategoriaAberta(null)
     }}
-    className="flex cursor-pointer items-center justify-between gap-3"
+    className="flex cursor-pointer items-start justify-between gap-3"
   >
-  <div className="flex items-center justify-between gap-3">
-    <div className="flex flex-wrap items-center gap-3">
+  <div className="flex flex-wrap items-center gap-3">
       <div className="flex items-center gap-2 pr-3 font-bold">
         <SlidersHorizontal size={18} className="text-[var(--accent)]" />
         Filtros aplicados
@@ -457,15 +456,13 @@ function parseLocalDate(dateString?: string) {
 </div>
     </div>
 
-    <div className="ml-auto flex items-center gap-4">
+    <div className="ml-auto flex shrink-0 items-center gap-4">
   {statusIndicator}
 
   <div className="text-[var(--accent)]">
     {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
   </div>
 </div>
-
-  </div>
 
   </div>
   {showFilters && (
