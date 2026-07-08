@@ -212,11 +212,11 @@ function textSecondary() {
 }
 
 function cardBg() {
-  return 'rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] transition-colors duration-200 hover:border-[var(--accent)]/30'
+  return 'rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)] transition-colors duration-200 hover:border-[var(--accent)]/30'
 }
 
 function metricCardBg() {
-  return 'rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-2 transition-colors duration-200 hover:border-[var(--accent)]/30'
+  return 'rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-2 transition-colors duration-200 hover:border-[var(--accent)]/30'
 }
 
 function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {

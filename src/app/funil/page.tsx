@@ -353,7 +353,7 @@ const ticketMedioConsultaComReabord =
   if (loading) {
     return (
       <AppShell title="Consulta (Funil)">
-        <div className="rounded-[18px] bg-[var(--card)] p-6">
+        <div className="rounded-[24px] bg-[var(--card)] p-6">
           Carregando consultas...
         </div>
       </AppShell>
@@ -363,7 +363,7 @@ const ticketMedioConsultaComReabord =
   if (error) {
     return (
       <AppShell title="Consulta (Funil)">
-        <div className="rounded-[18px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
+        <div className="rounded-[24px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
           {error}
         </div>
       </AppShell>
@@ -373,7 +373,7 @@ const ticketMedioConsultaComReabord =
   return (
   <AppShell title="Consulta (Funil)" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
     <div className="space-y-5">
-<section className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
+<section className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
  <div className="flex shrink-0 items-center justify-center">
   <ChartNoAxesCombined className="h-6 w-6 text-[var(--accent)]" />
@@ -437,7 +437,7 @@ const ticketMedioConsultaComReabord =
   <div className="mt-3 grid gap-3 xl:grid-cols-12">
   <div ref={colunaGraficosRef} className="min-w-0 space-y-3 xl:col-span-8">
 
-    <div className="min-w-0 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+    <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <div className="mb-3 flex items-center justify-between">
     <h3 className="text-[18px] font-black text-[var(--foreground)]">
       Atendimento por dia
@@ -463,7 +463,7 @@ const ticketMedioConsultaComReabord =
           data={atendimentoPorDiaChart}
           margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
         >
-          <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} strokeDasharray="3 3" />
           <XAxis
             dataKey="label"
             tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
@@ -471,7 +471,7 @@ const ticketMedioConsultaComReabord =
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: 'var(--metric-card)' }}
+            cursor={{ fill: 'var(--progress-bg)' }}
             contentStyle={{
               background: 'var(--background)',
               border: '1px solid var(--border)',
@@ -501,7 +501,7 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-   <div className="min-w-0 overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+   <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <h3 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
     Evolução de faturamento
   </h3>
@@ -513,7 +513,7 @@ const ticketMedioConsultaComReabord =
           data={evolucaoFaturamentoChart}
           margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
         >
-          <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} strokeDasharray="3 3" />
           <XAxis
             dataKey="label"
             tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
@@ -521,7 +521,7 @@ const ticketMedioConsultaComReabord =
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: 'var(--metric-card)' }}
+            cursor={{ fill: 'var(--progress-bg)' }}
             contentStyle={{
               background: 'var(--background)',
               border: '1px solid var(--border)',
@@ -561,7 +561,7 @@ const ticketMedioConsultaComReabord =
 <div className="flex min-h-0 min-w-0 flex-col gap-3 xl:col-span-4">
 
    <div
-     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4 xl:max-h-[var(--altura-coluna-graficos)]"
+     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:max-h-[var(--altura-coluna-graficos)]"
      style={alturaColunaGraficos ? ({ '--altura-coluna-graficos': `${alturaColunaGraficos}px` } as React.CSSProperties) : undefined}
    >
   <h3 className="mb-4 shrink-0 text-[18px] font-black text-[var(--foreground)]">
@@ -611,7 +611,7 @@ const ticketMedioConsultaComReabord =
 </div>
 
 <div className="mt-3 grid grid-cols-4 gap-3">
-  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+  <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Finalizados
     </p>
@@ -626,7 +626,7 @@ const ticketMedioConsultaComReabord =
     )}
   </div>
 
-  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+  <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       No Show
     </p>
@@ -641,7 +641,7 @@ const ticketMedioConsultaComReabord =
     )}
   </div>
 
-  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+  <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Reagendados
     </p>
@@ -656,7 +656,7 @@ const ticketMedioConsultaComReabord =
     )}
   </div>
 
-  <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
+  <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Cancelados
     </p>
@@ -673,7 +673,7 @@ const ticketMedioConsultaComReabord =
 </div>
 </section>
 
-       <section className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : isApresentacao ? 'p-6' : 'p-5'}`}>
+       <section className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : isApresentacao ? 'p-6' : 'p-5'}`}>
   <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
     <h2 className="text-[22px] font-black text-[var(--foreground)]">Consultas por médico</h2>
@@ -728,7 +728,7 @@ const ticketProcedimentosMedico =
   return (
       <div
   key={medico.medico}
-  className={`w-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] ${
+  className={`w-full rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)] ${
   isImac ? 'p-3' : isApresentacao ? 'p-4' : 'p-4'
 }`}
 >
@@ -1047,7 +1047,7 @@ function MetricMini({
 
   return (
   <div
-    className={`rounded-[18px] text-center shadow-none ${textColors[color]} ${
+    className={`rounded-[22px] text-center shadow-[var(--card-shadow)] ${textColors[color]} ${
       bordered ? 'border border-[color:var(--border)] bg-[var(--metric-card)]' : ''
     } ${
       isImac ? 'px-3 py-2' : isApresentacao ? 'p-4' : 'p-3'
@@ -1172,7 +1172,7 @@ const negativo = diff < 0
 
   if (empty) {
     return (
-      <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
+      <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
         <div className={`flex items-center gap-2 ${labelMinH}`}>
           <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
           <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
@@ -1192,7 +1192,7 @@ const negativo = diff < 0
   }
 
   return (
-    <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[18px] shadow-none px-3 py-2 ${tones[tone]}`}>
+    <div className={`relative z-0 hover:z-10 flex h-full flex-col rounded-[22px] shadow-[var(--card-shadow)] px-3 py-2 ${tones[tone]}`}>
       <div className={`flex items-center gap-2 ${labelMinH}`}>
         <Icon className={`h-5 w-5 shrink-0 ${iconColors[tone]}`} />
        <p className={`${isImac ? 'text-[15px]' : isApresentacao ? 'text-[20px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{label}</p>
