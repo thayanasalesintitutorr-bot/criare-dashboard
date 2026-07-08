@@ -1273,26 +1273,28 @@ const ticketAnteriorVendas =
   ganhasAnterior > 0
     ? valorAnteriorVendas / ganhasAnterior
     : 0
-    const propostasFechadasPercent = safePercent(propostasFechadas, propostasEnviadas)
+    const vendaPerdidaLeads = vendasLeads.filter((l) =>
+      statusIs(l, 'VENDA PERDIDA') &&
+      inRange(parseDateLocal(l.closed_at), range.start, range.end)
+    )
+
+    const propostasFechadasPercent = safePercent(
+      propostasFechadasLeads.length,
+      propostasEnviadasLeads.length
+    )
     const metaValorTotalVendas = getMetaVendas(periodo, range.start, range.end)
 
     const funilVendas = {
       total: propostasEnviadasLeads.length,
-      orcamentoEntregue: propostasEnviadasLeads.filter((l) =>
-        statusIs(l, 'ORÇAMENTO ENTREGUE')
-      ).length,
+      orcamentoEntregue: propostasEnviadasLeads.length,
       solicitacaoCirurgia: propostasEnviadasLeads.filter((l) =>
         statusIs(l, 'SOLICITAÇÃO DE CIRURGIA')
       ).length,
       marcado: propostasEnviadasLeads.filter((l) =>
         statusIs(l, 'MARCADO')
       ).length,
-      vendaGanha: propostasEnviadasLeads.filter((l) =>
-        statusIs(l, 'VENDA GANHA')
-      ).length,
-      vendaPerdida: propostasEnviadasLeads.filter((l) =>
-        statusIs(l, 'VENDA PERDIDA')
-      ).length,
+      vendaGanha: propostasFechadasLeads.length,
+      vendaPerdida: vendaPerdidaLeads.length,
     }
 
     // REABORD
