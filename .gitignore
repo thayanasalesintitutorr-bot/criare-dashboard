@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude-flow / ruflo local agent state (not part of the app)
+.claude/
+.claude-flow/
+.swarm/
+.mcp.json
+ruvector.db
+CLAUDE.md
