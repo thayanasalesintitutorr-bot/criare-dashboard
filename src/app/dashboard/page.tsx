@@ -66,6 +66,19 @@ type DashboardResponse = {
       metaValorTotalVendas: number
       metaTicketMedio: number
     }
+    experienciaCliente?: {
+      noShow: number
+      noShowPercent: number
+      metaNoShowPercent: number
+      metaNoShowQuantidade: number
+      reagendados: number
+      reagendadosPercent: number
+      cancelados: number
+      canceladosPercent: number
+      npsGoogle: number
+      npsGooglePercent: number
+      metaNpsGoogle: number
+    }
     atendimentoConsulta?: {
   nome: string
   qtd: number
@@ -87,7 +100,33 @@ conveniosConsulta?: {
     metaTicketMedio: number
   }
 
-  comparativo?: any
+  comparativo?: {
+    marketing?: {
+      totalEntradasAnterior?: number
+      leadsAceitosAnterior?: number
+    }
+    comercialConsulta?: {
+      quantidadeConsultaAnterior?: number
+      valorTotalConsultaAnterior?: number
+      ticketMedioConsultaAnterior?: number
+      quantidadeReabordAnterior?: number
+      valorTotalReabordAnterior?: number
+      ticketMedioReabordAnterior?: number
+      quantidadeTotalAnterior?: number
+      valorTotalAnterior?: number
+      ticketMedioTotalAnterior?: number
+    }
+    comercialVendas?: {
+      propostasEnviadasAnterior?: number
+      valorTotalVendasAnterior?: number
+      ticketMedioVendasAnterior?: number
+    }
+    consolidado?: {
+      qtdVendasAnterior?: number
+      valorVendasAnterior?: number
+      ticketMedioAnterior?: number
+    }
+  }
 
   funil?: {
     entrada: number
@@ -638,8 +677,8 @@ export default function DashboardPage() {
       })
 
       setLastUpdated(new Date())
-    } catch (err: any) {
-      setError(err.message || 'Erro inesperado')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
       setLoading(false)
     }
@@ -659,7 +698,7 @@ export default function DashboardPage() {
   const comercialVendas = data?.kpis?.comercialVendas
   const consolidado = data?.consolidado
   const origens = data?.origens || []
-  const experienciaCliente = (data as any)?.kpis?.experienciaCliente
+  const experienciaCliente = data?.kpis?.experienciaCliente
   const comparativo = data?.comparativo
   const consultaPorMedico = data?.consultaPorMedico || []
   const vendasPorMedico = data?.vendasPorMedico || []

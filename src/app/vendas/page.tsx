@@ -152,8 +152,8 @@ const res = await fetch(url, {
         if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
 
         setData(json)
-      } catch (err: any) {
-        setError(err.message || 'Erro inesperado')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro inesperado')
       } finally {
         setLoading(false)
       }
@@ -167,7 +167,9 @@ const res = await fetch(url, {
   const produtosVendidos = data?.produtosVendidos || []
   const vendasPorMedicoRaw = data?.vendasPorMedico || []
 
-  const vendasPorMedico = vendasPorMedicoRaw.reduce((acc: any[], medico) => {
+  type MedicoVenda = NonNullable<DashboardResponse['vendasPorMedico']>[number]
+
+  const vendasPorMedico = vendasPorMedicoRaw.reduce((acc: MedicoVenda[], medico) => {
     const nomeNormalizado =
       !medico.nome || medico.nome.trim().toLowerCase() === 'null'
         ? 'Sem médico'
@@ -178,7 +180,7 @@ const res = await fetch(url, {
     if (existente) {
       existente.valor += medico.valor || 0
       existente.meta += medico.meta || 0
-      existente.propostasEnviadas += medico.propostasEnviadas || 0
+      existente.propostasEnviadas = (existente.propostasEnviadas || 0) + (medico.propostasEnviadas || 0)
       existente.produtos = [
         ...(existente.produtos || []),
         ...(medico.produtos || []),

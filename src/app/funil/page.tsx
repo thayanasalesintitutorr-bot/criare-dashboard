@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Bar,
   BarChart,
@@ -25,11 +25,24 @@ import {
   CalendarX2,
   CalendarClock,
   ChartNoAxesCombined,
+  type LucideIcon,
 } from 'lucide-react'
 
 type DashboardResponse = {
   ok: boolean
-  painelAtendimento?: any
+  painelAtendimento?: {
+    atendimentoPorDia?: { data: string; label: string; quantidade: number }[]
+    evolucaoFaturamento?: { label: string; valor: number }[]
+    agendamentosPorOrigem?: { nome: string; quantidade: number }[]
+    totalAgendamentos?: number
+    totalPrimeiraVez?: number
+    statusAgenda?: {
+      finalizados?: number
+      noShow?: number
+      reagendados?: number
+      cancelados?: number
+    }
+  }
   consultaPorMedico?: {
   medico: string
   atendimentos: number
@@ -49,6 +62,11 @@ reagendados?: number
 valorParticular?: number
 valorConvenio?: number
 valorProtocolosVendidos?: number
+consultasPrimeiraVez?: number
+injetaveisVendidos?: number
+valorInjetaveisVendidos?: number
+protocolosVendidos?: number
+retornos?: number
 }[]
 
 vendasPorMedico?: {
@@ -284,8 +302,8 @@ const isApresentacao = viewMode === 'apresentacao'
       })
 
       setLastUpdated(new Date())
-    } catch (err: any) {
-      setError(err.message || 'Erro inesperado')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
       if (showLoading) {
         setLoading(false)
@@ -308,7 +326,7 @@ const isApresentacao = viewMode === 'apresentacao'
   const painelAtendimento = data?.painelAtendimento
 
   const atendimentoPorDiaChart = useMemo(() => {
-    return (painelAtendimento?.atendimentoPorDia || []).map((item: any) => {
+    return (painelAtendimento?.atendimentoPorDia || []).map((item) => {
       const dataObj = new Date(`${item.data}T00:00:00`)
       const fimDeSemana = dataObj.getDay() === 0 || dataObj.getDay() === 6
       return { ...item, fimDeSemana }
@@ -333,7 +351,7 @@ const ticketMedioConsultaComReabord =
   const consultaPorMedico = Array.from(
   new Map(
     (data?.consultaPorMedico || [])
-      .filter((medico: any) => {
+      .filter((medico) => {
         return (
           (medico.atendimentos || 0) > 0 ||
           (medico.quantidadeConsulta || 0) > 0 ||
@@ -344,7 +362,7 @@ const ticketMedioConsultaComReabord =
           (medico.reagendados || 0) > 0
         )
       })
-      .map((medico: any) => [
+      .map((medico) => [
         medico.medico
           ?.normalize('NFD')
           .replace(/\p{Diacritic}/gu, '')
@@ -484,10 +502,10 @@ const ticketMedioConsultaComReabord =
               fontWeight: 700,
               color: 'var(--foreground)',
             }}
-            formatter={(value: any) => [value, 'Atendimentos']}
+            formatter={(value) => [value, 'Atendimentos']}
           />
           <Bar dataKey="quantidade" radius={[6, 6, 0, 0]} maxBarSize={18} isAnimationActive={false} label={{ position: 'top', fontSize: 11, fontWeight: 900, fill: 'var(--foreground)' }}>
-            {atendimentoPorDiaChart.map((item: any, index: number) => (
+            {atendimentoPorDiaChart.map((item, index: number) => (
               <Cell
                 key={item.data || index}
                 fill={item.fimDeSemana ? 'var(--muted-foreground)' : 'var(--accent)'}
@@ -534,7 +552,7 @@ const ticketMedioConsultaComReabord =
               fontWeight: 700,
               color: 'var(--foreground)',
             }}
-            formatter={(value: any) => [formatMoney(Number(value || 0)), 'Faturamento']}
+            formatter={(value) => [formatMoney(Number(value || 0)), 'Faturamento']}
           />
           <Bar
             dataKey="valor"
@@ -547,7 +565,7 @@ const ticketMedioConsultaComReabord =
               fontSize: 10,
               fontWeight: 900,
               fill: 'var(--foreground)',
-              formatter: (value: any) => formatMoney(Number(value || 0)),
+              formatter: (value) => formatMoney(Number(value || 0)),
             }}
           />
         </BarChart>
@@ -573,9 +591,9 @@ const ticketMedioConsultaComReabord =
   </h3>
 
   <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-2">
-    {(painelAtendimento?.agendamentosPorOrigem || []).map((item: any) => {
+    {(painelAtendimento?.agendamentosPorOrigem || []).map((item) => {
       const maior = Math.max(
-        ...(painelAtendimento?.agendamentosPorOrigem || []).map((x: any) => Number(x.quantidade || 0)),
+        ...(painelAtendimento?.agendamentosPorOrigem || []).map((x) => Number(x.quantidade || 0)),
         1
       )
 
@@ -684,7 +702,7 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="grid gap-6">
-    {consultaPorMedico.map((medico: any) => {
+    {consultaPorMedico.map((medico) => {
   const infoMedico = getInfoMedico(medico.medico)
 
   const consultasGanhasMedico = Number(medico.quantidadeConsulta || 0)
@@ -696,7 +714,7 @@ const ticketMedioMedico =
     ? faturamentoMedico / consultasGanhasMedico
     : 0
 
-    const vendaProcedimentoMedico = vendasPorMedico.find((item: any) => {
+    const vendaProcedimentoMedico = vendasPorMedico.find((item) => {
   const nomeVenda = item.nome
     ?.normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
@@ -716,7 +734,7 @@ const valorProcedimentosMedico = Number(vendaProcedimentoMedico?.valor || 0)
 
 const quantidadeProcedimentosVendidos =
   vendaProcedimentoMedico?.produtos?.reduce(
-    (acc: number, item: any) => acc + Number(item.qtd || 0),
+    (acc: number, item) => acc + Number(item.qtd || 0),
     0
   ) || 0
 
@@ -1038,7 +1056,7 @@ function MetricMini({
   label: string
   value: number | string
   color?: 'blue' | 'red' | 'green' | 'orange' | 'pink' | 'darkRed'
-  icon?: any
+  icon?: LucideIcon
   bordered?: boolean
 }) {
   const { viewMode } = useFilters()
@@ -1129,9 +1147,9 @@ function MetricCard({
   centered = false,
   centerTitle = false,
 }: {
-  icon: any
+  icon: LucideIcon
   label: string
-  value: any
+  value: ReactNode
   description: string
   tone?: 'blue' | 'green' | 'red' | 'purple'
   previousValue?: number

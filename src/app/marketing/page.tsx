@@ -27,6 +27,62 @@ import {
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 
+type OrigemItem = {
+  nome: string
+  quantidade?: number
+  qtd?: number
+  valor?: number
+}
+
+type UtmLink = {
+  id: string
+  nome: string
+  slug: string
+  clicks?: number
+  utm_campaign?: string
+}
+
+type MarketingResponse = {
+  ok: boolean
+  error?: string
+  kpis?: {
+    marketing?: {
+      totalEntradas: number
+      naoQualificados: number
+      naoQualificadosPercent: number
+      leadsAceitos: number
+      leadsAceitosPercent: number
+      convertidos: number
+      convertidosPercent: number
+      leadA: number
+      leadB: number
+      leadC: number
+      leadD: number
+    }
+    comercialConsulta?: {
+      valorTotalConsulta: number
+    }
+    comercialVendas?: {
+      valorTotalVendas: number
+    }
+  }
+  origensPorEtapa?: {
+    entrada: OrigemItem[]
+    naoQualificado: OrigemItem[]
+    qualificado: OrigemItem[]
+    agendado: OrigemItem[]
+  }
+  origensQualificadosPorTag?: {
+    todas: OrigemItem[]
+    A: OrigemItem[]
+    B: OrigemItem[]
+    C: OrigemItem[]
+    D: OrigemItem[]
+  }
+  origensVendaConsulta?: OrigemItem[]
+  origensPropostasFechadas?: OrigemItem[]
+}
+
 function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {
   if (!lastUpdated) return null
 
@@ -97,23 +153,26 @@ function getInvestimentosSalvos() {
   }
 }
 
-function sumQtd(items: any[]) {
+function sumQtd(items: OrigemItem[]) {
   return items.reduce(
     (total, item) => total + (item.quantidade ?? item.qtd ?? 0),
     0
   )
 }
 
-function sumValor(items: any[]) {
+function sumValor(items: OrigemItem[]) {
   return items.reduce((total, item) => total + (item.valor ?? 0), 0)
 }
 
 function useHoverCapaz() {
-  const [hoverCapaz, setHoverCapaz] = useState(true)
+  const [hoverCapaz, setHoverCapaz] = useState(() =>
+    typeof window === 'undefined'
+      ? true
+      : window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  )
 
   useEffect(() => {
     const media = window.matchMedia('(hover: hover) and (pointer: fine)')
-    setHoverCapaz(media.matches)
 
     const atualizar = (event: MediaQueryListEvent) => setHoverCapaz(event.matches)
     media.addEventListener('change', atualizar)
@@ -520,7 +579,7 @@ function UtmLinksCard({
 }: {
   leadsOrigemTotais: { nome: string; quantidade?: number; qtd?: number }[]
 }) {
-  const [links, setLinks] = useState<any[]>([])
+  const [links, setLinks] = useState<UtmLink[]>([])
   const [loadingLinks, setLoadingLinks] = useState(true)
   const [criando, setCriando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
@@ -612,7 +671,7 @@ function UtmLinksCard({
     setTimeout(() => setCopiadoSlug(null), 1500)
   }
 
-  function leadsDoLink(link: any) {
+  function leadsDoLink(link: UtmLink) {
     const alvo = normalizeTexto(link.utm_campaign || link.nome)
 
     if (!alvo) return 0
@@ -1069,7 +1128,7 @@ export default function MarketingPage() {
 
     const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
 
-const [data, setData] = useState<any>(null)
+const [data, setData] = useState<MarketingResponse | null>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
 const [tagsSelecionadas, setTagsSelecionadas] = useState<('A' | 'B' | 'C' | 'D')[]>([])
@@ -1113,8 +1172,8 @@ const res = await fetch(url, {
 
       setData(json)
       setLastUpdated(new Date())
-    } catch (err: any) {
-      setError(err.message || 'Erro inesperado')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro inesperado')
     } finally {
       setLoading(false)
     }
@@ -1202,11 +1261,11 @@ const valorProcedimentos =
 
   const todasOrigens = Array.from(
   new Set([
-    ...origensPorEtapa.entrada.map((item: any) => item.nome),
-    ...origensPorEtapa.naoQualificado.map((item: any) => item.nome),
-    ...origensPorEtapa.agendado.map((item: any) => item.nome),
-    ...origensVendaConsulta.map((item: any) => item.nome),
-    ...origensPropostasFechadas.map((item: any) => item.nome),
+    ...origensPorEtapa.entrada.map((item) => item.nome),
+    ...origensPorEtapa.naoQualificado.map((item) => item.nome),
+    ...origensPorEtapa.agendado.map((item) => item.nome),
+    ...origensVendaConsulta.map((item) => item.nome),
+    ...origensPropostasFechadas.map((item) => item.nome),
   ])
 ).filter(Boolean)
 
@@ -1215,7 +1274,7 @@ const origemAtiva = (nome: string) => {
   return origensSelecionadas.includes(nome)
 }
 
-const filtrarOrigem = (items: any[]) =>
+const filtrarOrigem = (items: OrigemItem[]) =>
   items.filter((item) => origemAtiva(item.nome))
 const qualificadosFiltradosPorOrigem =
   filtrarOrigem(qualificadosFiltrados)
@@ -1241,11 +1300,11 @@ const origensRoi =
 const retornoPorOrigem = origensRoi
   .map((origem) => {
     const consulta = origensVendaConsulta.find(
-      (item: any) => item.nome === origem
+      (item) => item.nome === origem
     )
 
     const procedimento = origensPropostasFechadas.find(
-      (item: any) => item.nome === origem
+      (item) => item.nome === origem
     )
 
     const retorno = (consulta?.valor || 0) + (procedimento?.valor || 0)
