@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-07-08T02:32:40.811Z",
+  "timestamp": "2026-07-09T20:17:38.205Z",
   "projectRoot": "/Users/thayanasales/criare-dashboard",
   "structure": {
     "hasPackageJson": true,
@@ -7,5 +7,5 @@
     "hasClaudeConfig": true,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1783477960811
+  "scannedAt": 1783628258205
 }
