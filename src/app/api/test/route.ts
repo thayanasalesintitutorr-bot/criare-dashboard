@@ -1964,6 +1964,192 @@ if (med.includes('BRENO')) {
   })))
 }
 
+// Período anterior (comparativo "vs anterior") — mesma classificação usada acima
+// para o período atual, aplicada aos datasets já filtrados para o período anterior
+// (noShowFiltradoAnterior / consultaGanhosAnterior / procedimentosGanhosAnterior).
+const atendimentosAgendaMedicoAnterior = noShowFiltradoAnterior.filter((item: any) => {
+  const profissional = normalize(item['Profissional'])
+  return profissional.includes(med.split(' ')[1] || med)
+})
+
+const canceladosMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) =>
+  normalize(item['Status']).includes('CANCELADO')
+).length
+
+const reagendadosMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) =>
+  normalize(item['Status']).includes('REAGENDADO')
+).length
+
+const atendimentosMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) =>
+  normalize(item['Status']).includes('FINALIZADO')
+).length
+
+const retornosAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  return RETORNOS.some((retorno) => procedimento.includes(normalize(retorno)))
+}).length
+
+const consultasPrimeiraVezAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  return consultasProcedimentos.some((consulta) => procedimento.includes(normalize(consulta)))
+}).length
+
+const procedimentosMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  if (!status.includes('FINALIZADO')) return false
+  if (!procedimento) return false
+
+  const ehConsulta = consultasProcedimentos.some((consulta) => procedimento.includes(normalize(consulta)))
+  const ehCirurgia = cirurgiasProcedimentos.some((cirurgia) => procedimento.includes(normalize(cirurgia)))
+  const ehRetorno = RETORNOS.some((retorno) => procedimento.includes(normalize(retorno)))
+
+  return !ehConsulta && !ehCirurgia && !ehRetorno
+}).length
+
+const cirurgiasMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+  const procedimento = normalize(item['Procedimento'])
+
+  const statusValido = status.includes('FINALIZADO') || status.includes('CONFIRMADO')
+
+  if (!statusValido) return false
+  if (!procedimento) return false
+
+  return cirurgiasProcedimentos.some((cirurgia) => procedimento.includes(normalize(cirurgia)))
+}).length
+
+const noShowMedicoAnterior = atendimentosAgendaMedicoAnterior.filter((item: any) => {
+  const status = normalize(item['Status'])
+
+  return (
+    status.includes('NAO COMPARECEU') ||
+    status.includes('NCOMPARECEU') ||
+    status.includes('N COMPARECEU')
+  )
+}).length
+
+const vendasConsultaMedicoAnterior = consultaGanhosAnterior.filter(
+  (lead) => medicoKey(lead.medico) === medicoKey(medico)
+)
+
+const quantidadeConsultaAnterior = vendasConsultaMedicoAnterior.length
+
+const valorConsultaAnterior = vendasConsultaMedicoAnterior.reduce(
+  (acc, lead) => acc + toNumber(lead.faturamento),
+  0
+)
+
+const ticketMedioAnterior =
+  quantidadeConsultaAnterior > 0 ? valorConsultaAnterior / quantidadeConsultaAnterior : 0
+
+const vendasMedicoAnterior = procedimentosGanhosAnterior.filter(
+  (lead: any) => medicoKey(lead.medico) === medicoKey(medico)
+)
+
+const valorVendasAnterior = vendasMedicoAnterior.reduce(
+  (acc: number, lead: any) => acc + toNumber(lead.venda),
+  0
+)
+
+const produtosBrenoAnterior = procedimentosGanhosAnterior.filter((item: any) => {
+  const produtos = String(item.Produto || '')
+    .split(',')
+    .map((p) => normalize(p))
+
+  const possuiProdutoValido = produtos.some((produto) =>
+    produto.includes('INJETAVEL') ||
+    produto.includes('INJETAVEL CUSTO') ||
+    produto.includes('PROTOCOLO RESET METABOLICO MASTER') ||
+    produto.includes('PERNAS PLENAS') ||
+    produto.includes('RESET METABOLICO BRENO') ||
+    produto.includes('EMAGRECIMENTO PLENO') ||
+    produto.includes('IMPLANTE') ||
+    produto.includes('EMAGRECIMENTO PLENO START') ||
+produto.includes('EMAGRECIMENTO PLENO ACELERADOR') ||
+produto.includes('EMAGRECIMENTO PLENO SUPREMO') ||
+produto.includes('PERNAS PLENAS START') ||
+produto.includes('PERNAS PLENAS ACELERADOR') ||
+produto.includes('PERNAS PLENAS SUPREMO') ||
+produto.includes('PLENO TOTAL 3 MESES') ||
+produto.includes('PLENO TOTAL 6 MESES') ||
+produto.includes('HERA') ||
+    produto.includes('SUBCISION COM BIOESTIMULADOR')
+  )
+
+  return (
+    med.includes('BRENO') &&
+    medicoKey(item.medico) === medicoKey(medico) &&
+    statusIs(item, 'VENDA GANHA') &&
+    possuiProdutoValido
+  )
+})
+
+let qtdInjetaveisVendidosAnterior = 0
+let valorInjetaveisVendidosAnterior = 0
+
+let qtdProtocolosVendidosAnterior = 0
+let valorProtocolosVendidosAnterior = 0
+
+produtosBrenoAnterior.forEach((item: any) => {
+  const produtos = Array.isArray(item.Produto)
+    ? item.Produto
+    : String(item.Produto || '')
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean)
+
+  if (!produtos.length) return
+
+  const venda = toNumber(item.venda)
+  const valorPorProduto = venda / produtos.length
+
+  produtos.forEach((p: string) => {
+    const produto = normalize(p)
+
+    const ehInjetavel =
+      produto.includes('INJETAVEL') ||
+      produto.includes('INJETAVEL CUSTO')
+
+    const ehProtocolo =
+      produto.includes('PROTOCOLO RESET METABOLICO MASTER') ||
+      produto.includes('PERNAS PLENAS') ||
+      produto.includes('IMPLANTE') ||
+      produto.includes('RESET METABOLICO') ||
+produto.includes('EMAGRECIMENTO PLENO START') ||
+produto.includes('EMAGRECIMENTO PLENO ACELERADOR') ||
+produto.includes('EMAGRECIMENTO PLENO SUPREMO') ||
+produto.includes('PERNAS PLENAS START') ||
+produto.includes('PERNAS PLENAS ACELERADOR') ||
+produto.includes('PERNAS PLENAS SUPREMO') ||
+produto.includes('PLENO TOTAL 3 MESES') ||
+produto.includes('HERA') ||
+produto.includes('PLENO TOTAL 6 MESES') ||
+      produto.includes('EMAGRECIMENTO PLENO')
+
+    if (ehInjetavel) {
+      qtdInjetaveisVendidosAnterior += 1
+      valorInjetaveisVendidosAnterior += valorPorProduto
+    }
+
+    if (ehProtocolo) {
+      qtdProtocolosVendidosAnterior += 1
+      valorProtocolosVendidosAnterior += valorPorProduto
+    }
+  })
+})
+
   return {
   medico: medKey,
 
@@ -2007,6 +2193,27 @@ reagendados: reagendadosMedico,
   ticketMedio,
   evolucaoConsulta,
   proximosAtendimentos: 0,
+
+  atendimentosAnterior: atendimentosMedicoAnterior,
+  retornosAnterior,
+  noShowAnterior: noShowMedicoAnterior,
+  canceladosAnterior: canceladosMedicoAnterior,
+  reagendadosAnterior: reagendadosMedicoAnterior,
+  consultasPrimeiraVezAnterior,
+  procedimentosAnterior:
+    med.includes('BRENO')
+      ? 1
+      : procedimentosMedicoAnterior,
+  cirurgiasAnterior: cirurgiasMedicoAnterior,
+  injetaveisVendidosAnterior: qtdInjetaveisVendidosAnterior,
+  valorInjetaveisVendidosAnterior,
+  protocolosVendidosAnterior: qtdProtocolosVendidosAnterior,
+  valorProtocolosVendidosAnterior,
+  quantidadeConsultaAnterior,
+  valorConsultaAnterior,
+  ticketMedioAnterior,
+  valorVendasAnterior,
+  faturamentoConsolidadoAnterior: valorConsultaAnterior + valorVendasAnterior,
   evolucaoProcedimentos:
   med.includes('BRENO')
     ? evolucaoProcedimentos.map((v, i) => {

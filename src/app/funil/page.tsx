@@ -67,6 +67,24 @@ injetaveisVendidos?: number
 valorInjetaveisVendidos?: number
 protocolosVendidos?: number
 retornos?: number
+
+atendimentosAnterior?: number
+retornosAnterior?: number
+noShowAnterior?: number
+canceladosAnterior?: number
+reagendadosAnterior?: number
+consultasPrimeiraVezAnterior?: number
+procedimentosAnterior?: number
+cirurgiasAnterior?: number
+injetaveisVendidosAnterior?: number
+valorInjetaveisVendidosAnterior?: number
+protocolosVendidosAnterior?: number
+valorProtocolosVendidosAnterior?: number
+quantidadeConsultaAnterior?: number
+valorConsultaAnterior?: number
+ticketMedioAnterior?: number
+valorVendasAnterior?: number
+faturamentoConsolidadoAnterior?: number
 }[]
 
 vendasPorMedico?: {
@@ -840,6 +858,8 @@ const ticketProcedimentosMedico =
       value={medico.atendimentos || 0}
       color="green"
       icon={UserCheck}
+      anterior={medico.atendimentosAnterior}
+      showCompare={comparar}
     />
 
     <MetricMini
@@ -847,6 +867,8 @@ const ticketProcedimentosMedico =
       value={medico.retornos || 0}
       color="blue"
       icon={RotateCcw}
+      anterior={medico.retornosAnterior}
+      showCompare={comparar}
     />
 
     <MetricMini
@@ -854,6 +876,8 @@ const ticketProcedimentosMedico =
       value={medico.noShow || 0}
       color="pink"
       icon={UserX}
+      anterior={medico.noShowAnterior}
+      showCompare={comparar}
     />
 
     <MetricMini
@@ -861,6 +885,8 @@ const ticketProcedimentosMedico =
       value={medico.cancelados || 0}
       color="red"
       icon={CalendarX2}
+      anterior={medico.canceladosAnterior}
+      showCompare={comparar}
     />
 
     <MetricMini
@@ -868,10 +894,22 @@ const ticketProcedimentosMedico =
       value={medico.reagendados || 0}
       color="darkRed"
       icon={CalendarClock}
+      anterior={medico.reagendadosAnterior}
+      showCompare={comparar}
     />
   </div>
 
-    <div className={`mt-3 ${isImac ? 'grid grid-cols-1 gap-3 sm:grid-cols-2' : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
+    <div
+      className={`mt-3 ${
+        isImac
+          ? medico.medico?.toUpperCase().includes('BRENO')
+            ? 'grid grid-cols-1 gap-3 sm:grid-cols-2'
+            : 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
+          : isApresentacao
+            ? 'grid grid-cols-3 gap-2'
+            : 'grid grid-cols-1 gap-2'
+      }`}
+    >
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -880,6 +918,8 @@ const ticketProcedimentosMedico =
   tone="green"
   centerTitle
   centered
+  previousValue={medico.consultasPrimeiraVezAnterior}
+  showCompare={comparar}
 />
 
     <MetricCard
@@ -890,6 +930,8 @@ const ticketProcedimentosMedico =
   tone="blue"
   centerTitle
   centered
+  previousValue={medico.procedimentosAnterior}
+  showCompare={comparar}
 />
 
 {!medico.medico?.toUpperCase().includes('BRENO') && (
@@ -901,6 +943,8 @@ const ticketProcedimentosMedico =
     tone="purple"
     centerTitle
     centered
+    previousValue={medico.cirurgiasAnterior}
+    showCompare={comparar}
   />
 )}
 
@@ -924,6 +968,9 @@ const ticketProcedimentosMedico =
       tone="red"
       centerTitle
       centered
+      currentValue={medico.injetaveisVendidos || 0}
+      previousValue={medico.injetaveisVendidosAnterior}
+      showCompare={comparar}
     />
 
     <MetricCard
@@ -942,6 +989,9 @@ const ticketProcedimentosMedico =
       }
       description=""
       tone="purple"
+      currentValue={medico.protocolosVendidos || 0}
+      previousValue={medico.protocolosVendidosAnterior}
+      showCompare={comparar}
       centerTitle
       centered
     />
@@ -1009,6 +1059,13 @@ CONSOLIDADO
           {formatMoney(faturamentoConsolidado)}
         </p>
 
+        {comparar && (
+          <ComparativoBadge
+            atual={faturamentoConsolidado}
+            anterior={medico.faturamentoConsolidadoAnterior}
+          />
+        )}
+
         <div className="mt-3 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
           <div
   className={`h-full rounded-full ${
@@ -1061,12 +1118,16 @@ function MetricMini({
   color = 'blue',
   icon: Icon,
   bordered = true,
+  anterior,
+  showCompare = false,
 }: {
   label: string
   value: number | string
   color?: 'blue' | 'red' | 'green' | 'orange' | 'pink' | 'darkRed'
   icon?: LucideIcon
   bordered?: boolean
+  anterior?: number
+  showCompare?: boolean
 }) {
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
@@ -1115,18 +1176,30 @@ function MetricMini({
     >
       {value}
     </p>
+
+    {showCompare && (
+      <ComparativoBadge atual={Number(value) || 0} anterior={anterior} centered />
+    )}
   </div>
 )
 }
 
-function ComparativoBadge({ atual, anterior }: { atual: number; anterior?: number }) {
+function ComparativoBadge({
+  atual,
+  anterior,
+  centered = false,
+}: {
+  atual: number
+  anterior?: number
+  centered?: boolean
+}) {
   const base = Number(anterior || 0)
   const diff = base > 0 ? Math.round(((atual - base) / base) * 100) : 0
   const positivo = diff > 0
   const negativo = diff < 0
 
   return (
-    <div className="mt-2 flex items-center gap-2 text-[12px] font-medium">
+    <div className={`mt-2 flex items-center gap-2 text-[12px] font-medium ${centered ? 'justify-center' : ''}`}>
       <span
         className={
           positivo
@@ -1151,6 +1224,7 @@ function MetricCard({
   description,
   tone = 'blue',
   previousValue,
+  currentValue,
   showCompare = false,
   empty = false,
   centered = false,
@@ -1162,6 +1236,7 @@ function MetricCard({
   description: string
   tone?: 'blue' | 'green' | 'red' | 'purple'
   previousValue?: number
+  currentValue?: number
   showCompare?: boolean
   empty?: boolean
   centered?: boolean
@@ -1195,9 +1270,11 @@ purple:
 }
 
 const atual =
-  typeof value === 'string'
-    ? Number(String(value).replace(/[^\d,-]/g, '').replace(',', '.')) || 0
-    : Number(value || 0)
+  currentValue !== undefined
+    ? currentValue
+    : typeof value === 'string'
+      ? Number(String(value).replace(/[^\d,-]/g, '').replace(',', '.')) || 0
+      : Number(value || 0)
 
 const anterior = Number(previousValue || 0)
 

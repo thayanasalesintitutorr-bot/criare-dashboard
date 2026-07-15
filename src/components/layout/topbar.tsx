@@ -798,34 +798,17 @@ function parseLocalDate(dateString?: string) {
           </button>
 
           <button
-            onClick={() => setComparar(true)}
+            onClick={() => {
+              setComparar(true)
+              setShowCompararCalendar(true)
+            }}
             className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
           >
             Comparar
           </button>
 
           {comparar && (
-            <>
-              <button
-                onClick={() => {
-                  setCompararInicio('')
-                  setCompararFim('')
-                  setCategoriaAberta(null)
-                }}
-                className={`${pillBase} ${!compararInicio && !compararFim ? pillActive : pillInactive}`}
-              >
-                Período anterior
-              </button>
-
               <div ref={compararCalendarRef} className="relative">
-                <button
-                  onClick={() => setShowCompararCalendar((v) => !v)}
-                  className={`${pillBase} ${compararInicio && compararFim ? pillActive : pillInactive}`}
-                >
-                  <CalendarDays size={16} />
-                  Personalizado
-                </button>
-
                 {showCompararCalendar && (
                   <>
                   <div
@@ -940,7 +923,6 @@ function parseLocalDate(dateString?: string) {
                   </>
                 )}
               </div>
-            </>
           )}
         </div>
         )}
