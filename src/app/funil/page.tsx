@@ -900,6 +900,7 @@ const ticketProcedimentosMedico =
     description=""
     tone="purple"
     centerTitle
+    centered
   />
 )}
 
@@ -1110,7 +1111,7 @@ function MetricMini({
     <p
       className={`mt-2 ${
         isImac ? 'text-[18px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'
-      } font-black text-[var(--foreground)]`}
+      } font-medium text-[var(--foreground)]`}
     >
       {value}
     </p>
@@ -1217,7 +1218,7 @@ const negativo = diff < 0
         </div>
 
         <div className={`mt-3 ${centered ? 'text-center' : ''}`}>
-          <div className={`${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>
+          <div className={`${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-medium leading-none text-[var(--muted-foreground)]/40`}>
             —
           </div>
 
@@ -1238,7 +1239,7 @@ const negativo = diff < 0
 
       <div className={`mt-3 min-w-0 ${centered ? 'text-center' : ''}`}>
   <div className="min-w-0">
-    <div className={`flex w-full min-w-0 items-center gap-2 ${centered ? 'justify-center' : 'justify-between'} ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
+    <div className={`flex w-full min-w-0 items-center gap-2 ${centered ? 'justify-center' : 'justify-between'} ${isImac ? 'text-[20px]' : isApresentacao ? 'text-[34px]' : 'text-[24px]'} font-medium leading-none text-[var(--foreground)]`}>
       {value}
     </div>
 
@@ -1249,7 +1250,7 @@ const negativo = diff < 0
 )}
 
 {showCompare && (
-  <div className={`mt-2 flex items-center gap-2 text-[12px] font-black ${centered ? 'justify-center' : ''}`}>
+  <div className={`mt-2 flex items-center gap-2 text-[12px] font-medium ${centered ? 'justify-center' : ''}`}>
     <span
       className={
         positivo
