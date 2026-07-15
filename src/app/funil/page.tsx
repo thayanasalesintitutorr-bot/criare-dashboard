@@ -871,7 +871,7 @@ const ticketProcedimentosMedico =
     />
   </div>
 
-    <div className={`mt-3 ${isImac ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3' : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
+    <div className={`mt-3 ${isImac ? 'grid grid-cols-1 gap-3 sm:grid-cols-2' : isApresentacao ? 'grid grid-cols-3 gap-2' : 'grid grid-cols-1 gap-2'}`}>
    <MetricCard
   icon={TrendingUp}
   label="Consultas 1ª vez"
@@ -879,6 +879,7 @@ const ticketProcedimentosMedico =
   description=""
   tone="green"
   centerTitle
+  centered
 />
 
     <MetricCard
@@ -888,6 +889,7 @@ const ticketProcedimentosMedico =
   description=""
   tone="blue"
   centerTitle
+  centered
 />
 
 {!medico.medico?.toUpperCase().includes('BRENO') && (
