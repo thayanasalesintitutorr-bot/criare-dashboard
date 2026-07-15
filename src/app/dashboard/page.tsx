@@ -754,10 +754,10 @@ export default function DashboardPage() {
     {
       nome: string
       atendimentos?: number
-      ticketConsulta?: number
+      quantidadeConsulta?: number
       valorConsulta?: number
       valorVendas?: number
-      percentualMeta?: number
+      meta?: number
       procedimentos?: number
       capacidadeAgenda?: number
     }
@@ -768,7 +768,7 @@ export default function DashboardPage() {
       ...medicosSnapshotMap.get(m.medico),
       nome: m.medico,
       atendimentos: m.atendimentos,
-      ticketConsulta: m.ticketMedio,
+      quantidadeConsulta: m.quantidadeConsulta,
       valorConsulta: m.valorConsulta,
       capacidadeAgenda: m.capacidadeAgenda,
     })
@@ -781,15 +781,26 @@ export default function DashboardPage() {
       ...medicosSnapshotMap.get(m.nome),
       nome: m.nome,
       valorVendas: m.valor,
-      percentualMeta: (m.percentual || 0) * 100,
+      meta: m.meta,
       procedimentos,
     })
   })
 
-  const medicosSnapshot = Array.from(medicosSnapshotMap.values()).map((m) => ({
-    ...m,
-    faturamentoConsolidado: (m.valorConsulta || 0) + (m.valorVendas || 0),
-  }))
+  // Ticket médio e alcance da meta são calculados sobre o faturamento consolidado
+  // (consulta + vendas), a mesma base usada no card "Consolidado" — usar apenas
+  // consulta ou apenas vendas subestima os dois indicadores.
+  const medicosSnapshot = Array.from(medicosSnapshotMap.values()).map((m) => {
+    const faturamentoConsolidado = (m.valorConsulta || 0) + (m.valorVendas || 0)
+    const quantidadeConsolidada = (m.quantidadeConsulta || 0) + (m.procedimentos || 0)
+
+    return {
+      ...m,
+      faturamentoConsolidado,
+      ticketConsulta:
+        quantidadeConsolidada > 0 ? faturamentoConsolidado / quantidadeConsolidada : 0,
+      percentualMeta: (m.meta || 0) > 0 ? (faturamentoConsolidado / (m.meta || 0)) * 100 : 0,
+    }
+  })
   if (loading) {
     return (
       <AppShell title="Visão Geral">

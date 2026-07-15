@@ -26,6 +26,16 @@ import {
 } from 'lucide-react'
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
+const SIDEBAR_ORIGENS_WIDTH_KEY = 'criare-marketing-sidebar-origens-width'
+const SIDEBAR_ORIGENS_WIDTH_MIN = 230
+const SIDEBAR_ORIGENS_WIDTH_MAX = 560
+
+function getSidebarWidthSalva() {
+  if (typeof window === 'undefined') return SIDEBAR_ORIGENS_WIDTH_MIN
+
+  const stored = Number(localStorage.getItem(SIDEBAR_ORIGENS_WIDTH_KEY))
+  return stored ? Math.min(Math.max(stored, SIDEBAR_ORIGENS_WIDTH_MIN), SIDEBAR_ORIGENS_WIDTH_MAX) : SIDEBAR_ORIGENS_WIDTH_MIN
+}
 
 type OrigemItem = {
   nome: string
@@ -551,13 +561,13 @@ function RoiPorOrigemCard({
 
              <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-[var(--muted-foreground)]">
   <div>
-    <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
-    <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
+    <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
+    <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
   </div>
 
   <div className="text-right">
-    <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
-    <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
+    <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
+    <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
   </div>
 </div>
             </div>
@@ -1137,8 +1147,34 @@ const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
 const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
   () => getInvestimentosSalvos()
 )
+const [sidebarOrigensWidth, setSidebarOrigensWidth] = useState<number>(() => getSidebarWidthSalva())
 const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 const [now, setNow] = useState<Date>(new Date())
+
+useEffect(() => {
+  localStorage.setItem(SIDEBAR_ORIGENS_WIDTH_KEY, String(sidebarOrigensWidth))
+}, [sidebarOrigensWidth])
+
+function handleSidebarResizeStart(e: React.MouseEvent) {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = sidebarOrigensWidth
+
+  function handleMouseMove(moveEvent: MouseEvent) {
+    const proxima = startWidth + (moveEvent.clientX - startX)
+    setSidebarOrigensWidth(
+      Math.min(Math.max(proxima, SIDEBAR_ORIGENS_WIDTH_MIN), SIDEBAR_ORIGENS_WIDTH_MAX)
+    )
+  }
+
+  function handleMouseUp() {
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
+}
 
 useEffect(() => {
   const tick = setInterval(() => setNow(new Date()), 1000)
@@ -1357,8 +1393,18 @@ const insights = buildInsights({
 return (
   <AppShell title="Marketing" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
   <div className="space-y-5">
-    <div className="grid gap-5 xl:grid-cols-[230px_1fr]">
-  <aside className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
+    <div
+      className="grid gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
+      style={{ '--sidebar-origens-w': `${sidebarOrigensWidth}px` } as React.CSSProperties}
+    >
+  <aside className="relative flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
+    <div
+      onMouseDown={handleSidebarResizeStart}
+      className="absolute -right-2 top-0 z-10 hidden h-full w-4 cursor-col-resize items-center justify-center xl:flex"
+    >
+      <div className="h-10 w-1 rounded-full bg-[var(--border)] transition-colors hover:bg-[var(--accent)]" />
+    </div>
+
   <div className="min-h-0 flex-1 overflow-y-auto pr-2">
     <div className="mb-4">
       <div className="text-sm font-black uppercase tracking-[0.08em] text-[var(--foreground)]">

@@ -54,7 +54,7 @@ function hasVenda(lead: Lead) {
 }
 
 function normalizeCampaignName(name?: string | null) {
-  if (!name) return 'SEM CAMPANHA'
+  if (!name) return 'Sem origem'
 
   let normalized = name
     .normalize('NFD')
