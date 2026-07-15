@@ -178,6 +178,7 @@ conveniosConsulta?: {
   valorConsulta: number
   ticketMedio: number
   proximosAtendimentos: number
+  capacidadeAgenda?: number
 }[]
 campanhasConsulta?: {
   nome: string
@@ -548,51 +549,96 @@ function MedicoSnapshotCard({
   nome,
   atendimentos,
   ticketConsulta,
-  valorVendas,
+  faturamentoConsolidado,
   percentualMeta,
+  procedimentos,
+  capacidadeAgenda,
 }: {
   nome: string
   atendimentos?: number
   ticketConsulta?: number
-  valorVendas?: number
+  faturamentoConsolidado?: number
   percentualMeta?: number
+  procedimentos?: number
+  capacidadeAgenda?: number
 }) {
   const { viewMode } = useFilters()
   const isApresentacao = viewMode === 'apresentacao'
   const avatar = getAvatarMedico(nome)
   const metaOk = (percentualMeta || 0) >= 100
+  const ocupacao = capacidadeAgenda ?? 0
+  const ocupacaoOk = ocupacao >= 80
+  const ocupacaoAlerta = ocupacao >= 50 && ocupacao < 80
+
+  const statusClass = (good: boolean, alerta: boolean) =>
+    good
+      ? 'text-[var(--success)]'
+      : alerta
+      ? 'text-[var(--warning)]'
+      : 'text-[var(--danger)]'
 
   return (
-    <div className={`flex items-center gap-4 ${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'p-3'} ${metricCardBg()}`}>
-      <div className={`shrink-0 overflow-hidden rounded-full bg-[var(--accent)]/15 ${isApresentacao ? 'h-20 w-20' : viewMode === 'iphone' ? 'h-14 w-14' : 'h-12 w-12'}`}>
-        {avatar ? (
-          <img src={avatar} alt={nome} className="h-full w-full object-cover" />
-        ) : (
-          <div className={`flex h-full w-full items-center justify-center font-bold text-[var(--accent)] ${isApresentacao ? 'text-[28px]' : viewMode === 'iphone' ? 'text-[18px]' : 'text-[16px]'}`}>
-            {nome.charAt(0)}
+    <div className={`${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'p-3'} ${metricCardBg()}`}>
+      <div className="flex items-center gap-4">
+        <div className={`shrink-0 overflow-hidden rounded-full bg-[var(--accent)]/15 ${isApresentacao ? 'h-20 w-20' : viewMode === 'iphone' ? 'h-14 w-14' : 'h-12 w-12'}`}>
+          {avatar ? (
+            <img src={avatar} alt={nome} className="h-full w-full object-cover" />
+          ) : (
+            <div className={`flex h-full w-full items-center justify-center font-bold text-[var(--accent)] ${isApresentacao ? 'text-[28px]' : viewMode === 'iphone' ? 'text-[18px]' : 'text-[16px]'}`}>
+              {nome.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[15px]' : 'text-[14px]'}`}>
+            {nome}
+          </p>
+
+          <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-medium`}>
+            <span>{atendimentos ?? 0} atend.</span>
+            {procedimentos !== undefined && (
+              <span>{procedimentos} procedimento{procedimentos === 1 ? '' : 's'}</span>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="min-w-0 flex-1">
-        <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[15px]' : 'text-[14px]'}`}>
-          {nome}
-        </p>
+      <div className={`mt-3 grid grid-cols-2 gap-2 border-t pt-3 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Ocupação da agenda
+          </p>
+          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
+            {formatPercent(ocupacao)}
+          </p>
+        </div>
 
-        <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isApresentacao ? 'text-[18px]' : viewMode === 'iphone' ? 'text-[12px]' : 'text-[12px]'} font-medium`}>
-          <span>{atendimentos ?? 0} atend.</span>
-          <span>{formatMoney(ticketConsulta || 0)} ticket</span>
-          {valorVendas !== undefined && (
-            <span
-              className={
-                metaOk
-                  ? 'font-semibold text-[var(--success)]'
-                  : 'font-semibold text-[var(--danger)]'
-              }
-            >
-              {formatMoneyShort(valorVendas)} · {formatPercent(percentualMeta || 0)} da meta
-            </span>
-          )}
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Consolidado
+          </p>
+          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+            {formatMoneyShort(faturamentoConsolidado || 0)}
+          </p>
+        </div>
+
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Ticket Médio
+          </p>
+          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+            {formatMoney(ticketConsulta || 0)}
+          </p>
+        </div>
+
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Alcance da meta
+          </p>
+          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
+            {formatPercent(percentualMeta || 0)}
+          </p>
         </div>
       </div>
     </div>
@@ -709,8 +755,11 @@ export default function DashboardPage() {
       nome: string
       atendimentos?: number
       ticketConsulta?: number
+      valorConsulta?: number
       valorVendas?: number
       percentualMeta?: number
+      procedimentos?: number
+      capacidadeAgenda?: number
     }
   >()
 
@@ -720,19 +769,27 @@ export default function DashboardPage() {
       nome: m.medico,
       atendimentos: m.atendimentos,
       ticketConsulta: m.ticketMedio,
+      valorConsulta: m.valorConsulta,
+      capacidadeAgenda: m.capacidadeAgenda,
     })
   })
 
   vendasPorMedico.forEach((m) => {
+    const procedimentos = (m.produtos || []).reduce((total, p) => total + (p.qtd || 0), 0)
+
     medicosSnapshotMap.set(m.nome, {
       ...medicosSnapshotMap.get(m.nome),
       nome: m.nome,
       valorVendas: m.valor,
       percentualMeta: (m.percentual || 0) * 100,
+      procedimentos,
     })
   })
 
-  const medicosSnapshot = Array.from(medicosSnapshotMap.values())
+  const medicosSnapshot = Array.from(medicosSnapshotMap.values()).map((m) => ({
+    ...m,
+    faturamentoConsolidado: (m.valorConsulta || 0) + (m.valorVendas || 0),
+  }))
   if (loading) {
     return (
       <AppShell title="Visão Geral">
@@ -1349,8 +1406,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
                   nome={m.nome}
                   atendimentos={m.atendimentos}
                   ticketConsulta={m.ticketConsulta}
-                  valorVendas={m.valorVendas}
+                  faturamentoConsolidado={m.faturamentoConsolidado}
                   percentualMeta={m.percentualMeta}
+                  procedimentos={m.procedimentos}
+                  capacidadeAgenda={m.capacidadeAgenda}
                 />
               ))}
             </div>
