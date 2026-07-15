@@ -912,7 +912,9 @@ const ticketProcedimentosMedico =
         <>
           <span className="shrink-0">{medico.injetaveisVendidos || 0}</span>
 
-          <span className="min-w-0 truncate text-right">
+          <span className="w-px shrink-0 self-stretch bg-[color:var(--border)]" />
+
+          <span className="min-w-0 truncate">
             {formatMoney(medico.valorInjetaveisVendidos || 0)}
           </span>
         </>
@@ -920,6 +922,7 @@ const ticketProcedimentosMedico =
       description=""
       tone="red"
       centerTitle
+      centered
     />
 
     <MetricCard
@@ -929,7 +932,9 @@ const ticketProcedimentosMedico =
         <>
           <span className="shrink-0">{medico.protocolosVendidos || 0}</span>
 
-          <span className="min-w-0 truncate text-right">
+          <span className="w-px shrink-0 self-stretch bg-[color:var(--border)]" />
+
+          <span className="min-w-0 truncate">
             {formatMoney(medico.valorProtocolosVendidos || 0)}
           </span>
         </>
@@ -937,6 +942,7 @@ const ticketProcedimentosMedico =
       description=""
       tone="purple"
       centerTitle
+      centered
     />
   </>
 )}
