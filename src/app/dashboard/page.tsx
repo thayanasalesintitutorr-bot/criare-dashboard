@@ -363,7 +363,7 @@ const isUp = diff >= 0
         <div
           className={`${
             isApresentacao ? 'text-[64px]' : viewMode === 'iphone' ? 'text-[28px]' : 'text-[32px]'
-          } font-bold tracking-[-0.02em] leading-none text-[var(--muted-foreground)]/40`}
+          } font-medium tracking-[-0.02em] leading-none text-[var(--muted-foreground)]/40`}
         >
           —
         </div>
@@ -390,7 +390,7 @@ const isUp = diff >= 0
     onClick={viewMode === 'iphone' ? iphoneOnValueClick : undefined}
     className={`truncate ${
       isApresentacao ? 'text-[64px]' : viewMode === 'iphone' ? 'text-[28px]' : 'text-[32px]'
-    } font-bold tracking-[-0.02em] leading-none cursor-pointer ${textPrimary()}`}
+    } font-medium tracking-[-0.02em] leading-none cursor-pointer ${textPrimary()}`}
   >
     {value}
   </div>
@@ -400,7 +400,7 @@ const isUp = diff >= 0
 
       {showCompare && (
   <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[12px]' : 'text-[12px]'}`}>
-    <span className={`font-semibold ${isUp ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
+    <span className={`font-medium ${isUp ? 'text-[var(--success)]' : 'text-[var(--danger)]'}`}>
       {isUp ? '▲' : '▼'} {formatPercent(Math.abs(diff))}
     </span>
 
@@ -449,7 +449,7 @@ function GoalMetric({
         <div
           className={`${
             isApresentacao ? 'text-[64px]' : viewMode === 'iphone' ? 'text-[28px]' : 'text-[32px]'
-          } font-bold tracking-[-0.02em] text-[var(--muted-foreground)]/40`}
+          } font-medium tracking-[-0.02em] text-[var(--muted-foreground)]/40`}
         >
           —
         </div>
@@ -474,7 +474,7 @@ function GoalMetric({
       <div
         className={`${
           isApresentacao ? 'text-[64px]' : viewMode === 'iphone' ? 'text-[28px]' : 'text-[32px]'
-        } font-bold tracking-[-0.02em] ${textPrimary()}`}
+        } font-medium tracking-[-0.02em] ${textPrimary()}`}
       >
         {value}
       </div>
@@ -483,7 +483,7 @@ function GoalMetric({
   <span
     className={`${
       isApresentacao ? 'text-[28px]' : viewMode === 'iphone' ? 'text-[15px]' : 'text-[14px]'
-    } font-bold ${s.textClass}`}
+    } font-medium ${s.textClass}`}
   >
     {formatPercent(percent)}
   </span>
@@ -609,7 +609,7 @@ function MedicoSnapshotCard({
           <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ocupação da agenda
           </p>
-          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
             {formatPercent(ocupacao)}
           </p>
         </div>
@@ -618,7 +618,7 @@ function MedicoSnapshotCard({
           <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Consolidado
           </p>
-          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
             {formatMoneyShort(faturamentoConsolidado || 0)}
           </p>
         </div>
@@ -627,7 +627,7 @@ function MedicoSnapshotCard({
           <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ticket Médio
           </p>
-          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
             {formatMoney(ticketConsulta || 0)}
           </p>
         </div>
@@ -636,7 +636,7 @@ function MedicoSnapshotCard({
           <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Alcance da meta
           </p>
-          <p className={`mt-0.5 font-black ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
             {formatPercent(percentualMeta || 0)}
           </p>
         </div>
@@ -894,7 +894,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   </h3>
 
   <div className="flex items-center gap-3">
-    <span className={`${viewMode === 'apresentacao' ? 'text-[54px]' : 'text-[24px]'} font-bold text-[var(--foreground)]`}>
+    <span className={`${viewMode === 'apresentacao' ? 'text-[54px]' : 'text-[24px]'} font-medium text-[var(--foreground)]`}>
       {origensTotal}
     </span>
 
@@ -922,7 +922,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             {item.nome}
           </span>
 
-          <span className={`${viewMode === 'apresentacao' ? 'text-[30px]' : 'text-[14px]'} font-bold text-[var(--foreground)]`}>
+          <span className={`${viewMode === 'apresentacao' ? 'text-[30px]' : 'text-[14px]'} font-medium text-[var(--foreground)]`}>
             {item.quantidade}
           </span>
         </div>
@@ -999,7 +999,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           : 'text-[14px]'
     }`}
   >
-    <span className="font-bold text-[var(--success)]">
+    <span className="font-medium text-[var(--success)]">
       {formatPercent(
         marketing?.totalEntradas
           ? (quantidadeLeadSelecionado / marketing.totalEntradas) * 100

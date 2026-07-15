@@ -275,13 +275,13 @@ extraAoLado?: ReactNode
     onMouseLeave={hoverCapaz ? () => setDetalheAberto(false) : undefined}
     onClick={!hoverCapaz ? () => setDetalheAberto((aberto) => !aberto) : undefined}
   >
-    <span className="text-2xl font-black tracking-[-0.06em] text-[var(--foreground)]">
+    <span className="text-2xl font-medium tracking-[-0.06em] text-[var(--foreground)]">
       {value}
     </span>
 
     {percentBadge && (
       <span
-        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-black ${
+        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
           percentBadge.positive
             ? 'bg-[var(--success)]/10 text-[var(--success)]'
             : 'bg-[var(--danger)]/10 text-[var(--danger)]'
@@ -1494,33 +1494,33 @@ return (
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
               <div className="metric-label">Investimento</div>
-              <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(investimento)}</div>
+              <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(investimento)}</div>
             </div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
             <div className="metric-label">Retorno</div>
-            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(retornoMarketing)}</div>
+            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(retornoMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
             <div className="metric-label">Lucro</div>
-            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(lucroMarketing)}</div>
+            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(lucroMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
             <div className="metric-label">ROI</div>
-            <div className="text-xl font-black text-[var(--accent)]">{roi.toFixed(2)}x</div>
+            <div className="text-xl font-medium text-[var(--accent)]">{roi.toFixed(2)}x</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
             <div className="metric-label">CAC</div>
-            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cac)}</div>
+            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(cac)}</div>
           </div>
 
           <div className="px-4">
             <div className="metric-label">CPL</div>
-            <div className="text-xl font-black text-[var(--foreground)]">{formatMoneyBR(cpl)}</div>
+            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(cpl)}</div>
           </div>
         </div>
 
@@ -1626,7 +1626,7 @@ return (
       <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </span>
-      <span className="text-xs font-black text-[var(--foreground)]">
+      <span className="text-xs font-medium text-[var(--foreground)]">
         {formatMoney(valorConsultasFiltrado)}
       </span>
     </div>
@@ -1635,7 +1635,7 @@ return (
       <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </span>
-      <span className="text-xs font-black text-[var(--foreground)]">
+      <span className="text-xs font-medium text-[var(--foreground)]">
         {formatMoney(
           sumQtd(consultasFiltrado) > 0
             ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
@@ -1664,7 +1664,7 @@ items={consultasFiltrado}
       <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         Valor
       </span>
-      <span className="text-xs font-black text-[var(--foreground)]">
+      <span className="text-xs font-medium text-[var(--foreground)]">
         {formatMoney(valorProcedimentosFiltrado)}
       </span>
     </div>
@@ -1673,7 +1673,7 @@ items={consultasFiltrado}
       <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
         TM
       </span>
-      <span className="text-xs font-black text-[var(--foreground)]">
+      <span className="text-xs font-medium text-[var(--foreground)]">
         {formatMoney(
           sumQtd(procedimentosFiltrado) > 0
             ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)

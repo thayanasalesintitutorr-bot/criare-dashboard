@@ -504,7 +504,7 @@ const ticketMedioConsultaComReabord =
             }}
             formatter={(value) => [value, 'Atendimentos']}
           />
-          <Bar dataKey="quantidade" radius={[6, 6, 0, 0]} maxBarSize={18} isAnimationActive={false} label={{ position: 'top', fontSize: 11, fontWeight: 900, fill: 'var(--foreground)' }}>
+          <Bar dataKey="quantidade" radius={[6, 6, 0, 0]} maxBarSize={18} isAnimationActive={false} label={{ position: 'top', fontSize: 11, fontWeight: 500, fill: 'var(--foreground)' }}>
             {atendimentoPorDiaChart.map((item, index: number) => (
               <Cell
                 key={item.data || index}
@@ -563,7 +563,7 @@ const ticketMedioConsultaComReabord =
             label={{
               position: 'top',
               fontSize: 10,
-              fontWeight: 900,
+              fontWeight: 500,
               fill: 'var(--foreground)',
               formatter: (value) => formatMoney(Number(value || 0)),
             }}
@@ -604,7 +604,7 @@ const ticketMedioConsultaComReabord =
               {item.nome}
             </span>
 
-            <span className="text-sm font-black text-[var(--foreground)]">
+            <span className="text-sm font-medium text-[var(--foreground)]">
               {item.quantidade || 0}
             </span>
           </div>
@@ -624,7 +624,7 @@ const ticketMedioConsultaComReabord =
 
   <div className="mt-3 shrink-0 border-t border-[color:var(--border)] pt-3 text-right">
     <span className="text-sm font-bold text-[var(--muted-foreground)]">
-      Total: <span className="font-black text-[var(--foreground)]">{totalAgendamentosOrigem}</span>
+      Total: <span className="font-medium text-[var(--foreground)]">{totalAgendamentosOrigem}</span>
     </span>
   </div>
 </div>
@@ -637,7 +637,7 @@ const ticketMedioConsultaComReabord =
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Finalizados
     </p>
-    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
       {painelAtendimento?.statusAgenda?.finalizados || 0}
     </p>
     {comparar && (
@@ -652,7 +652,7 @@ const ticketMedioConsultaComReabord =
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       No Show
     </p>
-    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
       {painelAtendimento?.statusAgenda?.noShow || 0}
     </p>
     {comparar && (
@@ -667,7 +667,7 @@ const ticketMedioConsultaComReabord =
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Reagendados
     </p>
-    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
       {painelAtendimento?.statusAgenda?.reagendados || 0}
     </p>
     {comparar && (
@@ -682,7 +682,7 @@ const ticketMedioConsultaComReabord =
     <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
       Cancelados
     </p>
-    <p className="mt-2 text-[26px] font-black text-[var(--foreground)]">
+    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
       {painelAtendimento?.statusAgenda?.cancelados || 0}
     </p>
     {comparar && (
@@ -808,7 +808,7 @@ const ticketProcedimentosMedico =
 
         return (
           <>
-            <p className={`mt-1 ${isImac ? 'text-[24px]' : isApresentacao ? 'text-[30px]' : 'text-[26px]'} font-black leading-none ${corOcupacao}`}>
+            <p className={`mt-1 ${isImac ? 'text-[24px]' : isApresentacao ? 'text-[30px]' : 'text-[26px]'} font-medium leading-none ${corOcupacao}`}>
               {ocupacao}%
             </p>
 
@@ -993,7 +993,7 @@ CONSOLIDADO
     if (metaConsolidada === 0) {
       return (
         <>
-          <p className="text-[30px] font-black text-[var(--muted-foreground)]/40">
+          <p className="text-[30px] font-medium text-[var(--muted-foreground)]/40">
             —
           </p>
           <p className="mt-2 text-[13px] font-semibold text-[var(--muted-foreground)]">
@@ -1005,7 +1005,7 @@ CONSOLIDADO
 
     return (
       <>
-        <p className="text-[30px] font-black text-[var(--foreground)]">
+        <p className="text-[30px] font-medium text-[var(--foreground)]">
           {formatMoney(faturamentoConsolidado)}
         </p>
 
@@ -1030,7 +1030,7 @@ CONSOLIDADO
 </span>
 
 <span
-  className={`text-[22px] font-black ${
+  className={`text-[22px] font-medium ${
     percentualConsolidado >= 100
       ? 'text-[var(--success)]'
       : percentualConsolidado >= 50
@@ -1126,7 +1126,7 @@ function ComparativoBadge({ atual, anterior }: { atual: number; anterior?: numbe
   const negativo = diff < 0
 
   return (
-    <div className="mt-2 flex items-center gap-2 text-[12px] font-black">
+    <div className="mt-2 flex items-center gap-2 text-[12px] font-medium">
       <span
         className={
           positivo
