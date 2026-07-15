@@ -22,7 +22,6 @@ import {
   Presentation,
   Maximize2,
   Minimize2,
-  SlidersHorizontal,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
@@ -122,7 +121,6 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [sessao, setSessao] = useState<string | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
   const compararCalendarRef = useRef<HTMLDivElement>(null)
-  const [showFilters, setShowFilters] = useState(false)
   const [categoriaAberta, setCategoriaAberta] = useState<
     'tipoData' | 'periodo' | 'segmento' | 'dispositivo' | 'comparacao' | null
   >(null)
@@ -411,72 +409,12 @@ function parseLocalDate(dateString?: string) {
               </div>
            
 
-<div className="rounded-[18px] bg-[var(--card)] px-5 py-3 shadow-sm">
-
-  <div
-    onClick={() => {
-      setShowFilters((atual) => !atual)
-      setCategoriaAberta(null)
-    }}
-    className="flex cursor-pointer items-center justify-between gap-3"
-  >
-  <div className="flex flex-wrap items-center gap-3">
-      <div className="flex items-center gap-2 pr-3 font-bold">
-        <SlidersHorizontal size={18} className="text-[var(--accent)]" />
-        Filtros aplicados
-      </div>
-
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-        {tipoData === 'criado' ? 'Criado' : 'Fechado'}
-      </div>
-
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-  {periodo === 'hoje'
-    ? 'Hoje'
-    : periodo === 'ontem'
-    ? 'Ontem'
-    : periodo === 'semana'
-    ? 'Semana'
-    : periodo === 'mes-atual'
-    ? 'Mês atual'
-    : periodo === 'mes-passado'
-    ? 'Mês passado'
-    : dataInicio && dataFim
-    ? `Personalizado (${parseLocalDate(dataInicio)?.toLocaleDateString('pt-BR')} a ${parseLocalDate(dataFim)?.toLocaleDateString('pt-BR')})`
-    : 'Personalizado'}
-</div>
-
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-        {segmento === 'vascular'
-          ? 'Vascular'
-          : segmento === 'emagrecimento'
-          ? 'Emagrecimento'
-          : 'Geral'}
-      </div>
-
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-        {viewMode === 'desktop'
-          ? 'iMac'
-          : viewMode === 'iphone'
-          ? 'iPhone'
-          : 'Apresentação'}
-      </div>
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-semibold">
-  {comparar ? 'Comparando' : 'Sem comparação'}
-</div>
-    </div>
-
-    <div className="ml-auto flex shrink-0 items-center gap-4">
+<div className="flex justify-end px-1">
   {statusIndicator}
-
-  <div className="text-[var(--accent)]">
-    {showFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-  </div>
 </div>
 
-  </div>
-  {showFilters && (
-    <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[var(--border)] pt-4 sm:grid-cols-3 xl:grid-cols-5">
+<div className="rounded-[18px] bg-[var(--card)] px-5 py-3 shadow-sm">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
       <div>
         <FiltroResumoCard
           icon={<Database size={15} className="text-[var(--accent)]" />}
@@ -1009,7 +947,6 @@ function parseLocalDate(dateString?: string) {
       </div>
 
     </div>
-  )}
 </div>
           </div>
 

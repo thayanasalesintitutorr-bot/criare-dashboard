@@ -87,17 +87,13 @@ function normalizeCampaignName(name?: string | null) {
 
 // Retorna o campo bruto de origem do lead de acordo com o modo escolhido:
 // 'campanha' agrupa por utm_campaing (campanha), 'anuncio' agrupa por utm_content (anúncio).
-// Sempre cai para o campo legado "campanha" e depois "source" quando o utm específico não existir.
+// Não cai para outros campos (campanha/source) — apenas o utm específico do modo é considerado,
+// para que o filtro lateral só liste valores realmente presentes na coluna correspondente.
 function origemField(lead: Lead, modo: 'campanha' | 'anuncio') {
   const utmEspecifico =
     modo === 'anuncio' ? lead.utm_content : lead.utm_campaing
 
-  return (
-    (utmEspecifico || '').trim() ||
-    (lead.campanha || '').trim() ||
-    (lead.source || '').trim() ||
-    ''
-  )
+  return (utmEspecifico || '').trim()
 }
 
 // PARSE LOCAL MANUAL — sem UTC
