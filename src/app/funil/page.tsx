@@ -601,7 +601,7 @@ const ticketMedioConsultaComReabord =
 <div className="flex min-h-0 min-w-0 flex-col gap-3 xl:col-span-4">
 
    <div
-     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:max-h-[var(--altura-coluna-graficos)]"
+     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:h-[var(--altura-coluna-graficos)]"
      style={alturaColunaGraficos ? ({ '--altura-coluna-graficos': `${alturaColunaGraficos}px` } as React.CSSProperties) : undefined}
    >
   <h3 className="mb-4 shrink-0 text-[18px] font-black text-[var(--foreground)]">

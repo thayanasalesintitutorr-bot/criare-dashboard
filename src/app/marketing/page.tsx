@@ -1456,11 +1456,17 @@ return (
             : 'border-[color:var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
         }`}
       >
-        Todas as origens
+        {origemModo === 'anuncio' ? 'Todos os anúncios' : 'Todas as campanhas'}
       </button>
 
       {todasOrigens.map((origem) => {
         const ativo = origensSelecionadas.includes(origem)
+        const rotuloOrigem =
+          origem === 'Sem origem'
+            ? origemModo === 'anuncio'
+              ? 'Sem anúncios'
+              : 'Sem campanhas'
+            : origem
 
         return (
           <div
@@ -1492,7 +1498,7 @@ return (
                 }`}
               />
 
-              <span className="truncate">{origem}</span>
+              <span className="truncate">{rotuloOrigem}</span>
             </button>
 
             {ativo && (

@@ -268,6 +268,7 @@ const res = await fetch(url, {
     previousValue={data?.comparativo?.comercialVendas?.propostasPerdidasAnterior || 0}
     subtitle="perdidas no período"
     comparar={comparar}
+    allowZero
   />
 
  <CardMini
@@ -801,6 +802,7 @@ function CardMini({
   subtitle,
   formatAnterior = (v: number) => String(Math.round(v)),
   comparar = false,
+  allowZero = false,
 }: {
   icon: typeof CircleDollarSign
   title: string
@@ -810,10 +812,11 @@ function CardMini({
   subtitle?: string
   formatAnterior?: (v: number) => string
   comparar?: boolean
+  allowZero?: boolean
 }) {
   const atual = Number(rawValue ?? value ?? 0)
   const anterior = Number(previousValue || 0)
-  const empty = atual === 0
+  const empty = !allowZero && atual === 0
 
   if (empty) {
     return (

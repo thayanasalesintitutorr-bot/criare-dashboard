@@ -1408,7 +1408,9 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
             <div
               className={`grid gap-2 ${
-                viewMode === 'apresentacao' || viewMode === 'iphone' ? 'grid-cols-1' : 'grid-cols-2 xl:grid-cols-4'
+                viewMode === 'apresentacao' || viewMode === 'iphone'
+                  ? 'grid-cols-1'
+                  : 'grid-cols-[repeat(auto-fit,minmax(240px,1fr))]'
               }`}
             >
               {medicosSnapshot.map((m) => (
