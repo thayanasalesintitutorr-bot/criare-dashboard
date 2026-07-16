@@ -135,33 +135,37 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
   const largura = kpi.percent === null ? 0 : Math.min(Math.max(kpi.percent, 3), 100)
 
   return (
-    <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
-      <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
-        <Icon size={14} />
-        {metrica.label}
+    <div className="flex h-full flex-col rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
+      <div>
+        <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
+          <Icon size={14} />
+          {metrica.label}
+        </div>
+
+        <div className="mt-3 text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
+          {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
+        </div>
       </div>
 
-      <div className="mt-3 text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
-        {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
-      </div>
+      <div className="mt-auto pt-3">
+        <div className="h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundColor: tier.cor }}
+            initial={{ width: 0 }}
+            animate={{ width: `${largura}%` }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+        </div>
 
-      <div className="mt-2 h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
-        <motion.div
-          className="h-full rounded-full"
-          style={{ backgroundColor: tier.cor }}
-          initial={{ width: 0 }}
-          animate={{ width: `${largura}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        />
-      </div>
-
-      <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className="text-[16px] font-bold leading-tight text-[var(--foreground)]">
-          {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
-        </span>
-        <span className="shrink-0 text-[11px] font-semibold text-[var(--muted-foreground)]">
-          Meta {metrica.formatar(kpi.meta)}
-        </span>
+        <div className="mt-2 flex items-baseline justify-between gap-2">
+          <span className="text-[16px] font-bold leading-tight text-[var(--foreground)]">
+            {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
+          </span>
+          <span className="shrink-0 text-[11px] font-semibold text-[var(--muted-foreground)]">
+            Meta {metrica.formatar(kpi.meta)}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -282,7 +286,9 @@ export function ProjecaoMedicosResumoCard({
   const [erro, setErro] = useState<string | null>(null)
   const [indice, setIndice] = useState(0)
   const [direcao, setDirecao] = useState(1)
-  const touchX = useRef<number | null>(null)
+  const [arrastando, setArrastando] = useState(false)
+  const arrastoX = useRef<number | null>(null)
+  const wheelTravado = useRef(false)
 
   useEffect(() => {
     let ativo = true
@@ -372,17 +378,37 @@ export function ProjecaoMedicosResumoCard({
     setIndice(((proximo % total) + total) % total)
   }
 
-  function handleTouchStart(e: React.TouchEvent) {
-    touchX.current = e.touches[0].clientX
+  // Pointer Events cobrem mouse (arrastar), touch (swipe) e caneta com um único fluxo.
+  function handlePointerDown(e: React.PointerEvent) {
+    arrastoX.current = e.clientX
+    setArrastando(true)
   }
 
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchX.current === null) return
-    const delta = e.changedTouches[0].clientX - touchX.current
-    touchX.current = null
+  function handlePointerUp(e: React.PointerEvent) {
+    if (arrastoX.current === null) return
+    const delta = e.clientX - arrastoX.current
+    arrastoX.current = null
+    setArrastando(false)
 
     if (Math.abs(delta) < 40) return
     ir(indiceSeguro + (delta < 0 ? 1 : -1))
+  }
+
+  function handlePointerLeave() {
+    arrastoX.current = null
+    setArrastando(false)
+  }
+
+  // Gesto de duas dedos no trackpad dispara deltaX no wheel; ignora scroll vertical normal.
+  function handleWheel(e: React.WheelEvent) {
+    if (Math.abs(e.deltaX) < 25 || Math.abs(e.deltaX) < Math.abs(e.deltaY)) return
+    if (wheelTravado.current) return
+
+    wheelTravado.current = true
+    ir(indiceSeguro + (e.deltaX > 0 ? 1 : -1))
+    setTimeout(() => {
+      wheelTravado.current = false
+    }, 450)
   }
 
   const variantes = {
@@ -435,9 +461,13 @@ export function ProjecaoMedicosResumoCard({
       </div>
 
       <div
-        className="relative min-h-[380px] overflow-hidden px-5 py-5"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        className={`relative touch-pan-y select-none overflow-hidden px-5 py-5 ${
+          arrastando ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
+        onWheel={handleWheel}
       >
         <AnimatePresence mode="wait" custom={direcao} initial={false}>
           <motion.div
@@ -494,7 +524,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
                 Desempenho geral
               </div>
               <div
-                className="text-[44px] font-black leading-none tracking-[-0.02em]"
+                className="text-[36px] font-black leading-none tracking-[-0.02em]"
                 style={{ color: tierGeral.cor }}
               >
                 {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'}
