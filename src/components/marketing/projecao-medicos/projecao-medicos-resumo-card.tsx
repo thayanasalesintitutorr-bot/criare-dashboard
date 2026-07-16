@@ -136,12 +136,12 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
 
   return (
     <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
-      <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-        <Icon size={12} />
+      <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
+        <Icon size={14} />
         {metrica.label}
       </div>
 
-      <div className="mt-1 text-[24px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
+      <div className="mt-3 text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
         {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
       </div>
 
@@ -156,10 +156,10 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
       </div>
 
       <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className="text-[14px] font-bold leading-tight text-[var(--foreground)]">
+        <span className="text-[16px] font-bold leading-tight text-[var(--foreground)]">
           {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
         </span>
-        <span className="shrink-0 text-[10px] font-semibold text-[var(--muted-foreground)]">
+        <span className="shrink-0 text-[11px] font-semibold text-[var(--muted-foreground)]">
           Meta {metrica.formatar(kpi.meta)}
         </span>
       </div>
@@ -478,7 +478,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
       <div className={`flex flex-col gap-5 ${isImac ? 'sm:flex-row' : ''}`}>
         <div
           className={`flex shrink-0 flex-col items-center gap-1 text-center ${
-            isImac ? 'sm:w-[27%] sm:items-start sm:text-left' : ''
+            isImac ? 'sm:w-[27%]' : ''
           }`}
         >
           <Avatar nome={slide.nome} foto={slide.foto} size="lg" />
