@@ -1063,6 +1063,7 @@ CONSOLIDADO
           <ComparativoBadge
             atual={faturamentoConsolidado}
             anterior={medico.faturamentoConsolidadoAnterior}
+            formatAnterior={formatMoney}
           />
         )}
 
@@ -1188,10 +1189,12 @@ function ComparativoBadge({
   atual,
   anterior,
   centered = false,
+  formatAnterior,
 }: {
   atual: number
   anterior?: number
   centered?: boolean
+  formatAnterior?: (v: number) => string
 }) {
   const base = Number(anterior || 0)
   const diff = base > 0 ? Math.round(((atual - base) / base) * 100) : 0
@@ -1212,7 +1215,9 @@ function ComparativoBadge({
         {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
       </span>
 
-      <span className="text-[var(--muted-foreground)]">vs anterior</span>
+      <span className="text-[var(--muted-foreground)]">
+        ant. {formatAnterior ? formatAnterior(base) : base}
+      </span>
     </div>
   )
 }
@@ -1341,7 +1346,7 @@ const negativo = diff < 0
     </span>
 
     <span className="text-[var(--muted-foreground)]">
-      vs anterior
+      ant. {typeof value === 'string' && value.includes('R$') ? formatMoney(anterior) : anterior}
     </span>
   </div>
 )}
