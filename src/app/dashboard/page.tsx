@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
+import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
 
 type EvolucaoDiariaItem = {
   data: string
@@ -1428,6 +1429,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             </div>
           </section>
         )}
+
+        <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
 
       </div>
     </AppShell>
