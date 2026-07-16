@@ -13,6 +13,7 @@ import {
 
 import { PROJECAO_METRICAS, METRICAS_PRINCIPAIS, ICONES_METRICA, FOTOS_MEDICO } from './constants'
 import { calcularPercentual } from './utils'
+import { useFilters } from '@/store/use-filters'
 
 type MedicoChave = 'rodolpho' | 'breno' | 'claudia'
 
@@ -465,14 +466,21 @@ export function ProjecaoMedicosResumoCard({
 }
 
 function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: string }) {
+  const { viewMode } = useFilters()
+  const isImac = viewMode === 'desktop'
+
   const percentGeral = mediaPercentual(slide.kpis.map((k) => k.percent))
   const tierGeral = tierDoPercent(percentGeral)
   const { desafio, destaque } = construirInsights(slide.kpis)
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-5 sm:flex-row">
-        <div className="flex shrink-0 flex-col items-center gap-1 text-center sm:w-[27%] sm:items-start sm:text-left">
+      <div className={`flex flex-col gap-5 ${isImac ? 'sm:flex-row' : ''}`}>
+        <div
+          className={`flex shrink-0 flex-col items-center gap-1 text-center ${
+            isImac ? 'sm:w-[27%] sm:items-start sm:text-left' : ''
+          }`}
+        >
           <Avatar nome={slide.nome} foto={slide.foto} size="lg" />
 
           <div className="mt-1 text-[20px] font-black leading-tight text-[var(--foreground)]">{slide.nome}</div>
@@ -503,7 +511,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
         </div>
 
         {slide.temDados && (
-          <div className="flex-1 space-y-2.5">
+          <div className={isImac ? 'grid flex-1 grid-cols-3 gap-3' : 'flex-1 space-y-2.5'}>
             {slide.kpis.map((kpi) => (
               <KpiTile key={kpi.chave} kpi={kpi} />
             ))}
