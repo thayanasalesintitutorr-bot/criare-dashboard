@@ -420,11 +420,11 @@ const ticketMedioConsultaComReabord =
 </div>
 
   <div>
-    <h2 className="text-[24px] font-black text-[var(--foreground)]">
+    <h2 className={`${isApresentacao ? 'text-[38px]' : 'text-[24px]'} font-black text-[var(--foreground)]`}>
       Visão geral dos atendimentos
     </h2>
 
-    <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">
+    <p className={`mt-1 ${isApresentacao ? 'text-[18px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
       Dados consolidados de todos os profissionais no período
     </p>
   </div>
@@ -479,11 +479,11 @@ const ticketMedioConsultaComReabord =
 
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <div className="mb-3 flex items-center justify-between">
-    <h3 className="text-[18px] font-black text-[var(--foreground)]">
+    <h3 className={`${isApresentacao ? 'text-[28px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
       Atendimento por dia
     </h3>
 
-    <div className="flex items-center gap-3 text-[11px] font-bold text-[var(--muted-foreground)]">
+    <div className={`flex items-center gap-3 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
       <span className="flex items-center gap-1">
         <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
         Seg a sex
@@ -534,7 +534,7 @@ const ticketMedioConsultaComReabord =
         </BarChart>
       </ResponsiveContainer>
     ) : (
-      <div className="flex h-full items-center justify-center text-[13px] font-semibold text-[var(--muted-foreground)]">
+      <div className={`flex h-full items-center justify-center ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
         Sem dados no período
       </div>
     )}
@@ -542,7 +542,7 @@ const ticketMedioConsultaComReabord =
 </div>
 
    <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
-  <h3 className="mb-3 text-[18px] font-black text-[var(--foreground)]">
+  <h3 className={`mb-3 ${isApresentacao ? 'text-[28px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
     Evolução de faturamento
   </h3>
 
@@ -589,7 +589,7 @@ const ticketMedioConsultaComReabord =
         </BarChart>
       </ResponsiveContainer>
     ) : (
-      <div className="flex h-full items-center justify-center text-[13px] font-semibold text-[var(--muted-foreground)]">
+      <div className={`flex h-full items-center justify-center ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
         Sem dados no período
       </div>
     )}
@@ -604,7 +604,7 @@ const ticketMedioConsultaComReabord =
      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:h-[var(--altura-coluna-graficos)]"
      style={alturaColunaGraficos ? ({ '--altura-coluna-graficos': `${alturaColunaGraficos}px` } as React.CSSProperties) : undefined}
    >
-  <h3 className="mb-4 shrink-0 text-[18px] font-black text-[var(--foreground)]">
+  <h3 className={`mb-4 shrink-0 ${isApresentacao ? 'text-[28px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
     Origem dos agendamentos
   </h3>
 
@@ -618,16 +618,16 @@ const ticketMedioConsultaComReabord =
       return (
         <div key={item.nome}>
           <div className="mb-1 flex items-center justify-between gap-3">
-            <span className="truncate text-sm font-bold text-[var(--muted-foreground)]">
+            <span className={`truncate ${isApresentacao ? 'text-[18px]' : 'text-sm'} font-bold text-[var(--muted-foreground)]`}>
               {item.nome}
             </span>
 
-            <span className="text-sm font-medium text-[var(--foreground)]">
+            <span className={`${isApresentacao ? 'text-[18px]' : 'text-sm'} font-medium text-[var(--foreground)]`}>
               {item.quantidade || 0}
             </span>
           </div>
 
-          <div className="h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+          <div className={`${isApresentacao ? 'h-3' : 'h-2'} overflow-hidden rounded-full bg-[var(--progress-bg)]`}>
             <div
               className="h-full rounded-full bg-[var(--accent)]"
               style={{
@@ -641,7 +641,7 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="mt-3 shrink-0 border-t border-[color:var(--border)] pt-3 text-right">
-    <span className="text-sm font-bold text-[var(--muted-foreground)]">
+    <span className={`${isApresentacao ? 'text-[18px]' : 'text-sm'} font-bold text-[var(--muted-foreground)]`}>
       Total: <span className="font-medium text-[var(--foreground)]">{totalAgendamentosOrigem}</span>
     </span>
   </div>
@@ -652,10 +652,10 @@ const ticketMedioConsultaComReabord =
 
 <div className="mt-3 grid grid-cols-4 gap-3">
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
-    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+    <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       Finalizados
     </p>
-    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
+    <p className={`mt-2 ${isApresentacao ? 'text-[42px]' : 'text-[26px]'} font-medium text-[var(--foreground)]`}>
       {painelAtendimento?.statusAgenda?.finalizados || 0}
     </p>
     {comparar && (
@@ -667,10 +667,10 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
-    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+    <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       No Show
     </p>
-    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
+    <p className={`mt-2 ${isApresentacao ? 'text-[42px]' : 'text-[26px]'} font-medium text-[var(--foreground)]`}>
       {painelAtendimento?.statusAgenda?.noShow || 0}
     </p>
     {comparar && (
@@ -682,10 +682,10 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
-    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+    <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       Reagendados
     </p>
-    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
+    <p className={`mt-2 ${isApresentacao ? 'text-[42px]' : 'text-[26px]'} font-medium text-[var(--foreground)]`}>
       {painelAtendimento?.statusAgenda?.reagendados || 0}
     </p>
     {comparar && (
@@ -697,10 +697,10 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
-    <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+    <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       Cancelados
     </p>
-    <p className="mt-2 text-[26px] font-medium text-[var(--foreground)]">
+    <p className={`mt-2 ${isApresentacao ? 'text-[42px]' : 'text-[26px]'} font-medium text-[var(--foreground)]`}>
       {painelAtendimento?.statusAgenda?.cancelados || 0}
     </p>
     {comparar && (
@@ -716,7 +716,7 @@ const ticketMedioConsultaComReabord =
        <section className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-[var(--card-shadow)] ${isImac ? 'p-4' : isApresentacao ? 'p-6' : 'p-5'}`}>
   <div className="mb-4 flex items-center gap-3">
     <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-    <h2 className="text-[22px] font-black text-[var(--foreground)]">Consultas por médico</h2>
+    <h2 className={`${isApresentacao ? 'text-[36px]' : 'text-[22px]'} font-black text-[var(--foreground)]`}>Consultas por médico</h2>
   </div>
 
   <div className="grid gap-6">
@@ -848,7 +848,7 @@ const ticketProcedimentosMedico =
 
 <div className={isImac ? 'grid grid-cols-12 gap-3' : isApresentacao ? 'space-y-4' : 'space-y-3'}>
   <div className={isImac ? 'col-span-12' : ''}>
-  <h4 className="section-title mb-3">
+  <h4 className={`section-title mb-3 ${isApresentacao ? '!text-[28px]' : ''}`}>
     AGENDA
   </h4>
 
@@ -1001,14 +1001,14 @@ const ticketProcedimentosMedico =
 </div>
 
   <div className={`border-t border-[color:var(--border)] pt-4 mt-4 ${isImac ? 'col-span-12' : ''}`}>
-    <h4 className="section-title mb-4">
+    <h4 className={`section-title mb-4 ${isApresentacao ? '!text-[28px]' : ''}`}>
 FINANCEIRO
 </h4>
 
 
   <div className={isImac ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'grid grid-cols-1 gap-4'}>
     <div>
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Consultas</p>
+      <p className={`mb-2 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>Consultas</p>
       <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
         <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" centered />
         <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" centered />
@@ -1017,7 +1017,7 @@ FINANCEIRO
     </div>
 
     <div className={isImac ? 'border-t border-[color:var(--border)] pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0' : 'border-t border-[color:var(--border)] pt-4'}>
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Procedimentos</p>
+      <p className={`mb-2 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>Procedimentos</p>
       <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
         <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" centered />
         <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" centered />
@@ -1028,7 +1028,7 @@ FINANCEIRO
 </div>
 
 <div className={`border-t border-[color:var(--border)] pt-4 mt-4 ${isImac ? 'col-span-12' : ''}`}>
-  <h4 className="section-title mb-4">
+  <h4 className={`section-title mb-4 ${isApresentacao ? '!text-[28px]' : ''}`}>
 CONSOLIDADO
 </h4>
 
@@ -1043,10 +1043,10 @@ CONSOLIDADO
     if (metaConsolidada === 0) {
       return (
         <>
-          <p className="text-[30px] font-medium text-[var(--muted-foreground)]/40">
+          <p className={`${isApresentacao ? 'text-[48px]' : 'text-[30px]'} font-medium text-[var(--muted-foreground)]/40`}>
             —
           </p>
-          <p className="mt-2 text-[13px] font-semibold text-[var(--muted-foreground)]">
+          <p className={`mt-2 ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
             Sem meta definida para este médico
           </p>
         </>
@@ -1055,7 +1055,7 @@ CONSOLIDADO
 
     return (
       <>
-        <p className="text-[30px] font-medium text-[var(--foreground)]">
+        <p className={`${isApresentacao ? 'text-[48px]' : 'text-[30px]'} font-medium text-[var(--foreground)]`}>
           {formatMoney(faturamentoConsolidado)}
         </p>
 
@@ -1083,12 +1083,12 @@ CONSOLIDADO
         </div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className="text-[16px] font-bold text-[var(--muted-foreground)]">
+          <span className={`${isApresentacao ? 'text-[22px]' : 'text-[16px]'} font-bold text-[var(--muted-foreground)]`}>
   Meta {formatMoney(metaConsolidada)}
 </span>
 
 <span
-  className={`text-[22px] font-medium ${
+  className={`${isApresentacao ? 'text-[34px]' : 'text-[22px]'} font-medium ${
     percentualConsolidado >= 100
       ? 'text-[var(--success)]'
       : percentualConsolidado >= 50
@@ -1196,13 +1196,16 @@ function ComparativoBadge({
   centered?: boolean
   formatAnterior?: (v: number) => string
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const base = Number(anterior || 0)
   const diff = base > 0 ? Math.round(((atual - base) / base) * 100) : 0
   const positivo = diff > 0
   const negativo = diff < 0
 
   return (
-    <div className={`mt-2 flex items-center gap-2 text-[12px] font-medium ${centered ? 'justify-center' : ''}`}>
+    <div className={`mt-2 flex items-center gap-2 ${isApresentacao ? 'text-[16px]' : 'text-[12px]'} font-medium ${centered ? 'justify-center' : ''}`}>
       <span
         className={
           positivo
@@ -1332,7 +1335,7 @@ const negativo = diff < 0
 )}
 
 {showCompare && (
-  <div className={`mt-2 flex items-center gap-2 text-[12px] font-medium ${centered ? 'justify-center' : ''}`}>
+  <div className={`mt-2 flex items-center gap-2 ${isApresentacao ? 'text-[16px]' : 'text-[12px]'} font-medium ${centered ? 'justify-center' : ''}`}>
     <span
       className={
         positivo
