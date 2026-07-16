@@ -134,28 +134,17 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
   const largura = kpi.percent === null ? 0 : Math.min(Math.max(kpi.percent, 3), 100)
 
   return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-      <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-        <Icon size={14} />
+    <div className="rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
+      <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+        <Icon size={12} />
         {metrica.label}
       </div>
 
-      <div className="mt-2 flex items-end justify-between gap-3">
-        <div className="text-[36px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
-          {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
-        </div>
-
-        <div className="text-right">
-          <div className="text-[15px] font-bold leading-tight text-[var(--foreground)]">
-            {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
-          </div>
-          <div className="text-[11px] font-semibold text-[var(--muted-foreground)]">
-            Meta {metrica.formatar(kpi.meta)}
-          </div>
-        </div>
+      <div className="mt-1 text-[24px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
+        {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
       </div>
 
-      <div className="mt-3 h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+      <div className="mt-2 h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
         <motion.div
           className="h-full rounded-full"
           style={{ backgroundColor: tier.cor }}
@@ -163,6 +152,15 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
           animate={{ width: `${largura}%` }}
           transition={{ duration: 0.5, ease: 'easeOut' }}
         />
+      </div>
+
+      <div className="mt-2 flex items-baseline justify-between gap-2">
+        <span className="text-[14px] font-bold leading-tight text-[var(--foreground)]">
+          {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
+        </span>
+        <span className="shrink-0 text-[10px] font-semibold text-[var(--muted-foreground)]">
+          Meta {metrica.formatar(kpi.meta)}
+        </span>
       </div>
     </div>
   )
@@ -473,48 +471,51 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-col items-center gap-1 text-center">
-        <Avatar nome={slide.nome} foto={slide.foto} size="lg" />
+      <div className="flex flex-col gap-5 sm:flex-row">
+        <div className="flex shrink-0 flex-col items-center gap-1 text-center sm:w-[27%] sm:items-start sm:text-left">
+          <Avatar nome={slide.nome} foto={slide.foto} size="lg" />
 
-        <div className="mt-1 text-[22px] font-black leading-tight text-[var(--foreground)]">{slide.nome}</div>
-        {nomeMes && (
-          <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">{nomeMes}</div>
-        )}
+          <div className="mt-1 text-[20px] font-black leading-tight text-[var(--foreground)]">{slide.nome}</div>
+          {nomeMes && (
+            <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">{nomeMes}</div>
+          )}
 
-        {slide.temDados ? (
-          <div className="mt-2">
-            <div className="text-[11px] font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
-              Desempenho geral
+          {slide.temDados ? (
+            <div className="mt-2">
+              <div className="text-[10px] font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+                Desempenho geral
+              </div>
+              <div
+                className="text-[44px] font-black leading-none tracking-[-0.02em]"
+                style={{ color: tierGeral.cor }}
+              >
+                {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'}
+              </div>
+              <div className="text-[13px] font-bold" style={{ color: tierGeral.cor }}>
+                {tierGeral.label}
+              </div>
             </div>
-            <div className="text-[46px] font-black leading-none tracking-[-0.02em]" style={{ color: tierGeral.cor }}>
-              {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'}
+          ) : (
+            <div className="mt-3 text-[13px] font-semibold text-[var(--muted-foreground)]">
+              Sem dados de projeção para {nomeMes || 'este período'}
             </div>
-            <div className="text-[13px] font-bold" style={{ color: tierGeral.cor }}>
-              {tierGeral.label}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-3 text-[13px] font-semibold text-[var(--muted-foreground)]">
-            Sem dados de projeção para {nomeMes || 'este período'}
-          </div>
-        )}
-      </div>
+          )}
+        </div>
 
-      {slide.temDados && (
-        <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {slide.temDados && (
+          <div className="flex-1 space-y-2.5">
             {slide.kpis.map((kpi) => (
               <KpiTile key={kpi.chave} kpi={kpi} />
             ))}
           </div>
+        )}
+      </div>
 
-          {(desafio || destaque) && (
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              {destaque && <InsightTile tipo="destaque" texto={destaque} />}
-              {desafio && <InsightTile tipo="desafio" texto={desafio} />}
-            </div>
-          )}
-        </>
+      {slide.temDados && (desafio || destaque) && (
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {destaque && <InsightTile tipo="destaque" texto={destaque} />}
+          {desafio && <InsightTile tipo="desafio" texto={desafio} />}
+        </div>
       )}
     </div>
   )
