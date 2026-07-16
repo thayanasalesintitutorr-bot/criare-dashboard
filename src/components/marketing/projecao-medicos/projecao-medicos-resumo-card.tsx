@@ -5,7 +5,7 @@ import { TrendingUp } from 'lucide-react'
 
 import { SectionTitle } from './section-title'
 import { MarketingMetricCard } from './marketing-metric-card'
-import { PROJECAO_METRICAS, METRICAS_PRINCIPAIS, ICONES_METRICA } from './constants'
+import { PROJECAO_METRICAS, METRICAS_PRINCIPAIS, ICONES_METRICA, FOTOS_MEDICO } from './constants'
 import { calcularPercentual } from './utils'
 
 type MedicoChave = 'rodolpho' | 'breno' | 'claudia'
@@ -50,20 +50,6 @@ const ORDEM_MES: Record<string, number> = {
 const NOME_MES: Record<number, string> = Object.fromEntries(
   Object.entries(ORDEM_MES).map(([nome, ordem]) => [ordem, nome])
 )
-
-// Métricas de contagem são somadas entre os médicos; taxas (ex.: Taxa Engaj.) são
-// médias, já que somar percentuais não representa o combinado real.
-const METRICAS_SOMAVEIS = new Set([
-  'seguidores',
-  'alcance',
-  'engajamento',
-  'views',
-  'interacoes',
-  'posts',
-  'reels',
-  'carrosseis',
-  'storiesSemana',
-])
 
 function parseLocalDate(dateString?: string) {
   if (!dateString) return null
@@ -145,88 +131,85 @@ export function ProjecaoMedicosResumoCard({
 
   const medicos = Object.keys(projecao) as MedicoChave[]
 
-  const mesesPorMedico = medicos
-    .map((chave) => projecao[chave].meses.find((linha) => linha.ordem === ordemAlvo))
-    .filter((linha): linha is MesProjecao => Boolean(linha))
+  const linhaPorMedico = medicos.map((chave) => ({
+    chave,
+    nome: projecao[chave].nome,
+    foto: FOTOS_MEDICO[chave] ?? null,
+    linha: projecao[chave].meses.find((m) => m.ordem === ordemAlvo) ?? null,
+  }))
+
+  const algumComDados = linhaPorMedico.some((item) => item.linha)
 
   return (
     <section className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-2 shadow-[var(--card-shadow)] transition-colors duration-200 hover:border-[var(--accent)]/30">
       <SectionTitle
         icon={TrendingUp}
         title="Projeção dos médicos"
-        subtitle={
-          nomeMes
-            ? `Meta x Atual — ${nomeMes} — todos os médicos juntos`
-            : 'Meta x Atual — todos os médicos juntos'
-        }
+        subtitle={nomeMes ? `Meta x Atual — ${nomeMes} — por médico` : 'Meta x Atual — por médico'}
       />
 
-      {mesesPorMedico.length === 0 ? (
+      {!algumComDados ? (
         <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
           Sem dados de projeção para {nomeMes || 'o período selecionado'}
         </div>
       ) : (
-        (() => {
-          const metaSomada: Partial<ProjecaoMetricas> = {}
-          const atualSomado: Partial<ProjecaoMetricas> = {}
-          let algumAtualPreenchido = false
+        <div className="space-y-4">
+          {linhaPorMedico.map(({ chave, nome, foto, linha }, index) => (
+            <div
+              key={chave}
+              className={index > 0 ? 'border-t border-[color:var(--border)] pt-4' : ''}
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <span className="h-6 w-6 shrink-0 overflow-hidden rounded-full border border-[color:var(--border)] bg-[var(--metric-card)]">
+                  {foto ? (
+                    <img src={foto} alt={nome} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-[10px] font-black text-[var(--foreground)]">
+                      {nome.charAt(0)}
+                    </span>
+                  )}
+                </span>
 
-          PROJECAO_METRICAS.forEach(({ chave }) => {
-            const somavel = METRICAS_SOMAVEIS.has(chave)
-
-            const metaValores = mesesPorMedico
-              .map((linha) => linha.meta?.[chave])
-              .filter((v): v is number => typeof v === 'number')
-
-            const atualValores = mesesPorMedico
-              .map((linha) => linha.atual?.[chave])
-              .filter((v): v is number => typeof v === 'number')
-
-            if (metaValores.length > 0) {
-              metaSomada[chave] = somavel
-                ? metaValores.reduce((acc, v) => acc + v, 0)
-                : metaValores.reduce((acc, v) => acc + v, 0) / metaValores.length
-            }
-
-            if (atualValores.length > 0) {
-              algumAtualPreenchido = true
-              atualSomado[chave] = somavel
-                ? atualValores.reduce((acc, v) => acc + v, 0)
-                : atualValores.reduce((acc, v) => acc + v, 0) / atualValores.length
-            }
-          })
-
-          return (
-            <>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {METRICAS_PRINCIPAIS.map(({ chave, cor }) => {
-                  const metrica = PROJECAO_METRICAS.find((m) => m.chave === chave)!
-                  const valorMeta = metaSomada[chave] ?? 0
-                  const valorAtual = atualSomado[chave] ?? null
-                  const percent = calcularPercentual(valorAtual, valorMeta)
-
-                  return (
-                    <MarketingMetricCard
-                      key={chave}
-                      label={metrica.label}
-                      icon={ICONES_METRICA[chave]}
-                      iconColor={cor}
-                      valor={valorAtual !== null ? metrica.formatar(valorAtual) : 'Sem dados'}
-                      meta={metrica.formatar(valorMeta)}
-                      percent={percent}
-                    />
-                  )
-                })}
+                <span className="text-[13px] font-black uppercase tracking-[0.06em] text-[var(--foreground)]">
+                  {nome}
+                </span>
               </div>
 
-              {!algumAtualPreenchido && (
-                <div className="mt-4 text-[11px] font-semibold text-[var(--muted-foreground)]">
-                  Os valores de &quot;Atual&quot; ainda não estão preenchidos na planilha para {nomeMes}.
+              {!linha ? (
+                <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-xs font-semibold text-[var(--muted-foreground)]">
+                  Sem dados de projeção para {nomeMes || 'o período selecionado'}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {METRICAS_PRINCIPAIS.map(({ chave: metricaChave, cor }) => {
+                    const metrica = PROJECAO_METRICAS.find((m) => m.chave === metricaChave)!
+                    const valorMeta = linha.meta?.[metricaChave] ?? 0
+                    const valorAtual = linha.atual?.[metricaChave] ?? null
+                    const percent = calcularPercentual(valorAtual, valorMeta)
+
+                    return (
+                      <MarketingMetricCard
+                        key={metricaChave}
+                        label={metrica.label}
+                        icon={ICONES_METRICA[metricaChave]}
+                        iconColor={cor}
+                        valor={valorAtual !== null ? metrica.formatar(valorAtual) : 'Sem dados'}
+                        meta={metrica.formatar(valorMeta)}
+                        percent={percent}
+                      />
+                    )
+                  })}
                 </div>
               )}
-            </>
-          )
-        })()
+            </div>
+          ))}
+
+          {!linhaPorMedico.some((item) => item.linha?.atual) && (
+            <div className="text-[11px] font-semibold text-[var(--muted-foreground)]">
+              Os valores de &quot;Atual&quot; ainda não estão preenchidos na planilha para {nomeMes}.
+            </div>
+          )}
+        </div>
       )}
     </section>
   )
