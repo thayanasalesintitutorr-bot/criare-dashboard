@@ -247,6 +247,8 @@ extraAoLado?: ReactNode
 
   const hoverCapaz = useHoverCapaz()
   const [detalheAberto, setDetalheAberto] = useState(false)
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
 
  return (
   <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
@@ -260,19 +262,7 @@ extraAoLado?: ReactNode
   </div>
 
  <div
-  className="
-  pt-0
-  flex-1
-  min-w-0
-  whitespace-normal
-  break-words
-  text-[14px]
-  font-black
-  uppercase
-  leading-[1.12]
-  tracking-[0.08em]
-  text-[var(--foreground)]
-"
+  className={`pt-0 flex-1 min-w-0 whitespace-normal break-words ${isApresentacao ? 'text-[20px]' : 'text-[14px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}
 >
   {title}
 </div>
@@ -285,13 +275,13 @@ extraAoLado?: ReactNode
     onMouseLeave={hoverCapaz ? () => setDetalheAberto(false) : undefined}
     onClick={!hoverCapaz ? () => setDetalheAberto((aberto) => !aberto) : undefined}
   >
-    <span className="text-2xl font-medium tracking-[-0.06em] text-[var(--foreground)]">
+    <span className={`${isApresentacao ? 'text-[42px]' : 'text-2xl'} font-medium tracking-[-0.06em] text-[var(--foreground)]`}>
       {value}
     </span>
 
     {percentBadge && (
       <span
-        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+        className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-medium ${
           percentBadge.positive
             ? 'bg-[var(--success)]/10 text-[var(--success)]'
             : 'bg-[var(--danger)]/10 text-[var(--danger)]'
@@ -507,21 +497,24 @@ function RoiPorOrigemCard({
   }[]
   modo: 'campanha' | 'anuncio'
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
     <div className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)]">
       <div className="mb-5 flex shrink-0 items-center justify-between">
         <div>
-          <div className="text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
+          <div className={`${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
             ROI por {modo === 'anuncio' ? 'anúncio' : 'campanha'}
           </div>
-          <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
+          <div className={`mt-1 ${isApresentacao ? 'text-[16px]' : 'text-xs'} font-bold text-[var(--muted-foreground)]`}>
             Retorno sobre investimento
           </div>
         </div>
 
-        <div className="rounded-xl bg-[var(--metric-card)] px-3 py-2 text-xs font-black text-[var(--accent)]">
+        <div className={`rounded-xl bg-[var(--metric-card)] px-3 py-2 ${isApresentacao ? 'text-[16px]' : 'text-xs'} font-black text-[var(--accent)]`}>
           ROI
         </div>
       </div>
@@ -542,24 +535,24 @@ function RoiPorOrigemCard({
                     }}
                   />
 
-                  <span className="truncate text-sm font-black text-[var(--foreground)]">
+                  <span className={`truncate ${isApresentacao ? 'text-[18px]' : 'text-sm'} font-black text-[var(--foreground)]`}>
                     {item.origem}
                   </span>
                 </div>
 
-                <div className="text-sm font-black text-[var(--foreground)]">
+                <div className={`${isApresentacao ? 'text-[18px]' : 'text-sm'} font-black text-[var(--foreground)]`}>
                   {item.roi.toFixed(2)}x
                 </div>
               </div>
 
-              <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--metric-card)]">
+              <div className={`${isApresentacao ? 'h-3' : 'h-2'} w-full overflow-hidden rounded-full bg-[var(--metric-card)]`}>
                 <div
                   className="h-full rounded-full bg-[var(--accent)]"
                   style={{ width: `${Math.min(Math.max(largura, 4), 100)}%` }}
                 />
               </div>
 
-             <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-[var(--muted-foreground)]">
+             <div className={`grid grid-cols-2 gap-2 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
   <div>
     <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
@@ -575,7 +568,7 @@ function RoiPorOrigemCard({
         })}
 
         {items.length === 0 && (
-          <div className="flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 text-sm font-semibold text-[var(--muted-foreground)]">
+          <div className={`flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 ${isApresentacao ? 'text-[18px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
             Sem dados de ROI
           </div>
         )}
@@ -1056,6 +1049,9 @@ function buildInsights(params: {
 }
 
 function IndicadoresCard({ insights }: { insights: Insight[] }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const criticos = insights.filter((item) => item.severidade === 'critico').length
   const atencoes = insights.filter((item) => item.severidade === 'atencao').length
 
@@ -1063,28 +1059,28 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
     <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
-            <AlertTriangle size={18} className="text-[var(--accent)]" />
+          <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
+            <AlertTriangle size={isApresentacao ? 24 : 18} className="text-[var(--accent)]" />
             Painel de indicadores
           </div>
-          <div className="mt-1 text-xs font-bold text-[var(--muted-foreground)]">
+          <div className={`mt-1 ${isApresentacao ? 'text-[16px]' : 'text-xs'} font-bold text-[var(--muted-foreground)]`}>
             O que está bom e o que dá para melhorar agora
           </div>
         </div>
 
         <div className="flex gap-5 text-right">
           <div>
-            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+            <div className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase text-[var(--muted-foreground)]`}>
               Críticos
             </div>
-            <div className="text-xl font-black text-[var(--danger)]">{criticos}</div>
+            <div className={`${isApresentacao ? 'text-[32px]' : 'text-xl'} font-black text-[var(--danger)]`}>{criticos}</div>
           </div>
 
           <div>
-            <div className="text-[11px] font-bold uppercase text-[var(--muted-foreground)]">
+            <div className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase text-[var(--muted-foreground)]`}>
               Atenção
             </div>
-            <div className="text-xl font-black text-[var(--warning)]">{atencoes}</div>
+            <div className={`${isApresentacao ? 'text-[32px]' : 'text-xl'} font-black text-[var(--warning)]`}>{atencoes}</div>
           </div>
         </div>
       </div>
@@ -1113,7 +1109,7 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
 
             <div className="min-w-0">
               <div
-                className={`text-xs font-black uppercase tracking-wide ${
+                className={`${isApresentacao ? 'text-[16px]' : 'text-xs'} font-black uppercase tracking-wide ${
                   insight.severidade === 'critico'
                     ? 'text-[var(--danger)]'
                     : insight.severidade === 'atencao'
@@ -1123,7 +1119,7 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
               >
                 {insight.titulo}
               </div>
-              <div className="mt-0.5 text-xs font-semibold text-[var(--muted-foreground)]">
+              <div className={`mt-0.5 ${isApresentacao ? 'text-[15px]' : 'text-xs'} font-semibold text-[var(--muted-foreground)]`}>
                 {insight.descricao}
               </div>
             </div>
@@ -1136,7 +1132,8 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
 
 export default function MarketingPage() {
 
-    const { periodo, tipoData, segmento, dataInicio, dataFim } = useFilters()
+    const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode } = useFilters()
+    const isApresentacao = viewMode === 'apresentacao'
 
 const [data, setData] = useState<MarketingResponse | null>(null)
 const [loading, setLoading] = useState(true)
@@ -1545,34 +1542,34 @@ return (
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
-              <div className="metric-label">Investimento</div>
-              <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(investimento)}</div>
+              <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>Investimento</div>
+              <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(investimento)}</div>
             </div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="metric-label">Retorno</div>
-            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(retornoMarketing)}</div>
+            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>Retorno</div>
+            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(retornoMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="metric-label">Lucro</div>
-            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(lucroMarketing)}</div>
+            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>Lucro</div>
+            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(lucroMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="metric-label">ROI</div>
-            <div className="text-xl font-medium text-[var(--accent)]">{roi.toFixed(2)}x</div>
+            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>ROI</div>
+            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--accent)]`}>{roi.toFixed(2)}x</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
-            <div className="metric-label">CAC</div>
-            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(cac)}</div>
+            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>CAC</div>
+            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(cac)}</div>
           </div>
 
           <div className="px-4">
-            <div className="metric-label">CPL</div>
-            <div className="text-xl font-medium text-[var(--foreground)]">{formatMoneyBR(cpl)}</div>
+            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>CPL</div>
+            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(cpl)}</div>
           </div>
         </div>
 
@@ -1675,19 +1672,19 @@ return (
  extra={
   <div className="space-y-1 text-right">
     <div className="flex items-baseline justify-end gap-1.5">
-      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+      <span className={`${isApresentacao ? 'text-[14px]' : 'text-[9px]'} font-black uppercase text-[var(--muted-foreground)]`}>
         Valor
       </span>
-      <span className="text-xs font-medium text-[var(--foreground)]">
+      <span className={`${isApresentacao ? 'text-[18px]' : 'text-xs'} font-medium text-[var(--foreground)]`}>
         {formatMoney(valorConsultasFiltrado)}
       </span>
     </div>
 
     <div className="flex items-baseline justify-end gap-1.5">
-      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+      <span className={`${isApresentacao ? 'text-[14px]' : 'text-[9px]'} font-black uppercase text-[var(--muted-foreground)]`}>
         TM
       </span>
-      <span className="text-xs font-medium text-[var(--foreground)]">
+      <span className={`${isApresentacao ? 'text-[18px]' : 'text-xs'} font-medium text-[var(--foreground)]`}>
         {formatMoney(
           sumQtd(consultasFiltrado) > 0
             ? valorConsultasFiltrado / sumQtd(consultasFiltrado)
@@ -1713,19 +1710,19 @@ items={consultasFiltrado}
   extra={
   <div className="space-y-1 text-right">
     <div className="flex items-baseline justify-end gap-1.5">
-      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+      <span className={`${isApresentacao ? 'text-[14px]' : 'text-[9px]'} font-black uppercase text-[var(--muted-foreground)]`}>
         Valor
       </span>
-      <span className="text-xs font-medium text-[var(--foreground)]">
+      <span className={`${isApresentacao ? 'text-[18px]' : 'text-xs'} font-medium text-[var(--foreground)]`}>
         {formatMoney(valorProcedimentosFiltrado)}
       </span>
     </div>
 
     <div className="flex items-baseline justify-end gap-1.5">
-      <span className="text-[9px] font-black uppercase text-[var(--muted-foreground)]">
+      <span className={`${isApresentacao ? 'text-[14px]' : 'text-[9px]'} font-black uppercase text-[var(--muted-foreground)]`}>
         TM
       </span>
-      <span className="text-xs font-medium text-[var(--foreground)]">
+      <span className={`${isApresentacao ? 'text-[18px]' : 'text-xs'} font-medium text-[var(--foreground)]`}>
         {formatMoney(
           sumQtd(procedimentosFiltrado) > 0
             ? valorProcedimentosFiltrado / sumQtd(procedimentosFiltrado)

@@ -115,7 +115,8 @@ function getFotoMedico(nome: string) {
 
 export default function VendasPage() {
 
-  const { periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim } = useFilters()
+  const { periodo, tipoData, segmento, dataInicio, dataFim, comparar, compararInicio, compararFim, viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -316,14 +317,14 @@ const res = await fetch(url, {
           <section className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 transition-colors duration-200 hover:border-[var(--accent)]/30">
             <div className="mb-4 flex items-center gap-3">
               <Package className="h-6 w-6 text-[var(--accent)]" />
-              <h2 className="section-title">
+              <h2 className={`section-title ${isApresentacao ? '!text-[28px]' : ''}`}>
                 Performance por produto vendido
               </h2>
             </div>
 
             <div className="max-h-[300px] space-y-4 overflow-y-auto pr-2">
               {produtosVendidos.length === 0 && (
-                <div className="rounded-2xl bg-[var(--muted)] p-5 text-sm">
+                <div className={`rounded-2xl bg-[var(--muted)] p-5 ${isApresentacao ? 'text-[18px]' : 'text-sm'}`}>
                   Nenhum produto vendido no período.
                 </div>
               )}
@@ -335,23 +336,23 @@ const res = await fetch(url, {
                   <div key={produto.nome}>
                     <div className="mb-1 flex justify-between items-center">
                       <div>
-                       <p className="text-[14px] font-semibold">{produto.nome}</p>
-                        <p className="text-xs text-[var(--muted-foreground)]">
+                       <p className={`${isApresentacao ? 'text-[20px]' : 'text-[14px]'} font-semibold`}>{produto.nome}</p>
+                        <p className={`${isApresentacao ? 'text-[16px]' : 'text-xs'} text-[var(--muted-foreground)]`}>
                           {produto.qtd} vendas
                         </p>
                       </div>
 
                       <div className="text-right">
-                        <p className="text-[14px] font-bold">{formatMoney(produto.valor)}</p>
-                        <p className="text-xs text-[var(--muted-foreground)]">
+                        <p className={`${isApresentacao ? 'text-[20px]' : 'text-[14px]'} font-bold`}>{formatMoney(produto.valor)}</p>
+                        <p className={`${isApresentacao ? 'text-[16px]' : 'text-xs'} text-[var(--muted-foreground)]`}>
                           {Math.round(produto.percentual)}%
                         </p>
                       </div>
                     </div>
 
-                    <div className="h-7 rounded-xl bg-[var(--muted)] p-1">
+                    <div className={`${isApresentacao ? 'h-9' : 'h-7'} rounded-xl bg-[var(--muted)] p-1`}>
                       <div
-                        className="h-full rounded-xl flex items-center px-2 text-white text-[12px] font-semibold"
+                        className={`h-full rounded-xl flex items-center px-2 text-white ${isApresentacao ? 'text-[16px]' : 'text-[12px]'} font-semibold`}
                         style={{ width: `${width}%`, backgroundColor: 'var(--accent)' }}
                       >
                         {produto.qtd}
@@ -366,19 +367,19 @@ const res = await fetch(url, {
             <div className="mt-4 border-t border-[color:var(--border)] pt-3">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-xs uppercase text-[var(--muted-foreground)]">
+                  <p className={`${isApresentacao ? 'text-[16px]' : 'text-xs'} uppercase text-[var(--muted-foreground)]`}>
                     Total geral
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)] mt-1">
+                  <p className={`${isApresentacao ? 'text-[18px]' : 'text-sm'} text-[var(--muted-foreground)] mt-1`}>
                     {totalQtdProdutos} vendas
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-2xl font-black">
+                  <p className={`${isApresentacao ? 'text-[38px]' : 'text-2xl'} font-black`}>
                     {formatMoney(totalValorProdutos)}
                   </p>
-                  <p className="text-sm text-[var(--muted-foreground)]">
+                  <p className={`${isApresentacao ? 'text-[18px]' : 'text-sm'} text-[var(--muted-foreground)]`}>
                     100%
                   </p>
                 </div>
@@ -391,18 +392,18 @@ const res = await fetch(url, {
  <div className="mb-4 flex items-center justify-between">
     <div className="flex items-center gap-3">
       <Stethoscope className="h-6 w-6 text-[var(--accent)]" />
-      <h2 className="section-title">
+      <h2 className={`section-title ${isApresentacao ? '!text-[28px]' : ''}`}>
         Vendas por médico
       </h2>
     </div>
 
-    <span className="text-sm font-bold text-[var(--muted-foreground)]">
+    <span className={`${isApresentacao ? 'text-[16px]' : 'text-sm'} font-bold text-[var(--muted-foreground)]`}>
       desempenho individual
     </span>
   </div>
 
   {vendasPorMedico.length === 0 ? (
-    <div className="rounded-2xl bg-[var(--muted)] p-5 text-sm text-[var(--muted-foreground)]">
+    <div className={`rounded-2xl bg-[var(--muted)] p-5 ${isApresentacao ? 'text-[18px]' : 'text-sm'} text-[var(--muted-foreground)]`}>
       Nenhuma venda por médico no período.
     </div>
   ) : (
@@ -454,7 +455,7 @@ const res = await fetch(url, {
                       className="h-full w-full object-cover object-center"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-base font-black text-[var(--accent)]">
+                    <div className={`flex h-full w-full items-center justify-center ${isApresentacao ? 'text-[20px]' : 'text-base'} font-black text-[var(--accent)]`}>
                       DR
                     </div>
                   )}
@@ -462,28 +463,28 @@ const res = await fetch(url, {
 
                 <div>
                   {isTop && (
-                    <span className="mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-[var(--accent)]">
-                      <Medal size={12} strokeWidth={2.5} />
+                    <span className={`mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 ${isApresentacao ? 'text-[14px]' : 'text-[10px]'} font-black uppercase tracking-[0.12em] text-[var(--accent)]`}>
+                      <Medal size={isApresentacao ? 16 : 12} strokeWidth={2.5} />
                       Top vendedor
                     </span>
                   )}
 
-                  <h3 className="text-[20px] font-black leading-tight text-[var(--foreground)]">
+                  <h3 className={`${isApresentacao ? 'text-[30px]' : 'text-[20px]'} font-black leading-tight text-[var(--foreground)]`}>
                     {medico.nome}
                   </h3>
 
-                  <p className="mt-1 text-[13px] font-semibold text-[var(--muted-foreground)]">
+                  <p className={`mt-1 ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
                     Procedimentos vendidos
                   </p>
                 </div>
               </div>
 
               <div className="min-w-[120px] text-right">
-                <p className="text-[22px] font-black text-[var(--foreground)]">
+                <p className={`${isApresentacao ? 'text-[32px]' : 'text-[22px]'} font-black text-[var(--foreground)]`}>
                   {formatMoney(medico.valor)}
                 </p>
 
-                <div className="progress-bar mt-2 h-2">
+                <div className={`progress-bar mt-2 ${isApresentacao ? 'h-3' : 'h-2'}`}>
                   <div
                     className="h-full rounded-full"
                     style={{
@@ -493,7 +494,7 @@ const res = await fetch(url, {
                   />
                 </div>
 
-                <div className="mt-1 flex justify-between text-[11px]">
+                <div className={`mt-1 flex justify-between ${isApresentacao ? 'text-[16px]' : 'text-[11px]'}`}>
                   <span className="text-[var(--muted-foreground)]">
                     Meta {formatMoney(medico.meta)}
                   </span>
@@ -642,6 +643,9 @@ function MiniInfo({
   active?: boolean
   helper?: string
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const clickable = Boolean(onClick)
 
   const className = `w-full rounded-[18px] border px-3 py-1.5 text-left transition-colors duration-200 ${
@@ -652,17 +656,17 @@ function MiniInfo({
 
   const content = (
     <>
-      <p className="metric-label">
+      <p className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>
         {label}
       </p>
 
-      <p className="mt-1 text-[15px] font-black text-[var(--foreground)]">
+      <p className={`mt-1 ${isApresentacao ? 'text-[22px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>
         {value}
       </p>
 
       {helper && (
         <p
-          className={`mt-0.5 text-[10px] font-semibold ${
+          className={`mt-0.5 ${isApresentacao ? 'text-[14px]' : 'text-[10px]'} font-semibold ${
             active ? 'text-[var(--accent)]' : 'text-[var(--muted-foreground)]'
           }`}
         >
@@ -692,12 +696,15 @@ function CompareRow({
   anterior: number
   anteriorLabel?: string
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const diff = anterior > 0 ? Math.round(((atual - anterior) / anterior) * 100) : 0
   const positivo = diff > 0
   const negativo = diff < 0
 
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] font-black">
+    <div className={`mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 ${isApresentacao ? 'text-[16px]' : 'text-[12px]'} font-black`}>
       <span
         className={
           positivo ? 'text-[var(--success)]' : negativo ? 'text-[var(--danger)]' : 'text-[var(--muted-foreground)]'
@@ -732,6 +739,9 @@ function CardMeta({
   metaSucessoPercent?: number
   comparar?: boolean
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const percentual = meta > 0 ? Math.round((value / meta) * 100) : 0
   const empty = value === 0
   const anterior = Number(previousValue || 0)
@@ -741,12 +751,12 @@ function CardMeta({
       <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
         <div className="flex min-h-[40px] items-center gap-2">
           <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
-          <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+          <p className={`${isApresentacao ? 'text-[22px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{title}</p>
         </div>
 
         <div className="mt-3">
-          <div className="text-[24px] font-black leading-none text-[var(--muted-foreground)]/40">—</div>
-          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">Sem dados no período</p>
+          <div className={`${isApresentacao ? 'text-[40px]' : 'text-[24px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>—</div>
+          <p className={`mt-2 ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>Sem dados no período</p>
         </div>
       </div>
     )
@@ -756,15 +766,15 @@ function CardMeta({
     <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
       <div className="flex min-h-[40px] items-center gap-2">
         <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
-        <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+        <p className={`${isApresentacao ? 'text-[22px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{title}</p>
       </div>
 
       <div className="mt-3">
-        <div className="text-[24px] font-black leading-none text-[var(--foreground)]">
+        <div className={`${isApresentacao ? 'text-[40px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>
           {isMoney ? formatMoney(value) : value}
         </div>
 
-        <div className="progress-bar mt-3 h-2">
+        <div className={`progress-bar mt-3 ${isApresentacao ? 'h-3' : 'h-2'}`}>
           <div
             className="h-full rounded-full"
             style={{
@@ -774,9 +784,9 @@ function CardMeta({
           />
         </div>
 
-        <div className="mt-2 flex items-center justify-between text-[13px] font-medium text-[var(--muted-foreground)]">
+        <div className={`mt-2 flex items-center justify-between ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
           <span>Meta {isMoney ? formatMoney(meta) : meta}</span>
-          <span className="text-[14px] font-black" style={{ color: metaColor(percentual, true, metaSucessoPercent) }}>
+          <span className={`${isApresentacao ? 'text-[20px]' : 'text-[14px]'} font-black`} style={{ color: metaColor(percentual, true, metaSucessoPercent) }}>
             {percentual}%
           </span>
         </div>
@@ -814,6 +824,9 @@ function CardMini({
   comparar?: boolean
   allowZero?: boolean
 }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
+
   const atual = Number(rawValue ?? value ?? 0)
   const anterior = Number(previousValue || 0)
   const empty = !allowZero && atual === 0
@@ -823,12 +836,12 @@ function CardMini({
       <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
         <div className="flex min-h-[40px] items-center gap-2">
           <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
-          <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+          <p className={`${isApresentacao ? 'text-[22px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{title}</p>
         </div>
 
         <div className="mt-3">
-          <div className="text-[24px] font-black leading-none text-[var(--muted-foreground)]/40">—</div>
-          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">Sem dados no período</p>
+          <div className={`${isApresentacao ? 'text-[40px]' : 'text-[24px]'} font-black leading-none text-[var(--muted-foreground)]/40`}>—</div>
+          <p className={`mt-2 ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>Sem dados no período</p>
         </div>
       </div>
     )
@@ -838,14 +851,14 @@ function CardMini({
     <div className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2 transition-all duration-300 hover:-translate-y-[2px] hover:border-[var(--accent)]/30">
       <div className="flex min-h-[40px] items-center gap-2">
         <Icon className="h-5 w-5 shrink-0 text-[var(--accent)]" />
-        <p className="text-[15px] font-black text-[var(--foreground)]">{title}</p>
+        <p className={`${isApresentacao ? 'text-[22px]' : 'text-[15px]'} font-black text-[var(--foreground)]`}>{title}</p>
       </div>
 
       <div className="mt-3">
-        <div className="text-[24px] font-black leading-none text-[var(--foreground)]">{value}</div>
+        <div className={`${isApresentacao ? 'text-[40px]' : 'text-[24px]'} font-black leading-none text-[var(--foreground)]`}>{value}</div>
 
         {subtitle && (
-          <p className="mt-2 text-[13px] font-medium text-[var(--muted-foreground)]">{subtitle}</p>
+          <p className={`mt-2 ${isApresentacao ? 'text-[18px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>{subtitle}</p>
         )}
 
         {comparar && (
