@@ -135,20 +135,18 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
   const largura = kpi.percent === null ? 0 : Math.min(Math.max(kpi.percent, 3), 100)
 
   return (
-    <div className="flex h-full flex-col rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
-      <div>
-        <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
-          <Icon size={14} />
-          {metrica.label}
-        </div>
-
-        <div className="mt-3 text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
-          {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
-        </div>
+    <div className="flex h-full min-h-[190px] w-full flex-col self-stretch rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
+      <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
+        <Icon size={14} />
+        {metrica.label}
       </div>
 
-      <div className="mt-auto pt-3">
-        <div className="h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+      <div className="mt-auto">
+        <div className="text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
+          {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
+        </div>
+
+        <div className="mt-3 h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
           <motion.div
             className="h-full rounded-full"
             style={{ backgroundColor: tier.cor }}
@@ -505,7 +503,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
 
   return (
     <div className="space-y-5">
-      <div className={`flex flex-col gap-5 ${isImac ? 'sm:flex-row' : ''}`}>
+      <div className={`flex flex-col items-stretch gap-5 ${isImac ? 'sm:flex-row' : ''}`}>
         <div
           className={`flex shrink-0 flex-col items-center gap-1 text-center ${
             isImac ? 'sm:w-[27%]' : ''
@@ -541,7 +539,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
         </div>
 
         {slide.temDados && (
-          <div className={isImac ? 'grid flex-1 grid-cols-3 gap-3' : 'flex-1 space-y-2.5'}>
+          <div className={isImac ? 'grid flex-1 items-stretch grid-cols-3 gap-3' : 'flex-1 space-y-2.5'}>
             {slide.kpis.map((kpi) => (
               <KpiTile key={kpi.chave} kpi={kpi} />
             ))}
