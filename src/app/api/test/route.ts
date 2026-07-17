@@ -87,13 +87,26 @@ function normalizeCampaignName(name?: string | null) {
 
 // Retorna o campo bruto de origem do lead de acordo com o modo escolhido:
 // 'campanha' agrupa por utm_campaing (campanha), 'anuncio' agrupa por utm_content (anúncio).
-// Não cai para outros campos (campanha/source) — apenas o utm específico do modo é considerado,
-// para que o filtro lateral só liste valores realmente presentes na coluna correspondente.
-function origemField(lead: Lead, modo: 'campanha' | 'anuncio') {
+// Por padrão não cai para outros campos (campanha/source) — apenas o utm específico do modo é
+// considerado, para que o filtro lateral só liste valores realmente presentes na coluna
+// correspondente. Quando fallbackCampanha=true (ex.: "Origem dos agendamentos"), leads sem
+// utm_campaing preenchido usam o valor da coluna "campanha" em vez de caírem em "Sem origem".
+function origemField(
+  lead: Lead,
+  modo: 'campanha' | 'anuncio',
+  fallbackCampanha = false
+) {
   const utmEspecifico =
     modo === 'anuncio' ? lead.utm_content : lead.utm_campaing
 
-  return (utmEspecifico || '').trim()
+  const valor = (utmEspecifico || '').trim()
+  if (valor) return valor
+
+  if (fallbackCampanha && modo === 'campanha') {
+    return (lead.campanha || '').trim()
+  }
+
+  return ''
 }
 
 // PARSE LOCAL MANUAL — sem UTC
@@ -495,7 +508,11 @@ function buildEvolucaoDiaria(
   return result
 }
 
-function buildOrigens(leads: Lead[], modo: 'campanha' | 'anuncio' = 'campanha') {
+function buildOrigens(
+  leads: Lead[],
+  modo: 'campanha' | 'anuncio' = 'campanha',
+  fallbackCampanha = false
+) {
   const map: Record<
     string,
     {
@@ -505,7 +522,7 @@ function buildOrigens(leads: Lead[], modo: 'campanha' | 'anuncio' = 'campanha') 
   > = {}
 
   for (const lead of leads) {
-    const origem = origemField(lead, modo) || 'Sem origem'
+    const origem = origemField(lead, modo, fallbackCampanha) || 'Sem origem'
 
     const pipeline = lead.pipeline_id || 'SEM PIPELINE'
     const status = lead.status_id || 'SEM STATUS'
@@ -2409,7 +2426,7 @@ const painelAtendimento = {
     }
   }),
 
-  agendamentosPorOrigem: buildOrigens(leadsAgendados, origemModo),
+  agendamentosPorOrigem: buildOrigens(leadsAgendados, origemModo, true),
 
   finalizadosParticularConvenio: atendimentoConsulta,
 }
