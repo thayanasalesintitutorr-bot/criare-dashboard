@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Bar,
   BarChart,
@@ -256,9 +256,29 @@ const isApresentacao = viewMode === 'apresentacao'
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [now, setNow] = useState<Date>(new Date())
 
+  const colunaGraficosRef = useRef<HTMLDivElement>(null)
+  const [alturaColunaGraficos, setAlturaColunaGraficos] = useState<number | null>(null)
+
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(tick)
+  }, [])
+
+  // ResizeObserver acompanha a altura real da coluna de gráficos (Atendimento por dia +
+  // Evolução de faturamento) continuamente — inclusive depois que os gráficos terminam de
+  // renderizar de forma assíncrona — para que "Origem dos agendamentos" sempre termine
+  // alinhado ao fim dela, rolando internamente quando tiver mais origens do que cabe.
+  useEffect(() => {
+    const elemento = colunaGraficosRef.current
+    if (!elemento) return
+
+    const observer = new ResizeObserver((entries) => {
+      const altura = entries[0]?.contentRect.height
+      if (altura) setAlturaColunaGraficos(Math.round(altura))
+    })
+
+    observer.observe(elemento)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -461,7 +481,7 @@ const ticketMedioConsultaComReabord =
   </div>
 
   <div className="mt-3 grid items-stretch gap-3 xl:grid-cols-12">
-  <div className="min-w-0 space-y-3 xl:col-span-8">
+  <div ref={colunaGraficosRef} className="min-w-0 space-y-3 xl:col-span-8">
 
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <div className="mb-3 flex items-center justify-between">
@@ -587,7 +607,8 @@ const ticketMedioConsultaComReabord =
 <div className="flex min-h-0 min-w-0 flex-col gap-3 xl:col-span-4">
 
    <div
-     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4"
+     className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:h-[var(--altura-coluna-graficos)]"
+     style={alturaColunaGraficos ? ({ '--altura-coluna-graficos': `${alturaColunaGraficos}px` } as React.CSSProperties) : undefined}
    >
   <h3 className={`mb-4 shrink-0 ${isApresentacao ? 'text-[28px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
     Origem dos agendamentos
