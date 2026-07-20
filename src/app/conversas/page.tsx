@@ -17,6 +17,8 @@ import {
   Star,
   AlertTriangle,
   X,
+  Sparkles,
+  TrendingDown,
 } from 'lucide-react'
 import { AppShell } from '@/components/layout/app-shell'
 import { KpiCard } from '@/components/dashboard/kpi-card'
@@ -115,6 +117,104 @@ function fmtData(iso: string | null) {
   })
 }
 
+type Insight = { tipo: 'positivo' | 'atencao'; texto: string }
+
+// Insights automáticos derivados dos mesmos KPIs já carregados — sem chamada extra ao banco.
+// Cada regra só entra na lista quando há dado suficiente para sustentar a leitura.
+function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): Insight[] {
+  if (!kpis) return []
+
+  const insights: Insight[] = []
+  const { operacao, funil, qualidade } = kpis
+
+  if (operacao.total_conversas > 0) {
+    const respondidas = operacao.total_conversas - operacao.aguardando_resposta
+    const coberturaPct = Math.round((respondidas / operacao.total_conversas) * 100)
+
+    if (operacao.aguardando_resposta === 0) {
+      insights.push({
+        tipo: 'positivo',
+        texto: `Sara respondeu 100% das ${operacao.total_conversas} conversas do período — nenhuma pendência há mais de 48h.`,
+      })
+    } else {
+      insights.push({
+        tipo: 'atencao',
+        texto: `${operacao.aguardando_resposta} conversa(s) aguardando resposta há mais de 48h (cobertura de ${coberturaPct}%).`,
+      })
+    }
+  }
+
+  if (operacao.tempo_resposta_medio_seg !== null) {
+    if (operacao.tempo_resposta_medio_seg <= 30) {
+      insights.push({
+        tipo: 'positivo',
+        texto: `Tempo médio de resposta de ${fmtTempo(operacao.tempo_resposta_medio_seg)} — praticamente instantâneo.`,
+      })
+    } else if (operacao.tempo_resposta_medio_seg > 300) {
+      insights.push({
+        tipo: 'atencao',
+        texto: `Tempo médio de resposta em ${fmtTempo(operacao.tempo_resposta_medio_seg)} — vale revisar o fluxo de atendimento.`,
+      })
+    }
+  }
+
+  const topCampanha = funil.por_campanha?.[0]
+  if (topCampanha?.campanha) {
+    insights.push({
+      tipo: 'positivo',
+      texto: `"${topCampanha.campanha}" foi a campanha que mais gerou conversas (${topCampanha.leads}) no período.`,
+    })
+  }
+
+  if (funil.total_leads > 0 && funil.agendados === 0 && funil.vendidos === 0) {
+    insights.push({
+      tipo: 'atencao',
+      texto: `${funil.total_leads} conversa(s) no período sem agendamento ou venda registrado — confirme se o resultado está sendo marcado no funil.`,
+    })
+  }
+
+  if (qualidade.avaliadas === 0) {
+    insights.push({
+      tipo: 'atencao',
+      texto: 'Nenhuma conversa foi avaliada ainda — ative a rotina de análise de qualidade para acompanhar a nota da Sara.',
+    })
+  } else if (qualidade.nota_media !== null) {
+    insights.push(
+      qualidade.nota_media >= 4
+        ? {
+            tipo: 'positivo',
+            texto: `Nota média de qualidade em ${qualidade.nota_media}/5 nas ${qualidade.avaliadas} conversas avaliadas.`,
+          }
+        : {
+            tipo: 'atencao',
+            texto: `Nota média de qualidade em ${qualidade.nota_media}/5 — abaixo do ideal, veja os pontos de melhoria.`,
+          }
+    )
+  }
+
+  return insights
+}
+
+function InsightTile({ insight }: { insight: Insight }) {
+  const positivo = insight.tipo === 'positivo'
+
+  return (
+    <div
+      className={`flex items-start gap-2.5 rounded-[16px] border p-3 ${
+        positivo
+          ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
+          : 'border-[var(--warning)]/25 bg-[var(--warning)]/10'
+      }`}
+    >
+      <span className={`mt-0.5 shrink-0 ${positivo ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
+        {positivo ? <Sparkles size={15} /> : <TrendingDown size={15} />}
+      </span>
+
+      <p className="text-[13px] font-semibold leading-snug text-[var(--foreground)]">{insight.texto}</p>
+    </div>
+  )
+}
+
 export default function ConversasPage() {
   const [dias, setDias] = useState(30)
   const [dados, setDados] = useState<ApiResponse | null>(null)
@@ -162,6 +262,7 @@ export default function ConversasPage() {
   }))
 
   const criterios = Object.entries(kpis?.qualidade.criterios_media ?? {})
+  const insights = construirInsights(kpis)
 
   return (
     <AppShell title="Conversas — Análise Crítica">
@@ -219,6 +320,21 @@ export default function ConversasPage() {
           accent="red"
         />
       </div>
+
+      {insights.length > 0 && (
+        <section className="dashboard-section mb-6">
+          <div className="mb-4 flex items-center gap-2">
+            <Sparkles size={18} className="text-[var(--accent)]" />
+            <h2 className="section-title">Insights automáticos</h2>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+            {insights.map((insight, i) => (
+              <InsightTile key={i} insight={insight} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
         <section className="dashboard-section">
