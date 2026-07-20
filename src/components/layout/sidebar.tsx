@@ -5,6 +5,7 @@ import {
   Megaphone,
   Filter,
   DollarSign,
+  MessageSquare,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -29,6 +30,11 @@ const items = [
     href: '/vendas',
     label: 'Vendas',
     icon: DollarSign,
+  },
+  {
+    href: '/conversas',
+    label: 'Conversas',
+    icon: MessageSquare,
   },
 ]
 

@@ -36,13 +36,21 @@ setComparar: (value: boolean) => void
   setCompararFim: (data: string) => void
 }
 
+// Só usado na primeira visita (sem preferência salva ainda) — depois disso o zustand-persist
+// restaura o que a pessoa escolheu manualmente, então isso nunca sobrescreve uma troca feita
+// no filtro "Dispositivo".
+function detectarViewModeInicial(): ViewMode {
+  if (typeof window === 'undefined') return 'desktop'
+  return window.innerWidth < 768 ? 'iphone' : 'desktop'
+}
+
 export const useFilters = create<FiltersState>()(
   persist(
     (set) => ({
       periodo: 'hoje',
       tipoData: 'criado',
       segmento: 'geral',
-      viewMode: 'desktop',
+      viewMode: detectarViewModeInicial(),
       dataInicio: '',
       dataFim: '',
       comparar: false,
