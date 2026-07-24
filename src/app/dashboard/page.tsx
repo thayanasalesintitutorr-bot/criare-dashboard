@@ -13,6 +13,7 @@ import {
 import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
 import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
+import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
 
 type EvolucaoDiariaItem = {
   data: string
@@ -970,7 +971,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     Leads aceitos (SAL)
   </h4>
 
-  <div className="grid grid-cols-4 gap-3">
+  <div className="grid grid-cols-5 gap-3">
     {(['A', 'B', 'C', 'D'] as const).map((item) => (
       <button
         key={item}
@@ -991,6 +992,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         {item}
       </button>
     ))}
+
+    <PrimeiraMensagemTile periodo={periodo} dataInicio={dataInicio} dataFim={dataFim} />
   </div>
     <SimpleMetric
    label=""
