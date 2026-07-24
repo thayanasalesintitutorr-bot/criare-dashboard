@@ -128,25 +128,40 @@ type Kpi = {
   percent: number | null
 }
 
-function KpiTile({ kpi }: { kpi: Kpi }) {
+function KpiTile({ kpi, isApresentacao }: { kpi: Kpi; isApresentacao: boolean }) {
   const Icon = ICONES_METRICA[kpi.chave]
   const metrica = PROJECAO_METRICAS.find((m) => m.chave === kpi.chave)!
   const tier = tierDoPercent(kpi.percent)
   const largura = kpi.percent === null ? 0 : Math.min(Math.max(kpi.percent, 3), 100)
 
   return (
-    <div className="flex h-full min-h-[190px] w-full flex-col self-stretch rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3">
-      <div className="flex items-center gap-1.5 text-[14px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
-        <Icon size={14} />
-        {metrica.label}
+    <div
+      className={`flex h-full w-full min-w-0 flex-col self-stretch rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] ${
+        isApresentacao ? 'min-h-[240px] px-5 py-4' : 'min-h-[190px] px-4 py-3'
+      }`}
+    >
+      <div
+        className={`flex min-w-0 items-center gap-1.5 font-bold uppercase tracking-wide text-[var(--muted-foreground)] ${
+          isApresentacao ? 'text-[20px]' : 'text-[14px]'
+        }`}
+      >
+        <Icon size={isApresentacao ? 20 : 14} className="shrink-0" />
+        <span className="min-w-0 break-words leading-tight">{metrica.label}</span>
       </div>
 
       <div className="mt-auto">
-        <div className="text-[28px] font-black leading-none tracking-[-0.02em]" style={{ color: tier.cor }}>
+        <div
+          className={`font-black leading-none tracking-[-0.02em] ${isApresentacao ? 'text-[44px]' : 'text-[28px]'}`}
+          style={{ color: tier.cor }}
+        >
           {kpi.percent !== null ? `${Math.round(kpi.percent)}%` : '—'}
         </div>
 
-        <div className="mt-3 h-[5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+        <div
+          className={`mt-3 w-full overflow-hidden rounded-full bg-[var(--progress-bg)] ${
+            isApresentacao ? 'h-[7px]' : 'h-[5px]'
+          }`}
+        >
           <motion.div
             className="h-full rounded-full"
             style={{ backgroundColor: tier.cor }}
@@ -157,10 +172,18 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
         </div>
 
         <div className="mt-2 flex items-baseline justify-between gap-2">
-          <span className="text-[16px] font-bold leading-tight text-[var(--foreground)]">
+          <span
+            className={`font-bold leading-tight text-[var(--foreground)] ${
+              isApresentacao ? 'text-[22px]' : 'text-[16px]'
+            }`}
+          >
             {kpi.atual !== null ? metrica.formatar(kpi.atual) : 'Sem dados'}
           </span>
-          <span className="shrink-0 text-[11px] font-semibold text-[var(--muted-foreground)]">
+          <span
+            className={`shrink-0 font-semibold text-[var(--muted-foreground)] ${
+              isApresentacao ? 'text-[15px]' : 'text-[11px]'
+            }`}
+          >
             Meta {metrica.formatar(kpi.meta)}
           </span>
         </div>
@@ -172,33 +195,41 @@ function KpiTile({ kpi }: { kpi: Kpi }) {
 function InsightTile({
   tipo,
   texto,
+  isApresentacao,
 }: {
   tipo: 'desafio' | 'destaque'
   texto: string
+  isApresentacao: boolean
 }) {
   const positivo = tipo === 'destaque'
 
   return (
     <div
-      className={`flex items-start gap-2.5 rounded-[16px] border p-3 ${
+      className={`flex items-start rounded-[16px] border ${isApresentacao ? 'gap-3.5 p-4' : 'gap-2.5 p-3'} ${
         positivo
           ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
           : 'border-[var(--warning)]/25 bg-[var(--warning)]/10'
       }`}
     >
       <span className={`mt-0.5 shrink-0 ${positivo ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
-        {positivo ? <Sparkles size={15} /> : <TrendingDown size={15} />}
+        {positivo ? <Sparkles size={isApresentacao ? 20 : 15} /> : <TrendingDown size={isApresentacao ? 20 : 15} />}
       </span>
 
       <div className="min-w-0">
         <div
-          className={`text-[10px] font-black uppercase tracking-[0.08em] ${
+          className={`font-black uppercase tracking-[0.08em] ${isApresentacao ? 'text-[14px]' : 'text-[10px]'} ${
             positivo ? 'text-[var(--success)]' : 'text-[var(--warning)]'
           }`}
         >
           {positivo ? 'Destaque positivo' : 'Principal desafio'}
         </div>
-        <div className="mt-0.5 text-[13px] font-semibold leading-snug text-[var(--foreground)]">{texto}</div>
+        <div
+          className={`mt-0.5 font-semibold leading-snug text-[var(--foreground)] ${
+            isApresentacao ? 'text-[18px]' : 'text-[13px]'
+          }`}
+        >
+          {texto}
+        </div>
       </div>
     </div>
   )
@@ -239,9 +270,19 @@ function construirInsights(kpis: Kpi[]) {
   return { desafio, destaque }
 }
 
-function Avatar({ nome, foto, size = 'md' }: { nome: string; foto: string | null; size?: 'md' | 'lg' }) {
-  const dimensao = size === 'lg' ? 'h-16 w-16' : 'h-7 w-7'
-  const fonte = size === 'lg' ? 'text-[20px]' : 'text-[11px]'
+function Avatar({
+  nome,
+  foto,
+  size = 'md',
+  isApresentacao = false,
+}: {
+  nome: string
+  foto: string | null
+  size?: 'md' | 'lg'
+  isApresentacao?: boolean
+}) {
+  const dimensao = size === 'lg' ? (isApresentacao ? 'h-24 w-24' : 'h-16 w-16') : isApresentacao ? 'h-9 w-9' : 'h-7 w-7'
+  const fonte = size === 'lg' ? (isApresentacao ? 'text-[30px]' : 'text-[20px]') : isApresentacao ? 'text-[14px]' : 'text-[11px]'
 
   return (
     <span
@@ -287,6 +328,8 @@ export function ProjecaoMedicosResumoCard({
   const [arrastando, setArrastando] = useState(false)
   const arrastoX = useRef<number | null>(null)
   const wheelTravado = useRef(false)
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
 
   useEffect(() => {
     let ativo = true
@@ -417,9 +460,17 @@ export function ProjecaoMedicosResumoCard({
 
   return (
     <section className="overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)]">
-      <div className="flex items-center justify-between gap-3 border-b border-[color:var(--border)] px-5 py-3">
-        <div className="flex items-center gap-2 text-[13px] font-black uppercase tracking-[0.08em] text-[var(--foreground)]">
-          <TrendingUp size={16} className="text-[var(--accent)]" />
+      <div
+        className={`flex items-center justify-between gap-3 border-b border-[color:var(--border)] ${
+          isApresentacao ? 'px-7 py-4' : 'px-5 py-3'
+        }`}
+      >
+        <div
+          className={`flex items-center gap-2 font-black uppercase tracking-[0.08em] text-[var(--foreground)] ${
+            isApresentacao ? 'text-[19px]' : 'text-[13px]'
+          }`}
+        >
+          <TrendingUp size={isApresentacao ? 22 : 16} className="text-[var(--accent)]" />
           Projeção dos médicos
         </div>
 
@@ -427,10 +478,12 @@ export function ProjecaoMedicosResumoCard({
           <button
             type="button"
             onClick={() => ir(indiceSeguro - 1)}
-            className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[color:var(--border)] text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)] sm:flex"
+            className={`hidden shrink-0 items-center justify-center rounded-full border border-[color:var(--border)] text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)] sm:flex ${
+              isApresentacao ? 'h-9 w-9' : 'h-7 w-7'
+            }`}
             aria-label="Anterior"
           >
-            <ChevronLeft size={15} />
+            <ChevronLeft size={isApresentacao ? 20 : 15} />
           </button>
 
           <div className="flex items-center gap-1.5">
@@ -440,8 +493,10 @@ export function ProjecaoMedicosResumoCard({
                 type="button"
                 onClick={() => ir(i)}
                 aria-label={`Ir para slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === indiceSeguro ? 'w-5 bg-[var(--accent)]' : 'w-1.5 bg-[var(--border)]'
+                className={`rounded-full transition-all ${isApresentacao ? 'h-2' : 'h-1.5'} ${
+                  i === indiceSeguro
+                    ? `bg-[var(--accent)] ${isApresentacao ? 'w-8' : 'w-5'}`
+                    : `bg-[var(--border)] ${isApresentacao ? 'w-2' : 'w-1.5'}`
                 }`}
               />
             ))}
@@ -450,16 +505,18 @@ export function ProjecaoMedicosResumoCard({
           <button
             type="button"
             onClick={() => ir(indiceSeguro + 1)}
-            className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[color:var(--border)] text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)] sm:flex"
+            className={`hidden shrink-0 items-center justify-center rounded-full border border-[color:var(--border)] text-[var(--muted-foreground)] transition-colors hover:border-[var(--accent)]/40 hover:text-[var(--accent)] sm:flex ${
+              isApresentacao ? 'h-9 w-9' : 'h-7 w-7'
+            }`}
             aria-label="Próximo"
           >
-            <ChevronRight size={15} />
+            <ChevronRight size={isApresentacao ? 20 : 15} />
           </button>
         </div>
       </div>
 
       <div
-        className={`relative touch-pan-y select-none overflow-hidden px-5 py-5 ${
+        className={`relative touch-pan-y select-none overflow-hidden ${isApresentacao ? 'px-7 py-7' : 'px-5 py-5'} ${
           arrastando ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         onPointerDown={handlePointerDown}
@@ -486,7 +543,11 @@ export function ProjecaoMedicosResumoCard({
         </AnimatePresence>
       </div>
 
-      <div className="border-t border-[color:var(--border)] px-5 py-2 text-center text-[11px] font-semibold text-[var(--muted-foreground)] sm:hidden">
+      <div
+        className={`border-t border-[color:var(--border)] px-5 py-2 text-center font-semibold text-[var(--muted-foreground)] sm:hidden ${
+          isApresentacao ? 'text-[14px]' : 'text-[11px]'
+        }`}
+      >
         Deslize para o lado · {indiceSeguro + 1} de {total}
       </div>
     </section>
@@ -496,61 +557,91 @@ export function ProjecaoMedicosResumoCard({
 function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: string }) {
   const { viewMode } = useFilters()
   const isImac = viewMode === 'desktop'
+  const isApresentacao = viewMode === 'apresentacao'
+  const isWide = isImac || isApresentacao
 
   const percentGeral = mediaPercentual(slide.kpis.map((k) => k.percent))
   const tierGeral = tierDoPercent(percentGeral)
   const { desafio, destaque } = construirInsights(slide.kpis)
 
   return (
-    <div className="space-y-5">
-      <div className={`flex flex-col items-stretch gap-5 ${isImac ? 'sm:flex-row' : ''}`}>
+    <div className={isApresentacao ? 'space-y-7' : 'space-y-5'}>
+      <div className={`flex flex-col items-stretch gap-5 ${isWide ? 'sm:flex-row' : ''} ${isApresentacao ? 'sm:gap-8' : ''}`}>
         <div
           className={`flex shrink-0 flex-col items-center gap-1 text-center ${
-            isImac ? 'sm:w-[27%]' : ''
+            isWide ? 'sm:w-[27%]' : ''
           }`}
         >
-          <Avatar nome={slide.nome} foto={slide.foto} size="lg" />
+          <Avatar nome={slide.nome} foto={slide.foto} size="lg" isApresentacao={isApresentacao} />
 
-          <div className="mt-1 text-[20px] font-black leading-tight text-[var(--foreground)]">{slide.nome}</div>
+          <div
+            className={`mt-1 font-black leading-tight text-[var(--foreground)] ${
+              isApresentacao ? 'text-[30px]' : 'text-[20px]'
+            }`}
+          >
+            {slide.nome}
+          </div>
           {nomeMes && (
-            <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">{nomeMes}</div>
+            <div
+              className={`font-semibold text-[var(--muted-foreground)] ${
+                isApresentacao ? 'text-[18px]' : 'text-[13px]'
+              }`}
+            >
+              {nomeMes}
+            </div>
           )}
 
           {slide.temDados ? (
             <div className="mt-2">
-              <div className="text-[10px] font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+              <div
+                className={`font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)] ${
+                  isApresentacao ? 'text-[14px]' : 'text-[10px]'
+                }`}
+              >
                 Desempenho geral
               </div>
               <div
-                className="text-[36px] font-black leading-none tracking-[-0.02em]"
+                className={`font-black leading-none tracking-[-0.02em] ${
+                  isApresentacao ? 'text-[56px]' : 'text-[36px]'
+                }`}
                 style={{ color: tierGeral.cor }}
               >
                 {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'}
               </div>
-              <div className="text-[13px] font-bold" style={{ color: tierGeral.cor }}>
+              <div className={`font-bold ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`} style={{ color: tierGeral.cor }}>
                 {tierGeral.label}
               </div>
             </div>
           ) : (
-            <div className="mt-3 text-[13px] font-semibold text-[var(--muted-foreground)]">
+            <div
+              className={`mt-3 font-semibold text-[var(--muted-foreground)] ${
+                isApresentacao ? 'text-[18px]' : 'text-[13px]'
+              }`}
+            >
               Sem dados de projeção para {nomeMes || 'este período'}
             </div>
           )}
         </div>
 
         {slide.temDados && (
-          <div className={isImac ? 'grid flex-1 items-stretch grid-cols-3 gap-3' : 'flex-1 space-y-2.5'}>
+          <div
+            className={
+              isWide
+                ? `grid min-w-0 flex-1 items-stretch grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`
+                : 'flex-1 space-y-2.5'
+            }
+          >
             {slide.kpis.map((kpi) => (
-              <KpiTile key={kpi.chave} kpi={kpi} />
+              <KpiTile key={kpi.chave} kpi={kpi} isApresentacao={isApresentacao} />
             ))}
           </div>
         )}
       </div>
 
       {slide.temDados && (desafio || destaque) && (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {destaque && <InsightTile tipo="destaque" texto={destaque} />}
-          {desafio && <InsightTile tipo="desafio" texto={desafio} />}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isApresentacao ? 'gap-3.5' : 'gap-2.5'}`}>
+          {destaque && <InsightTile tipo="destaque" texto={destaque} isApresentacao={isApresentacao} />}
+          {desafio && <InsightTile tipo="desafio" texto={desafio} isApresentacao={isApresentacao} />}
         </div>
       )}
     </div>
@@ -558,6 +649,8 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
 }
 
 function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: string }) {
+  const { viewMode } = useFilters()
+  const isApresentacao = viewMode === 'apresentacao'
   const medicos = slides.filter((s): s is SlideMedico => s.tipo === 'medico')
   const comDados = medicos.filter((m) => m.temDados)
 
@@ -580,45 +673,86 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
   const tierMedio = tierDoPercent(percentualMedioGeral)
 
   return (
-    <div className="space-y-5">
+    <div className={isApresentacao ? 'space-y-7' : 'space-y-5'}>
       <div className="flex flex-col items-center gap-1 text-center">
-        <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[color:var(--accent)]/30 bg-[var(--metric-card)] text-[var(--accent)]">
-          <LayoutGrid size={26} />
+        <span
+          className={`flex shrink-0 items-center justify-center rounded-full border border-[color:var(--accent)]/30 bg-[var(--metric-card)] text-[var(--accent)] ${
+            isApresentacao ? 'h-24 w-24' : 'h-16 w-16'
+          }`}
+        >
+          <LayoutGrid size={isApresentacao ? 38 : 26} />
         </span>
 
-        <div className="mt-1 text-[22px] font-black leading-tight text-[var(--foreground)]">Visão geral</div>
-        {nomeMes && <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">{nomeMes}</div>}
+        <div
+          className={`mt-1 font-black leading-tight text-[var(--foreground)] ${
+            isApresentacao ? 'text-[32px]' : 'text-[22px]'
+          }`}
+        >
+          Visão geral
+        </div>
+        {nomeMes && (
+          <div className={`font-semibold text-[var(--muted-foreground)] ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`}>
+            {nomeMes}
+          </div>
+        )}
 
         <div className="mt-2">
-          <div className="text-[11px] font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+          <div
+            className={`font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)] ${
+              isApresentacao ? 'text-[15px]' : 'text-[11px]'
+            }`}
+          >
             Percentual médio das metas
           </div>
-          <div className="text-[46px] font-black leading-none tracking-[-0.02em]" style={{ color: tierMedio.cor }}>
+          <div
+            className={`font-black leading-none tracking-[-0.02em] ${isApresentacao ? 'text-[70px]' : 'text-[46px]'}`}
+            style={{ color: tierMedio.cor }}
+          >
             {percentualMedioGeral !== null ? `${Math.round(percentualMedioGeral)}%` : '—'}
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className={`grid grid-cols-1 sm:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`}>
         {totais.map((item) => (
           <div
             key={item.chave}
-            className="rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4 text-center"
+            className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] text-center ${
+              isApresentacao ? 'p-5' : 'p-4'
+            }`}
           >
-            <div className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+            <div
+              className={`font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)] ${
+                isApresentacao ? 'text-[15px]' : 'text-[11px]'
+              }`}
+            >
               {item.label} totais
             </div>
-            <div className="mt-1 text-[26px] font-black leading-none text-[var(--foreground)]">{item.valor}</div>
+            <div
+              className={`mt-1 font-black leading-none text-[var(--foreground)] ${
+                isApresentacao ? 'text-[38px]' : 'text-[26px]'
+              }`}
+            >
+              {item.valor}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="space-y-3 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] p-4">
-        <div className="text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+      <div
+        className={`space-y-3 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] ${
+          isApresentacao ? 'p-5' : 'p-4'
+        }`}
+      >
+        <div
+          className={`font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)] ${
+            isApresentacao ? 'text-[15px]' : 'text-[11px]'
+          }`}
+        >
           Comparativo por médico
         </div>
 
-        <div className="space-y-3">
+        <div className={isApresentacao ? 'space-y-4' : 'space-y-3'}>
           {medicos.map((medico) => {
             const percent = medico.temDados ? mediaPercentual(medico.kpis.map((k) => k.percent)) : null
             const tier = tierDoPercent(percent)
@@ -628,16 +762,29 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
               <div key={medico.chave}>
                 <div className="mb-1 flex items-center justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-2">
-                    <Avatar nome={medico.nome} foto={medico.foto} />
-                    <span className="truncate text-[13px] font-bold text-[var(--foreground)]">{medico.nome}</span>
+                    <Avatar nome={medico.nome} foto={medico.foto} isApresentacao={isApresentacao} />
+                    <span
+                      className={`truncate font-bold text-[var(--foreground)] ${
+                        isApresentacao ? 'text-[18px]' : 'text-[13px]'
+                      }`}
+                    >
+                      {medico.nome}
+                    </span>
                   </div>
 
-                  <span className="shrink-0 text-[13px] font-black" style={{ color: tier.cor }}>
+                  <span
+                    className={`shrink-0 font-black ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`}
+                    style={{ color: tier.cor }}
+                  >
                     {percent !== null ? `${Math.round(percent)}%` : '—'}
                   </span>
                 </div>
 
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                <div
+                  className={`w-full overflow-hidden rounded-full bg-[var(--progress-bg)] ${
+                    isApresentacao ? 'h-3' : 'h-2'
+                  }`}
+                >
                   <motion.div
                     className="h-full rounded-full"
                     style={{ backgroundColor: tier.cor }}
