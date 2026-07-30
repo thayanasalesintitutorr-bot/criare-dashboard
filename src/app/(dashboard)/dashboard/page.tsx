@@ -8,12 +8,11 @@ import {
   Users,
   ChartNoAxesCombined,
   UserRound,
-  X,
 } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 import { useSetPageHeader } from '@/store/use-page-header'
 import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
-import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
+import { PrimeiraMensagemTile, PrimeiraMensagemCard } from '@/components/marketing/primeira-mensagem-tile'
 import { deepEqual } from '@/lib/deep-equal'
 
 type EvolucaoDiariaItem = {
@@ -706,7 +705,6 @@ export default function DashboardPage() {
   const [leadsSelecionados, setLeadsSelecionados] = useState<('A' | 'B' | 'C' | 'D')[]>(['A'])
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [now, setNow] = useState<Date>(new Date())
-  const [origensAberto, setOrigensAberto] = useState(false)
 
   useSetPageHeader('Visão Geral', <LiveIndicator lastUpdated={lastUpdated} now={now} />)
 
@@ -891,93 +889,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={marketing?.totalEntradas || 0}
   previousValue={comparativo?.marketing?.totalEntradasAnterior}
   showCompare={comparar}
-  iphoneOnValueClick={() => setOrigensAberto((v) => !v)}
->
-  <div
-  className={
-    viewMode === 'iphone'
-      ? `relative z-50 mt-3 w-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-2xl transition-all duration-200 ${
-          origensAberto ? 'block' : 'hidden'
-        }`
-      : `
-    absolute
-    left-0
-    top-full
-    z-50
-    mt-3
-    w-[900px]
-    rounded-[18px]
-    border
-    border-[color:var(--border)]
-    bg-[var(--card)]
-    p-5
-    shadow-2xl
-
-    opacity-0
-    invisible
-
-    group-hover:opacity-100
-    group-hover:visible
-
-    transition-all
-    duration-200
-  `
-  }
->
-      <div className="mb-4 flex items-center justify-between">
-  <h3 className={`${viewMode === 'apresentacao' ? 'text-[34px]' : 'text-[18px]'} font-bold text-[var(--foreground)]`}>
-    Origens dos leads
-  </h3>
-
-  <div className="flex items-center gap-3">
-    <span className={`${viewMode === 'apresentacao' ? 'text-[54px]' : 'text-[24px]'} font-medium text-[var(--foreground)]`}>
-      {origensTotal}
-    </span>
-
-    {viewMode === 'iphone' && (
-      <button
-        type="button"
-        onClick={() => setOrigensAberto(false)}
-        className="flex h-6 w-6 items-center justify-center rounded-full text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]"
-      >
-        <X size={14} />
-      </button>
-    )}
-  </div>
-</div>
-
-<div className={`${viewMode === 'apresentacao' ? 'max-h-[680px] space-y-6' : 'max-h-[360px] space-y-3'} overflow-y-auto pr-2`}>
-  {origensTop.map((item, i) => {
-    const pct = (item.quantidade / origensTotal) * 100
-    const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
-
-    return (
-      <div key={item.nome}>
-        <div className="mb-1 flex items-center justify-between gap-4">
-          <span className={`${viewMode === 'apresentacao' ? 'text-[26px]' : 'text-[13px]'} truncate font-medium text-[var(--muted-foreground)]`}>
-            {item.nome}
-          </span>
-
-          <span className={`${viewMode === 'apresentacao' ? 'text-[30px]' : 'text-[14px]'} font-medium text-[var(--foreground)]`}>
-            {item.quantidade}
-          </span>
-        </div>
-
-        <div className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} relative overflow-hidden rounded-full bg-[var(--progress-bg)]`}>
-          <div
-            className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} rounded-full`}
-            style={{
-              width: `${Math.max(pct, 4)}%`,
-              backgroundColor: color,
-            }}
-          />
-        </div>
-      </div>
-    )
-  })}
-</div>
-  </div>
-</SimpleMetric>
+/>
             <GoalMetric
               label="Leads não qualificados"
               value={marketing?.naoQualificados || 0}
@@ -1463,6 +1375,66 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         )}
 
         <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
+
+        {origensTop.length > 0 && (
+          <section className={`px-4 py-2 ${cardBg()}`}>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`${
+                    viewMode === 'apresentacao' ? 'h-12 w-12' : viewMode === 'iphone' ? 'h-8 w-8' : 'h-6 w-6'
+                  } flex shrink-0 items-center justify-center text-[var(--accent)]`}
+                >
+                  <Funnel size={26} />
+                </div>
+                <h3
+                  className={`${
+                    viewMode === 'apresentacao' ? 'text-[42px]' : 'text-[20px]'
+                  } font-bold tracking-[-0.02em] ${textPrimary()}`}
+                >
+                  Origens dos leads
+                </h3>
+              </div>
+
+              <span className={`${viewMode === 'apresentacao' ? 'text-[42px]' : 'text-[22px]'} font-medium ${textPrimary()}`}>
+                {origensTotal}
+              </span>
+            </div>
+
+            <div className="space-y-3">
+              {origensTop.map((item, i) => {
+                const pct = (item.quantidade / origensTotal) * 100
+                const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
+
+                return (
+                  <div key={item.nome}>
+                    <div className="mb-1 flex items-center justify-between gap-4">
+                      <span className={`${viewMode === 'apresentacao' ? 'text-[24px]' : 'text-[13px]'} truncate font-medium text-[var(--muted-foreground)]`}>
+                        {item.nome}
+                      </span>
+
+                      <span className={`${viewMode === 'apresentacao' ? 'text-[28px]' : 'text-[14px]'} font-medium ${textPrimary()}`}>
+                        {item.quantidade}
+                      </span>
+                    </div>
+
+                    <div className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} relative overflow-hidden rounded-full bg-[var(--progress-bg)]`}>
+                      <div
+                        className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} rounded-full`}
+                        style={{
+                          width: `${Math.max(pct, 4)}%`,
+                          backgroundColor: color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
+        <PrimeiraMensagemCard periodo={periodo} dataInicio={dataInicio} dataFim={dataFim} />
 
       </div>
   )
