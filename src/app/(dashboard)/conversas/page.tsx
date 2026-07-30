@@ -20,7 +20,7 @@ import {
   Sparkles,
   TrendingDown,
 } from 'lucide-react'
-import { AppShell } from '@/components/layout/app-shell'
+import { useSetPageHeader } from '@/store/use-page-header'
 import { KpiCard } from '@/components/dashboard/kpi-card'
 
 type CampanhaItem = {
@@ -264,8 +264,10 @@ export default function ConversasPage() {
   const criterios = Object.entries(kpis?.qualidade.criterios_media ?? {})
   const insights = construirInsights(kpis)
 
+  useSetPageHeader('Conversas — Análise Crítica')
+
   return (
-    <AppShell title="Conversas — Análise Crítica">
+    <>
       <div className="mb-6 flex items-center gap-2">
         {PERIODOS.map((p) => (
           <button
@@ -591,6 +593,6 @@ export default function ConversasPage() {
           </div>
         </div>
       )}
-    </AppShell>
+    </>
   )
 }

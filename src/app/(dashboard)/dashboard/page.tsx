@@ -10,10 +10,11 @@ import {
   UserRound,
   X,
 } from 'lucide-react'
-import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
+import { useSetPageHeader } from '@/store/use-page-header'
 import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
 import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
+import { deepEqual } from '@/lib/deep-equal'
 
 type EvolucaoDiariaItem = {
   data: string
@@ -423,6 +424,8 @@ function GoalMetric({
   mode,
   metaLabel,
   empty = false,
+  previousValue,
+  showCompare = false,
 }: {
   label: string
   value: ReactNode
@@ -431,11 +434,19 @@ function GoalMetric({
   mode: 'max' | 'min'
   metaLabel?: string
   empty?: boolean
+  previousValue?: number
+  showCompare?: boolean
 }) {
   const { viewMode } = useFilters()
   const s = getMetricStatus(percent, target, mode)
 
   const isApresentacao = viewMode === 'apresentacao'
+
+  const base = Number(previousValue || 0)
+  const numericValue = typeof value === 'number' ? value : Number(value) || 0
+  const diff = base > 0 ? Math.round(((numericValue - base) / base) * 100) : 0
+  const positivo = diff > 0
+  const negativo = diff < 0
 
   if (empty) {
     return (
@@ -480,6 +491,24 @@ function GoalMetric({
       >
         {value}
       </div>
+
+      {showCompare && (
+        <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[22px]' : viewMode === 'iphone' ? 'text-[12px]' : 'text-[12px]'} font-medium`}>
+          <span
+            className={
+              positivo
+                ? 'text-[var(--success)]'
+                : negativo
+                ? 'text-[var(--danger)]'
+                : 'text-[var(--muted-foreground)]'
+            }
+          >
+            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
+          </span>
+
+          <span className={textSecondary()}>ant. {base}</span>
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
   <span
@@ -673,6 +702,8 @@ export default function DashboardPage() {
   const [now, setNow] = useState<Date>(new Date())
   const [origensAberto, setOrigensAberto] = useState(false)
 
+  useSetPageHeader('Visão Geral', <LiveIndicator lastUpdated={lastUpdated} now={now} />)
+
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(tick)
@@ -713,16 +744,7 @@ export default function DashboardPage() {
 
       if (!json.ok) throw new Error(json.error || 'Erro ao buscar dados')
 
-      setData((prev) => {
-        const anterior = JSON.stringify(prev)
-        const novo = JSON.stringify(json)
-
-        if (anterior === novo) {
-          return prev
-        }
-
-        return json
-      })
+      setData((prev) => (deepEqual(prev, json) ? prev : json))
 
       setLastUpdated(new Date())
     } catch (err) {
@@ -805,23 +827,19 @@ export default function DashboardPage() {
   })
   if (loading) {
     return (
-      <AppShell title="Visão Geral">
-        <div className="grid gap-6 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className={`h-[440px] animate-pulse ${cardBg()}`} />
-          ))}
-        </div>
-      </AppShell>
+      <div className="grid gap-6 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className={`h-[440px] animate-pulse ${cardBg()}`} />
+        ))}
+      </div>
     )
   }
 
   if (error) {
     return (
-      <AppShell title="Visão Geral">
-        <div className="rounded-[18px] border border-[color:var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
-          {error}
-        </div>
-      </AppShell>
+      <div className="rounded-[18px] border border-[color:var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
+        {error}
+      </div>
     )
   }
 
@@ -852,7 +870,6 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
 
   return (
-    <AppShell title="Visão Geral" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
      <div className="space-y-3">
 
     <div
@@ -1205,6 +1222,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     target={experienciaCliente?.metaNoShowPercent ?? 10}
     metaLabel={`ideal até ${experienciaCliente?.metaNoShowQuantidade ?? 0}`}
     mode="max"
+    previousValue={comparativo?.statusAgenda?.noShowAnterior}
+    showCompare={comparar}
   />
 
   <GoalMetric
@@ -1213,6 +1232,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     percent={experienciaCliente?.reagendadosPercent ?? 0}
     target={30}
     mode="max"
+    previousValue={comparativo?.statusAgenda?.reagendadosAnterior}
+    showCompare={comparar}
   />
 
   <GoalMetric
@@ -1221,6 +1242,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     percent={experienciaCliente?.canceladosPercent ?? 0}
     target={10}
     mode="max"
+    previousValue={comparativo?.statusAgenda?.canceladosAnterior}
+    showCompare={comparar}
   />
 
  <div className="border-t border-[color:var(--border)] pt-2">
@@ -1436,6 +1459,5 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
 
       </div>
-    </AppShell>
   )
 }

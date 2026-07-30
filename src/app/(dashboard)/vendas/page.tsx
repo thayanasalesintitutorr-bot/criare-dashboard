@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
+import { useSetPageHeader } from '@/store/use-page-header'
 import {
   CircleDollarSign,
   TrendingUp,
@@ -123,6 +123,8 @@ export default function VendasPage() {
   const [error, setError] = useState<string | null>(null)
   const [medicoAberto, setMedicoAberto] = useState<string | null>(null)
 
+  useSetPageHeader('Vendas (Procedimentos)')
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -219,26 +221,21 @@ const res = await fetch(url, {
 
   if (loading) {
     return (
-      <AppShell title="Vendas (Procedimentos)">
-        <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
-          Carregando vendas...
-        </div>
-      </AppShell>
+      <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
+        Carregando vendas...
+      </div>
     )
   }
 
   if (error) {
     return (
-      <AppShell title="Vendas (Procedimentos)">
-        <div className="rounded-[18px] border border-[color:var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
-          {error}
-        </div>
-      </AppShell>
+      <div className="rounded-[18px] border border-[color:var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
+        {error}
+      </div>
     )
   }
 
   return (
-    <AppShell title="Vendas (Procedimentos)">
       <div className="space-y-5">
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
   <CardMini
@@ -626,7 +623,6 @@ const res = await fetch(url, {
 </section>
 
       </div>
-    </AppShell>
   )
 }
 

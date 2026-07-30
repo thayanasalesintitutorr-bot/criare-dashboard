@@ -1,5 +1,26 @@
 export const dynamic = 'force-dynamic'
 
+// Cache em memória de curta duração: evita recomputar a mesma combinação de filtros
+// quando o Topbar e a página ativa pedem os mesmos dados quase ao mesmo tempo, ou
+// quando o polling repete a chamada antes de qualquer coisa ter mudado no período.
+type CacheEntry = { data: unknown; expiresAt: number }
+const RESPONSE_CACHE_TTL_MS = 20_000
+const responseCache = new Map<string, CacheEntry>()
+
+function getCachedResponse(key: string) {
+  const entry = responseCache.get(key)
+  if (!entry) return null
+  if (entry.expiresAt < Date.now()) {
+    responseCache.delete(key)
+    return null
+  }
+  return entry.data
+}
+
+function setCachedResponse(key: string, data: unknown) {
+  responseCache.set(key, { data, expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS })
+}
+
 type Lead = {
   id: number
   name?: string | null
@@ -605,6 +626,21 @@ const data = await response.json()
     const compararFim = searchParams.get('compararFim') || ''
     const origemModo =
       searchParams.get('origemModo') === 'anuncio' ? 'anuncio' : 'campanha'
+
+    const cacheKey = JSON.stringify({
+      periodo,
+      segmento,
+      customStart,
+      customEnd,
+      compararInicio,
+      compararFim,
+      origemModo,
+    })
+
+    const cached = getCachedResponse(cacheKey)
+    if (cached) {
+      return Response.json(cached)
+    }
 
     const range = getGlobalRange(periodo, customStart, customEnd)
     const previousRange =
@@ -2432,7 +2468,7 @@ const painelAtendimento = {
 }
 
 
-    return Response.json({
+    const payload = {
       ok: true,
       filtros: {
         periodo,
@@ -2612,9 +2648,11 @@ origensVendaConsulta: campanhasConsulta,
 origensPropostasFechadas: campanhasVendidas,
 
 reabordLeads,
-    })
+    }
 
-    
+    setCachedResponse(cacheKey, payload)
+
+    return Response.json(payload)
   } catch (err: any) {
     return Response.json({
       ok: false,

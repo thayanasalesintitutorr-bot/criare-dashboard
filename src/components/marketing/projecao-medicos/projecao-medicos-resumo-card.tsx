@@ -163,10 +163,10 @@ function KpiTile({ kpi, isApresentacao }: { kpi: Kpi; isApresentacao: boolean })
           }`}
         >
           <motion.div
-            className="h-full rounded-full"
+            className="h-full w-full origin-left rounded-full"
             style={{ backgroundColor: tier.cor }}
-            initial={{ width: 0 }}
-            animate={{ width: `${largura}%` }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: largura / 100 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
           />
         </div>
@@ -786,10 +786,10 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
                   }`}
                 >
                   <motion.div
-                    className="h-full rounded-full"
+                    className="h-full w-full origin-left rounded-full"
                     style={{ backgroundColor: tier.cor }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${largura}%` }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: largura / 100 }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
                 </div>

@@ -18,9 +18,9 @@ export function ProgressBar({ percent }: ProgressBarProps) {
   return (
     <div className="h-[3.5px] w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
       <motion.div
-        className={`h-full rounded-full ${cor}`}
-        initial={{ width: 0 }}
-        animate={{ width: `${largura}%` }}
+        className={`h-full w-full origin-left rounded-full ${cor}`}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: largura / 100 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
       />
     </div>

@@ -10,8 +10,9 @@ import {
   Tooltip,
   XAxis,
 } from 'recharts'
-import { AppShell } from '@/components/layout/app-shell'
 import { useFilters } from '@/store/use-filters'
+import { useSetPageHeader } from '@/store/use-page-header'
+import { deepEqual } from '@/lib/deep-equal'
 import {
   CircleDollarSign,
   TrendingUp,
@@ -256,6 +257,8 @@ const isApresentacao = viewMode === 'apresentacao'
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [now, setNow] = useState<Date>(new Date())
 
+  useSetPageHeader('Consulta (Funil)', <LiveIndicator lastUpdated={lastUpdated} now={now} />)
+
   const colunaGraficosRef = useRef<HTMLDivElement>(null)
   const [alturaColunaGraficos, setAlturaColunaGraficos] = useState<number | null>(null)
 
@@ -319,13 +322,7 @@ const isApresentacao = viewMode === 'apresentacao'
         throw new Error(json.error || 'Erro ao buscar dados')
       }
 
-      setData((prev) => {
-        if (JSON.stringify(prev) === JSON.stringify(json)) {
-          return prev
-        }
-
-        return json
-      })
+      setData((prev) => (deepEqual(prev, json) ? prev : json))
 
       setLastUpdated(new Date())
     } catch (err) {
@@ -400,26 +397,21 @@ const ticketMedioConsultaComReabord =
 )
   if (loading) {
     return (
-      <AppShell title="Consulta (Funil)">
-        <div className="rounded-[24px] bg-[var(--card)] p-6">
-          Carregando consultas...
-        </div>
-      </AppShell>
+      <div className="rounded-[24px] bg-[var(--card)] p-6">
+        Carregando consultas...
+      </div>
     )
   }
 
   if (error) {
     return (
-      <AppShell title="Consulta (Funil)">
-        <div className="rounded-[24px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
-          {error}
-        </div>
-      </AppShell>
+      <div className="rounded-[24px] border border-[var(--danger)]/20 bg-[var(--danger)]/10 p-6 text-[var(--danger)]">
+        {error}
+      </div>
     )
   }
 
   return (
-  <AppShell title="Consulta (Funil)" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
     <div className="space-y-5">
 <section className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
   <div className="flex items-center gap-4">
@@ -1118,7 +1110,6 @@ CONSOLIDADO
 </div>
 </section>
  </div>
-    </AppShell>
   )
 }
 function MetricMini({

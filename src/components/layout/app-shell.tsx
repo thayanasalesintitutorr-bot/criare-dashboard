@@ -1,17 +1,16 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { usePathname } from 'next/navigation'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
+import { usePageHeader } from '@/store/use-page-header'
 
-type AppShellProps = {
-  title: string
-  children: ReactNode
-  statusIndicator?: ReactNode
-}
+export function AppShell({ children }: { children: ReactNode }) {
+  const { title, statusIndicator } = usePageHeader()
+  const pathname = usePathname()
 
-export function AppShell({ title, children, statusIndicator }: AppShellProps) {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
@@ -20,14 +19,17 @@ export function AppShell({ title, children, statusIndicator }: AppShellProps) {
         <div className="flex min-w-0 flex-1 flex-col pl-[76px]">
           <Topbar title={title} statusIndicator={statusIndicator} />
 
-          <motion.main
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.22 }}
-            className="flex-1 p-6 md:p-8"
-          >
-            {children}
-          </motion.main>
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22 }}
+              className="flex-1 p-6 md:p-8"
+            >
+              {children}
+            </motion.main>
+          </AnimatePresence>
         </div>
       </div>
     </div>

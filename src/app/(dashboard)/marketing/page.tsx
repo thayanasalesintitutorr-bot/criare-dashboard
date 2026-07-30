@@ -3,9 +3,8 @@
 import { useEffect, useState, type ReactNode } from 'react'
 
 
-import { AppShell } from '@/components/layout/app-shell'
-
 import { useFilters } from '@/store/use-filters'
+import { useSetPageHeader } from '@/store/use-page-header'
 
 import { ProjecaoMedicosCard } from '@/components/marketing/projecao-medicos/projecao-medicos-card'
 
@@ -1148,6 +1147,8 @@ const [sidebarOrigensWidth, setSidebarOrigensWidth] = useState<number>(() => get
 const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 const [now, setNow] = useState<Date>(new Date())
 
+useSetPageHeader('Marketing', <LiveIndicator lastUpdated={lastUpdated} now={now} />)
+
 useEffect(() => {
   localStorage.setItem(SIDEBAR_ORIGENS_WIDTH_KEY, String(sidebarOrigensWidth))
 }, [sidebarOrigensWidth])
@@ -1388,7 +1389,6 @@ const insights = buildInsights({
 })
 
 return (
-  <AppShell title="Marketing" statusIndicator={<LiveIndicator lastUpdated={lastUpdated} now={now} />}>
   <div className="space-y-5">
     <div
       className="grid gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
@@ -1754,6 +1754,5 @@ items={consultasFiltrado}
 
     <ProjecaoMedicosCard />
   </div>
-</AppShell>
 )
 }
