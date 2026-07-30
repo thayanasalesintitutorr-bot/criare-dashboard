@@ -129,6 +129,12 @@ conveniosConsulta?: {
       valorVendasAnterior?: number
       ticketMedioAnterior?: number
     }
+    statusAgenda?: {
+      finalizadosAnterior?: number
+      noShowAnterior?: number
+      reagendadosAnterior?: number
+      canceladosAnterior?: number
+    }
   }
 
   funil?: {
