@@ -12,7 +12,8 @@ import {
 import { useFilters } from '@/store/use-filters'
 import { useSetPageHeader } from '@/store/use-page-header'
 import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
-import { PrimeiraMensagemTile, PrimeiraMensagemCard } from '@/components/marketing/primeira-mensagem-tile'
+import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
+import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-primeira-mensagem-card'
 import { deepEqual } from '@/lib/deep-equal'
 
 type EvolucaoDiariaItem = {
@@ -680,21 +681,6 @@ function MedicoSnapshotCard({
     </div>
   )
 }
-
-const ORIGENS_COLORS = [
-  '#4f8cff',
-  '#34d399',
-  '#f59e0b',
-  '#f87171',
-  '#a78bfa',
-  '#fb923c',
-  '#38bdf8',
-  '#e879f9',
-  '#84cc16',
-  '#14b8a6',
-  '#f472b6',
-  '#6366f1',
-]
 
 export default function DashboardPage() {
   const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar, compararInicio, compararFim } = useFilters()
@@ -1376,65 +1362,13 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
         <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
 
-        {origensTop.length > 0 && (
-          <section className={`px-4 py-2 ${cardBg()}`}>
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`${
-                    viewMode === 'apresentacao' ? 'h-12 w-12' : viewMode === 'iphone' ? 'h-8 w-8' : 'h-6 w-6'
-                  } flex shrink-0 items-center justify-center text-[var(--accent)]`}
-                >
-                  <Funnel size={26} />
-                </div>
-                <h3
-                  className={`${
-                    viewMode === 'apresentacao' ? 'text-[42px]' : 'text-[20px]'
-                  } font-bold tracking-[-0.02em] ${textPrimary()}`}
-                >
-                  Origens dos leads
-                </h3>
-              </div>
-
-              <span className={`${viewMode === 'apresentacao' ? 'text-[42px]' : 'text-[22px]'} font-medium ${textPrimary()}`}>
-                {origensTotal}
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {origensTop.map((item, i) => {
-                const pct = (item.quantidade / origensTotal) * 100
-                const color = ORIGENS_COLORS[i % ORIGENS_COLORS.length]
-
-                return (
-                  <div key={item.nome}>
-                    <div className="mb-1 flex items-center justify-between gap-4">
-                      <span className={`${viewMode === 'apresentacao' ? 'text-[24px]' : 'text-[13px]'} truncate font-medium text-[var(--muted-foreground)]`}>
-                        {item.nome}
-                      </span>
-
-                      <span className={`${viewMode === 'apresentacao' ? 'text-[28px]' : 'text-[14px]'} font-medium ${textPrimary()}`}>
-                        {item.quantidade}
-                      </span>
-                    </div>
-
-                    <div className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} relative overflow-hidden rounded-full bg-[var(--progress-bg)]`}>
-                      <div
-                        className={`${viewMode === 'apresentacao' ? 'h-6' : 'h-3'} rounded-full`}
-                        style={{
-                          width: `${Math.max(pct, 4)}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
-        )}
-
-        <PrimeiraMensagemCard periodo={periodo} dataInicio={dataInicio} dataFim={dataFim} />
+        <OrigensPrimeiraMensagemCard
+          origens={origensTop}
+          origensTotal={origensTotal}
+          periodo={periodo}
+          dataInicio={dataInicio}
+          dataFim={dataFim}
+        />
 
       </div>
   )

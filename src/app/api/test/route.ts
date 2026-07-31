@@ -1425,7 +1425,7 @@ const consolidadoTicketMedio =
       range
     )
 
-    const origens = buildOrigens(consultaBasePeriodo, origemModo)
+    const origens = buildOrigens(consultaBasePeriodo, origemModo, true)
 
     const leadsEntrada = consultaBasePeriodo
 

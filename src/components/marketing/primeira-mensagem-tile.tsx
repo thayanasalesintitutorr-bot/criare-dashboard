@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { MessageCircleWarning } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 
-type PrimeiraMensagemData = {
+export type PrimeiraMensagemData = {
   total: number
   porCampanha: { campanha: string; qtd: number }[]
 }
@@ -26,7 +26,7 @@ function useHoverCapaz() {
   return hoverCapaz
 }
 
-function usePrimeiraMensagem(periodo: string, dataInicio?: string, dataFim?: string) {
+export function usePrimeiraMensagem(periodo: string, dataInicio?: string, dataFim?: string) {
   const [dados, setDados] = useState<PrimeiraMensagemData | null>(null)
 
   useEffect(() => {
@@ -60,16 +60,6 @@ function usePrimeiraMensagem(periodo: string, dataInicio?: string, dataFim?: str
 
   return dados
 }
-
-const PRIMEIRA_MENSAGEM_COLORS = [
-  '#f59e0b',
-  '#fb923c',
-  '#f87171',
-  '#facc15',
-  '#fb7185',
-  '#fdba74',
-  '#eab308',
-]
 
 export function PrimeiraMensagemTile({
   periodo,
@@ -135,86 +125,5 @@ export function PrimeiraMensagemTile({
         </div>
       )}
     </div>
-  )
-}
-
-export function PrimeiraMensagemCard({
-  periodo,
-  dataInicio,
-  dataFim,
-}: {
-  periodo: string
-  dataInicio?: string
-  dataFim?: string
-}) {
-  const { viewMode } = useFilters()
-  const isApresentacao = viewMode === 'apresentacao'
-
-  const dados = usePrimeiraMensagem(periodo, dataInicio, dataFim)
-  const total = dados?.total ?? 0
-  const lista = dados?.porCampanha ?? []
-
-  return (
-    <section className="rounded-[24px] border border-[color:var(--warning)]/30 bg-[var(--card)] px-4 py-2 shadow-[var(--card-shadow)]">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div
-            className={`${
-              isApresentacao ? 'h-12 w-12' : 'h-6 w-6'
-            } flex shrink-0 items-center justify-center text-[var(--warning)]`}
-          >
-            <MessageCircleWarning size={isApresentacao ? 34 : 22} />
-          </div>
-          <h3 className={`${isApresentacao ? 'text-[42px]' : 'text-[20px]'} font-bold tracking-[-0.02em] text-[var(--foreground)]`}>
-            Leads na primeira mensagem
-          </h3>
-        </div>
-
-        <span className={`${isApresentacao ? 'text-[42px]' : 'text-[22px]'} font-medium text-[var(--foreground)]`}>
-          {total}
-        </span>
-      </div>
-
-      <p className={`mb-4 ${isApresentacao ? 'text-[22px]' : 'text-[13px]'} font-medium text-[var(--muted-foreground)]`}>
-        Leads que mandaram só 1 mensagem no período e não voltaram a interagir.
-      </p>
-
-      {lista.length === 0 ? (
-        <div className={`flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 ${isApresentacao ? 'text-[20px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
-          Sem dados no período
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {lista.map((item, i) => {
-            const pct = total > 0 ? (item.qtd / total) * 100 : 0
-            const color = PRIMEIRA_MENSAGEM_COLORS[i % PRIMEIRA_MENSAGEM_COLORS.length]
-
-            return (
-              <div key={item.campanha}>
-                <div className="mb-1 flex items-center justify-between gap-4">
-                  <span className={`${isApresentacao ? 'text-[24px]' : 'text-[13px]'} truncate font-medium text-[var(--muted-foreground)]`}>
-                    {item.campanha}
-                  </span>
-
-                  <span className={`${isApresentacao ? 'text-[28px]' : 'text-[14px]'} font-medium text-[var(--foreground)]`}>
-                    {item.qtd}
-                  </span>
-                </div>
-
-                <div className={`${isApresentacao ? 'h-6' : 'h-3'} relative overflow-hidden rounded-full bg-[var(--progress-bg)]`}>
-                  <div
-                    className={`${isApresentacao ? 'h-6' : 'h-3'} rounded-full`}
-                    style={{
-                      width: `${Math.max(pct, 4)}%`,
-                      backgroundColor: color,
-                    }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </section>
   )
 }
