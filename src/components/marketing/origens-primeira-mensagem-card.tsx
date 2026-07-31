@@ -2,7 +2,6 @@
 
 import { Funnel } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
-import { usePrimeiraMensagem } from './primeira-mensagem-tile'
 
 type OrigemItem = {
   nome: string
@@ -12,22 +11,16 @@ type OrigemItem = {
 export function OrigensPrimeiraMensagemCard({
   origens,
   origensTotal,
-  periodo,
-  dataInicio,
-  dataFim,
+  primeiraMensagemOrigens,
+  primeiraMensagemTotal,
 }: {
   origens: OrigemItem[]
   origensTotal: number
-  periodo: string
-  dataInicio?: string
-  dataFim?: string
+  primeiraMensagemOrigens: OrigemItem[]
+  primeiraMensagemTotal: number
 }) {
   const { viewMode } = useFilters()
   const isApresentacao = viewMode === 'apresentacao'
-
-  const primeiraMensagem = usePrimeiraMensagem(periodo, dataInicio, dataFim)
-  const primeiraMensagemTotal = primeiraMensagem?.total ?? 0
-  const porCampanha = primeiraMensagem?.porCampanha ?? []
 
   return (
     <section className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-2 shadow-[var(--card-shadow)]">
@@ -55,7 +48,7 @@ export function OrigensPrimeiraMensagemCard({
           <div className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[var(--warning)]" />
             <span className={`${isApresentacao ? 'text-[20px]' : 'text-[12px]'} font-semibold text-[var(--muted-foreground)]`}>
-              só 1ª mensagem ({primeiraMensagemTotal})
+              parados na 1ª mensagem ({primeiraMensagemTotal})
             </span>
           </div>
         </div>
@@ -69,10 +62,7 @@ export function OrigensPrimeiraMensagemCard({
         <div className="space-y-4">
           {origens.map((item) => {
             const pctDoTotal = origensTotal > 0 ? (item.quantidade / origensTotal) * 100 : 0
-            // "Sem origem" é só o balde de "não identificado" de cada lado (Kommo x WhatsApp) —
-            // não representa os mesmos leads, então cruzar os dois aqui dá número sem sentido.
-            const comparavel = item.nome !== 'Sem origem'
-            const presaNaPrimeira = comparavel ? porCampanha.find((c) => c.campanha === item.nome)?.qtd ?? 0 : 0
+            const presaNaPrimeira = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
             const pctPresaNaCampanha = item.quantidade > 0 ? (presaNaPrimeira / item.quantidade) * 100 : 0
 
             return (
@@ -97,7 +87,7 @@ export function OrigensPrimeiraMensagemCard({
                 {presaNaPrimeira > 0 && (
                   <div className="mt-1 flex items-center justify-between gap-4">
                     <span className={`${isApresentacao ? 'text-[18px]' : 'text-[11px]'} font-medium text-[var(--warning)]`}>
-                      {presaNaPrimeira} ficaram só na 1ª mensagem ({Math.round(pctPresaNaCampanha)}%)
+                      {presaNaPrimeira} parados na 1ª mensagem ({Math.round(pctPresaNaCampanha)}%)
                     </span>
                   </div>
                 )}

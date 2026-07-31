@@ -815,6 +815,23 @@ const leadD = consultaBasePeriodo.filter((l) =>
   normalize(l.tag).includes('LEAD D')
 ).length
 
+// Leads com a tag PRIMEIRA MENSAGEM que ainda não avançaram pra nenhuma
+// classificação de lead (A/B/C/D) — se já tem A/B/C/D, não conta mais como
+// "parado na primeira mensagem", já foi qualificado.
+const leadsPrimeiraMensagem = consultaBasePeriodo.filter((l) => {
+  const tag = normalize(l.tag)
+  const temPrimeiraMensagem = tag.includes('PRIMEIRA MENSAGEM')
+  const temLeadGrade =
+    tag.includes('LEAD A') ||
+    tag.includes('LEAD B') ||
+    tag.includes('LEAD C') ||
+    tag.includes('LEAD D')
+
+  return temPrimeiraMensagem && !temLeadGrade
+})
+
+const origensPrimeiraMensagem = buildOrigens(leadsPrimeiraMensagem, origemModo, true)
+
     const convertidos = consultaLeads.filter((l) => {
   return (
     inRange(parseDateLocal(l.created_at), range.start, range.end) &&
@@ -2635,6 +2652,11 @@ painelAtendimento,
       origens,
       atendimentoConsulta,
       conveniosConsulta,
+
+      primeiraMensagem: {
+        total: leadsPrimeiraMensagem.length,
+        origens: origensPrimeiraMensagem,
+      },
 
       origensPorEtapa: {
       entrada: buildOrigens(leadsEntrada, origemModo),

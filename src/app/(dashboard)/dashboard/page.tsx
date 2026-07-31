@@ -178,6 +178,10 @@ conveniosConsulta?: {
 
   evolucaoDiaria?: EvolucaoDiariaItem[]
   origens?: OrigemItem[]
+  primeiraMensagem?: {
+    total: number
+    origens: OrigemItem[]
+  }
   consultaPorMedico?: {
   medico: string
   atendimentos: number
@@ -758,6 +762,8 @@ export default function DashboardPage() {
   const comercialVendas = data?.kpis?.comercialVendas
   const consolidado = data?.consolidado
   const origens = data?.origens || []
+  const primeiraMensagemTotal = data?.primeiraMensagem?.total || 0
+  const primeiraMensagemOrigens = data?.primeiraMensagem?.origens || []
   const experienciaCliente = data?.kpis?.experienciaCliente
   const comparativo = data?.comparativo
   const consultaPorMedico = data?.consultaPorMedico || []
@@ -914,7 +920,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       </button>
     ))}
 
-    <PrimeiraMensagemTile periodo={periodo} dataInicio={dataInicio} dataFim={dataFim} />
+    <PrimeiraMensagemTile total={primeiraMensagemTotal} origens={primeiraMensagemOrigens} />
   </div>
     <SimpleMetric
    label=""
@@ -1365,9 +1371,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         <OrigensPrimeiraMensagemCard
           origens={origensTop}
           origensTotal={origensTotal}
-          periodo={periodo}
-          dataInicio={dataInicio}
-          dataFim={dataFim}
+          primeiraMensagemOrigens={primeiraMensagemOrigens}
+          primeiraMensagemTotal={primeiraMensagemTotal}
         />
 
       </div>

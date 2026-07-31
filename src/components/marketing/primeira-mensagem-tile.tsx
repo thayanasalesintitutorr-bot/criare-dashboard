@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { MessageCircleWarning } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 
-export type PrimeiraMensagemData = {
-  total: number
-  porCampanha: { campanha: string; qtd: number }[]
+export type OrigemItem = {
+  nome: string
+  quantidade: number
 }
 
 function useHoverCapaz() {
@@ -26,56 +26,18 @@ function useHoverCapaz() {
   return hoverCapaz
 }
 
-export function usePrimeiraMensagem(periodo: string, dataInicio?: string, dataFim?: string) {
-  const [dados, setDados] = useState<PrimeiraMensagemData | null>(null)
-
-  useEffect(() => {
-    let ativo = true
-
-    async function carregar() {
-      try {
-        let url = `/api/primeira-mensagem?periodo=${periodo}`
-        if (periodo === 'personalizado' && dataInicio && dataFim) {
-          url += `&inicio=${dataInicio}&fim=${dataFim}`
-        }
-
-        const res = await fetch(url, { cache: 'no-store' })
-        const json = await res.json()
-
-        if (!ativo) return
-        if (json.ok) setDados({ total: json.total, porCampanha: json.porCampanha })
-      } catch {
-        // mantém o último valor carregado em caso de falha pontual
-      }
-    }
-
-    carregar()
-    const interval = setInterval(carregar, 60000)
-
-    return () => {
-      ativo = false
-      clearInterval(interval)
-    }
-  }, [periodo, dataInicio, dataFim])
-
-  return dados
-}
-
 export function PrimeiraMensagemTile({
-  periodo,
-  dataInicio,
-  dataFim,
+  total,
+  origens,
 }: {
-  periodo: string
-  dataInicio?: string
-  dataFim?: string
+  total: number
+  origens: OrigemItem[]
 }) {
   const { viewMode } = useFilters()
   const isApresentacao = viewMode === 'apresentacao'
   const isIphone = viewMode === 'iphone'
   const hoverCapaz = useHoverCapaz()
 
-  const dados = usePrimeiraMensagem(periodo, dataInicio, dataFim)
   const [aberto, setAberto] = useState(false)
 
   return (
@@ -99,25 +61,25 @@ export function PrimeiraMensagemTile({
           isApresentacao ? 'text-[28px]' : isIphone ? 'text-[15px]' : 'text-[14px]'
         }`}
       >
-        {dados?.total ?? '—'}
+        {total}
       </span>
 
       {aberto && (
         <div className="absolute left-1/2 top-full z-50 mt-2 w-[280px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 rounded-[16px] border border-[color:var(--border)] bg-[var(--card)] p-3 text-left shadow-[var(--card-shadow)]">
           <div className="mb-2 text-[11px] font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-            Leads que só mandaram 1 mensagem
+            Leads parados na primeira mensagem
           </div>
 
-          {!dados || dados.porCampanha.length === 0 ? (
+          {origens.length === 0 ? (
             <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">Sem dados no período</div>
           ) : (
             <div className="space-y-1.5">
-              {dados.porCampanha.map((item) => (
-                <div key={item.campanha} className="flex items-center justify-between gap-3">
+              {origens.map((item) => (
+                <div key={item.nome} className="flex items-center justify-between gap-3">
                   <span className="min-w-0 truncate text-[12px] font-medium text-[var(--foreground)]">
-                    {item.campanha}
+                    {item.nome}
                   </span>
-                  <span className="shrink-0 text-[12px] font-bold text-[var(--foreground)]">{item.qtd}</span>
+                  <span className="shrink-0 text-[12px] font-bold text-[var(--foreground)]">{item.quantidade}</span>
                 </div>
               ))}
             </div>
