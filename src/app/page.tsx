@@ -114,7 +114,7 @@ export default function Home() {
   const metaValor = Math.round((meta / 100) * 1000000)
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#F8FAFF_0%,#EEF4FF_50%,#DCEAFF_100%)] text-[#191b2a]">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#DCE9FF_0%,#B9D2FF_45%,#8FB4FF_100%)] text-[#191b2a]">
       {/* Grid sutil, com respiração lenta */}
       <motion.div
         className="absolute inset-0 bg-[linear-gradient(to_right,rgba(37,99,235,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(37,99,235,0.06)_1px,transparent_1px)] bg-[size:88px_88px]"
@@ -164,7 +164,14 @@ export default function Home() {
       <Sparkle className="left-[6%] top-[52%] h-3.5 w-3.5 md:block" delay="2.6s" />
       <Sparkle className="right-[5%] top-[18%] h-2.5 w-2.5 md:block" delay="1s" />
 
-      {/* Cards abstratos de fundo, simulando o dashboard real */}
+      {/* Cards abstratos de fundo, simulando o dashboard real — some perto do centro pra não brigar com o texto */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          maskImage: 'radial-gradient(ellipse 52% 58% at center, transparent 15%, black 68%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 52% 58% at center, transparent 15%, black 68%)',
+        }}
+      >
       <GhostCard position="left-10 top-16" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]">
         <div className="flex items-center justify-between">
           <p className={CARD_LABEL}>Receita</p>
@@ -290,6 +297,37 @@ export default function Home() {
         </div>
       </GhostCard>
 
+      <GhostCard position="left-[26%] top-[10%]" rotate="rotate-[-3deg]" delay="0.4s" width="w-[170px]">
+        <p className={CARD_LABEL}>Conversão</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">32%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
+          <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]" />
+        </div>
+      </GhostCard>
+
+      <GhostCard position="right-[26%] top-[10%]" rotate="rotate-[3deg]" delay="1.3s" width="w-[170px]">
+        <p className={CARD_LABEL}>Ticket Médio</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">R$ 1.390</p>
+        <p className="text-[10px] font-medium text-[#94A3B8]">por atendimento</p>
+      </GhostCard>
+
+      <GhostCard position="left-[24%] bottom-[12%]" rotate="rotate-[4deg]" delay="2.1s" width="w-[170px]">
+        <p className={CARD_LABEL}>NPS</p>
+        <div className="mt-1 flex items-baseline gap-1">
+          <p className="text-xl font-black tracking-[-0.02em] text-[#1f2233]">92</p>
+          <span className="text-[10px] font-bold text-[#059669]">Excelente</span>
+        </div>
+      </GhostCard>
+
+      <GhostCard position="right-[24%] bottom-[12%]" rotate="rotate-[-4deg]" delay="0.9s" width="w-[170px]">
+        <p className={CARD_LABEL}>Ocupação</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">78%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
+          <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]" />
+        </div>
+      </GhostCard>
+      </div>
+
       <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
         <section className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center">
           <span className="mb-7 inline-flex items-center rounded-full border border-[#BFDBFE]/70 bg-white/50 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2563EB] shadow-[0_1px_3px_rgba(37,99,235,0.08)] backdrop-blur-md">
@@ -297,13 +335,13 @@ export default function Home() {
           </span>
 
           <h1
-            className="bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] bg-clip-text text-5xl font-black tracking-[-0.05em] text-transparent sm:text-6xl md:text-7xl"
+            className="bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
             style={{ filter: 'drop-shadow(0 8px 18px rgba(37,99,235,0.22))' }}
           >
             Criare
           </h1>
 
-          <h2 className="mt-7 max-w-2xl text-2xl font-semibold tracking-[-0.02em] text-[#1f2233] sm:text-3xl">
+          <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-[#1f2233] sm:whitespace-nowrap sm:text-2xl md:text-3xl">
             Inteligência para transformar operação em decisão
           </h2>
 
@@ -313,9 +351,14 @@ export default function Home() {
 
           <Link
             href="/login"
-            className="group relative mt-11 inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-10 py-4 text-base font-semibold text-white shadow-[0_14px_32px_rgba(37,99,235,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_rgba(37,99,235,0.38)]"
+            className="group relative mt-11 inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-10 py-4 text-base font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5"
+            style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
           >
             <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+            <span
+              className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+              style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+            />
             <span className="relative">Acessar painel</span>
             <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
