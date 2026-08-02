@@ -10,7 +10,6 @@ export default function LoginPage() {
   const router = useRouter()
   const { login } = useAuth()
 
-  const [step, setStep] = useState<'landing' | 'form'>('landing')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -105,88 +104,21 @@ export default function LoginPage() {
         ))}
       </div>
 
-      {/* Landing */}
-      {step === 'landing' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          className="relative z-10 flex flex-col items-center gap-6 px-6 text-center"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="rounded-full border border-[#2563EB]/20 bg-white/60 px-6 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#2563EB] backdrop-blur-sm"
-          >
-            Painel Inteligente
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-[100px] font-black leading-none tracking-[-0.06em] text-[#2563EB]"
-            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-          >
-            Criare
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="space-y-2"
-          >
-            <p className="text-xl font-bold text-slate-800">
-              Domine sua operação com inteligência real
-            </p>
-            <p className="text-base text-slate-500">
-              Dados, desempenho e decisão em um único lugar
-            </p>
-          </motion.div>
-
-          <motion.button
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setStep('form')}
-            className="mt-4 rounded-2xl bg-[#2563EB] px-12 py-4 text-base font-semibold text-white shadow-lg shadow-[#2563EB]/30 transition hover:bg-[#1D4ED8]"
-          >
-            Acessar painel
-          </motion.button>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="mt-6 flex gap-2"
-          >
-            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/30" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/50" />
-            <span className="h-2.5 w-2.5 rounded-full bg-[#2563EB]/30" />
-          </motion.div>
-        </motion.div>
-      )}
-
       {/* Login Form */}
-      {step === 'form' && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 w-full max-w-md px-6"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative z-10 w-full max-w-md px-6"
+      >
+        <button
+          onClick={() => router.push('/')}
+          className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-700"
         >
-          <button
-            onClick={() => setStep('landing')}
-            className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-700"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
+          <ArrowLeft size={16} />
+          Voltar
+        </button>
 
-          <div className="rounded-3xl border border-white/60 bg-white/70 p-8 shadow-xl backdrop-blur-xl">
+        <div className="rounded-3xl border border-white/60 bg-white/70 p-8 shadow-xl backdrop-blur-xl">
             <div className="mb-6 text-center">
               <h2
                 className="text-4xl font-black tracking-[-0.04em] text-[#2563EB]"
@@ -257,7 +189,6 @@ export default function LoginPage() {
             </div>
           </div>
         </motion.div>
-      )}
     </div>
   )
 }
