@@ -106,6 +106,41 @@ const SINAIS_CONFUSAO = /\b(n[aã]o entendi|n[aã]o entendo|de novo|j[aá] falei
 
 const GAP_MAXIMO_SEG = 6 * 60 * 60 // gaps maiores que isso viram "conversa retomada depois", não ritmo de resposta
 
+// A integração do WhatsApp costuma reentregar o mesmo webhook (retry por
+// falta de confirmação rápida, ou duplicidade na automação que grava em
+// mensagens), gerando duas linhas com o mesmo remetente e texto idêntico,
+// só alguns segundos separadas — chegamos a ver o mesmo texto repetido em
+// ~1 a cada 4 mensagens de paciente numa amostra real. Isso não é o
+// paciente mandando a mensagem de novo (o intervalo é curto e o texto é
+// idêntico, não parecido); é a mesma mensagem original sendo salva duas
+// vezes. Filtramos aqui antes de exibir ou de contar qualquer coisa.
+const JANELA_DUPLICATA_SEG = 90
+
+type MensagemBruta = { quem: string; conteudo: string; criado_em: string }
+
+function deduplicarMensagens(msgs: MensagemBruta[]): MensagemBruta[] {
+  const ordenadas = [...msgs].sort(
+    (a, b) => new Date(a.criado_em).getTime() - new Date(b.criado_em).getTime()
+  )
+
+  const resultado: MensagemBruta[] = []
+
+  for (const msg of ordenadas) {
+    const anterior = resultado[resultado.length - 1]
+
+    const ehDuplicata =
+      anterior &&
+      anterior.quem === msg.quem &&
+      anterior.conteudo.trim() === (msg.conteudo || '').trim() &&
+      (new Date(msg.criado_em).getTime() - new Date(anterior.criado_em).getTime()) / 1000 <=
+        JANELA_DUPLICATA_SEG
+
+    if (!ehDuplicata) resultado.push(msg)
+  }
+
+  return resultado
+}
+
 type CacheAmostra = { data: unknown; expiraEm: number }
 const AMOSTRA_CACHE_MS = 15 * 60 * 1000
 const cacheAmostra = new Map<string, CacheAmostra>()
@@ -151,9 +186,9 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
 
     const conversa = amostra[indice]
 
-    const msgs = (r.data as { quem: string; conteudo: string; criado_em: string }[])
-      .filter((m) => m.criado_em)
-      .sort((a, b) => new Date(a.criado_em).getTime() - new Date(b.criado_em).getTime())
+    const msgs = deduplicarMensagens(
+      (r.data as MensagemBruta[]).filter((m) => m.criado_em)
+    )
 
     for (let i = 0; i < msgs.length; i++) {
       const msg = msgs[i]
@@ -233,7 +268,9 @@ export async function GET(req: NextRequest) {
 
       if (error) throw error
 
-      return NextResponse.json({ ok: true, transcript: data ?? [] })
+      const transcript = deduplicarMensagens((data ?? []) as MensagemBruta[])
+
+      return NextResponse.json({ ok: true, transcript })
     }
 
     const [kpisRes, listaRes] = await Promise.all([
