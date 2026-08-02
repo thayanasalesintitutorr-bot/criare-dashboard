@@ -66,15 +66,43 @@ export default function LoginPage() {
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
           className="absolute left-1/2 top-1/3 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#60A5FA]/5 blur-[80px]"
         />
+        <motion.div
+          animate={{ x: [0, -25, 15, 0], y: [0, 15, -25, 0], scale: [1, 1.08, 0.94, 1] }}
+          transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-[-10%] left-[8%] h-[260px] w-[260px] rounded-full bg-[#93C5FD]/10 blur-[70px]"
+        />
 
-        {/* Grid sutil */}
-        <div
+        {/* Grid sutil, com respiração lenta */}
+        <motion.div
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: 'linear-gradient(rgba(37,99,235,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.25) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
           }}
+          animate={{ backgroundPosition: ['0px 0px', '60px 60px'] }}
+          transition={{ duration: 32, repeat: Infinity, ease: 'linear' }}
         />
+
+        {/* Partículas */}
+        {[
+          { top: '18%', left: '14%', size: 12, delay: 0 },
+          { top: '28%', left: '82%', size: 16, delay: 1.2 },
+          { top: '68%', left: '10%', size: 10, delay: 2.4 },
+          { top: '76%', left: '88%', size: 14, delay: 0.6 },
+          { top: '12%', left: '52%', size: 10, delay: 1.8 },
+        ].map((p, i) => (
+          <motion.svg
+            key={i}
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="absolute hidden text-[#93C5FD] sm:block"
+            style={{ top: p.top, left: p.left, width: p.size, height: p.size }}
+            animate={{ opacity: [0.15, 0.7, 0.15], scale: [0.85, 1.1, 0.85] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
+          >
+            <path d="M12 0l1.8 8.2L22 10l-8.2 1.8L12 20l-1.8-8.2L2 10l8.2-1.8z" />
+          </motion.svg>
+        ))}
       </div>
 
       {/* Landing */}

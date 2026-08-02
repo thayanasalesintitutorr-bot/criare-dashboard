@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
 
 function formatMoney(v: number) {
@@ -50,7 +51,7 @@ function GhostCard({
 }) {
   return (
     <div
-      className={`pointer-events-none absolute hidden select-none 2xl:block ${position}`}
+      className={`pointer-events-none absolute hidden select-none xl:block ${position}`}
       style={{ animation: 'float-slow 7s ease-in-out infinite', animationDelay: delay }}
     >
       <div
@@ -114,8 +115,12 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#F8FAFF_0%,#EEF4FF_50%,#DCEAFF_100%)] text-[#191b2a]">
-      {/* Grid sutil */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(37,99,235,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(37,99,235,0.05)_1px,transparent_1px)] bg-[size:88px_88px]" />
+      {/* Grid sutil, com respiração lenta */}
+      <motion.div
+        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(37,99,235,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(37,99,235,0.06)_1px,transparent_1px)] bg-[size:88px_88px]"
+        animate={{ backgroundPosition: ['0px 0px', '88px 88px'] }}
+        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+      />
 
       {/* Noise quase imperceptível */}
       <div
@@ -126,17 +131,38 @@ export default function Home() {
         }}
       />
 
-      {/* Radial gradients de profundidade */}
-      <div className="absolute -left-40 -top-40 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.16),transparent_70%)] blur-[10px]" />
-      <div className="absolute -right-32 top-1/3 h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.14),transparent_70%)] blur-[10px]" />
-      <div className="absolute bottom-[-220px] left-1/2 h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.10),transparent_70%)] blur-[10px]" />
+      {/* Blobs de profundidade, à deriva */}
+      <motion.div
+        className="absolute -left-40 -top-40 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.18),transparent_70%)] blur-[10px]"
+        animate={{ x: [0, 50, -20, 0], y: [0, -40, 25, 0], scale: [1, 1.1, 0.95, 1] }}
+        transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute -right-32 top-1/3 h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.16),transparent_70%)] blur-[10px]"
+        animate={{ x: [0, -40, 30, 0], y: [0, 30, -25, 0], scale: [1, 0.92, 1.08, 1] }}
+        transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute bottom-[-220px] left-1/2 h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.12),transparent_70%)] blur-[10px]"
+        animate={{ x: ['-50%', '-46%', '-54%', '-50%'], scale: [1, 1.06, 0.97, 1] }}
+        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.div
+        className="absolute left-1/4 top-1/4 h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle,rgba(147,197,253,0.22),transparent_70%)] blur-[6px]"
+        animate={{ x: [0, 30, -15, 0], y: [0, 25, -20, 0] }}
+        transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
+      />
 
       {/* Sparkles */}
+      <Sparkle className="left-[10%] top-[22%] h-2.5 w-2.5 sm:block" delay="0.3s" />
+      <Sparkle className="right-[8%] bottom-[26%] h-3 w-3 sm:block" delay="1.9s" />
       <Sparkle className="left-[38%] top-[15%] h-3 w-3" delay="0s" />
       <Sparkle className="right-[34%] top-[9%] h-4 w-4" delay="1.4s" />
       <Sparkle className="left-[32%] bottom-[22%] h-3 w-3" delay="2.2s" />
       <Sparkle className="right-[30%] bottom-[16%] h-3.5 w-3.5" delay="0.7s" />
       <Sparkle className="right-[42%] top-[46%] h-2.5 w-2.5" delay="3s" />
+      <Sparkle className="left-[6%] top-[52%] h-3.5 w-3.5 md:block" delay="2.6s" />
+      <Sparkle className="right-[5%] top-[18%] h-2.5 w-2.5 md:block" delay="1s" />
 
       {/* Cards abstratos de fundo, simulando o dashboard real */}
       <GhostCard position="left-10 top-16" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]">
