@@ -1213,7 +1213,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   className={`grid gap-2 ${
     viewMode === 'apresentacao' || viewMode === 'iphone'
   ? 'grid-cols-1'
-  : 'grid-cols-3'
+  : 'grid-cols-1 tablet:grid-cols-3'
   }`}
 >
             <div className={`space-y-1 ${metricCardBg()}`}>

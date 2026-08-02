@@ -273,19 +273,19 @@ function parseLocalDate(dateString?: string) {
 }
   return (
     <header className="z-30 border-b border-[var(--border)] bg-[var(--background)]">
-      <div className="flex flex-col gap-3 px-6 pt-4 pb-1 md:px-8">
-        <div className="flex items-start justify-between gap-6">
-       
+      <div className="flex flex-col gap-3 px-4 pt-4 pb-1 sm:px-6 md:px-8">
+        <div className="flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6">
+
           <div className="flex-1 space-y-4">
-            <h1 className="text-5xl font-black tracking-[-0.06em]">{title}</h1>
+            <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
 </div>
-<div className="flex shrink-0 items-center gap-3">
+<div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="inline-flex items-center gap-3 rounded-[18px] bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
             >
               {mounted && (resolvedTheme === 'dark' ? <Sun size={20} /> : <Moon size={20} />)}
-              <span className="font-medium">
+              <span className="hidden font-medium mobile-h:inline">
                 {mounted && (resolvedTheme === 'dark' ? 'Claro' : 'Escuro')}
               </span>
             </button>
@@ -300,12 +300,12 @@ function parseLocalDate(dateString?: string) {
             <button
   onClick={toggleFullscreen}
   title={isFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-  className="rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
+  className="hidden rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)] tablet:inline-flex"
 >
   {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
 </button>
 
-            <button className="rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)]">
+            <button className="hidden rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)] mobile-h:inline-flex">
               <Search size={18} />
             </button>
 
@@ -323,7 +323,7 @@ function parseLocalDate(dateString?: string) {
               </button>
 
               {showNotifications && openMessage && (
-  <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xl">
+  <div className="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] max-w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xl">
     <div className="mb-4 flex items-center justify-between">
       <div className="text-lg font-bold">Notificações</div>
 
@@ -357,7 +357,7 @@ function parseLocalDate(dateString?: string) {
 </button>
 
               {showProfile && (
-                <div className="absolute right-0 top-full mt-3 w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl">
+                <div className="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] max-w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-5 shadow-2xl">
                   <div className="mb-5 flex items-center justify-between">
                     <div className="text-2xl font-bold">Minha conta</div>
                     <button onClick={() => setShowProfile(false)}>
@@ -413,8 +413,8 @@ function parseLocalDate(dateString?: string) {
   {statusIndicator}
 </div>
 
-<div className="rounded-[18px] bg-[var(--card)] px-5 py-3 shadow-sm">
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+<div className="rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm">
+    <div className="grid grid-cols-1 gap-3 mobile-h:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5">
       <div>
         <FiltroResumoCard
           icon={<Database size={15} className="text-[var(--accent)]" />}

@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Breakpoints reais do painel — usados junto com sm/md/lg/xl/2xl padrão do
+   Tailwind (que continuam existindo). Estes cobrem exatamente as faixas de
+   dispositivo do painel (celular, celular deitado, tablet, tablet deitado,
+   laptop) para telas que precisam de um degrau a mais além do padrão. */
+@theme {
+  --breakpoint-mobile: 480px;
+  --breakpoint-mobile-h: 768px;
+  --breakpoint-tablet: 834px;
+  --breakpoint-tablet-h: 1024px;
+  --breakpoint-laptop: 1440px;
+}
+
 :root {
   /* Base */
   --background: #08111D;

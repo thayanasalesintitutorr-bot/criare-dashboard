@@ -414,13 +414,13 @@ const ticketMedioConsultaComReabord =
   return (
     <div className="space-y-5">
 <section className={`rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-4 text-[var(--foreground)] shadow-[var(--card-shadow)]`}>
-  <div className="flex items-center gap-4">
- <div className="flex shrink-0 items-center justify-center">
+  <div className="flex items-start gap-4">
+ <div className="flex h-9 shrink-0 items-center justify-center">
   <ChartNoAxesCombined className="h-6 w-6 text-[var(--accent)]" />
 </div>
 
   <div>
-    <h2 className={`${isApresentacao ? 'text-[38px]' : 'text-[24px]'} font-black text-[var(--foreground)]`}>
+    <h2 className={`${isApresentacao ? 'text-[38px]' : 'text-[19px] mobile-h:text-[24px]'} font-black text-[var(--foreground)]`}>
       Visão geral dos atendimentos
     </h2>
 
@@ -650,7 +650,7 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-<div className="mt-3 grid grid-cols-4 gap-3">
+<div className="mt-3 grid grid-cols-2 gap-3 tablet:grid-cols-4">
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       Finalizados

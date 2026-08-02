@@ -1391,10 +1391,10 @@ const insights = buildInsights({
 return (
   <div className="space-y-5">
     <div
-      className="grid gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
+      className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
       style={{ '--sidebar-origens-w': `${sidebarOrigensWidth}px` } as React.CSSProperties}
     >
-  <aside className="relative flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
+  <aside className="relative flex min-w-0 flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
     <div
       onMouseDown={handleSidebarResizeStart}
       className="absolute -right-2 top-0 z-10 hidden h-full w-4 cursor-col-resize items-center justify-center xl:flex"
@@ -1495,7 +1495,7 @@ return (
                 }`}
               />
 
-              <span className="truncate">{rotuloOrigem}</span>
+              <span className="min-w-0 flex-1 truncate">{rotuloOrigem}</span>
             </button>
 
             {ativo && (
@@ -1537,7 +1537,7 @@ return (
   </div>
 </aside>
 
-      <section className="flex flex-col space-y-4">
+      <section className="flex min-w-0 flex-col space-y-4">
         <div className="grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />

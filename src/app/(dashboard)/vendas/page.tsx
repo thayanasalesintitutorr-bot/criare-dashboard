@@ -506,7 +506,7 @@ const res = await fetch(url, {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 tablet:grid-cols-4">
               <MiniInfo label="Propostas enviadas" value={medico.propostasEnviadas || 0} />
               <MiniInfo
                 label="Propostas fechadas"

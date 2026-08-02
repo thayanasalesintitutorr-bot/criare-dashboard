@@ -38,8 +38,30 @@ const items = [
   },
 ]
 
-export function Sidebar() {
+function useItensVisiveis() {
   const pathname = usePathname()
+
+  const itensVisiveis = items.filter((item) => {
+    if (typeof document === 'undefined') return true
+
+    const isMarketingUser = document.cookie.includes('criare-auth=marketing')
+
+    if (isMarketingUser) {
+      return item.href === '/marketing'
+    }
+
+    return true
+  })
+
+  return { pathname, itensVisiveis }
+}
+
+// A partir de tablet-h (1024px, tablet deitado) usamos a barra lateral que
+// expande no hover — funciona bem com mouse. Abaixo disso (celular e tablet
+// em pé, onde não existe hover confiável) trocamos para uma barra inferior
+// fixa, mais comum e acessível em telas de toque.
+export function Sidebar() {
+  const { pathname, itensVisiveis } = useItensVisiveis()
 
   return (
     <aside
@@ -49,7 +71,7 @@ export function Sidebar() {
         left-0
         top-0
         z-50
-        flex
+        hidden
         h-screen
         w-[76px]
         flex-col
@@ -63,6 +85,7 @@ export function Sidebar() {
         ease-out
         hover:w-[235px]
         hover:shadow-[8px_0_30px_rgba(0,0,0,0.25)]
+        tablet-h:flex
       "
     >
       <div className="flex h-full flex-col">
@@ -77,19 +100,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 space-y-1.5 px-3 pb-6">
-          {items
-            .filter((item) => {
-              if (typeof document === 'undefined') return true
-
-              const isMarketingUser = document.cookie.includes('criare-auth=marketing')
-
-              if (isMarketingUser) {
-                return item.href === '/marketing'
-              }
-
-              return true
-            })
-            .map((item) => {
+          {itensVisiveis.map((item) => {
               const active = pathname === item.href
               const Icon = item.icon
 
@@ -119,5 +130,48 @@ export function Sidebar() {
         </nav>
       </div>
     </aside>
+  )
+}
+
+export function MobileBottomNav() {
+  const { pathname, itensVisiveis } = useItensVisiveis()
+
+  return (
+    <nav
+      className="
+        fixed
+        inset-x-0
+        bottom-0
+        z-50
+        flex
+        h-16
+        items-center
+        justify-around
+        border-t
+        border-[var(--border)]
+        bg-[var(--sidebar)]
+        px-1
+        pb-[env(safe-area-inset-bottom)]
+        tablet-h:hidden
+      "
+    >
+      {itensVisiveis.map((item) => {
+        const active = pathname === item.href
+        const Icon = item.icon
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition-colors duration-200 ${
+              active ? 'text-[var(--accent)]' : 'text-white/50'
+            }`}
+          >
+            <Icon size={19} className="shrink-0" />
+            <span className="max-w-full truncate px-1">{item.label}</span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

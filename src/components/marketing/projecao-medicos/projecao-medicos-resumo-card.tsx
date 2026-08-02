@@ -627,7 +627,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
           <div
             className={
               isWide
-                ? `grid min-w-0 flex-1 items-stretch grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`
+                ? `grid min-w-0 flex-1 items-stretch grid-cols-1 tablet:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`
                 : 'flex-1 space-y-2.5'
             }
           >
