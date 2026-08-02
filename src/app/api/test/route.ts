@@ -1335,6 +1335,15 @@ const orcamentosAnterior = vendasPeriodoAnterior.filter((l) =>
   statusIs(l, 'ORÇAMENTO ENTREGUE')
 ).length
 
+// Mesmo critério de "propostasEnviadas" (venda e faturamento preenchidos), só que
+// aplicado ao período anterior — precisa bater com o critério do valor atual,
+// não com o de orcamentosAnterior (status "ORÇAMENTO ENTREGUE"), senão o "ant."
+// mostrado na comparação não corresponde ao mesmo período filtrado sozinho.
+const propostasEnviadasAnterior = vendasPeriodoAnterior.filter((l) =>
+  toNumber(l.venda) > 0 &&
+  toNumber(l.faturamento) > 0
+).length
+
 const negociacaoAnterior =
   vendasPeriodoAnterior.filter((l) =>
     statusIs(l, 'SOLICITAÇÃO DE CIRURGIA')
@@ -2645,7 +2654,7 @@ painelAtendimento,
   },
 
   comercialVendas: {
-    propostasEnviadasAnterior: orcamentosAnterior,
+    propostasEnviadasAnterior,
     propostasFechadasAnterior: ganhasAnterior,
     propostasPerdidasAnterior: perdidasAnterior,
     propostasFechadasPercentAnterior: conversaoAnterior,
