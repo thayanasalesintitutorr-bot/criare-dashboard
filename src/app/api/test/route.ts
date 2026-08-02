@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
+import { getGlobalRange, parseLocalDate, startOfDay, endOfDay } from '@/lib/date-range'
 
 // Cache em memória de curta duração: evita recomputar a mesma combinação de filtros
 // quando o Topbar e a página ativa pedem os mesmos dados quase ao mesmo tempo, ou
@@ -183,28 +184,6 @@ function parseDataAmplimed(value?: string | null) {
   )
 }
 
-function parseLocalDate(value: string, end = false) {
-  const [year, month, day] = value.split('-').map(Number)
-
-  if (end) {
-    return new Date(year, month - 1, day, 23, 59, 59, 999)
-  }
-
-  return new Date(year, month - 1, day, 0, 0, 0, 0)
-}
-
-function startOfDay(date: Date) {
-  const d = new Date(date)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-function endOfDay(date: Date) {
-  const d = new Date(date)
-  d.setHours(23, 59, 59, 999)
-  return d
-}
-
 function getWeekRangeSaturdayToFriday(baseDate: Date) {
   const current = startOfDay(baseDate)
   const day = current.getDay()
@@ -231,60 +210,6 @@ function getNextWeekRangeSaturdayToFriday(baseDate: Date) {
   return {
     start: startOfDay(start),
     end: endOfDay(end),
-  }
-}
-function getMonthRange(date: Date) {
-  return {
-    start: startOfDay(new Date(date.getFullYear(), date.getMonth(), 1)),
-    end: endOfDay(new Date(date.getFullYear(), date.getMonth() + 1, 0)),
-  }
-}
-
-function getPreviousMonthRange(date: Date) {
-  return {
-    start: startOfDay(new Date(date.getFullYear(), date.getMonth() - 1, 1)),
-    end: endOfDay(new Date(date.getFullYear(), date.getMonth(), 0)),
-  }
-}
-
-function getGlobalRange(periodo: string, customStart?: string, customEnd?: string) {
-  const now = new Date(
-  new Date().toLocaleString('en-US', {
-    timeZone: 'America/Sao_Paulo'
-  })
-)
-
-  switch (periodo) {
-    case 'hoje':
-      return { start: startOfDay(now), end: endOfDay(now) }
-
-    case 'ontem': {
-      const y = new Date(now)
-      y.setDate(now.getDate() - 1)
-      return { start: startOfDay(y), end: endOfDay(y) }
-    }
-
-    case 'semana':
-      return getWeekRangeSaturdayToFriday(now)
-
-    case 'mes-atual':
-      return getMonthRange(now)
-
-    case 'mes-passado':
-      return getPreviousMonthRange(now)
-
-    case 'personalizado': {
-      if (customStart && customEnd) {
-        return {
-          start: parseLocalDate(customStart),
-          end: parseLocalDate(customEnd, true),
-        }
-      }
-      return { start: startOfDay(now), end: endOfDay(now) }
-    }
-
-    default:
-      return { start: startOfDay(now), end: endOfDay(now) }
   }
 }
 function getPreviousRange(periodo: string, start: Date, end: Date) {

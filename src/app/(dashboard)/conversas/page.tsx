@@ -15,7 +15,7 @@ import {
   MessageSquare,
   CalendarCheck,
   Timer,
-  Star,
+  Brain,
   AlertTriangle,
   X,
   Sparkles,
@@ -24,6 +24,7 @@ import {
   MessageCircleQuestion,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
+import { useFilters } from '@/store/use-filters'
 import { KpiCard } from '@/components/dashboard/kpi-card'
 
 type CampanhaItem = {
@@ -65,6 +66,7 @@ type ApiResponse = {
       vendidos: number
       taxa_agendamento: number
       taxa_venda: number
+      agendamento_confiavel: boolean
       por_campanha: CampanhaItem[]
       por_anuncio: NomeQtd[]
       por_canal: NomeQtd[]
@@ -73,9 +75,8 @@ type ApiResponse = {
     operacao: {
       total_conversas: number
       msgs_por_conversa: number | null
-      tempo_resposta_medio_seg: number | null
-      tempo_resposta_confiavel: boolean
       aguardando_resposta: number
+      aguardando_resposta_amostra: number
       evolucao_diaria: { dia: string; leads: number }[]
     }
     comportamento: {
@@ -84,10 +85,12 @@ type ApiResponse = {
       distribuicao_mensagens: { faixa: string; quantidade: number }[]
       por_dia_semana: { dia: string; leads: number }[]
     }
-    principaisMotivos: {
+    amostraRecente: {
       conversasAnalisadas: number
       mensagensAnalisadas: number
-      ranking: { topico: string; ocorrencias: number }[]
+      motivos: { topico: string; ocorrencias: number }[]
+      tempoMedioEntreMensagensSeg: number | null
+      compreensao: { sinaisPositivos: number; sinaisConfusao: number; nota: number | null }
     }
     objecoes: {
       ranking: { objecao: string; ocorrencias: number }[]
@@ -109,12 +112,6 @@ type ApiResponse = {
   }
   conversas?: ConversaItem[]
 }
-
-const PERIODOS = [
-  { label: '7 dias', dias: 7 },
-  { label: '30 dias', dias: 30 },
-  { label: '90 dias', dias: 90 },
-]
 
 function fmtTempo(seg: number | null) {
   if (seg === null || seg === undefined) return '—'
@@ -140,40 +137,33 @@ function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): 
   if (!kpis) return []
 
   const insights: Insight[] = []
-  const { operacao, funil, qualidade, comportamento } = kpis
+  const { operacao, funil, qualidade, comportamento, amostraRecente } = kpis
 
   if (operacao.total_conversas > 0) {
-    const respondidas = operacao.total_conversas - operacao.aguardando_resposta
-    const coberturaPct = Math.round((respondidas / operacao.total_conversas) * 100)
-
     if (operacao.aguardando_resposta === 0) {
       insights.push({
         tipo: 'positivo',
-        texto: `Sara respondeu 100% das ${operacao.total_conversas} conversas do período — nenhuma pendência há mais de 48h.`,
+        texto: `Nenhuma conversa da amostra (${operacao.aguardando_resposta_amostra}) ficou sem resposta depois da última mensagem do paciente.`,
       })
     } else {
+      const pct = Math.round((operacao.aguardando_resposta / operacao.aguardando_resposta_amostra) * 100)
       insights.push({
         tipo: 'atencao',
-        texto: `${operacao.aguardando_resposta} conversa(s) aguardando resposta há mais de 48h (cobertura de ${coberturaPct}%).`,
+        texto: `${operacao.aguardando_resposta} de ${operacao.aguardando_resposta_amostra} conversas (${pct}%) têm a última mensagem do paciente sem resposta ainda.`,
       })
     }
   }
 
-  if (!operacao.tempo_resposta_confiavel && operacao.total_conversas > 0) {
-    insights.push({
-      tipo: 'atencao',
-      texto: 'Tempo de resposta zerado em todas as conversas — parece que o timestamp das mensagens importadas não reflete o horário real. Vale checar a rotina que grava tempo_espera.',
-    })
-  } else if (operacao.tempo_resposta_medio_seg !== null) {
-    if (operacao.tempo_resposta_medio_seg <= 30) {
+  if (amostraRecente.tempoMedioEntreMensagensSeg !== null) {
+    if (amostraRecente.tempoMedioEntreMensagensSeg <= 30) {
       insights.push({
         tipo: 'positivo',
-        texto: `Tempo médio de resposta de ${fmtTempo(operacao.tempo_resposta_medio_seg)} — praticamente instantâneo.`,
+        texto: `Tempo médio entre mensagens de ${fmtTempo(amostraRecente.tempoMedioEntreMensagensSeg)} na amostra recente — ritmo bem ágil.`,
       })
-    } else if (operacao.tempo_resposta_medio_seg > 300) {
+    } else if (amostraRecente.tempoMedioEntreMensagensSeg > 300) {
       insights.push({
         tipo: 'atencao',
-        texto: `Tempo médio de resposta em ${fmtTempo(operacao.tempo_resposta_medio_seg)} — vale revisar o fluxo de atendimento.`,
+        texto: `Tempo médio entre mensagens de ${fmtTempo(amostraRecente.tempoMedioEntreMensagensSeg)} na amostra recente — vale revisar o ritmo de atendimento.`,
       })
     }
   }
@@ -212,30 +202,30 @@ function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): 
     })
   }
 
-  if (funil.total_leads > 0 && funil.agendados === 0 && funil.vendidos === 0) {
+  if (!funil.agendamento_confiavel && funil.total_leads > 0) {
     insights.push({
       tipo: 'atencao',
-      texto: `${funil.total_leads} conversa(s) no período sem agendamento ou venda registrado — confirme se o resultado está sendo marcado no funil.`,
+      texto: `${funil.total_leads} conversa(s) no período sem nenhum agendamento ou venda marcado no bate-papo — esse campo não está sendo preenchido ainda, então a taxa de agendamento fica travada em 0%.`,
     })
   }
 
-  if (qualidade.avaliadas === 0) {
-    insights.push({
-      tipo: 'atencao',
-      texto: 'Nenhuma conversa foi avaliada ainda — ative a rotina de análise de qualidade para acompanhar a nota da Sara.',
-    })
-  } else if (qualidade.nota_media !== null) {
+  if (amostraRecente.compreensao.nota !== null) {
     insights.push(
-      qualidade.nota_media >= 4
+      amostraRecente.compreensao.nota >= 4
         ? {
             tipo: 'positivo',
-            texto: `Nota média de qualidade em ${qualidade.nota_media}/5 nas ${qualidade.avaliadas} conversas avaliadas.`,
+            texto: `Sinais de compreensão predominam na amostra recente (nota ${amostraRecente.compreensao.nota}/5) — poucos indícios de confusão ou insatisfação nas respostas dos pacientes.`,
           }
         : {
             tipo: 'atencao',
-            texto: `Nota média de qualidade em ${qualidade.nota_media}/5 — abaixo do ideal, veja os pontos de melhoria.`,
+            texto: `Nota de compreensão em ${amostraRecente.compreensao.nota}/5 na amostra recente — ${amostraRecente.compreensao.sinaisConfusao} mensagem(ns) com sinal de confusão ou insatisfação.`,
           }
     )
+  } else if (qualidade.avaliadas === 0) {
+    insights.push({
+      tipo: 'atencao',
+      texto: 'Nenhuma conversa foi avaliada pela rotina de qualidade ainda, e a amostra recente não teve sinal suficiente de compreensão/confusão pra estimar uma nota.',
+    })
   }
 
   return insights
@@ -262,7 +252,7 @@ function InsightTile({ insight }: { insight: Insight }) {
 }
 
 export default function ConversasPage() {
-  const [dias, setDias] = useState(30)
+  const { periodo, dataInicio, dataFim } = useFilters()
   const [dados, setDados] = useState<ApiResponse | null>(null)
   const [carregando, setCarregando] = useState(true)
   const [filtroLista, setFiltroLista] = useState<'todas' | 'aguardando' | 'agendou' | 'objecao'>('todas')
@@ -272,14 +262,18 @@ export default function ConversasPage() {
   const carregar = useCallback(async () => {
     setCarregando(true)
     try {
-      const inicio = new Date(Date.now() - dias * 24 * 60 * 60 * 1000)
-      const res = await fetch(`/api/conversas?inicio=${inicio.toISOString()}`)
+      let url = `/api/conversas?periodo=${periodo}`
+      if (periodo === 'personalizado' && dataInicio && dataFim) {
+        url += `&inicio=${dataInicio}&fim=${dataFim}`
+      }
+
+      const res = await fetch(url)
       const json: ApiResponse = await res.json()
       if (json.ok) setDados(json)
     } finally {
       setCarregando(false)
     }
-  }, [dias])
+  }, [periodo, dataInicio, dataFim])
 
   useEffect(() => {
     carregar()
@@ -329,7 +323,7 @@ export default function ConversasPage() {
 
   const mensagensChart = kpis?.comportamento.distribuicao_mensagens ?? []
   const diaSemanaChart = kpis?.comportamento.por_dia_semana ?? []
-  const principaisMotivos = kpis?.principaisMotivos
+  const amostraRecente = kpis?.amostraRecente
 
   const criterios = Object.entries(kpis?.qualidade.criterios_media ?? {})
   const insights = construirInsights(kpis)
@@ -338,25 +332,6 @@ export default function ConversasPage() {
 
   return (
     <>
-      <div className="mb-6 flex items-center gap-2">
-        {PERIODOS.map((p) => (
-          <button
-            key={p.dias}
-            onClick={() => setDias(p.dias)}
-            className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
-              dias === p.dias
-                ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--background)]'
-                : 'border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--accent)]'
-            }`}
-          >
-            {p.label}
-          </button>
-        ))}
-        {carregando && (
-          <span className="ml-2 text-sm text-[var(--muted-foreground)]">Carregando…</span>
-        )}
-      </div>
-
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard
           title="Leads no período"
@@ -366,36 +341,44 @@ export default function ConversasPage() {
         />
         <KpiCard
           title="Taxa de agendamento"
-          value={`${kpis?.funil.taxa_agendamento ?? 0}%`}
-          subtitle={`${kpis?.funil.agendados ?? 0} agendados / ${kpis?.funil.vendidos ?? 0} vendas`}
+          value={kpis?.funil.agendamento_confiavel ? `${kpis.funil.taxa_agendamento}%` : '—'}
+          subtitle={
+            kpis && !kpis.funil.agendamento_confiavel
+              ? 'agendou/vendeu não preenchido ainda, veja o insight'
+              : `${kpis?.funil.agendados ?? 0} agendados / ${kpis?.funil.vendidos ?? 0} vendas`
+          }
           icon={CalendarCheck}
           accent="green"
         />
         <KpiCard
-          title="Tempo de resposta"
-          value={
-            kpis?.operacao.tempo_resposta_confiavel
-              ? fmtTempo(kpis.operacao.tempo_resposta_medio_seg)
-              : '—'
-          }
+          title="Tempo médio entre mensagens"
+          value={fmtTempo(amostraRecente?.tempoMedioEntreMensagensSeg ?? null)}
           subtitle={
-            kpis && !kpis.operacao.tempo_resposta_confiavel
-              ? 'dado não confiável, veja o insight'
-              : `${kpis?.operacao.msgs_por_conversa ?? '—'} msgs por conversa`
+            amostraRecente
+              ? `amostra de ${amostraRecente.conversasAnalisadas} conversas recentes`
+              : '—'
           }
           icon={Timer}
           accent="purple"
         />
         <KpiCard
-          title="Nota média da IA"
-          value={kpis?.qualidade.nota_media ?? '—'}
-          subtitle={`${kpis?.qualidade.avaliadas ?? 0} conversas avaliadas`}
-          icon={Star}
+          title="Compreensão do atendimento"
+          value={amostraRecente?.compreensao.nota ?? '—'}
+          subtitle={
+            amostraRecente
+              ? `${amostraRecente.compreensao.sinaisPositivos} sinais positivos / ${amostraRecente.compreensao.sinaisConfusao} de confusão`
+              : 'sem sinal suficiente na amostra'
+          }
+          icon={Brain}
         />
         <KpiCard
           title="Aguardando resposta"
           value={kpis?.operacao.aguardando_resposta ?? '—'}
-          subtitle="pacientes sem retorno da Sara"
+          subtitle={
+            kpis
+              ? `de ${kpis.operacao.aguardando_resposta_amostra} conversas — última msg foi do paciente`
+              : 'pacientes sem retorno'
+          }
           icon={AlertTriangle}
           accent="red"
         />
@@ -564,14 +547,14 @@ export default function ConversasPage() {
           <h2 className="section-title">Principais motivos de contato</h2>
         </div>
 
-        {!principaisMotivos || principaisMotivos.ranking.length === 0 ? (
+        {!amostraRecente || amostraRecente.motivos.length === 0 ? (
           <p className="metric-helper">
             Sem mensagens suficientes na amostra recente pra identificar um padrão.
           </p>
         ) : (
           <>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
-              {principaisMotivos.ranking.map((m) => (
+              {amostraRecente.motivos.map((m) => (
                 <div key={m.topico} className="subtle-card flex items-center justify-between">
                   <span className="text-sm">{m.topico}</span>
                   <span className="metric-value text-xl">{m.ocorrencias}</span>
@@ -579,8 +562,8 @@ export default function ConversasPage() {
               ))}
             </div>
             <p className="metric-helper mt-3">
-              Baseado nas {principaisMotivos.mensagensAnalisadas} mensagens das{' '}
-              {principaisMotivos.conversasAnalisadas} conversas mais recentes do período — uma
+              Baseado nas {amostraRecente.mensagensAnalisadas} mensagens das{' '}
+              {amostraRecente.conversasAnalisadas} conversas mais recentes do período — uma
               amostra, não o histórico inteiro.
             </p>
           </>
@@ -682,7 +665,9 @@ export default function ConversasPage() {
 
       <section className="dashboard-section">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="section-title">Conversas ({conversas.length})</h2>
+          <h2 className="section-title">
+            Conversas ({conversas.length}) {carregando && <span className="text-[var(--muted-foreground)]">· carregando…</span>}
+          </h2>
           <div className="flex gap-2">
             {(
               [
