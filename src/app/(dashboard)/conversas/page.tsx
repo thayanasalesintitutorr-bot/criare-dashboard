@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -19,6 +20,8 @@ import {
   X,
   Sparkles,
   TrendingDown,
+  Activity,
+  MessageCircleQuestion,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
 import { KpiCard } from '@/components/dashboard/kpi-card'
@@ -71,8 +74,20 @@ type ApiResponse = {
       total_conversas: number
       msgs_por_conversa: number | null
       tempo_resposta_medio_seg: number | null
+      tempo_resposta_confiavel: boolean
       aguardando_resposta: number
       evolucao_diaria: { dia: string; leads: number }[]
+    }
+    comportamento: {
+      por_canal: { channel: string; leads: number }[]
+      por_status: { status: string; quantidade: number }[]
+      distribuicao_mensagens: { faixa: string; quantidade: number }[]
+      por_dia_semana: { dia: string; leads: number }[]
+    }
+    principaisMotivos: {
+      conversasAnalisadas: number
+      mensagensAnalisadas: number
+      ranking: { topico: string; ocorrencias: number }[]
     }
     objecoes: {
       ranking: { objecao: string; ocorrencias: number }[]
@@ -125,7 +140,7 @@ function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): 
   if (!kpis) return []
 
   const insights: Insight[] = []
-  const { operacao, funil, qualidade } = kpis
+  const { operacao, funil, qualidade, comportamento } = kpis
 
   if (operacao.total_conversas > 0) {
     const respondidas = operacao.total_conversas - operacao.aguardando_resposta
@@ -144,7 +159,12 @@ function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): 
     }
   }
 
-  if (operacao.tempo_resposta_medio_seg !== null) {
+  if (!operacao.tempo_resposta_confiavel && operacao.total_conversas > 0) {
+    insights.push({
+      tipo: 'atencao',
+      texto: 'Tempo de resposta zerado em todas as conversas — parece que o timestamp das mensagens importadas não reflete o horário real. Vale checar a rotina que grava tempo_espera.',
+    })
+  } else if (operacao.tempo_resposta_medio_seg !== null) {
     if (operacao.tempo_resposta_medio_seg <= 30) {
       insights.push({
         tipo: 'positivo',
@@ -154,6 +174,32 @@ function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): 
       insights.push({
         tipo: 'atencao',
         texto: `Tempo médio de resposta em ${fmtTempo(operacao.tempo_resposta_medio_seg)} — vale revisar o fluxo de atendimento.`,
+      })
+    }
+  }
+
+  const totalStatus = comportamento.por_status.reduce((acc, s) => acc + s.quantidade, 0)
+  const followUpSemResposta = comportamento.por_status.find((s) =>
+    s.status.toUpperCase().includes('FOLLOW-UP')
+  )
+
+  if (followUpSemResposta && totalStatus > 0) {
+    const pct = Math.round((followUpSemResposta.quantidade / totalStatus) * 100)
+    if (pct >= 30) {
+      insights.push({
+        tipo: 'atencao',
+        texto: `${pct}% das conversas da amostra estão em "Follow-up sem resposta" (${followUpSemResposta.quantidade} de ${totalStatus}) — boa parte do volume some depois do primeiro contato.`,
+      })
+    }
+  }
+
+  const semMensagem = comportamento.distribuicao_mensagens.find((d) => d.faixa === '0 mensagens')
+  if (semMensagem && totalStatus > 0) {
+    const pct = Math.round((semMensagem.quantidade / totalStatus) * 100)
+    if (pct >= 30) {
+      insights.push({
+        tipo: 'atencao',
+        texto: `${pct}% dos leads da amostra não têm nenhuma mensagem registrada nessa base — pode ser lead que nunca respondeu ou falha na sincronia do bate-papo.`,
       })
     }
   }
@@ -261,6 +307,30 @@ export default function ConversasPage() {
     agendados: c.agendados,
   }))
 
+  const CORES_GRAFICO = [
+    'var(--chart-blue)',
+    'var(--chart-green)',
+    'var(--chart-orange)',
+    'var(--chart-purple)',
+    'var(--chart-pink)',
+    'var(--chart-red)',
+    'var(--chart-darkRed)',
+  ]
+
+  const canalChart = (kpis?.comportamento.por_canal ?? []).map((c) => ({
+    nome: c.channel === 'waba' ? 'WhatsApp' : c.channel || 'Outro',
+    leads: c.leads,
+  }))
+
+  const statusChart = (kpis?.comportamento.por_status ?? []).slice(0, 7).map((s) => ({
+    nome: s.status.length > 20 ? s.status.slice(0, 20) + '…' : s.status,
+    quantidade: s.quantidade,
+  }))
+
+  const mensagensChart = kpis?.comportamento.distribuicao_mensagens ?? []
+  const diaSemanaChart = kpis?.comportamento.por_dia_semana ?? []
+  const principaisMotivos = kpis?.principaisMotivos
+
   const criterios = Object.entries(kpis?.qualidade.criterios_media ?? {})
   const insights = construirInsights(kpis)
 
@@ -303,8 +373,16 @@ export default function ConversasPage() {
         />
         <KpiCard
           title="Tempo de resposta"
-          value={fmtTempo(kpis?.operacao.tempo_resposta_medio_seg ?? null)}
-          subtitle={`${kpis?.operacao.msgs_por_conversa ?? '—'} msgs por conversa`}
+          value={
+            kpis?.operacao.tempo_resposta_confiavel
+              ? fmtTempo(kpis.operacao.tempo_resposta_medio_seg)
+              : '—'
+          }
+          subtitle={
+            kpis && !kpis.operacao.tempo_resposta_confiavel
+              ? 'dado não confiável, veja o insight'
+              : `${kpis?.operacao.msgs_por_conversa ?? '—'} msgs por conversa`
+          }
           icon={Timer}
           accent="purple"
         />
@@ -387,11 +465,136 @@ export default function ConversasPage() {
         </section>
       </div>
 
+      <section className="dashboard-section mb-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Activity size={18} className="text-[var(--accent)]" />
+          <h2 className="section-title">Comportamento dos leads</h2>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <p className="metric-label mb-2">Canal de origem</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={canalChart} layout="vertical" margin={{ left: 8 }}>
+                  <XAxis type="number" hide allowDecimals={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="nome"
+                    tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
+                    width={80}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
+                  />
+                  <Bar dataKey="leads" radius={[0, 6, 6, 0]}>
+                    {canalChart.map((_, i) => (
+                      <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div>
+            <p className="metric-label mb-2">Situação das conversas</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={statusChart} layout="vertical" margin={{ left: 8 }}>
+                  <XAxis type="number" hide allowDecimals={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="nome"
+                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
+                    width={110}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
+                  />
+                  <Bar dataKey="quantidade" radius={[0, 6, 6, 0]}>
+                    {statusChart.map((_, i) => (
+                      <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div>
+            <p className="metric-label mb-2">Mensagens por conversa</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={mensagensChart} margin={{ left: -20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="faixa" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} interval={0} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
+                  />
+                  <Bar dataKey="quantidade" fill="var(--accent)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div>
+            <p className="metric-label mb-2">Leads por dia da semana</p>
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={diaSemanaChart} margin={{ left: -20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="dia" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
+                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
+                  />
+                  <Bar dataKey="leads" fill="var(--chart-purple)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="dashboard-section mb-6">
+        <div className="mb-4 flex items-center gap-2">
+          <MessageCircleQuestion size={18} className="text-[var(--accent)]" />
+          <h2 className="section-title">Principais motivos de contato</h2>
+        </div>
+
+        {!principaisMotivos || principaisMotivos.ranking.length === 0 ? (
+          <p className="metric-helper">
+            Sem mensagens suficientes na amostra recente pra identificar um padrão.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+              {principaisMotivos.ranking.map((m) => (
+                <div key={m.topico} className="subtle-card flex items-center justify-between">
+                  <span className="text-sm">{m.topico}</span>
+                  <span className="metric-value text-xl">{m.ocorrencias}</span>
+                </div>
+              ))}
+            </div>
+            <p className="metric-helper mt-3">
+              Baseado nas {principaisMotivos.mensagensAnalisadas} mensagens das{' '}
+              {principaisMotivos.conversasAnalisadas} conversas mais recentes do período — uma
+              amostra, não o histórico inteiro.
+            </p>
+          </>
+        )}
+      </section>
+
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <section className="dashboard-section">
           <h2 className="section-title mb-4">Objeções mais comuns</h2>
           {(kpis?.objecoes.ranking ?? []).filter((o) => o.objecao).length === 0 ? (
-            <p className="metric-helper">Sem objeções registradas no período.</p>
+            <p className="metric-helper">
+              Sem objeções marcadas no período — esse campo depende da tag automática no CRM
+              (ainda não está em uso, então é esperado ficar vazio por enquanto).
+            </p>
           ) : (
             <ul className="space-y-2">
               {(kpis?.objecoes.ranking ?? [])
@@ -409,7 +612,10 @@ export default function ConversasPage() {
         <section className="dashboard-section">
           <h2 className="section-title mb-4">Queixas dos pacientes</h2>
           {(kpis?.funil.por_queixa ?? []).filter((q) => q.queixas).length === 0 ? (
-            <p className="metric-helper">Sem queixas registradas no período.</p>
+            <p className="metric-helper">
+              Sem queixas marcadas no período — veja &quot;Principais motivos de contato&quot;
+              acima, que já lê o conteúdo real das mensagens.
+            </p>
           ) : (
             <ul className="space-y-2">
               {(kpis?.funil.por_queixa ?? [])
