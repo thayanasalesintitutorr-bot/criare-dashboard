@@ -80,36 +80,34 @@ export default function LoginPage() {
 
   const metaValor = Math.round((meta / 100) * 1000000)
 
-  function handleLogin() {
-  setError('')
-  setLoading(true)
+  async function handleLogin() {
+    setError('')
+    setLoading(true)
 
-  const emailDigitado = email.trim().toLowerCase()
-  const senhaDigitada = password.trim()
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password: password.trim(),
+        }),
+      })
 
-  if (
-    emailDigitado === 'altuusclinic@gmail.com' &&
-    senhaDigitada === 'Altuus@2026#'
-  ) {
-    localStorage.setItem('access_token', 'criare-auth')
-    document.cookie = 'criare-auth=admin; path=/'
-    router.push('/dispositivo')
-    return
+      const json = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        setError(json.error || 'E-mail ou senha incorretos')
+        setLoading(false)
+        return
+      }
+
+      router.push('/dispositivo')
+    } catch {
+      setError('Não foi possível entrar agora. Tente novamente.')
+      setLoading(false)
+    }
   }
-
-  if (
-    emailDigitado === 'brunofontanella.ads@gmail.com' &&
-    senhaDigitada === 'Criare@Mkt9274#'
-  ) {
-    localStorage.setItem('access_token', 'criare-auth')
-    document.cookie = 'criare-auth=marketing; path=/'
-    router.push('/dispositivo')
-    return
-  }
-
-  setError('E-mail ou senha incorretos')
-  setLoading(false)
-}
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE]">
       {/* Animação sutil de fundo */}

@@ -28,6 +28,7 @@ import {
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
+import { useSessionRole } from '../../store/use-session-role'
 import { useRouter } from 'next/navigation'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
@@ -110,6 +111,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
   const { logout } = useAuth()
   const router = useRouter()
+  const { role: sessao, fetchRole } = useSessionRole()
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -118,7 +120,6 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [showNotifications, setShowNotifications] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [sessao, setSessao] = useState<string | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
   const compararCalendarRef = useRef<HTMLDivElement>(null)
   const [categoriaAberta, setCategoriaAberta] = useState<
@@ -138,9 +139,8 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
     const stored = localStorage.getItem(NOTIF_SEEN_KEY)
     if (stored) setLastSeenPercent(Number(stored))
 
-    const cookie = document.cookie.split('; ').find((c) => c.startsWith('criare-auth='))
-    setSessao(cookie?.split('=')[1] || null)
-  }, [])
+    fetchRole()
+  }, [fetchRole])
 
   const conta = CONTAS[sessao || 'admin'] || CONTAS.admin
 
@@ -254,8 +254,16 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   }
 }
 
-  function handleLogout() {
+  async function handleLogout() {
     logout()
+
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // segue o logout mesmo se a chamada falhar — o cookie expira sozinho
+    }
+
+    localStorage.removeItem('access_token')
     router.push('/login')
   }
 

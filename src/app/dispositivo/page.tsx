@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Monitor, Smartphone, Presentation, BadgeCheck } from 'lucide-react'
 import { useFilters, type ViewMode } from '@/store/use-filters'
+import { useSessionRole } from '@/store/use-session-role'
 
 function detectarDispositivo(): ViewMode {
   if (typeof navigator === 'undefined') return 'desktop'
@@ -46,21 +47,17 @@ const OPCOES: {
 export default function DispositivoPage() {
   const router = useRouter()
   const { setViewMode } = useFilters()
+  const { role, fetchRole } = useSessionRole()
   const [detectado, setDetectado] = useState<ViewMode | null>(null)
 
   useEffect(() => {
     setDetectado(detectarDispositivo())
-  }, [])
+    fetchRole()
+  }, [fetchRole])
 
   function confirmarDispositivo(modo: ViewMode) {
     setViewMode(modo)
-
-    const cookie = document.cookie
-      .split('; ')
-      .find((c) => c.startsWith('criare-auth='))
-    const session = cookie?.split('=')[1]
-
-    router.push(session === 'marketing' ? '/marketing' : '/dashboard')
+    router.push(role === 'marketing' ? '/marketing' : '/dashboard')
   }
 
   return (

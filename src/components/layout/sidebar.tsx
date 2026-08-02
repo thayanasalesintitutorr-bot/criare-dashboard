@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
+import { useSessionRole } from '@/store/use-session-role'
 
 const items = [
   {
@@ -40,13 +42,14 @@ const items = [
 
 function useItensVisiveis() {
   const pathname = usePathname()
+  const { role, fetchRole } = useSessionRole()
+
+  useEffect(() => {
+    fetchRole()
+  }, [fetchRole])
 
   const itensVisiveis = items.filter((item) => {
-    if (typeof document === 'undefined') return true
-
-    const isMarketingUser = document.cookie.includes('criare-auth=marketing')
-
-    if (isMarketingUser) {
+    if (role === 'marketing') {
       return item.href === '/marketing'
     }
 

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { JWT } from 'google-auth-library'
 import * as XLSX from 'xlsx'
+import { requireSession } from '@/lib/require-session'
 
 const OKR_FILE_ID = '18CuXMpejBSrXhzGLHJvTiFxboJOC3nhO'
 const CACHE_MS = 20000
@@ -161,7 +162,10 @@ async function montarProjecao(): Promise<ProjecaoPorMedico> {
   return resultado
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireSession(req)
+  if (!auth.ok) return auth.response
+
   const agora = Date.now()
 
   if (cache && cache.expiraEm > agora) {

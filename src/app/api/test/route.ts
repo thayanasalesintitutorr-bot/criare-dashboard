@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { requireSession } from '@/lib/require-session'
+
 // Cache em memória de curta duração: evita recomputar a mesma combinação de filtros
 // quando o Topbar e a página ativa pedem os mesmos dados quase ao mesmo tempo, ou
 // quando o polling repete a chamada antes de qualquer coisa ter mudado no período.
@@ -644,6 +646,9 @@ const data = await response.json()
 
     export async function GET(req: Request) {
   try {
+    const auth = await requireSession(req)
+    if (!auth.ok) return auth.response
+
     const { searchParams } = new URL(req.url)
 
     const periodo = searchParams.get('periodo') || 'mes-atual'

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { requireSession } from '@/lib/require-session'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -10,6 +11,9 @@ const supabaseAdmin = createClient(
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = await requireSession(req)
+    if (!auth.ok) return auth.response
+
     const { searchParams } = new URL(req.url)
 
     const fim = searchParams.get('fim')

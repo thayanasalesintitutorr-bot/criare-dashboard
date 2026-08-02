@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { requireSession } from '@/lib/require-session'
+
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
 function supabaseHeaders() {
@@ -24,7 +26,10 @@ function slugify(nome: string) {
   return `${base || 'link'}-${sufixo}`
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireSession(request)
+  if (!auth.ok) return auth.response
+
   const response = await fetch(
     `${SUPABASE_URL}/rest/v1/utm_links?select=*&order=created_at.desc`,
     { headers: supabaseHeaders() }
@@ -40,6 +45,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireSession(request)
+  if (!auth.ok) return auth.response
+
   const body = await request.json()
 
   const nome = String(body.nome || '').trim()
@@ -102,6 +110,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireSession(request)
+  if (!auth.ok) return auth.response
+
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
