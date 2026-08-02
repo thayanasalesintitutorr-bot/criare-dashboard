@@ -1,9 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
+
+// Raio de influência do mouse e o quanto o card empurra pra longe no pico (bem perto do cursor).
+const REPEL_RADIUS = 190
+const REPEL_STRENGTH = 46
 
 function formatMoney(v: number) {
   return v.toLocaleString('pt-BR', {
@@ -49,16 +53,55 @@ function GhostCard({
   width?: string
   children: React.ReactNode
 }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const frame = useRef<number | null>(null)
+
+  useEffect(() => {
+    function handleMouseMove(e: MouseEvent) {
+      if (frame.current) cancelAnimationFrame(frame.current)
+
+      frame.current = requestAnimationFrame(() => {
+        const el = ref.current
+        if (!el) return
+
+        const rect = el.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        const centerY = rect.top + rect.height / 2
+        const dx = centerX - e.clientX
+        const dy = centerY - e.clientY
+        const distance = Math.sqrt(dx * dx + dy * dy)
+
+        if (distance < REPEL_RADIUS) {
+          const strength = (1 - distance / REPEL_RADIUS) * REPEL_STRENGTH
+          const angle = Math.atan2(dy, dx)
+          setOffset({ x: Math.cos(angle) * strength, y: Math.sin(angle) * strength })
+        } else {
+          setOffset((prev) => (prev.x === 0 && prev.y === 0 ? prev : { x: 0, y: 0 }))
+        }
+      })
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      if (frame.current) cancelAnimationFrame(frame.current)
+    }
+  }, [])
+
   return (
     <div
+      ref={ref}
       className={`pointer-events-none absolute hidden select-none xl:block ${position}`}
       style={{ animation: 'float-slow 7s ease-in-out infinite', animationDelay: delay }}
     >
-      <div
+      <motion.div
+        animate={{ x: offset.x, y: offset.y }}
+        transition={{ type: 'spring', stiffness: 160, damping: 14, mass: 0.6 }}
         className={`${width} rounded-[20px] border border-white/70 bg-white/50 p-4 text-left opacity-45 shadow-[0_20px_50px_rgba(37,99,235,0.10)] backdrop-blur-sm ${rotate}`}
       >
         {children}
-      </div>
+      </motion.div>
     </div>
   )
 }
