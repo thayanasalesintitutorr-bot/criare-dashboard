@@ -90,7 +90,12 @@ type ApiResponse = {
       mensagensAnalisadas: number
       motivos: { topico: string; ocorrencias: number }[]
       tempoMedioEntreMensagensSeg: number | null
-      compreensao: { sinaisPositivos: number; sinaisConfusao: number; nota: number | null }
+      compreensao: {
+        sinaisPositivos: number
+        sinaisConfusao: number
+        nota: number | null
+        exemplosConfusao: { contactId: string; nomeLead: string | null; trecho: string; criadoEm: string }[]
+      }
     }
     objecoes: {
       ranking: { objecao: string; ocorrencias: number }[]
@@ -285,6 +290,29 @@ export default function ConversasPage() {
     const res = await fetch(`/api/conversas?contact_id=${c.contact_id}`)
     const json = await res.json()
     if (json.ok) setTranscript(json.transcript)
+  }
+
+  // Usado pelo card de sinais de confusão, que só tem contact_id/nome — os
+  // outros campos do ConversaItem ficam vazios e a modal já lida bem com isso.
+  const abrirTranscriptPorContato = (contactId: string, nomeLead: string | null) => {
+    abrirTranscript({
+      lead_id: contactId,
+      contact_id: contactId,
+      name_lead: nomeLead,
+      campanha: null,
+      anuncio: null,
+      queixas: null,
+      objecao: null,
+      status: null,
+      resultado_conversa: null,
+      agendou: null,
+      vendeu: null,
+      msgs: null,
+      ultima_atividade: null,
+      aguardando: false,
+      nota: null,
+      resumo_qualidade: null,
+    })
   }
 
   const kpis = dados?.kpis
@@ -565,6 +593,48 @@ export default function ConversasPage() {
               Baseado nas {amostraRecente.mensagensAnalisadas} mensagens das{' '}
               {amostraRecente.conversasAnalisadas} conversas mais recentes do período — uma
               amostra, não o histórico inteiro.
+            </p>
+          </>
+        )}
+      </section>
+
+      <section className="dashboard-section mb-6">
+        <div className="mb-4 flex items-center gap-2">
+          <AlertTriangle size={18} className="text-[var(--danger)]" />
+          <h2 className="section-title">Sinais de confusão</h2>
+        </div>
+
+        {!amostraRecente || amostraRecente.compreensao.exemplosConfusao.length === 0 ? (
+          <p className="metric-helper">
+            Nenhum sinal de confusão ou insatisfação nas mensagens da amostra recente — pacientes
+            usando termos como &quot;não entendi&quot;, &quot;de novo&quot; ou reclamações.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {amostraRecente.compreensao.exemplosConfusao.map((ex, i) => (
+                <button
+                  key={i}
+                  onClick={() => abrirTranscriptPorContato(ex.contactId, ex.nomeLead)}
+                  className="subtle-card cursor-pointer text-left transition hover:border-[var(--danger)]/40"
+                >
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-semibold">
+                      {ex.nomeLead ?? `Contato ${ex.contactId}`}
+                    </span>
+                    <span className="shrink-0 text-[10px] font-semibold text-[var(--muted-foreground)]">
+                      {fmtData(ex.criadoEm)}
+                    </span>
+                  </div>
+                  <p className="line-clamp-3 whitespace-pre-wrap text-xs text-[var(--muted-foreground)]">
+                    &quot;{ex.trecho}&quot;
+                  </p>
+                </button>
+              ))}
+            </div>
+            <p className="metric-helper mt-3">
+              Trechos reais das mensagens dos pacientes na amostra recente — clique num card pra
+              abrir a conversa inteira.
             </p>
           </>
         )}

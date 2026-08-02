@@ -16,10 +16,18 @@ const ORDEM_SEMANA = [1, 2, 3, 4, 5, 6, 0]
 
 type ItemLista = {
   contact_id: string
+  name_lead: string | null
   status: string | null
   msgs: number | null
   ultima_atividade: string | null
   aguardando: boolean | null
+}
+
+type ExemploConfusao = {
+  contactId: string
+  nomeLead: string | null
+  trecho: string
+  criadoEm: string
 }
 
 function calcularPorStatus(lista: ItemLista[]) {
@@ -117,7 +125,12 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
     mensagensAnalisadas: 0,
     motivos: [] as { topico: string; ocorrencias: number }[],
     tempoMedioEntreMensagensSeg: null as number | null,
-    compreensao: { sinaisPositivos: 0, sinaisConfusao: 0, nota: null as number | null },
+    compreensao: {
+      sinaisPositivos: 0,
+      sinaisConfusao: 0,
+      nota: null as number | null,
+      exemplosConfusao: [] as ExemploConfusao[],
+    },
   }
 
   if (amostra.length === 0) return vazio
@@ -128,12 +141,15 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
 
   const contagemTopicos: Record<string, number> = {}
   const gaps: number[] = []
+  const exemplosConfusao: ExemploConfusao[] = []
   let sinaisPositivos = 0
   let sinaisConfusao = 0
   let mensagensAnalisadas = 0
 
-  for (const r of resultados) {
-    if (r.error || !Array.isArray(r.data)) continue
+  resultados.forEach((r, indice) => {
+    if (r.error || !Array.isArray(r.data)) return
+
+    const conversa = amostra[indice]
 
     const msgs = (r.data as { quem: string; conteudo: string; criado_em: string }[])
       .filter((m) => m.criado_em)
@@ -148,8 +164,17 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
         const topico = classificarMensagem(msg.conteudo)
         if (topico) contagemTopicos[topico] = (contagemTopicos[topico] || 0) + 1
 
-        if (SINAIS_CONFUSAO.test(msg.conteudo || '')) sinaisConfusao++
-        else if (SINAIS_COMPREENSAO.test(msg.conteudo || '')) sinaisPositivos++
+        if (SINAIS_CONFUSAO.test(msg.conteudo || '')) {
+          sinaisConfusao++
+          exemplosConfusao.push({
+            contactId: conversa.contact_id,
+            nomeLead: conversa.name_lead,
+            trecho: msg.conteudo,
+            criadoEm: msg.criado_em,
+          })
+        } else if (SINAIS_COMPREENSAO.test(msg.conteudo || '')) {
+          sinaisPositivos++
+        }
       }
 
       if (i > 0) {
@@ -157,7 +182,7 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
         if (gapSeg > 0 && gapSeg <= GAP_MAXIMO_SEG) gaps.push(gapSeg)
       }
     }
-  }
+  })
 
   const motivos = Object.entries(contagemTopicos)
     .map(([topico, ocorrencias]) => ({ topico, ocorrencias }))
@@ -169,12 +194,19 @@ async function analisarAmostraRecente(candidatos: ItemLista[]) {
   const totalSinais = sinaisPositivos + sinaisConfusao
   const nota = totalSinais > 0 ? Math.round((sinaisPositivos / totalSinais) * 5 * 2) / 2 : null
 
+  exemplosConfusao.sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime())
+
   return {
     conversasAnalisadas: amostra.length,
     mensagensAnalisadas,
     motivos,
     tempoMedioEntreMensagensSeg,
-    compreensao: { sinaisPositivos, sinaisConfusao, nota },
+    compreensao: {
+      sinaisPositivos,
+      sinaisConfusao,
+      nota,
+      exemplosConfusao: exemplosConfusao.slice(0, 8),
+    },
   }
 }
 
