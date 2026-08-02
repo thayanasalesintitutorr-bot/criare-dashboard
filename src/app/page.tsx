@@ -74,7 +74,7 @@ export default function Home() {
   const metaValor = Math.round((meta / 100) * 1000000)
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#DCE9FF_0%,#B9D2FF_45%,#8FB4FF_100%)] text-[#191b2a]">
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#F0F6FF_0%,#E1ECFF_45%,#C7DCFF_100%)] text-[#191b2a]">
       {/* Grid sutil, com respiração lenta */}
       <motion.div
         className="absolute inset-0 bg-[linear-gradient(to_right,rgba(37,99,235,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(37,99,235,0.06)_1px,transparent_1px)] bg-[size:88px_88px]"
