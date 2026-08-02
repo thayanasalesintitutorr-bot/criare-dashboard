@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
+import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -47,7 +48,7 @@ export default function LoginPage() {
   setLoading(false)
 }
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[linear-gradient(135deg,#DCE9FF_0%,#B9D2FF_45%,#8FB4FF_100%)]">
       {/* Animação sutil de fundo */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
@@ -103,6 +104,57 @@ export default function LoginPage() {
           </motion.svg>
         ))}
       </div>
+
+      {/* Cards fantasma, mais próximos do centro já que o card de login é estreito */}
+      <GhostCard position="left-[6%] top-[12%]" rotate="rotate-[-5deg]" delay="0s" width="w-[170px]" breakpoint="lg">
+        <div className="flex items-center justify-between">
+          <p className={CARD_LABEL}>Receita</p>
+          <span className="rounded-full bg-[#059669]/10 px-2 py-0.5 text-[10px] font-bold text-[#059669]">+18%</span>
+        </div>
+        <p className="mt-2 text-lg font-black tracking-[-0.02em] text-[#1f2233]">R$ 1.25M</p>
+      </GhostCard>
+
+      <GhostCard position="right-[6%] top-[12%]" rotate="rotate-[5deg]" delay="0.9s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Metas</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">75%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
+          <div className="h-full w-3/4 rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]" />
+        </div>
+      </GhostCard>
+
+      <GhostCard position="left-[7%] top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="1.7s" width="w-[160px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Desempenho</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">92%</p>
+        <p className="text-[10px] font-medium text-[#94A3B8]">da meta mensal</p>
+      </GhostCard>
+
+      <GhostCard position="right-[7%] top-1/2 -translate-y-1/2" rotate="rotate-[-4deg]" delay="0.5s" width="w-[160px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Conversão</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#2563EB]">+24.7%</p>
+        <p className="text-[10px] font-medium text-[#94A3B8]">vs. mês anterior</p>
+      </GhostCard>
+
+      <GhostCard position="left-[6%] bottom-[12%]" rotate="rotate-[-4deg]" delay="1.2s" width="w-[180px]" breakpoint="lg">
+        <p className={`${CARD_LABEL} mb-2`}>Funil Comercial</p>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-3 text-[11px]">
+            <span className="text-[#64748B]">Leads</span>
+            <span className="font-bold text-[#1f2233]">1.250</span>
+          </div>
+          <div className="flex items-center justify-between gap-3 text-[11px]">
+            <span className="text-[#64748B]">Fechados</span>
+            <span className="font-bold text-[#1f2233]">128</span>
+          </div>
+        </div>
+      </GhostCard>
+
+      <GhostCard position="right-[6%] bottom-[12%]" rotate="rotate-[5deg]" delay="2s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>NPS</p>
+        <div className="mt-1 flex items-baseline gap-1">
+          <p className="text-xl font-black tracking-[-0.02em] text-[#1f2233]">92</p>
+          <span className="text-[10px] font-bold text-[#059669]">Excelente</span>
+        </div>
+      </GhostCard>
 
       {/* Login Form */}
       <motion.div
@@ -182,9 +234,14 @@ export default function LoginPage() {
               <button
                 onClick={handleLogin}
                 disabled={loading || !email || !password}
-                className="w-full rounded-xl bg-[#2563EB] py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#2563EB]/25 transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                className="group relative w-full overflow-hidden rounded-xl bg-[#2563EB] py-3.5 text-sm font-semibold text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
               >
-                {loading ? 'Entrando...' : 'Entrar'}
+                <span
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                  style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+                />
+                <span className="relative">{loading ? 'Entrando...' : 'Entrar'}</span>
               </button>
             </div>
           </div>
