@@ -20,6 +20,7 @@ import {
   Target,
   Receipt,
   MousePointerClick,
+  Webhook,
   AlertTriangle,
   Trash2,
 } from 'lucide-react'
@@ -50,6 +51,7 @@ type UtmLink = {
   slug: string
   clicks?: number
   utm_campaign?: string
+  webhook_url?: string | null
 }
 
 type MarketingResponse = {
@@ -602,6 +604,7 @@ function UtmLinksCard({
     utmMedium: 'social',
     utmCampaign: '',
     utmContent: 'link_in_bio',
+    webhookUrl: '',
   })
 
   async function carregarLinks() {
@@ -641,7 +644,7 @@ function UtmLinksCard({
         return
       }
 
-      setForm((atual) => ({ ...atual, nome: '', utmCampaign: '' }))
+      setForm((atual) => ({ ...atual, nome: '', utmCampaign: '', webhookUrl: '' }))
       await carregarLinks()
     } finally {
       setCriando(false)
@@ -789,6 +792,15 @@ function UtmLinksCard({
           className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
         />
 
+        <input
+          value={form.webhookUrl}
+          onChange={(e) =>
+            setForm((atual) => ({ ...atual, webhookUrl: e.target.value }))
+          }
+          placeholder="Webhook (opcional) — recebe um POST a cada clique"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-4"
+        />
+
         {erro && (
           <div className="text-xs font-bold text-[var(--danger)] md:col-span-4">
             {erro}
@@ -820,8 +832,17 @@ function UtmLinksCard({
               className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] px-4 py-3"
             >
               <div className="min-w-0">
-                <div className="truncate text-sm font-black text-[var(--foreground)]">
+                <div className="flex items-center gap-1.5 truncate text-sm font-black text-[var(--foreground)]">
                   {link.nome}
+                  {link.webhook_url && (
+                    <span
+                      title={`Webhook ativo: ${link.webhook_url}`}
+                      className="flex shrink-0 items-center gap-1 rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[9px] font-black uppercase text-[var(--accent)]"
+                    >
+                      <Webhook size={10} />
+                      Webhook
+                    </span>
+                  )}
                 </div>
 
                 <button

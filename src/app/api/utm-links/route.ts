@@ -56,6 +56,7 @@ export async function POST(request: Request) {
   const utmMedium = String(body.utmMedium || '').trim()
   const utmCampaign = String(body.utmCampaign || '').trim()
   const utmContent = String(body.utmContent || '').trim()
+  const webhookUrlBase = String(body.webhookUrl || '').trim()
 
   if (!nome || !destinoBase) {
     return Response.json(
@@ -70,6 +71,14 @@ export async function POST(request: Request) {
     destinoUrl = new URL(destinoBase)
   } catch {
     return Response.json({ error: 'URL de destino inválida' }, { status: 400 })
+  }
+
+  if (webhookUrlBase) {
+    try {
+      new URL(webhookUrlBase)
+    } catch {
+      return Response.json({ error: 'URL de webhook inválida' }, { status: 400 })
+    }
   }
 
   if (utmSource) destinoUrl.searchParams.set('utm_source', utmSource)
@@ -93,6 +102,7 @@ export async function POST(request: Request) {
       utm_medium: utmMedium || null,
       utm_campaign: utmCampaign || null,
       utm_content: utmContent || null,
+      webhook_url: webhookUrlBase || null,
     }),
   })
 
