@@ -488,6 +488,33 @@ function OrigemStageCard({
           </div>
         )
       })}
+
+      {items.length > 3 && (() => {
+        const restantes = items.slice(3)
+        const qtdRestante = restantes.reduce(
+          (acc, item) => acc + (item.quantidade ?? item.qtd ?? 0),
+          0
+        )
+        const valorRestante = restantes.reduce(
+          (acc, item) => acc + (item.valor ?? 0),
+          0
+        )
+
+        return (
+          <div className="flex items-center justify-between gap-3 border-t border-dashed border-[color:var(--border)] pt-2 text-xs font-bold text-[var(--muted-foreground)]">
+            <span>+{restantes.length} outra{restantes.length > 1 ? 's' : ''} origem{restantes.length > 1 ? 'ns' : ''}</span>
+
+            <div className="shrink-0 text-right">
+              <div className="text-sm font-black text-[var(--foreground)]">{qtdRestante}</div>
+              {valorRestante > 0 && (
+                <div className="text-[11px] font-bold text-[var(--muted-foreground)]">
+                  {formatMoney(valorRestante)}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }
