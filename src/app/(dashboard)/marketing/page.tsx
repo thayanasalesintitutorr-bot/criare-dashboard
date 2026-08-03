@@ -528,7 +528,6 @@ function RoiPorOrigemCard({
     retorno: number
     investimento: number
     roi: number
-    lucro: number
     cac: number
     cpl: number
   }[]
@@ -589,7 +588,7 @@ function RoiPorOrigemCard({
                 />
               </div>
 
-             <div className={`grid grid-cols-3 gap-x-2 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
+             <div className={`grid grid-cols-2 gap-x-2 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
   <div>
     <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
@@ -598,13 +597,6 @@ function RoiPorOrigemCard({
   <div>
     <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
-  </div>
-
-  <div>
-    <div className="uppercase text-[var(--muted-foreground)]">Lucro</div>
-    <div className={item.lucro >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}>
-      {formatMoneyBR(item.lucro)}
-    </div>
   </div>
 
   <div>
@@ -1439,8 +1431,6 @@ const retornoPorOrigem = origensRoi
     const roiOrigem =
       investimentoOrigem > 0 ? retorno / investimentoOrigem : 0
 
-    const lucroOrigem = retorno - investimentoOrigem
-
     const leadsOrigem = sumQtd(
       origensPorEtapa.entrada.filter((item) => item.nome === origem)
     )
@@ -1460,7 +1450,6 @@ const retornoPorOrigem = origensRoi
       retorno,
       investimento: investimentoOrigem,
       roi: roiOrigem,
-      lucro: lucroOrigem,
       cac: cacOrigem,
       cpl: cplOrigem,
     }
@@ -1481,7 +1470,6 @@ const investimento =
     : origensParaInvestimento.reduce((total, origem) => {
         return total + parseMoney(investimentosPorOrigem[origem] || '')
       }, 0)
-const lucroMarketing = retornoMarketing - investimento
 
 const roi =
   investimento > 0 ? retornoMarketing / investimento : 0
@@ -1683,7 +1671,7 @@ return (
 </aside>
 
       <section className="flex min-w-0 flex-col space-y-4">
-        <div className="grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-6">
+        <div className="grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-5">
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
@@ -1695,11 +1683,6 @@ return (
           <div className="border-r border-[color:var(--border)] px-4">
             <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>Retorno</div>
             <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(retornoMarketing)}</div>
-          </div>
-
-          <div className="border-r border-[color:var(--border)] px-4">
-            <div className={`metric-label ${isApresentacao ? '!text-[16px]' : ''}`}>Lucro</div>
-            <div className={`${isApresentacao ? 'text-[34px]' : 'text-xl'} font-medium text-[var(--foreground)]`}>{formatMoneyBR(lucroMarketing)}</div>
           </div>
 
           <div className="border-r border-[color:var(--border)] px-4">
