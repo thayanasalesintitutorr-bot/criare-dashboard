@@ -779,7 +779,7 @@ function UtmLinksCard({
           onChange={(e) =>
             setForm((atual) => ({ ...atual, utmCampaign: e.target.value }))
           }
-          placeholder="utm_campaign (identificador único)"
+          placeholder="utm_campaign (ex: promo_botox_agosto)"
           className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
         />
 
