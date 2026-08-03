@@ -761,7 +761,7 @@ function UtmLinksCard({
           onChange={(e) =>
             setForm((atual) => ({ ...atual, utmSource: e.target.value }))
           }
-          placeholder="utm_source"
+          placeholder="utm_source (ex: ig, facebook, google)"
           className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
         />
 
@@ -770,7 +770,7 @@ function UtmLinksCard({
           onChange={(e) =>
             setForm((atual) => ({ ...atual, utmMedium: e.target.value }))
           }
-          placeholder="utm_medium"
+          placeholder="utm_medium (ex: social, cpc, email)"
           className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
         />
 
@@ -788,7 +788,7 @@ function UtmLinksCard({
           onChange={(e) =>
             setForm((atual) => ({ ...atual, utmContent: e.target.value }))
           }
-          placeholder="utm_content"
+          placeholder="utm_content (ex: link_in_bio, story)"
           className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none"
         />
 
