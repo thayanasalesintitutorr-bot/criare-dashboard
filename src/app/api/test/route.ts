@@ -110,15 +110,15 @@ function normalizeCampaignName(name?: string | null) {
 }
 
 // Retorna o campo bruto de origem do lead de acordo com o modo escolhido:
-// 'campanha' agrupa por utm_campaing (campanha), 'anuncio' agrupa por utm_content (anúncio).
-// Por padrão não cai para outros campos (campanha/source) — apenas o utm específico do modo é
-// considerado, para que o filtro lateral só liste valores realmente presentes na coluna
-// correspondente. Quando fallbackCampanha=true (ex.: "Origem dos agendamentos"), leads sem
-// utm_campaing preenchido usam o valor da coluna "campanha" em vez de caírem em "Sem origem".
+// 'campanha' agrupa por utm_campaing, 'anuncio' agrupa por utm_content. Por
+// padrão (fallbackCampanha=true), quando o utm específico do modo vem vazio,
+// cai pra coluna "campanha" em vez de virar "Sem origem" — nos dois modos,
+// já que campanha ainda é um agrupamento melhor que nada. Passe
+// fallbackCampanha=false só se precisar do valor cru do utm, sem fallback.
 function origemField(
   lead: Lead,
   modo: 'campanha' | 'anuncio',
-  fallbackCampanha = false
+  fallbackCampanha = true
 ) {
   const utmEspecifico =
     modo === 'anuncio' ? lead.utm_content : lead.utm_campaing
@@ -126,7 +126,7 @@ function origemField(
   const valor = (utmEspecifico || '').trim()
   if (valor) return valor
 
-  if (fallbackCampanha && modo === 'campanha') {
+  if (fallbackCampanha) {
     return (lead.campanha || '').trim()
   }
 
@@ -459,7 +459,7 @@ function buildEvolucaoDiaria(
 function buildOrigens(
   leads: Lead[],
   modo: 'campanha' | 'anuncio' = 'campanha',
-  fallbackCampanha = false
+  fallbackCampanha = true
 ) {
   const map: Record<
     string,
