@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
+const INVESTIMENTO_TOTAL_STORAGE_KEY = 'criare-marketing-investimento-total'
 const SIDEBAR_ORIGENS_WIDTH_KEY = 'criare-marketing-sidebar-origens-width'
 const SIDEBAR_ORIGENS_WIDTH_MIN = 230
 const SIDEBAR_ORIGENS_WIDTH_MAX = 560
@@ -160,6 +161,11 @@ function getInvestimentosSalvos() {
   } catch {
     return {}
   }
+}
+
+function getInvestimentoTotalSalvo() {
+  if (typeof window === 'undefined') return ''
+  return localStorage.getItem(INVESTIMENTO_TOTAL_STORAGE_KEY) || ''
 }
 
 function sumQtd(items: OrigemItem[]) {
@@ -1143,6 +1149,9 @@ const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
 const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
   () => getInvestimentosSalvos()
 )
+const [investimentoTotalGeral, setInvestimentoTotalGeral] = useState<string>(
+  () => getInvestimentoTotalSalvo()
+)
 const [sidebarOrigensWidth, setSidebarOrigensWidth] = useState<number>(() => getSidebarWidthSalva())
 const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 const [now, setNow] = useState<Date>(new Date())
@@ -1233,11 +1242,19 @@ useEffect(() => {
   )
 }, [investimentosPorOrigem])
 
+useEffect(() => {
+  localStorage.setItem(INVESTIMENTO_TOTAL_STORAGE_KEY, investimentoTotalGeral)
+}, [investimentoTotalGeral])
+
 function atualizarInvestimentoOrigem(origem: string, valor: string) {
   setInvestimentosPorOrigem((atual) => ({
     ...atual,
     [origem]: formatMoneyInput(valor),
   }))
+}
+
+function atualizarInvestimentoTotal(valor: string) {
+  setInvestimentoTotalGeral(formatMoneyInput(valor))
 }
 
 const marketing = data?.kpis?.marketing
@@ -1362,9 +1379,17 @@ const retornoPorOrigem = origensRoi
 const origensParaInvestimento =
   origensSelecionadas.length === 0 ? todasOrigens : origensSelecionadas
 
-const investimento = origensParaInvestimento.reduce((total, origem) => {
-  return total + parseMoney(investimentosPorOrigem[origem] || '')
-}, 0)
+// Com "Todas as campanhas" selecionado, usa o investimento total informado
+// direto (o real gasto em anúncios do período), em vez de somar os campos
+// por campanha — a maioria das origens (ex: "Sem origem", tráfego
+// orgânico) nunca vai ter um valor individual preenchido, então a soma
+// ficava bem abaixo do investimento real.
+const investimento =
+  origensSelecionadas.length === 0
+    ? parseMoney(investimentoTotalGeral)
+    : origensParaInvestimento.reduce((total, origem) => {
+        return total + parseMoney(investimentosPorOrigem[origem] || '')
+      }, 0)
 const lucroMarketing = retornoMarketing - investimento
 
 const roi =
@@ -1444,17 +1469,46 @@ return (
     </div>
 
     <div className="mt-3 space-y-3">
-      <button
-        type="button"
-        onClick={() => setOrigensSelecionadas([])}
-        className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-black transition-colors ${
+      <div
+        className={`overflow-hidden rounded-xl border transition-colors ${
           origensSelecionadas.length === 0
-            ? 'border-[color:var(--accent)] bg-[var(--metric-card)] text-[var(--accent)]'
-            : 'border-[color:var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
+            ? 'border-[color:var(--accent)] bg-[var(--metric-card)]'
+            : 'border-[color:var(--border)] hover:bg-[var(--metric-card)]'
         }`}
       >
-        {origemModo === 'anuncio' ? 'Todos os anúncios' : 'Todas as campanhas'}
-      </button>
+        <button
+          type="button"
+          onClick={() => setOrigensSelecionadas([])}
+          className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-black transition-colors ${
+            origensSelecionadas.length === 0
+              ? 'text-[var(--accent)]'
+              : 'text-[var(--muted-foreground)]'
+          }`}
+        >
+          {origemModo === 'anuncio' ? 'Todos os anúncios' : 'Todas as campanhas'}
+        </button>
+
+        {origensSelecionadas.length === 0 && (
+          <div className="border-t border-[color:var(--accent)]/20 px-3 py-2.5">
+            <div className="mb-1.5 text-[10px] font-black uppercase tracking-[0.06em] text-[var(--muted-foreground)]">
+              Investimento total do período
+            </div>
+
+            <div className="flex overflow-hidden rounded-xl border border-[color:var(--border)] bg-[var(--card)]">
+              <div className="flex items-center bg-[var(--metric-card)] px-2 text-xs font-black text-[var(--muted-foreground)]">
+                R$
+              </div>
+
+              <input
+                value={investimentoTotalGeral}
+                onChange={(e) => atualizarInvestimentoTotal(e.target.value)}
+                placeholder="0,00"
+                className="w-full px-2 py-2 text-xs font-black text-[var(--foreground)] outline-none"
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {todasOrigens.map((origem) => {
         const ativo = origensSelecionadas.includes(origem)
