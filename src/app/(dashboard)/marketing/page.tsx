@@ -530,6 +530,10 @@ function RoiPorOrigemCard({
     roi: number
     cac: number
     cpl: number
+    retornoConsulta: number
+    qtdConsulta: number
+    retornoVendas: number
+    qtdVendas: number
   }[]
   modo: 'campanha' | 'anuncio'
 }) {
@@ -597,6 +601,24 @@ function RoiPorOrigemCard({
   <div>
     <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
+  </div>
+
+  <div className="col-span-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-dashed border-[color:var(--border)] pt-1.5 normal-case">
+    <span className="flex items-center gap-1">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+      <span className="uppercase text-[var(--muted-foreground)]">Consulta</span>
+      <span className="text-[var(--foreground)]">
+        {formatMoneyBR(item.retornoConsulta)} ({item.qtdConsulta})
+      </span>
+    </span>
+
+    <span className="flex items-center gap-1">
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--chart-purple)]" />
+      <span className="uppercase text-[var(--muted-foreground)]">Vendas</span>
+      <span className="text-[var(--foreground)]">
+        {formatMoneyBR(item.retornoVendas)} ({item.qtdVendas})
+      </span>
+    </span>
   </div>
 
   <div>
@@ -1422,7 +1444,9 @@ const retornoPorOrigem = origensRoi
       (item) => item.nome === origem
     )
 
-    const retorno = (consulta?.valor || 0) + (procedimento?.valor || 0)
+    const retornoConsulta = consulta?.valor || 0
+    const retornoVendas = procedimento?.valor || 0
+    const retorno = retornoConsulta + retornoVendas
 
     const investimentoOrigem = parseMoney(
       investimentosPorOrigem[origem] || ''
@@ -1452,6 +1476,10 @@ const retornoPorOrigem = origensRoi
       roi: roiOrigem,
       cac: cacOrigem,
       cpl: cplOrigem,
+      retornoConsulta,
+      qtdConsulta: consulta?.qtd || 0,
+      retornoVendas,
+      qtdVendas: procedimento?.qtd || 0,
     }
   })
   .filter((item) => item.retorno > 0 || item.investimento > 0)
