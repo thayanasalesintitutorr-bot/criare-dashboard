@@ -501,6 +501,9 @@ function RoiPorOrigemCard({
     retorno: number
     investimento: number
     roi: number
+    lucro: number
+    cac: number
+    cpl: number
   }[]
   modo: 'campanha' | 'anuncio'
 }) {
@@ -559,15 +562,36 @@ function RoiPorOrigemCard({
                 />
               </div>
 
-             <div className={`grid grid-cols-2 gap-2 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
+             <div className={`grid grid-cols-3 gap-x-2 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} font-bold text-[var(--muted-foreground)]`}>
   <div>
     <div className="uppercase text-[var(--muted-foreground)]">Investimento</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.investimento)}</div>
   </div>
 
-  <div className="text-right">
+  <div>
     <div className="uppercase text-[var(--muted-foreground)]">Retorno</div>
     <div className="text-[var(--foreground)]">{formatMoneyBR(item.retorno)}</div>
+  </div>
+
+  <div>
+    <div className="uppercase text-[var(--muted-foreground)]">Lucro</div>
+    <div className={item.lucro >= 0 ? 'text-[var(--success)]' : 'text-[var(--danger)]'}>
+      {formatMoneyBR(item.lucro)}
+    </div>
+  </div>
+
+  <div>
+    <div className="uppercase text-[var(--muted-foreground)]">CAC</div>
+    <div className="text-[var(--foreground)]">
+      {item.cac > 0 ? formatMoneyBR(item.cac) : '—'}
+    </div>
+  </div>
+
+  <div>
+    <div className="uppercase text-[var(--muted-foreground)]">CPL</div>
+    <div className="text-[var(--foreground)]">
+      {item.cpl > 0 ? formatMoneyBR(item.cpl) : '—'}
+    </div>
   </div>
 </div>
             </div>
@@ -1388,11 +1412,30 @@ const retornoPorOrigem = origensRoi
     const roiOrigem =
       investimentoOrigem > 0 ? retorno / investimentoOrigem : 0
 
+    const lucroOrigem = retorno - investimentoOrigem
+
+    const leadsOrigem = sumQtd(
+      origensPorEtapa.entrada.filter((item) => item.nome === origem)
+    )
+
+    const agendadosOrigem = sumQtd(
+      origensPorEtapa.agendado.filter((item) => item.nome === origem)
+    )
+
+    const cacOrigem =
+      agendadosOrigem > 0 ? investimentoOrigem / agendadosOrigem : 0
+
+    const cplOrigem =
+      leadsOrigem > 0 ? investimentoOrigem / leadsOrigem : 0
+
     return {
       origem,
       retorno,
       investimento: investimentoOrigem,
       roi: roiOrigem,
+      lucro: lucroOrigem,
+      cac: cacOrigem,
+      cpl: cplOrigem,
     }
   })
   .filter((item) => item.retorno > 0 || item.investimento > 0)
