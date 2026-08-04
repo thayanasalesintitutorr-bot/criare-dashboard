@@ -136,7 +136,7 @@ function KpiTile({ kpi, isApresentacao }: { kpi: Kpi; isApresentacao: boolean })
 
   return (
     <div
-      className={`flex h-full w-full min-w-0 flex-col self-stretch rounded-[16px] border border-[color:var(--border)] bg-[var(--metric-card)] ${
+      className={`flex h-full w-full min-w-0 flex-col self-stretch rounded-[16px] ${VIDRO_TILE} ${
         isApresentacao ? 'min-h-[240px] px-5 py-4' : 'min-h-[190px] px-4 py-3'
       }`}
     >
@@ -205,7 +205,7 @@ function InsightTile({
 
   return (
     <div
-      className={`flex items-start rounded-[16px] border ${isApresentacao ? 'gap-3.5 p-4' : 'gap-2.5 p-3'} ${
+      className={`flex items-start rounded-[16px] border backdrop-blur-lg backdrop-saturate-150 ${isApresentacao ? 'gap-3.5 p-4' : 'gap-2.5 p-3'} ${
         positivo
           ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
           : 'border-[var(--warning)]/25 bg-[var(--warning)]/10'
@@ -270,6 +270,13 @@ function construirInsights(kpis: Kpi[]) {
   return { desafio, destaque }
 }
 
+// Vidro translúcido reutilizado em todos os blocos deste card — fundo
+// semi-transparente + blur + borda suave, em vez de fundo sólido.
+const VIDRO_CARD =
+  'border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
+const VIDRO_TILE =
+  'border border-[color:var(--border)] bg-[var(--metric-card)]/55 backdrop-blur-lg backdrop-saturate-150'
+
 function Avatar({
   nome,
   foto,
@@ -296,6 +303,75 @@ function Avatar({
         </span>
       )}
     </span>
+  )
+}
+
+// Junta foto + desempenho geral num único elemento (anel de progresso em
+// volta da foto) em vez de foto pequena + número gigante empilhados — fica
+// proporcional em qualquer tamanho de tela.
+function AvatarComProgresso({
+  nome,
+  foto,
+  percent,
+  cor,
+  isApresentacao,
+}: {
+  nome: string
+  foto: string | null
+  percent: number | null
+  cor: string
+  isApresentacao: boolean
+}) {
+  const tamanho = isApresentacao ? 116 : 84
+  const espessura = isApresentacao ? 6 : 5
+  const raio = tamanho / 2 - espessura
+  const circunferencia = 2 * Math.PI * raio
+  const progresso = percent === null ? 0 : Math.min(Math.max(percent, 0), 100)
+  const offset = circunferencia * (1 - progresso / 100)
+
+  return (
+    <div className="relative shrink-0" style={{ width: tamanho, height: tamanho }}>
+      <svg viewBox={`0 0 ${tamanho} ${tamanho}`} className="absolute inset-0 -rotate-90">
+        <circle
+          cx={tamanho / 2}
+          cy={tamanho / 2}
+          r={raio}
+          fill="none"
+          stroke="var(--progress-bg)"
+          strokeWidth={espessura}
+        />
+        <motion.circle
+          cx={tamanho / 2}
+          cy={tamanho / 2}
+          r={raio}
+          fill="none"
+          stroke={cor}
+          strokeWidth={espessura}
+          strokeLinecap="round"
+          strokeDasharray={circunferencia}
+          initial={{ strokeDashoffset: circunferencia }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        />
+      </svg>
+
+      <div
+        className="absolute overflow-hidden rounded-full border border-white/40 bg-[var(--metric-card)]"
+        style={{ inset: espessura + 4 }}
+      >
+        {foto ? (
+          <img src={foto} alt={nome} className="h-full w-full object-cover" />
+        ) : (
+          <span
+            className={`flex h-full w-full items-center justify-center font-black text-[var(--accent)] ${
+              isApresentacao ? 'text-[36px]' : 'text-[26px]'
+            }`}
+          >
+            {nome.charAt(0)}
+          </span>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -402,7 +478,7 @@ export function ProjecaoMedicosResumoCard({
 
   if (!projecao) {
     return (
-      <section className="rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--card-shadow)]">
+      <section className={`rounded-[24px] px-4 py-3 ${VIDRO_CARD}`}>
         <div className="text-xs font-bold text-[var(--muted-foreground)]">
           {erro ? erro : 'Carregando projeção dos médicos...'}
         </div>
@@ -459,7 +535,7 @@ export function ProjecaoMedicosResumoCard({
   }
 
   return (
-    <section className="overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)]">
+    <section className={`overflow-hidden rounded-[24px] ${VIDRO_CARD}`}>
       <div
         className={`flex items-center justify-between gap-3 border-b border-[color:var(--border)] ${
           isApresentacao ? 'px-7 py-4' : 'px-5 py-3'
@@ -569,14 +645,20 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
       <div className={`flex flex-col items-stretch gap-5 ${isWide ? 'sm:flex-row' : ''} ${isApresentacao ? 'sm:gap-8' : ''}`}>
         <div
           className={`flex shrink-0 flex-col items-center gap-1 text-center ${
-            isWide ? 'sm:w-[27%]' : ''
+            isWide ? 'sm:w-[22%]' : ''
           }`}
         >
-          <Avatar nome={slide.nome} foto={slide.foto} size="lg" isApresentacao={isApresentacao} />
+          <AvatarComProgresso
+            nome={slide.nome}
+            foto={slide.foto}
+            percent={slide.temDados ? percentGeral : null}
+            cor={tierGeral.cor}
+            isApresentacao={isApresentacao}
+          />
 
           <div
-            className={`mt-1 font-black leading-tight text-[var(--foreground)] ${
-              isApresentacao ? 'text-[30px]' : 'text-[20px]'
+            className={`mt-2 font-black leading-tight text-[var(--foreground)] ${
+              isApresentacao ? 'text-[22px]' : 'text-[16px]'
             }`}
           >
             {slide.nome}
@@ -584,7 +666,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
           {nomeMes && (
             <div
               className={`font-semibold text-[var(--muted-foreground)] ${
-                isApresentacao ? 'text-[18px]' : 'text-[13px]'
+                isApresentacao ? 'text-[15px]' : 'text-[12px]'
               }`}
             >
               {nomeMes}
@@ -592,26 +674,14 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
           )}
 
           {slide.temDados ? (
-            <div className="mt-2">
-              <div
-                className={`font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)] ${
-                  isApresentacao ? 'text-[14px]' : 'text-[10px]'
-                }`}
-              >
-                Desempenho geral
-              </div>
-              <div
-                className={`font-black leading-none tracking-[-0.02em] ${
-                  isApresentacao ? 'text-[56px]' : 'text-[36px]'
-                }`}
-                style={{ color: tierGeral.cor }}
-              >
-                {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'}
-              </div>
-              <div className={`font-bold ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`} style={{ color: tierGeral.cor }}>
-                {tierGeral.label}
-              </div>
-            </div>
+            <span
+              className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold ${
+                isApresentacao ? 'text-[15px]' : 'text-[12px]'
+              }`}
+              style={{ backgroundColor: `${tierGeral.cor}1A`, color: tierGeral.cor }}
+            >
+              {percentGeral !== null ? `${Math.round(percentGeral)}%` : '—'} · {tierGeral.label}
+            </span>
           ) : (
             <div
               className={`mt-3 font-semibold text-[var(--muted-foreground)] ${
@@ -717,7 +787,7 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
         {totais.map((item) => (
           <div
             key={item.chave}
-            className={`rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] text-center ${
+            className={`rounded-[18px] text-center ${VIDRO_TILE} ${
               isApresentacao ? 'p-5' : 'p-4'
             }`}
           >
@@ -740,7 +810,7 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
       </div>
 
       <div
-        className={`space-y-3 rounded-[18px] border border-[color:var(--border)] bg-[var(--metric-card)] ${
+        className={`space-y-3 rounded-[18px] ${VIDRO_TILE} ${
           isApresentacao ? 'p-5' : 'p-4'
         }`}
       >
