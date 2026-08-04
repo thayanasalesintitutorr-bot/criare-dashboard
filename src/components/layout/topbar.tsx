@@ -6,7 +6,6 @@ import {
   BarChart3,
   Bell,
   CalendarDays,
-  Database,
   Eye,
   EyeOff,
   Heart,
@@ -17,9 +16,6 @@ import {
   Sun,
   User2,
   X,
-  Monitor,
-  Smartphone,
-  Presentation,
   Maximize2,
   Minimize2,
   ChevronDown,
@@ -92,15 +88,12 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   periodo,
   setPeriodo,
   tipoData,
-  setTipoData,
   segmento,
   setSegmento,
   dataInicio,
   setDataInicio,
   dataFim,
   setDataFim,
-  viewMode,
-  setViewMode,
   comparar,
   setComparar,
   compararInicio,
@@ -123,7 +116,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const calendarRef = useRef<HTMLDivElement>(null)
   const compararCalendarRef = useRef<HTMLDivElement>(null)
   const [categoriaAberta, setCategoriaAberta] = useState<
-    'tipoData' | 'periodo' | 'segmento' | 'dispositivo' | 'comparacao' | null
+    'periodo' | 'segmento' | 'comparacao' | null
   >(null)
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
@@ -422,45 +415,7 @@ function parseLocalDate(dateString?: string) {
 </div>
 
 <div className="rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm">
-    <div className="grid grid-cols-1 gap-3 mobile-h:grid-cols-2 tablet:grid-cols-3 laptop:grid-cols-5">
-      <div>
-        <FiltroResumoCard
-          icon={<Database size={15} className="text-[var(--accent)]" />}
-          label="Tipo de data"
-          valor={tipoData === 'criado' ? 'Criado' : 'Fechado'}
-          aberto={categoriaAberta === 'tipoData'}
-          onClick={() =>
-            setCategoriaAberta((atual) => (atual === 'tipoData' ? null : 'tipoData'))
-          }
-        />
-
-        {categoriaAberta === 'tipoData' && (
-          <div className={`${groupClass} mt-3`}>
-            <button
-              onClick={() => {
-                setTipoData('criado')
-                setCategoriaAberta(null)
-              }}
-              className={`${pillBase} ${tipoData === 'criado' ? pillActive : pillInactive}`}
-            >
-              <Database size={16} />
-              Criado
-            </button>
-
-            <button
-              onClick={() => {
-                setTipoData('fechado')
-                setCategoriaAberta(null)
-              }}
-              className={`${pillBase} ${tipoData === 'fechado' ? pillActive : pillInactive}`}
-            >
-              <Database size={16} />
-              Fechado
-            </button>
-          </div>
-        )}
-      </div>
-
+    <div className="grid grid-cols-1 gap-3 mobile-h:grid-cols-2 tablet:grid-cols-3">
       <div>
         <FiltroResumoCard
           icon={<CalendarDays size={15} className="text-[var(--accent)]" />}
@@ -716,61 +671,6 @@ function parseLocalDate(dateString?: string) {
           >
             <BarChart3 size={16} />
             Geral
-          </button>
-        </div>
-        )}
-      </div>
-
-      <div>
-        <FiltroResumoCard
-          icon={<Monitor size={15} className="text-[var(--accent)]" />}
-          label="Dispositivo"
-          valor={
-            viewMode === 'desktop'
-              ? 'iMac'
-              : viewMode === 'iphone'
-                ? 'iPhone'
-                : 'Apresentação'
-          }
-          aberto={categoriaAberta === 'dispositivo'}
-          onClick={() =>
-            setCategoriaAberta((atual) => (atual === 'dispositivo' ? null : 'dispositivo'))
-          }
-        />
-
-        {categoriaAberta === 'dispositivo' && (
-        <div className={`${groupClass} mt-3`}>
-          <button
-            onClick={() => {
-              setViewMode('desktop')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${viewMode === 'desktop' ? pillActive : pillInactive}`}
-          >
-            <Monitor size={16} />
-            iMac
-          </button>
-
-          <button
-            onClick={() => {
-              setViewMode('iphone')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${viewMode === 'iphone' ? pillActive : pillInactive}`}
-          >
-            <Smartphone size={16} />
-            iPhone
-          </button>
-
-          <button
-            onClick={() => {
-              setViewMode('apresentacao')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${viewMode === 'apresentacao' ? pillActive : pillInactive}`}
-          >
-            <Presentation size={16} />
-            Apresentação
           </button>
         </div>
         )}
