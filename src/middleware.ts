@@ -42,7 +42,6 @@ export async function middleware(req: NextRequest) {
   if (role === 'marketing') {
     const podeAcessar =
       pathname === '/marketing' ||
-      pathname === '/dispositivo' ||
       pathname.startsWith('/api/')
 
     if (!podeAcessar) {

@@ -102,7 +102,7 @@ export default function LoginPage() {
         return
       }
 
-      router.push('/dispositivo')
+      router.push(json.role === 'marketing' ? '/marketing' : '/dashboard')
     } catch {
       setError('Não foi possível entrar agora. Tente novamente.')
       setLoading(false)
