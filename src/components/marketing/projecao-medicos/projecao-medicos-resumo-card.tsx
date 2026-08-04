@@ -277,35 +277,6 @@ const VIDRO_CARD =
 const VIDRO_TILE =
   'border border-[color:var(--border)] bg-[var(--metric-card)]/55 backdrop-blur-lg backdrop-saturate-150'
 
-function Avatar({
-  nome,
-  foto,
-  size = 'md',
-  isApresentacao = false,
-}: {
-  nome: string
-  foto: string | null
-  size?: 'md' | 'lg'
-  isApresentacao?: boolean
-}) {
-  const dimensao = size === 'lg' ? (isApresentacao ? 'h-24 w-24' : 'h-16 w-16') : isApresentacao ? 'h-9 w-9' : 'h-7 w-7'
-  const fonte = size === 'lg' ? (isApresentacao ? 'text-[30px]' : 'text-[20px]') : isApresentacao ? 'text-[14px]' : 'text-[11px]'
-
-  return (
-    <span
-      className={`${dimensao} shrink-0 overflow-hidden rounded-full border border-[color:var(--accent)]/30 bg-[var(--metric-card)]`}
-    >
-      {foto ? (
-        <img src={foto} alt={nome} className="h-full w-full object-cover" />
-      ) : (
-        <span className={`flex h-full w-full items-center justify-center ${fonte} font-black text-[var(--accent)]`}>
-          {nome.charAt(0)}
-        </span>
-      )}
-    </span>
-  )
-}
-
 // Junta foto + desempenho geral num único elemento (anel de progresso em
 // volta da foto) em vez de foto pequena + número gigante empilhados — fica
 // proporcional em qualquer tamanho de tela.
@@ -315,12 +286,14 @@ function AvatarComProgresso({
   percent,
   cor,
   isApresentacao,
+  icone,
 }: {
   nome: string
   foto: string | null
   percent: number | null
   cor: string
   isApresentacao: boolean
+  icone?: React.ReactNode
 }) {
   const tamanho = isApresentacao ? 116 : 84
   const espessura = isApresentacao ? 6 : 5
@@ -359,7 +332,9 @@ function AvatarComProgresso({
         className="absolute overflow-hidden rounded-full border border-white/40 bg-[var(--metric-card)]"
         style={{ inset: espessura + 4 }}
       >
-        {foto ? (
+        {icone ? (
+          <span className="flex h-full w-full items-center justify-center text-[var(--accent)]">{icone}</span>
+        ) : foto ? (
           <img src={foto} alt={nome} className="h-full w-full object-cover" />
         ) : (
           <span
@@ -745,42 +720,36 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
   return (
     <div className={isApresentacao ? 'space-y-7' : 'space-y-5'}>
       <div className="flex flex-col items-center gap-1 text-center">
-        <span
-          className={`flex shrink-0 items-center justify-center rounded-full border border-[color:var(--accent)]/30 bg-[var(--metric-card)] text-[var(--accent)] ${
-            isApresentacao ? 'h-24 w-24' : 'h-16 w-16'
-          }`}
-        >
-          <LayoutGrid size={isApresentacao ? 38 : 26} />
-        </span>
+        <AvatarComProgresso
+          nome="Visão geral"
+          foto={null}
+          percent={percentualMedioGeral}
+          cor={tierMedio.cor}
+          isApresentacao={isApresentacao}
+          icone={<LayoutGrid size={isApresentacao ? 34 : 24} />}
+        />
 
         <div
-          className={`mt-1 font-black leading-tight text-[var(--foreground)] ${
-            isApresentacao ? 'text-[32px]' : 'text-[22px]'
+          className={`mt-2 font-black leading-tight text-[var(--foreground)] ${
+            isApresentacao ? 'text-[22px]' : 'text-[16px]'
           }`}
         >
           Visão geral
         </div>
         {nomeMes && (
-          <div className={`font-semibold text-[var(--muted-foreground)] ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`}>
+          <div className={`font-semibold text-[var(--muted-foreground)] ${isApresentacao ? 'text-[15px]' : 'text-[12px]'}`}>
             {nomeMes}
           </div>
         )}
 
-        <div className="mt-2">
-          <div
-            className={`font-black uppercase tracking-[0.1em] text-[var(--muted-foreground)] ${
-              isApresentacao ? 'text-[15px]' : 'text-[11px]'
-            }`}
-          >
-            Percentual médio das metas
-          </div>
-          <div
-            className={`font-black leading-none tracking-[-0.02em] ${isApresentacao ? 'text-[70px]' : 'text-[46px]'}`}
-            style={{ color: tierMedio.cor }}
-          >
-            {percentualMedioGeral !== null ? `${Math.round(percentualMedioGeral)}%` : '—'}
-          </div>
-        </div>
+        <span
+          className={`mt-2 inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold ${
+            isApresentacao ? 'text-[15px]' : 'text-[12px]'
+          }`}
+          style={{ backgroundColor: `${tierMedio.cor}1A`, color: tierMedio.cor }}
+        >
+          {percentualMedioGeral !== null ? `${Math.round(percentualMedioGeral)}%` : '—'} · Percentual médio das metas
+        </span>
       </div>
 
       <div className={`grid grid-cols-1 sm:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`}>
@@ -829,39 +798,56 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
             const largura = percent === null ? 0 : Math.min(Math.max(percent, 3), 100)
 
             return (
-              <div key={medico.chave}>
-                <div className="mb-1 flex items-center justify-between gap-3">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Avatar nome={medico.nome} foto={medico.foto} isApresentacao={isApresentacao} />
+              <div key={medico.chave} className="flex items-center gap-3">
+                <span
+                  className={`shrink-0 overflow-hidden rounded-full border border-[color:var(--accent)]/30 bg-[var(--metric-card)] ${
+                    isApresentacao ? 'h-14 w-14' : 'h-11 w-11'
+                  }`}
+                >
+                  {medico.foto ? (
+                    <img src={medico.foto} alt={medico.nome} className="h-full w-full object-cover" />
+                  ) : (
+                    <span
+                      className={`flex h-full w-full items-center justify-center font-black text-[var(--accent)] ${
+                        isApresentacao ? 'text-[20px]' : 'text-[16px]'
+                      }`}
+                    >
+                      {medico.nome.charAt(0)}
+                    </span>
+                  )}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center justify-between gap-3">
                     <span
                       className={`truncate font-bold text-[var(--foreground)] ${
-                        isApresentacao ? 'text-[18px]' : 'text-[13px]'
+                        isApresentacao ? 'text-[18px]' : 'text-[14px]'
                       }`}
                     >
                       {medico.nome}
                     </span>
+
+                    <span
+                      className={`shrink-0 font-black ${isApresentacao ? 'text-[18px]' : 'text-[14px]'}`}
+                      style={{ color: tier.cor }}
+                    >
+                      {percent !== null ? `${Math.round(percent)}%` : '—'}
+                    </span>
                   </div>
 
-                  <span
-                    className={`shrink-0 font-black ${isApresentacao ? 'text-[18px]' : 'text-[13px]'}`}
-                    style={{ color: tier.cor }}
+                  <div
+                    className={`w-full overflow-hidden rounded-full bg-[var(--progress-bg)] ${
+                      isApresentacao ? 'h-3' : 'h-2'
+                    }`}
                   >
-                    {percent !== null ? `${Math.round(percent)}%` : '—'}
-                  </span>
-                </div>
-
-                <div
-                  className={`w-full overflow-hidden rounded-full bg-[var(--progress-bg)] ${
-                    isApresentacao ? 'h-3' : 'h-2'
-                  }`}
-                >
-                  <motion.div
-                    className="h-full w-full origin-left rounded-full"
-                    style={{ backgroundColor: tier.cor }}
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: largura / 100 }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
-                  />
+                    <motion.div
+                      className="h-full w-full origin-left rounded-full"
+                      style={{ backgroundColor: tier.cor }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: largura / 100 }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
+                  </div>
                 </div>
               </div>
             )
