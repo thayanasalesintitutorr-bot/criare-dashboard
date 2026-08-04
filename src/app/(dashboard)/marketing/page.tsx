@@ -1230,7 +1230,7 @@ const [data, setData] = useState<MarketingResponse | null>(null)
 const [loading, setLoading] = useState(true)
 const [error, setError] = useState<string | null>(null)
 const [tagsSelecionadas, setTagsSelecionadas] = useState<('A' | 'B' | 'C' | 'D')[]>([])
-const [origemModo, setOrigemModo] = useState<'campanha' | 'anuncio'>('campanha')
+const origemModo = 'campanha' as const
 const [origensSelecionadas, setOrigensSelecionadas] = useState<string[]>([])
 const [investimentosPorOrigem, setInvestimentosPorOrigem] = useState<Record<string, string>>(
   () => getInvestimentosSalvos()
@@ -1544,31 +1544,6 @@ return (
         Filtre campanhas para calcular o ROI
       </div>
 
-      <div className="mt-3 flex overflow-hidden rounded-xl border border-[color:var(--border)]">
-        <button
-          type="button"
-          onClick={() => setOrigemModo('campanha')}
-          className={`flex-1 px-3 py-2 text-xs font-black uppercase tracking-[0.04em] transition-colors ${
-            origemModo === 'campanha'
-              ? 'bg-[var(--accent)] text-[var(--background)]'
-              : 'bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
-          }`}
-        >
-          Campanha
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setOrigemModo('anuncio')}
-          className={`flex-1 px-3 py-2 text-xs font-black uppercase tracking-[0.04em] transition-colors ${
-            origemModo === 'anuncio'
-              ? 'bg-[var(--accent)] text-[var(--background)]'
-              : 'bg-transparent text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]'
-          }`}
-        >
-          Anúncio
-        </button>
-      </div>
     </div>
 
     <div className="mt-1 text-[11px] font-semibold text-[var(--muted-foreground)]">
@@ -1592,7 +1567,7 @@ return (
               : 'text-[var(--muted-foreground)]'
           }`}
         >
-          {origemModo === 'anuncio' ? 'Todos os anúncios' : 'Todas as campanhas'}
+          Todas as campanhas
         </button>
 
         {origensSelecionadas.length === 0 && (
@@ -1619,12 +1594,7 @@ return (
 
       {todasOrigens.map((origem) => {
         const ativo = origensSelecionadas.includes(origem)
-        const rotuloOrigem =
-          origem === 'Sem origem'
-            ? origemModo === 'anuncio'
-              ? 'Sem anúncios'
-              : 'Sem campanhas'
-            : origem
+        const rotuloOrigem = origem === 'Sem origem' ? 'Sem campanhas' : origem
 
         return (
           <div
