@@ -25,6 +25,41 @@ import {
   Trash2,
 } from 'lucide-react'
 
+// Glaze de vidro (efeito espelho) aplicado sobre os cards: um brilho fixo no
+// topo + uma faixa de luz que varre o card periodicamente.
+function MirrorShine() {
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+      <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/12 to-transparent" />
+      <span
+        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        style={{ animation: 'shine-sweep 7s ease-in-out infinite' }}
+      />
+    </div>
+  )
+}
+
+// Blobs animados atrás do conteúdo da página — dão movimento ambiente sem
+// disputar atenção com os cards (que ficam por cima, com fundo opaco).
+function AuroraBackground() {
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]">
+      <div
+        className="absolute left-[-10%] top-[-15%] h-[520px] w-[520px] rounded-full bg-[var(--accent)]/25 blur-3xl"
+        style={{ animation: 'aurora-drift-1 22s ease-in-out infinite' }}
+      />
+      <div
+        className="absolute right-[-12%] top-[10%] h-[480px] w-[480px] rounded-full bg-[var(--chart-purple)]/25 blur-3xl"
+        style={{ animation: 'aurora-drift-2 26s ease-in-out infinite' }}
+      />
+      <div
+        className="absolute bottom-[-15%] left-[20%] h-[460px] w-[460px] rounded-full bg-[var(--chart-pink)]/20 blur-3xl"
+        style={{ animation: 'aurora-drift-3 30s ease-in-out infinite' }}
+      />
+    </div>
+  )
+}
+
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 const INVESTIMENTO_TOTAL_STORAGE_KEY = 'criare-marketing-investimento-total'
 const SIDEBAR_ORIGENS_WIDTH_KEY = 'criare-marketing-sidebar-origens-width'
@@ -258,7 +293,8 @@ extraAoLado?: ReactNode
   const isApresentacao = viewMode === 'apresentacao'
 
  return (
-  <div className="h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
+  <div className="relative h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
+    <MirrorShine />
   <div className="mb-1 flex min-h-[40px] items-center gap-3">
   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)]">
     <Icon
@@ -543,7 +579,8 @@ function RoiPorOrigemCard({
   const maiorRoi = Math.max(...items.map((item) => item.roi), 1)
 
   return (
-    <div className="flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 overflow-hidden shadow-[var(--card-shadow)]">
+    <div className="relative flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 overflow-hidden shadow-[var(--card-shadow)]">
+      <MirrorShine />
       <div className="mb-5 flex shrink-0 items-center justify-between">
         <div>
           <div className={`${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
@@ -766,7 +803,8 @@ function UtmLinksCard({
   )
 
   return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+    <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)]">
+      <MirrorShine />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -1147,7 +1185,8 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
   const atencoes = insights.filter((item) => item.severidade === 'atencao').length
 
   return (
-    <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
+    <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)]">
+      <MirrorShine />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
@@ -1521,12 +1560,15 @@ const insights = buildInsights({
 })
 
 return (
-  <div className="space-y-5">
+  <div className="relative space-y-5">
+    <AuroraBackground />
+
     <div
       className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
       style={{ '--sidebar-origens-w': `${sidebarOrigensWidth}px` } as React.CSSProperties}
     >
-  <aside className="relative flex min-w-0 flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
+  <aside className="relative flex min-w-0 flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
+    <MirrorShine />
     <div
       onMouseDown={handleSidebarResizeStart}
       className="absolute -right-2 top-0 z-10 hidden h-full w-4 cursor-col-resize items-center justify-center xl:flex"
@@ -1669,7 +1711,8 @@ return (
 </aside>
 
       <section className="flex min-w-0 flex-col space-y-4">
-        <div className="grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)] xl:grid-cols-5">
+        <div className="relative grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)] xl:grid-cols-5">
+          <MirrorShine />
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
@@ -1699,7 +1742,8 @@ return (
           </div>
         </div>
 
-        <div className="rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-4 shadow-[var(--card-shadow)]">
+        <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)]">
+          <MirrorShine />
 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 
 <MarketingMetricCard

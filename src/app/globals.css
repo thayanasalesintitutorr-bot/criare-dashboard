@@ -269,3 +269,41 @@ body {
     transform: translateX(260%) skewX(-20deg);
   }
 }
+
+/* Blobs de fundo animados ("aurora") — usados atrás de páginas específicas
+   para dar movimento ambiente sem competir com o conteúdo dos cards. */
+@keyframes aurora-drift-1 {
+  0% {
+    transform: translate(-6%, -8%) scale(1);
+  }
+  50% {
+    transform: translate(8%, 6%) scale(1.15);
+  }
+  100% {
+    transform: translate(-6%, -8%) scale(1);
+  }
+}
+
+@keyframes aurora-drift-2 {
+  0% {
+    transform: translate(10%, -4%) scale(1.05);
+  }
+  50% {
+    transform: translate(-10%, 10%) scale(0.9);
+  }
+  100% {
+    transform: translate(10%, -4%) scale(1.05);
+  }
+}
+
+@keyframes aurora-drift-3 {
+  0% {
+    transform: translate(-4%, 10%) scale(0.95);
+  }
+  50% {
+    transform: translate(6%, -10%) scale(1.1);
+  }
+  100% {
+    transform: translate(-4%, 10%) scale(0.95);
+  }
+}
