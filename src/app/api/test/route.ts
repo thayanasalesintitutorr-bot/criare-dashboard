@@ -726,19 +726,19 @@ const leadsAceitosAnterior =
   totalEntradasAnterior - naoQualificadosAnterior
 
 const leadAAnterior = consultaBasePeriodoAnterior.filter((l) =>
-  normalize(l.tag).includes('LEAD A')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD A')
 ).length
 
 const leadBAnterior = consultaBasePeriodoAnterior.filter((l) =>
-  normalize(l.tag).includes('LEAD B')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD B')
 ).length
 
 const leadCAnterior = consultaBasePeriodoAnterior.filter((l) =>
-  normalize(l.tag).includes('LEAD C')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD C')
 ).length
 
 const leadDAnterior = consultaBasePeriodoAnterior.filter((l) =>
-  normalize(l.tag).includes('LEAD D')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD D')
 ).length
 
 const convertidosAnterior = consultaLeads.filter((l) => {
@@ -757,26 +757,33 @@ const convertidosAnterior = consultaLeads.filter((l) => {
 
     const leadsAceitos = totalEntradas - naoQualificados
 
+    // Status "não qualificado" tem prioridade sobre a tag: um lead que virou
+    // PERDEU [NÃO QUALIFICADO] não conta mais em nenhuma classificação por
+    // tag (A/B/C/D ou primeira mensagem), mesmo mantendo a tag antiga —
+    // senão o mesmo lead aparece em duas colunas do card ao mesmo tempo.
     const leadA = consultaBasePeriodo.filter((l) =>
-  normalize(l.tag).includes('LEAD A')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD A')
 ).length
 
 const leadB = consultaBasePeriodo.filter((l) =>
-  normalize(l.tag).includes('LEAD B')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD B')
 ).length
 
 const leadC = consultaBasePeriodo.filter((l) =>
-  normalize(l.tag).includes('LEAD C')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD C')
 ).length
 
 const leadD = consultaBasePeriodo.filter((l) =>
-  normalize(l.tag).includes('LEAD D')
+  !statusIs(l, 'PERDEU [NÃO QUALIFICADO]') && normalize(l.tag).includes('LEAD D')
 ).length
 
 // Leads com a tag PRIMEIRA MENSAGEM que ainda não avançaram pra nenhuma
 // classificação de lead (A/B/C/D) — se já tem A/B/C/D, não conta mais como
-// "parado na primeira mensagem", já foi qualificado.
+// "parado na primeira mensagem", já foi qualificado. Também exclui quem já
+// virou PERDEU [NÃO QUALIFICADO] pelo mesmo motivo do bloco acima.
 const leadsPrimeiraMensagem = consultaBasePeriodo.filter((l) => {
+  if (statusIs(l, 'PERDEU [NÃO QUALIFICADO]')) return false
+
   const tag = normalize(l.tag)
   const temPrimeiraMensagem = tag.includes('PRIMEIRA MENSAGEM')
   const temLeadGrade =
