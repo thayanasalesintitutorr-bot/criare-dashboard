@@ -30,10 +30,10 @@ import {
 function MirrorShine() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--accent)]/10 to-transparent" />
-      <span className="absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)]" />
+      <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--accent)]/5 to-transparent" />
+      <span className="absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]" />
       <span
-        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent"
+        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--accent)]/12 to-transparent"
         style={{ animation: 'shine-sweep 6s ease-in-out infinite' }}
       />
     </div>
@@ -47,20 +47,16 @@ function AuroraBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]">
       <div
-        className="absolute left-[-8%] top-[-12%] h-[620px] w-[620px] rounded-full bg-[var(--accent)]/45 blur-2xl"
-        style={{ animation: 'aurora-drift-1 20s ease-in-out infinite' }}
+        className="absolute left-[-10%] top-[-14%] h-[560px] w-[560px] rounded-full bg-[var(--accent)]/12 blur-3xl"
+        style={{ animation: 'aurora-drift-1 24s ease-in-out infinite' }}
       />
       <div
-        className="absolute right-[-10%] top-[6%] h-[580px] w-[580px] rounded-full bg-[var(--chart-purple)]/45 blur-2xl"
-        style={{ animation: 'aurora-drift-2 24s ease-in-out infinite' }}
+        className="absolute right-[-12%] top-[8%] h-[520px] w-[520px] rounded-full bg-[var(--chart-purple)]/12 blur-3xl"
+        style={{ animation: 'aurora-drift-2 28s ease-in-out infinite' }}
       />
       <div
-        className="absolute bottom-[-12%] left-[18%] h-[560px] w-[560px] rounded-full bg-[var(--chart-pink)]/40 blur-2xl"
-        style={{ animation: 'aurora-drift-3 28s ease-in-out infinite' }}
-      />
-      <div
-        className="absolute left-[35%] top-[35%] h-[420px] w-[420px] rounded-full bg-[var(--chart-green)]/30 blur-2xl"
-        style={{ animation: 'aurora-drift-2 18s ease-in-out infinite reverse' }}
+        className="absolute bottom-[-14%] left-[22%] h-[500px] w-[500px] rounded-full bg-[var(--chart-pink)]/10 blur-3xl"
+        style={{ animation: 'aurora-drift-3 32s ease-in-out infinite' }}
       />
     </div>
   )
