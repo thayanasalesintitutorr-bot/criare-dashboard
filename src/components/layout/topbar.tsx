@@ -10,8 +10,11 @@ import {
   EyeOff,
   Heart,
   LogOut,
+  Minus,
   Moon,
+  Plus,
   RefreshCw,
+  RotateCcw,
   Search,
   Sun,
   User2,
@@ -20,11 +23,13 @@ import {
   Minimize2,
   ChevronDown,
   ChevronUp,
+  ZoomIn,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
 import { useSessionRole } from '../../store/use-session-role'
+import { useZoom, NIVEIS_ZOOM } from '../../store/use-zoom'
 import { useRouter } from 'next/navigation'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
@@ -105,6 +110,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const { logout } = useAuth()
   const router = useRouter()
   const { role: sessao, fetchRole } = useSessionRole()
+  const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -112,9 +118,11 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [showProfile, setShowProfile] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showZoom, setShowZoom] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
   const compararCalendarRef = useRef<HTMLDivElement>(null)
+  const zoomRef = useRef<HTMLDivElement>(null)
   const [categoriaAberta, setCategoriaAberta] = useState<
     'periodo' | 'segmento' | 'comparacao' | null
   >(null)
@@ -227,6 +235,10 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
       if (notificationRef.current && !notificationRef.current.contains(target)) {
         setShowNotifications(false)
       }
+
+      if (zoomRef.current && !zoomRef.current.contains(target)) {
+        setShowZoom(false)
+      }
     }
 
     document.addEventListener('mousedown', handleClick)
@@ -305,6 +317,60 @@ function parseLocalDate(dateString?: string) {
 >
   {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
 </button>
+
+            <div ref={zoomRef} className="relative hidden tablet:block">
+              <button
+                onClick={() => setShowZoom((v) => !v)}
+                title="Zoom"
+                className={`inline-flex items-center gap-2 rounded-[18px] p-3 transition-colors duration-200 ${
+                  zoomIndice > 0
+                    ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
+                    : 'bg-[var(--card)] hover:bg-[var(--metric-card)]'
+                }`}
+              >
+                <ZoomIn size={18} />
+                {zoomIndice > 0 && (
+                  <span className="text-sm font-bold">{Math.round(NIVEIS_ZOOM[zoomIndice] * 100)}%</span>
+                )}
+              </button>
+
+              {showZoom && (
+                <div className="absolute right-0 top-full z-50 mt-3 flex items-center gap-1 rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-2 shadow-2xl">
+                  <button
+                    onClick={zoomDiminuir}
+                    disabled={zoomIndice === 0}
+                    title="Diminuir"
+                    className="rounded-xl p-2.5 transition-colors hover:bg-[var(--metric-card)] disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <Minus size={16} />
+                  </button>
+
+                  <span className="w-14 text-center text-sm font-bold">
+                    {Math.round(NIVEIS_ZOOM[zoomIndice] * 100)}%
+                  </span>
+
+                  <button
+                    onClick={zoomAumentar}
+                    disabled={zoomIndice === NIVEIS_ZOOM.length - 1}
+                    title="Aumentar"
+                    className="rounded-xl p-2.5 transition-colors hover:bg-[var(--metric-card)] disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <Plus size={16} />
+                  </button>
+
+                  <div className="mx-1 h-6 w-px bg-[var(--border)]" />
+
+                  <button
+                    onClick={zoomResetar}
+                    disabled={zoomIndice === 0}
+                    title="Redefinir zoom"
+                    className="rounded-xl p-2.5 transition-colors hover:bg-[var(--metric-card)] disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <RotateCcw size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button className="hidden rounded-[18px] bg-[var(--card)] p-3 transition-colors duration-200 hover:bg-[var(--metric-card)] mobile-h:inline-flex">
               <Search size={18} />
