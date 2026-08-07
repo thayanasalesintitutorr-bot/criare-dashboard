@@ -1313,7 +1313,7 @@ const ticketAnteriorVendas =
 
     const propostasFechadasPercent = safePercent(
       propostasFechadasLeads.length,
-      propostasEnviadasLeads.length
+      propostasEnviadas
     )
     const metaValorTotalVendas = getMetaVendas(periodo, range.start, range.end)
 
