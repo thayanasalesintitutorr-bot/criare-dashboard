@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 // Não usa persist de propósito: ao atualizar a página o zoom deve voltar
 // para 100% (pedido explícito do usuário), então o estado fica só em memória.
-export const NIVEIS_ZOOM = [1, 1.1, 1.2, 1.35, 1.5] as const
+export const NIVEIS_ZOOM = [1, 1.1, 1.2, 1.35, 1.5, 1.75, 2] as const
 
 type ZoomState = {
   indice: number

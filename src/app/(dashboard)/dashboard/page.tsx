@@ -1209,13 +1209,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   </h3>
 </div>
 
-           <div
-  className={`grid gap-2 ${
-    viewMode === 'apresentacao' || viewMode === 'iphone'
-  ? 'grid-cols-1'
-  : 'grid-cols-1 tablet:grid-cols-3'
-  }`}
->
+           <div className="grid grid-cols-1 gap-2">
             <div className={`space-y-1 ${metricCardBg()}`}>
   <SimpleMetric
     label="Quantidade total de vendas"
