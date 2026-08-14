@@ -237,7 +237,7 @@ const res = await fetch(url, {
 
   return (
       <div className="space-y-5">
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 @md:grid-cols-2 @xl:grid-cols-4">
   <CardMini
   icon={Target}
   title="Orçamentos entregues"
@@ -281,7 +281,7 @@ const res = await fetch(url, {
 />
 </div>
 
-<div className="grid gap-5 md:grid-cols-2">
+<div className="grid gap-5 @md:grid-cols-2">
   <CardMeta
   icon={CircleDollarSign}
   title="Valor vendido"
@@ -308,7 +308,7 @@ const res = await fetch(url, {
 
        
 
-        <div className="grid gap-5">
+        <div className="grid grid-cols-1 gap-5">
 
 
           <section className="flex h-full flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-5 transition-colors duration-200 hover:border-[var(--accent)]/30">
@@ -404,7 +404,7 @@ const res = await fetch(url, {
       Nenhuma venda por médico no período.
     </div>
   ) : (
-   <div className="grid gap-4">
+   <div className="grid grid-cols-1 gap-4">
       {vendasPorMedico.map((medico, index) => {
         const produtosDetalhados = (medico.produtos || []).map(
           (item: { produto: string; qtd: number; valor: number }) => ({
@@ -443,7 +443,7 @@ const res = await fetch(url, {
             className="rounded-[18px] border border-[color:var(--border)] bg-[var(--background)] p-4 transition-colors duration-200 hover:border-[var(--accent)]/30"
           >
             <div className="mb-3 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-[color:var(--accent)]/40 bg-[var(--accent)]/10">
                   {getFotoMedico(medico.nome) ? (
                     <img
@@ -458,7 +458,7 @@ const res = await fetch(url, {
                   )}
                 </div>
 
-                <div>
+                <div className="min-w-0">
                   {isTop && (
                     <span className={`mb-2 inline-flex items-center gap-1 rounded-full bg-[var(--accent)]/15 px-2 py-0.5 ${isApresentacao ? 'text-[14px]' : 'text-[10px]'} font-black uppercase tracking-[0.12em] text-[var(--accent)]`}>
                       <Medal size={isApresentacao ? 16 : 12} strokeWidth={2.5} />
@@ -506,7 +506,7 @@ const res = await fetch(url, {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 tablet:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 @tablet:grid-cols-4">
               <MiniInfo label="Propostas enviadas" value={medico.propostasEnviadas || 0} />
               <MiniInfo
                 label="Propostas fechadas"

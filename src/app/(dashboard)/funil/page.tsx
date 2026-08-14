@@ -430,7 +430,7 @@ const ticketMedioConsultaComReabord =
   </div>
   </div>
 
-  <div className="mt-6 grid gap-3 md:grid-cols-4">
+  <div className="mt-6 grid gap-3 @md:grid-cols-4">
 <MetricCard
   icon={TrendingUp}
   label="Atendimentos 1ª vez"
@@ -474,8 +474,8 @@ const ticketMedioConsultaComReabord =
     />
   </div>
 
-  <div className="mt-3 grid items-start gap-3 xl:grid-cols-12">
-  <div ref={colunaGraficosRef} className="min-w-0 space-y-3 xl:col-span-8">
+  <div className="mt-3 grid items-start gap-3 @xl:grid-cols-12">
+  <div ref={colunaGraficosRef} className="min-w-0 space-y-3 @xl:col-span-8">
 
     <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <div className="mb-3 flex items-center justify-between">
@@ -598,7 +598,7 @@ const ticketMedioConsultaComReabord =
 
   </div>
 
-<div className="flex min-h-0 min-w-0 flex-col gap-3 xl:col-span-4">
+<div className="flex min-h-0 min-w-0 flex-col gap-3 @xl:col-span-4">
 
    <div
      className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4 xl:h-[var(--altura-coluna-graficos)]"
@@ -650,7 +650,7 @@ const ticketMedioConsultaComReabord =
   </div>
 </div>
 
-<div className="mt-3 grid grid-cols-2 gap-3 tablet:grid-cols-4">
+<div className="mt-3 grid grid-cols-2 gap-3 @tablet:grid-cols-4">
   <div className="rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
     <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-black uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>
       Finalizados
@@ -719,7 +719,7 @@ const ticketMedioConsultaComReabord =
     <h2 className={`${isApresentacao ? 'text-[36px]' : 'text-[22px]'} font-black text-[var(--foreground)]`}>Consultas por médico</h2>
   </div>
 
-  <div className="grid gap-6">
+  <div className="grid grid-cols-1 gap-6">
     {consultaPorMedico.map((medico) => {
   const infoMedico = getInfoMedico(medico.medico)
 
@@ -768,7 +768,7 @@ const ticketProcedimentosMedico =
   return (
       <div
   key={medico.medico}
-  className={`w-full rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)] ${
+  className={`w-full min-w-0 rounded-[22px] border border-[color:var(--border)] bg-[var(--card)] shadow-[var(--card-shadow)] ${
   isImac ? 'p-3' : isApresentacao ? 'p-4' : 'p-4'
 }`}
 >
@@ -793,8 +793,8 @@ const ticketProcedimentosMedico =
 )}
   </div>
 
- <div className={`flex flex-1 gap-4 ${viewMode === 'iphone' ? 'flex-col' : 'items-center justify-between'}`}>
-    <div className="flex flex-col justify-center">
+ <div className={`flex flex-1 min-w-0 gap-4 ${viewMode === 'iphone' ? 'flex-col' : 'items-center justify-between'}`}>
+    <div className="min-w-0 flex flex-col justify-center">
   <h3 className={`${isImac ? 'text-[17px]' : isApresentacao ? 'text-[20px]' : 'text-[16px]'} font-black tracking-[-0.04em] text-[var(--foreground)]`}>
     {medico.medico}
   </h3>
@@ -852,7 +852,7 @@ const ticketProcedimentosMedico =
     AGENDA
   </h4>
 
-  <div className={isImac ? 'grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5' : isApresentacao ? 'grid grid-cols-5 gap-2' : 'grid grid-cols-2 gap-2'}>
+  <div className={isImac ? 'grid grid-cols-2 gap-3 @sm:grid-cols-3 @lg:grid-cols-5' : isApresentacao ? 'grid grid-cols-5 gap-2' : 'grid grid-cols-2 gap-2'}>
     <MetricMini
       label="Atendimentos"
       value={medico.atendimentos || 0}
@@ -903,8 +903,8 @@ const ticketProcedimentosMedico =
       className={`mt-3 ${
         isImac
           ? medico.medico?.toUpperCase().includes('BRENO')
-            ? 'grid grid-cols-1 gap-3 sm:grid-cols-2'
-            : 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
+            ? 'grid grid-cols-1 gap-3 @sm:grid-cols-2'
+            : 'grid grid-cols-1 gap-3 @sm:grid-cols-2 @lg:grid-cols-3'
           : isApresentacao
             ? 'grid grid-cols-3 gap-2'
             : 'grid grid-cols-1 gap-2'
@@ -1006,10 +1006,10 @@ FINANCEIRO
 </h4>
 
 
-  <div className={isImac ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'grid grid-cols-1 gap-4'}>
+  <div className={isImac ? 'grid grid-cols-1 gap-4 @xl:grid-cols-2' : 'grid grid-cols-1 gap-4'}>
     <div>
       <p className={`mb-2 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>Consultas</p>
-      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 @sm:grid-cols-3'}>
         <MetricCard icon={TrendingUp} label="Qtd. consultas" value={consultasGanhasMedico} description="" tone="green" centered />
         <MetricCard icon={CircleDollarSign} label="Venda consultas" value={formatMoney(faturamentoMedico)} description="" tone="green" centered />
         <MetricCard icon={Ticket} label="Ticket consultas" value={formatMoney(ticketMedioMedico)} description="" tone="green" empty={consultasGanhasMedico === 0} centered />
@@ -1018,7 +1018,7 @@ FINANCEIRO
 
     <div className={isImac ? 'border-t border-[color:var(--border)] pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0' : 'border-t border-[color:var(--border)] pt-4'}>
       <p className={`mb-2 ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]`}>Procedimentos</p>
-      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 sm:grid-cols-3'}>
+      <div className={viewMode === 'iphone' ? 'grid grid-cols-1 gap-2' : 'grid grid-cols-1 gap-2 @sm:grid-cols-3'}>
         <MetricCard icon={Stethoscope} label="Qtd. procedimentos" value={quantidadeProcedimentosVendidos} description="" tone="blue" centered />
         <MetricCard icon={CircleDollarSign} label="Venda procedimentos" value={formatMoney(valorProcedimentosMedico)} description="" tone="blue" centered />
         <MetricCard icon={Ticket} label="Ticket procedimentos" value={formatMoney(ticketProcedimentosMedico)} description="" tone="blue" empty={quantidadeProcedimentosVendidos === 0} centered />

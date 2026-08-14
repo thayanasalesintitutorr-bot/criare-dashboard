@@ -33,8 +33,11 @@ export function AppShell({ children }: { children: ReactNode }) {
                   conteúdo primeiro reflui como se a tela fosse menor (cards
                   empilham, grids reduzem colunas) e depois é escalado de volta
                   para caber na largura real — cresce fonte, borda, barra,
-                  tudo junto, na mesma proporção. */}
+                  tudo junto, na mesma proporção. @container faz os grids que
+                  usam variantes @sm/@md/@xl reagirem a essa largura reduzida
+                  (não à largura real da tela), então eles também empilham. */}
               <div
+                className="@container"
                 style={
                   escala === 1
                     ? undefined

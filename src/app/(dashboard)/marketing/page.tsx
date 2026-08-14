@@ -841,7 +841,7 @@ function UtmLinksCard({
 
       <form
         onSubmit={criarLink}
-        className="mb-5 grid gap-2 rounded-[18px] bg-[var(--metric-card)] p-3 md:grid-cols-4"
+        className="mb-5 grid gap-2 rounded-[18px] bg-[var(--metric-card)] p-3 @md:grid-cols-4"
       >
         <input
           value={form.nome}
@@ -849,7 +849,7 @@ function UtmLinksCard({
             setForm((atual) => ({ ...atual, nome: e.target.value }))
           }
           placeholder="Nome (ex: Bio Instagram - Promo Botox)"
-          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-2"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none @md:col-span-2"
         />
 
         <input
@@ -858,7 +858,7 @@ function UtmLinksCard({
             setForm((atual) => ({ ...atual, destinoUrl: e.target.value }))
           }
           placeholder="URL de destino"
-          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-2"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none @md:col-span-2"
         />
 
         <input
@@ -903,11 +903,11 @@ function UtmLinksCard({
             setForm((atual) => ({ ...atual, webhookUrl: e.target.value }))
           }
           placeholder="Webhook (opcional) — recebe um POST a cada clique"
-          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none md:col-span-4"
+          className="rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none @md:col-span-4"
         />
 
         {erro && (
-          <div className="text-xs font-bold text-[var(--danger)] md:col-span-4">
+          <div className="text-xs font-bold text-[var(--danger)] @md:col-span-4">
             {erro}
           </div>
         )}
@@ -915,7 +915,7 @@ function UtmLinksCard({
         <button
           type="submit"
           disabled={criando}
-          className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--background)] transition disabled:opacity-50 md:col-span-4"
+          className="rounded-xl bg-[var(--accent)] px-4 py-2 text-xs font-black text-[var(--background)] transition disabled:opacity-50 @md:col-span-4"
         >
           {criando ? 'Criando...' : 'Criar link de rastreamento'}
         </button>
@@ -1241,7 +1241,7 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
 
             <div className="min-w-0">
               <div
-                className={`${isApresentacao ? 'text-[16px]' : 'text-xs'} font-black uppercase tracking-wide ${
+                className={`break-words ${isApresentacao ? 'text-[16px]' : 'text-xs'} font-black uppercase tracking-wide ${
                   insight.severidade === 'critico'
                     ? 'text-[var(--danger)]'
                     : insight.severidade === 'atencao'
@@ -1251,7 +1251,7 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
               >
                 {insight.titulo}
               </div>
-              <div className={`mt-0.5 ${isApresentacao ? 'text-[15px]' : 'text-xs'} font-semibold text-[var(--muted-foreground)]`}>
+              <div className={`mt-0.5 break-words ${isApresentacao ? 'text-[15px]' : 'text-xs'} font-semibold text-[var(--muted-foreground)]`}>
                 {insight.descricao}
               </div>
             </div>
@@ -1566,7 +1566,7 @@ return (
     <AuroraBackground />
 
     <div
-      className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
+      className="grid min-w-0 grid-cols-1 gap-5 @xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
       style={{ '--sidebar-origens-w': `${sidebarOrigensWidth}px` } as React.CSSProperties}
     >
   <aside className="relative flex min-w-0 flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
@@ -1713,7 +1713,7 @@ return (
 </aside>
 
       <section className="flex min-w-0 flex-col space-y-4">
-        <div className="relative grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)] xl:grid-cols-5">
+        <div className="relative grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)] @xl:grid-cols-5">
           <MirrorShine />
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
@@ -1746,7 +1746,7 @@ return (
 
         <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)]">
           <MirrorShine />
-<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+<div className="grid gap-3 @md:grid-cols-2 @xl:grid-cols-4">
 
 <MarketingMetricCard
           title="Entrada"
@@ -1834,7 +1834,7 @@ return (
         </MarketingMetricCard>
 </div>
 
-<div className="mt-3 grid gap-3 md:grid-cols-2">
+<div className="mt-3 grid gap-3 @md:grid-cols-2">
 
        <MarketingMetricCard
   title="Consultas Ganhas"

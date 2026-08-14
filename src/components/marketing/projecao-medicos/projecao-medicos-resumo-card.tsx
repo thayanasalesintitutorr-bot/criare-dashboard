@@ -672,7 +672,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
           <div
             className={
               isWide
-                ? `grid min-w-0 flex-1 items-stretch grid-cols-1 tablet:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`
+                ? `grid min-w-0 flex-1 items-stretch grid-cols-1 @tablet:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`
                 : 'flex-1 space-y-2.5'
             }
           >
@@ -684,7 +684,7 @@ function SlideMedicoConteudo({ slide, nomeMes }: { slide: SlideMedico; nomeMes: 
       </div>
 
       {slide.temDados && (desafio || destaque) && (
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isApresentacao ? 'gap-3.5' : 'gap-2.5'}`}>
+        <div className={`grid grid-cols-1 @sm:grid-cols-2 ${isApresentacao ? 'gap-3.5' : 'gap-2.5'}`}>
           {destaque && <InsightTile tipo="destaque" texto={destaque} isApresentacao={isApresentacao} />}
           {desafio && <InsightTile tipo="desafio" texto={desafio} isApresentacao={isApresentacao} />}
         </div>
@@ -752,7 +752,7 @@ function SlideGeralConteudo({ slides, nomeMes }: { slides: Slide[]; nomeMes: str
         </span>
       </div>
 
-      <div className={`grid grid-cols-1 sm:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`}>
+      <div className={`grid grid-cols-1 @sm:grid-cols-3 ${isApresentacao ? 'gap-4' : 'gap-3'}`}>
         {totais.map((item) => (
           <div
             key={item.chave}

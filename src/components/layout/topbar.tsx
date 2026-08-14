@@ -481,7 +481,7 @@ function parseLocalDate(dateString?: string) {
 </div>
 
 <div className="rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm">
-    <div className="grid grid-cols-1 gap-3 mobile-h:grid-cols-2 tablet:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 @mobile-h:grid-cols-2 @tablet:grid-cols-3">
       <div>
         <FiltroResumoCard
           icon={<CalendarDays size={15} className="text-[var(--accent)]" />}

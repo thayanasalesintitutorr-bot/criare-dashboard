@@ -823,7 +823,7 @@ export default function DashboardPage() {
   })
   if (loading) {
     return (
-      <div className="grid gap-6 xl:grid-cols-4">
+      <div className="grid gap-6 @xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className={`h-[440px] animate-pulse ${cardBg()}`} />
         ))}
@@ -872,7 +872,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   className={`grid gap-3 ${
     viewMode === 'apresentacao' || viewMode === 'iphone'
   ? 'grid-cols-1'
-  : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4'
+  : 'grid-cols-1 @md:grid-cols-2 @xl:grid-cols-4'
   }`}
 >
           <GroupCard title="Marketing / Topo de Funil" icon={<Funnel size={26} />}>

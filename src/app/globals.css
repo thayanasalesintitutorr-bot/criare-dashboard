@@ -10,6 +10,15 @@
   --breakpoint-tablet: 834px;
   --breakpoint-tablet-h: 1024px;
   --breakpoint-laptop: 1440px;
+
+  /* Mesmos valores, como container queries (@tablet:, @laptop: etc.) —
+     usadas dentro do wrapper com zoom (@container), que reage à largura
+     efetiva do conteúdo em vez da largura real da tela. */
+  --container-mobile: 480px;
+  --container-mobile-h: 768px;
+  --container-tablet: 834px;
+  --container-tablet-h: 1024px;
+  --container-laptop: 1440px;
 }
 
 :root {

@@ -360,7 +360,7 @@ export default function ConversasPage() {
 
   return (
     <>
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mb-6 grid grid-cols-1 gap-4 @sm:grid-cols-2 @xl:grid-cols-5">
         <KpiCard
           title="Leads no período"
           value={kpis?.funil.total_leads ?? '—'}
@@ -419,7 +419,7 @@ export default function ConversasPage() {
             <h2 className="section-title">Insights automáticos</h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2.5 @sm:grid-cols-2 @xl:grid-cols-3">
             {insights.map((insight, i) => (
               <InsightTile key={i} insight={insight} />
             ))}
@@ -427,7 +427,7 @@ export default function ConversasPage() {
         </section>
       )}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mb-6 grid grid-cols-1 gap-4 @xl:grid-cols-2">
         <section className="dashboard-section">
           <h2 className="section-title mb-4">Leads e agendamentos por campanha</h2>
           <div className="h-72">
@@ -482,7 +482,7 @@ export default function ConversasPage() {
           <h2 className="section-title">Comportamento dos leads</h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-4">
           <div>
             <p className="metric-label mb-2">Canal de origem</p>
             <div className="h-40">
@@ -581,7 +581,7 @@ export default function ConversasPage() {
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2.5 @sm:grid-cols-2 @xl:grid-cols-3">
               {amostraRecente.motivos.map((m) => (
                 <div key={m.topico} className="subtle-card flex items-center justify-between">
                   <span className="text-sm">{m.topico}</span>
@@ -611,7 +611,7 @@ export default function ConversasPage() {
           </p>
         ) : (
           <>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @xl:grid-cols-4">
               {amostraRecente.compreensao.exemplosConfusao.map((ex, i) => (
                 <button
                   key={i}
@@ -640,7 +640,7 @@ export default function ConversasPage() {
         )}
       </section>
 
-      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="mb-6 grid grid-cols-1 gap-4 @xl:grid-cols-3">
         <section className="dashboard-section">
           <h2 className="section-title mb-4">Objeções mais comuns</h2>
           {(kpis?.objecoes.ranking ?? []).filter((o) => o.objecao).length === 0 ? (
@@ -716,7 +716,7 @@ export default function ConversasPage() {
       {(kpis?.qualidade.piores ?? []).length > 0 && (
         <section className="dashboard-section mb-6">
           <h2 className="section-title mb-4">Conversas com pior avaliação</h2>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @xl:grid-cols-3">
             {(kpis?.qualidade.piores ?? []).map((p) => (
               <div key={p.contact_id} className="subtle-card">
                 <div className="mb-1 flex items-center justify-between">

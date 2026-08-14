@@ -64,7 +64,7 @@ function construirSerieEvolucao(meses: MesProjecao[], chave: string) {
   }))
 }
 
-const GRID_3 = 'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3'
+const GRID_3 = 'grid grid-cols-1 gap-3 @sm:grid-cols-2 @lg:grid-cols-3'
 
 type ProjecaoPorMedico = Record<MedicoChave, { nome: string; meses: MesProjecao[] }>
 
