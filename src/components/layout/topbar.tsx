@@ -31,7 +31,7 @@ import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
 import { useSessionRole } from '../../store/use-session-role'
 import { useZoom, NIVEIS_ZOOM } from '../../store/use-zoom'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
 import { ptBR } from 'date-fns/locale'
@@ -111,6 +111,8 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
   const { logout } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
+  const isProtocolosPage = pathname === '/conversas'
   const { role: sessao, fetchRole } = useSessionRole()
   const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
   const zoomEscala = NIVEIS_ZOOM[zoomIndice]
@@ -334,12 +336,25 @@ function parseLocalDate(dateString?: string) {
   return (
     <header className="z-30 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="flex flex-col gap-3 px-4 pt-4 pb-1 sm:px-6 md:px-8">
-        <div className="flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6">
+        <div
+          className={
+            isProtocolosPage
+              ? 'grid grid-cols-1 items-center gap-3 tablet:grid-cols-[1fr_auto_1fr] tablet:gap-6'
+              : 'flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6'
+          }
+        >
 
-          <div className="flex-1 space-y-4">
-            <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
-</div>
-<div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
+          {isProtocolosPage ? (
+            <>
+              <div className="hidden tablet:block" />
+              <h1 className="text-center text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
+            </>
+          ) : (
+            <div className="flex-1 space-y-4">
+              <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
+            </div>
+          )}
+<div className={`flex shrink-0 flex-wrap items-center gap-2 sm:gap-3 ${isProtocolosPage ? 'justify-center tablet:justify-end' : ''}`}>
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="inline-flex items-center gap-3 rounded-[18px] bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
@@ -536,6 +551,7 @@ function parseLocalDate(dateString?: string) {
   {statusIndicator}
 </div>
 
+{!isProtocolosPage && (
 <div
   className="@container rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm"
   style={
@@ -973,6 +989,7 @@ function parseLocalDate(dateString?: string) {
 
     </div>
 </div>
+)}
           </div>
 
     </header>

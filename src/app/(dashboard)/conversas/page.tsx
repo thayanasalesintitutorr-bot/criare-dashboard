@@ -250,6 +250,12 @@ export default function ProtocolosPage() {
     [pacientes]
   )
 
+  const protocolosParaExibirProdutos = useMemo(
+    () =>
+      filtroProtocolo ? protocolos.filter((p) => p.id === filtroProtocolo) : protocolos.filter((p) => p.ativo),
+    [protocolos, filtroProtocolo]
+  )
+
   const kpis = useMemo(() => {
     const hoje = hojeISO()
     const ativos = pacientes.filter((p) => p.ativo)
@@ -453,6 +459,33 @@ export default function ProtocolosPage() {
             ))}
           </select>
         </div>
+
+        {protocolosParaExibirProdutos.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {protocolosParaExibirProdutos.map((p) => (
+              <div
+                key={p.id}
+                className="flex flex-wrap items-center gap-1.5 rounded-xl bg-[var(--metric-card)] px-3 py-1.5"
+              >
+                <span className="text-[10px] font-black text-[var(--foreground)]">{p.nome}:</span>
+                {p.produtos_kommo.length > 0 ? (
+                  p.produtos_kommo.map((produto) => (
+                    <span
+                      key={produto}
+                      className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--accent)]"
+                    >
+                      {produto}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-[10px] font-semibold text-[var(--muted-foreground)]">
+                    sem produtos vinculados
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {erro && (
           <p className="mb-3 rounded-xl bg-[var(--danger)]/10 px-3 py-2 text-xs font-bold text-[var(--danger)]">
