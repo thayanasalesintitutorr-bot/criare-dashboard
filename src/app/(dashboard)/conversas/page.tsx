@@ -430,11 +430,13 @@ export default function ProtocolosPage() {
             className={inputClass}
           >
             <option value="">Todos os protocolos</option>
-            {protocolos.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.nome}
-              </option>
-            ))}
+            {protocolos
+              .filter((p) => p.ativo)
+              .map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome}
+                </option>
+              ))}
           </select>
 
           <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className={inputClass}>
@@ -1158,11 +1160,13 @@ function ModalNovoPaciente({
           <Campo label="Protocolo">
             <select value={protocoloId} onChange={(e) => setProtocoloId(e.target.value)} className={inputClass}>
               <option value="">Selecione um protocolo</option>
-              {protocolos.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nome}
-                </option>
-              ))}
+              {protocolos
+                .filter((p) => p.ativo)
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nome}
+                  </option>
+                ))}
             </select>
           </Campo>
           <Campo label="Médico">
