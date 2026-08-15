@@ -1,859 +1,1155 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
-import {
-  MessageSquare,
-  CalendarCheck,
-  Timer,
-  Brain,
+  Users,
+  CalendarClock,
   AlertTriangle,
+  Clock,
+  TrendingUp,
+  Lock,
+  Settings2,
+  UserPlus,
   X,
+  Plus,
+  Trash2,
+  Check,
   Sparkles,
-  TrendingDown,
-  Activity,
-  MessageCircleQuestion,
+  Loader2,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
-import { useFilters } from '@/store/use-filters'
-import { KpiCard } from '@/components/dashboard/kpi-card'
 
-type CampanhaItem = {
-  campanha: string
-  leads: number
-  agendados: number
-  vendidos: number
+// ---------- Tipos ----------
+
+type Protocolo = {
+  id: string
+  nome: string
+  produtos_kommo: string[]
+  duracao_semanas: number
+  cor: string | null
+  ativo: boolean
 }
 
-type NomeQtd = { [key: string]: string | number }
+type ChecklistItem = { item: string; status: 'pendente' | 'concluido' }
+type Observacao = { texto: string; criado_em: string }
 
-type ConversaItem = {
-  lead_id: string
-  contact_id: string
-  name_lead: string | null
-  campanha: string | null
-  anuncio: string | null
-  queixas: string | null
-  objecao: string | null
-  status: string | null
-  resultado_conversa: string | null
-  agendou: boolean | null
-  vendeu: boolean | null
-  msgs: number | null
-  ultima_atividade: string | null
-  aguardando: boolean
-  nota: number | null
-  resumo_qualidade: string | null
+type PacienteProtocolo = {
+  id: string
+  nome_paciente: string
+  protocolo_id: string | null
+  protocolo: { id: string; nome: string; duracao_semanas: number; cor: string | null } | null
+  medico: string | null
+  kommo_lead_id: number | null
+  data_inicio: string | null
+  semana_atual: number
+  status: string
+  adesao_percent: number | null
+  ultimo_contato: string | null
+  proxima_acao: string | null
+  proxima_acao_responsavel: string | null
+  proxima_acao_prazo: string | null
+  proxima_acao_prioridade: string | null
+  saldo_contratado: number | null
+  saldo_realizado: number | null
+  checklist: ChecklistItem[]
+  observacoes: Observacao[]
+  ativo: boolean
+  atualizado_em: string
 }
 
-type TranscriptMsg = { quem: string; conteudo: string; criado_em: string }
+type VendaPendente = {
+  kommoLeadId: number
+  nomePaciente: string
+  medico: string | null
+  produto: string | null
+  valor: number | string | null
+  fechadoEm: string | null
+  protocoloId: string | null
+  protocoloNome: string | null
+}
 
-type ApiResponse = {
-  ok: boolean
-  kpis?: {
-    funil: {
-      total_leads: number
-      agendados: number
-      vendidos: number
-      taxa_agendamento: number
-      taxa_venda: number
-      agendamento_confiavel: boolean
-      por_campanha: CampanhaItem[]
-      por_anuncio: NomeQtd[]
-      por_canal: NomeQtd[]
-      por_queixa: NomeQtd[]
-    }
-    operacao: {
-      total_conversas: number
-      msgs_por_conversa: number | null
-      aguardando_resposta: number
-      aguardando_resposta_amostra: number
-      evolucao_diaria: { dia: string; leads: number }[]
-    }
-    comportamento: {
-      por_canal: { channel: string; leads: number }[]
-      por_status: { status: string; quantidade: number }[]
-      distribuicao_mensagens: { faixa: string; quantidade: number }[]
-      por_dia_semana: { dia: string; leads: number }[]
-    }
-    amostraRecente: {
-      conversasAnalisadas: number
-      mensagensAnalisadas: number
-      motivos: { topico: string; ocorrencias: number }[]
-      tempoMedioEntreMensagensSeg: number | null
-      compreensao: {
-        sinaisPositivos: number
-        sinaisConfusao: number
-        nota: number | null
-        exemplosConfusao: { contactId: string; nomeLead: string | null; trecho: string; criadoEm: string }[]
-      }
-    }
-    objecoes: {
-      ranking: { objecao: string; ocorrencias: number }[]
-      resultados: { resultado_conversa: string; ocorrencias: number }[]
-    }
-    qualidade: {
-      avaliadas: number
-      nota_media: number | null
-      convertidas_pct: number
-      criterios_media: Record<string, number>
-      piores: {
-        contact_id: number
-        name_lead: string | null
-        nota: number
-        resumo: string | null
-        pontos_melhoria: string | null
-      }[]
-    }
+const STATUS_OPCOES: { value: string; label: string }[] = [
+  { value: 'onboarding', label: 'Onboarding' },
+  { value: 'no_prazo', label: 'No prazo' },
+  { value: 'atrasado', label: 'Atrasado' },
+  { value: 'critico', label: 'Crítico' },
+  { value: 'finalizado', label: 'Finalizado' },
+]
+
+const PRIORIDADE_OPCOES = [
+  { value: 'baixa', label: 'Baixa' },
+  { value: 'media', label: 'Média' },
+  { value: 'alta', label: 'Alta' },
+]
+
+function statusInfo(status: string) {
+  switch (status) {
+    case 'no_prazo':
+      return { label: 'No prazo', className: 'bg-[var(--success)]/10 text-[var(--success)]' }
+    case 'atrasado':
+      return { label: 'Atrasado', className: 'bg-[var(--warning)]/10 text-[var(--warning)]' }
+    case 'critico':
+      return { label: 'Crítico', className: 'bg-[var(--danger)]/10 text-[var(--danger)]' }
+    case 'finalizado':
+      return { label: 'Finalizado', className: 'bg-[var(--muted-foreground)]/10 text-[var(--muted-foreground)]' }
+    default:
+      return { label: 'Onboarding', className: 'bg-[var(--accent)]/10 text-[var(--accent)]' }
   }
-  conversas?: ConversaItem[]
 }
 
-function fmtTempo(seg: number | null) {
-  if (seg === null || seg === undefined) return '—'
-  if (seg < 60) return `${Math.round(seg)}s`
-  return `${Math.round(seg / 60)}min`
-}
-
-function fmtData(iso: string | null) {
+function formatDate(iso: string | null) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  const data = new Date(`${iso}T00:00:00`)
+  if (Number.isNaN(data.getTime())) return '—'
+  return data.toLocaleDateString('pt-BR')
 }
 
-type Insight = { tipo: 'positivo' | 'atencao'; texto: string }
+function diasDesde(iso: string | null) {
+  if (!iso) return null
+  const data = new Date(`${iso}T00:00:00`)
+  if (Number.isNaN(data.getTime())) return null
+  return Math.floor((Date.now() - data.getTime()) / (1000 * 60 * 60 * 24))
+}
 
-// Insights automáticos derivados dos mesmos KPIs já carregados — sem chamada extra ao banco.
-// Cada regra só entra na lista quando há dado suficiente para sustentar a leitura.
-function construirInsights(kpis: NonNullable<ApiResponse['kpis']> | undefined): Insight[] {
-  if (!kpis) return []
+function hojeISO() {
+  return new Date().toISOString().slice(0, 10)
+}
 
-  const insights: Insight[] = []
-  const { operacao, funil, qualidade, comportamento, amostraRecente } = kpis
+function formatMoney(v: number | string | null) {
+  const n = Number(v || 0)
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+}
 
-  if (operacao.total_conversas > 0) {
-    if (operacao.aguardando_resposta === 0) {
-      insights.push({
-        tipo: 'positivo',
-        texto: `Nenhuma conversa da amostra (${operacao.aguardando_resposta_amostra}) ficou sem resposta depois da última mensagem do paciente.`,
+const inputClass =
+  'w-full rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]'
+
+// ---------- Página ----------
+
+export default function ProtocolosPage() {
+  useSetPageHeader('Protocolos')
+
+  const [gate, setGate] = useState<'checking' | 'locked' | 'unlocked'>('checking')
+  const [senhaGate, setSenhaGate] = useState('')
+  const [gateErro, setGateErro] = useState('')
+  const [gateCarregando, setGateCarregando] = useState(false)
+
+  const [protocolos, setProtocolos] = useState<Protocolo[]>([])
+  const [pacientes, setPacientes] = useState<PacienteProtocolo[]>([])
+  const [vendasPendentes, setVendasPendentes] = useState<VendaPendente[]>([])
+  const [carregando, setCarregando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  const [filtroMedico, setFiltroMedico] = useState('')
+  const [filtroProtocolo, setFiltroProtocolo] = useState('')
+  const [filtroStatus, setFiltroStatus] = useState('')
+  const [filtroResponsavel, setFiltroResponsavel] = useState('')
+
+  const [pacienteSelecionado, setPacienteSelecionado] = useState<PacienteProtocolo | null>(null)
+  const [showGerenciarProtocolos, setShowGerenciarProtocolos] = useState(false)
+  const [showNovoPaciente, setShowNovoPaciente] = useState(false)
+  const [prefilNovoPaciente, setPrefilNovoPaciente] = useState<VendaPendente | null>(null)
+
+  const checarGate = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/protocolos-gate')
+      const json = await res.json().catch(() => ({}))
+      setGate(json.unlocked ? 'unlocked' : 'locked')
+    } catch {
+      setGate('locked')
+    }
+  }, [])
+
+  useEffect(() => {
+    checarGate()
+  }, [checarGate])
+
+  async function enviarSenhaGate() {
+    setGateErro('')
+    setGateCarregando(true)
+    try {
+      const res = await fetch('/api/auth/protocolos-gate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: senhaGate }),
       })
-    } else {
-      const pct = Math.round((operacao.aguardando_resposta / operacao.aguardando_resposta_amostra) * 100)
-      insights.push({
-        tipo: 'atencao',
-        texto: `${operacao.aguardando_resposta} de ${operacao.aguardando_resposta_amostra} conversas (${pct}%) têm a última mensagem do paciente sem resposta ainda.`,
-      })
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setGateErro(json.error || 'Senha incorreta')
+        setGateCarregando(false)
+        return
+      }
+      setSenhaGate('')
+      setGate('unlocked')
+      setGateCarregando(false)
+    } catch {
+      setGateErro('Não foi possível verificar agora. Tente novamente.')
+      setGateCarregando(false)
     }
   }
 
-  if (amostraRecente.tempoMedioEntreMensagensSeg !== null) {
-    if (amostraRecente.tempoMedioEntreMensagensSeg <= 30) {
-      insights.push({
-        tipo: 'positivo',
-        texto: `Tempo médio entre mensagens de ${fmtTempo(amostraRecente.tempoMedioEntreMensagensSeg)} na amostra recente — ritmo bem ágil.`,
-      })
-    } else if (amostraRecente.tempoMedioEntreMensagensSeg > 300) {
-      insights.push({
-        tipo: 'atencao',
-        texto: `Tempo médio entre mensagens de ${fmtTempo(amostraRecente.tempoMedioEntreMensagensSeg)} na amostra recente — vale revisar o ritmo de atendimento.`,
-      })
-    }
-  }
+  const fetchProtocolos = useCallback(async () => {
+    const res = await fetch('/api/protocolos')
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) setProtocolos(json.protocolos)
+  }, [])
 
-  const totalStatus = comportamento.por_status.reduce((acc, s) => acc + s.quantidade, 0)
-  const followUpSemResposta = comportamento.por_status.find((s) =>
-    s.status.toUpperCase().includes('FOLLOW-UP')
+  const fetchPacientes = useCallback(async () => {
+    setCarregando(true)
+    setErro('')
+    try {
+      const params = new URLSearchParams()
+      if (filtroMedico) params.set('medico', filtroMedico)
+      if (filtroProtocolo) params.set('protocoloId', filtroProtocolo)
+      if (filtroStatus) params.set('status', filtroStatus)
+      if (filtroResponsavel) params.set('responsavel', filtroResponsavel)
+
+      const res = await fetch(`/api/pacientes-protocolo?${params.toString()}`)
+      const json = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        if (json.locked) {
+          setGate('locked')
+          return
+        }
+        setErro(json.error || 'Erro ao carregar pacientes')
+        return
+      }
+
+      setPacientes(json.pacientes)
+    } catch {
+      setErro('Não foi possível carregar os pacientes agora.')
+    } finally {
+      setCarregando(false)
+    }
+  }, [filtroMedico, filtroProtocolo, filtroStatus, filtroResponsavel])
+
+  const fetchVendasPendentes = useCallback(async () => {
+    const res = await fetch('/api/pacientes-protocolo/novas-vendas')
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) setVendasPendentes(json.vendas)
+  }, [])
+
+  useEffect(() => {
+    if (gate !== 'unlocked') return
+    fetchProtocolos()
+    fetchVendasPendentes()
+  }, [gate, fetchProtocolos, fetchVendasPendentes])
+
+  useEffect(() => {
+    if (gate !== 'unlocked') return
+    fetchPacientes()
+  }, [gate, fetchPacientes])
+
+  const medicosDisponiveis = useMemo(
+    () => Array.from(new Set(pacientes.map((p) => p.medico).filter(Boolean))) as string[],
+    [pacientes]
+  )
+  const responsaveisDisponiveis = useMemo(
+    () =>
+      Array.from(new Set(pacientes.map((p) => p.proxima_acao_responsavel).filter(Boolean))) as string[],
+    [pacientes]
   )
 
-  if (followUpSemResposta && totalStatus > 0) {
-    const pct = Math.round((followUpSemResposta.quantidade / totalStatus) * 100)
-    if (pct >= 30) {
-      insights.push({
-        tipo: 'atencao',
-        texto: `${pct}% das conversas da amostra estão em "Follow-up sem resposta" (${followUpSemResposta.quantidade} de ${totalStatus}) — boa parte do volume some depois do primeiro contato.`,
-      })
-    }
-  }
+  const kpis = useMemo(() => {
+    const hoje = hojeISO()
+    const ativos = pacientes.filter((p) => p.ativo)
+    const acaoHoje = ativos.filter((p) => p.proxima_acao_prazo === hoje).length
+    const emAtencao = ativos.filter((p) => p.status === 'atrasado' || p.status === 'critico').length
+    const semContato = ativos.filter((p) => {
+      const dias = diasDesde(p.ultimo_contato)
+      return dias === null || dias > 7
+    }).length
 
-  const semMensagem = comportamento.distribuicao_mensagens.find((d) => d.faixa === '0 mensagens')
-  if (semMensagem && totalStatus > 0) {
-    const pct = Math.round((semMensagem.quantidade / totalStatus) * 100)
-    if (pct >= 30) {
-      insights.push({
-        tipo: 'atencao',
-        texto: `${pct}% dos leads da amostra não têm nenhuma mensagem registrada nessa base — pode ser lead que nunca respondeu ou falha na sincronia do bate-papo.`,
-      })
-    }
-  }
-
-  const topCampanha = funil.por_campanha?.[0]
-  if (topCampanha?.campanha) {
-    insights.push({
-      tipo: 'positivo',
-      texto: `"${topCampanha.campanha}" foi a campanha que mais gerou conversas (${topCampanha.leads}) no período.`,
-    })
-  }
-
-  if (!funil.agendamento_confiavel && funil.total_leads > 0) {
-    insights.push({
-      tipo: 'atencao',
-      texto: `${funil.total_leads} conversa(s) no período sem nenhum agendamento ou venda marcado no bate-papo — esse campo não está sendo preenchido ainda, então a taxa de agendamento fica travada em 0%.`,
-    })
-  }
-
-  if (amostraRecente.compreensao.nota !== null) {
-    insights.push(
-      amostraRecente.compreensao.nota >= 4
-        ? {
-            tipo: 'positivo',
-            texto: `Sinais de compreensão predominam na amostra recente (nota ${amostraRecente.compreensao.nota}/5) — poucos indícios de confusão ou insatisfação nas respostas dos pacientes.`,
-          }
-        : {
-            tipo: 'atencao',
-            texto: `Nota de compreensão em ${amostraRecente.compreensao.nota}/5 na amostra recente — ${amostraRecente.compreensao.sinaisConfusao} mensagem(ns) com sinal de confusão ou insatisfação.`,
-          }
+    const progressos = ativos.map((p) =>
+      p.adesao_percent != null
+        ? p.adesao_percent
+        : p.protocolo?.duracao_semanas
+          ? Math.min(100, Math.round((p.semana_atual / p.protocolo.duracao_semanas) * 100))
+          : 0
     )
-  } else if (qualidade.avaliadas === 0) {
-    insights.push({
-      tipo: 'atencao',
-      texto: 'Nenhuma conversa foi avaliada pela rotina de qualidade ainda, e a amostra recente não teve sinal suficiente de compreensão/confusão pra estimar uma nota.',
+    const adesaoMedia = progressos.length
+      ? Math.round(progressos.reduce((a, b) => a + b, 0) / progressos.length)
+      : 0
+
+    return { ativos: ativos.length, acaoHoje, emAtencao, semContato, adesaoMedia }
+  }, [pacientes])
+
+  async function atualizarPaciente(id: string, updates: Record<string, unknown>) {
+    const res = await fetch(`/api/pacientes-protocolo/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates),
     })
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) {
+      setPacientes((prev) => prev.map((p) => (p.id === id ? json.paciente : p)))
+      setPacienteSelecionado((prev) => (prev && prev.id === id ? json.paciente : prev))
+    }
+    return json
   }
 
-  return insights
-}
+  if (gate === 'checking') {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center text-[var(--muted-foreground)]">
+        <Loader2 className="animate-spin" size={22} />
+      </div>
+    )
+  }
 
-function InsightTile({ insight }: { insight: Insight }) {
-  const positivo = insight.tipo === 'positivo'
+  if (gate === 'locked') {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="w-full max-w-sm rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-7 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-[14px] bg-[var(--accent)]/10 text-[var(--accent)]">
+            <Lock size={20} />
+          </div>
+          <h2 className="text-[16px] font-black text-[var(--foreground)]">Área protegida</h2>
+          <p className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">
+            Digite a senha de acesso aos dados de pacientes.
+          </p>
+
+          <input
+            type="password"
+            value={senhaGate}
+            onChange={(e) => setSenhaGate(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && enviarSenhaGate()}
+            placeholder="Senha"
+            autoFocus
+            className="mt-5 w-full rounded-xl border border-[color:var(--border)] bg-[var(--metric-card)] px-3 py-2.5 text-center text-sm font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+          />
+
+          {gateErro && <p className="mt-2 text-xs font-bold text-[var(--danger)]">{gateErro}</p>}
+
+          <button
+            onClick={enviarSenhaGate}
+            disabled={gateCarregando || !senhaGate}
+            className="mt-4 w-full rounded-xl bg-[var(--accent)] px-4 py-2.5 text-xs font-black text-white transition disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {gateCarregando ? 'Verificando...' : 'Entrar'}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className={`flex items-start gap-2.5 rounded-[16px] border p-3 ${
-        positivo
-          ? 'border-[var(--success)]/25 bg-[var(--success)]/10'
-          : 'border-[var(--warning)]/25 bg-[var(--warning)]/10'
-      }`}
-    >
-      <span className={`mt-0.5 shrink-0 ${positivo ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
-        {positivo ? <Sparkles size={15} /> : <TrendingDown size={15} />}
-      </span>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-[20px] font-black text-[var(--foreground)]">Acompanhamento de protocolos</h1>
+          <p className="text-xs font-semibold text-[var(--muted-foreground)]">
+            Pacientes em tratamento com Dr. Rodolpho, Dr. Breno e Dra. Cláudia
+          </p>
+        </div>
 
-      <p className="text-[13px] font-semibold leading-snug text-[var(--foreground)]">{insight.texto}</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowGerenciarProtocolos(true)}
+            className="flex items-center gap-1.5 rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3.5 py-2 text-xs font-black text-[var(--foreground)] transition hover:bg-[var(--metric-card)]"
+          >
+            <Settings2 size={14} />
+            Gerenciar protocolos
+          </button>
+          <button
+            onClick={() => {
+              setPrefilNovoPaciente(null)
+              setShowNovoPaciente(true)
+            }}
+            className="flex items-center gap-1.5 rounded-xl bg-[var(--accent)] px-3.5 py-2 text-xs font-black text-white transition hover:brightness-110"
+          >
+            <UserPlus size={14} />
+            Novo paciente
+          </button>
+        </div>
+      </div>
+
+      {vendasPendentes.length > 0 && (
+        <div className="dashboard-section border-[color:var(--accent)]/30">
+          <div className="mb-3 flex items-center gap-2">
+            <Sparkles size={16} className="text-[var(--accent)]" />
+            <h3 className="text-sm font-black text-[var(--foreground)]">
+              {vendasPendentes.length} venda(s) de protocolo sem acompanhamento
+            </h3>
+          </div>
+          <div className="space-y-2">
+            {vendasPendentes.map((v) => (
+              <div
+                key={v.kommoLeadId}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-black text-[var(--foreground)]">{v.nomePaciente}</p>
+                  <p className="truncate text-[11px] font-semibold text-[var(--muted-foreground)]">
+                    {v.produto} {v.protocoloNome ? `→ ${v.protocoloNome}` : ''} · {v.medico || 'sem médico'} ·{' '}
+                    {formatMoney(v.valor)}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setPrefilNovoPaciente(v)
+                    setShowNovoPaciente(true)
+                  }}
+                  className="shrink-0 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-[11px] font-black text-white transition hover:brightness-110"
+                >
+                  Criar acompanhamento
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-3 @md:grid-cols-2 @lg:grid-cols-5">
+        <KpiMini icon={Users} label="Pacientes ativos" value={kpis.ativos} accent="blue" />
+        <KpiMini icon={CalendarClock} label="Ação prevista hoje" value={kpis.acaoHoje} accent="purple" />
+        <KpiMini icon={AlertTriangle} label="Em atenção" value={kpis.emAtencao} accent="red" />
+        <KpiMini icon={Clock} label="Sem contato 7+ dias" value={kpis.semContato} accent="yellow" />
+        <KpiMini icon={TrendingUp} label="Adesão média" value={`${kpis.adesaoMedia}%`} accent="green" />
+      </div>
+
+      <div className="dashboard-section">
+        <div className="mb-4 grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-4">
+          <select value={filtroMedico} onChange={(e) => setFiltroMedico(e.target.value)} className={inputClass}>
+            <option value="">Todos os médicos</option>
+            {medicosDisponiveis.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filtroProtocolo}
+            onChange={(e) => setFiltroProtocolo(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Todos os protocolos</option>
+            {protocolos.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+
+          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className={inputClass}>
+            <option value="">Todos os status</option>
+            {STATUS_OPCOES.map((s) => (
+              <option key={s.value} value={s.value}>
+                {s.label}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filtroResponsavel}
+            onChange={(e) => setFiltroResponsavel(e.target.value)}
+            className={inputClass}
+          >
+            <option value="">Todos os responsáveis</option>
+            {responsaveisDisponiveis.map((r) => (
+              <option key={r} value={r}>
+                {r}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {erro && (
+          <p className="mb-3 rounded-xl bg-[var(--danger)]/10 px-3 py-2 text-xs font-bold text-[var(--danger)]">
+            {erro}
+          </p>
+        )}
+
+        {carregando ? (
+          <div className="flex items-center justify-center py-16 text-[var(--muted-foreground)]">
+            <Loader2 className="animate-spin" size={20} />
+          </div>
+        ) : pacientes.length === 0 ? (
+          <p className="py-12 text-center text-xs font-semibold text-[var(--muted-foreground)]">
+            Nenhum paciente encontrado com esses filtros.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-xs">
+              <thead>
+                <tr className="border-b border-[color:var(--border)] text-[10px] font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+                  <th className="py-2 pr-3">Paciente</th>
+                  <th className="py-2 pr-3">Protocolo</th>
+                  <th className="py-2 pr-3">Médico</th>
+                  <th className="py-2 pr-3">Progresso</th>
+                  <th className="py-2 pr-3">Último contato</th>
+                  <th className="py-2 pr-3">Próxima ação</th>
+                  <th className="py-2 pr-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pacientes.map((p) => {
+                  const progresso = p.protocolo?.duracao_semanas
+                    ? Math.min(100, Math.round((p.semana_atual / p.protocolo.duracao_semanas) * 100))
+                    : 0
+                  const info = statusInfo(p.status)
+                  return (
+                    <tr
+                      key={p.id}
+                      onClick={() => setPacienteSelecionado(p)}
+                      className="cursor-pointer border-b border-[color:var(--border)] transition hover:bg-[var(--metric-card)]"
+                    >
+                      <td className="max-w-[180px] truncate py-2.5 pr-3 font-black text-[var(--foreground)]">
+                        {p.nome_paciente}
+                      </td>
+                      <td className="max-w-[160px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
+                        {p.protocolo?.nome || '—'}
+                      </td>
+                      <td className="max-w-[140px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
+                        {p.medico || '—'}
+                      </td>
+                      <td className="w-[130px] py-2.5 pr-3">
+                        <div className="progress-bar h-1.5">
+                          <div
+                            className="h-full rounded-full bg-[var(--accent)]"
+                            style={{ width: `${progresso}%` }}
+                          />
+                        </div>
+                        <span className="mt-1 block text-[10px] font-bold text-[var(--muted-foreground)]">
+                          Semana {p.semana_atual}
+                          {p.protocolo ? `/${p.protocolo.duracao_semanas}` : ''} · {progresso}%
+                        </span>
+                      </td>
+                      <td className="py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
+                        {formatDate(p.ultimo_contato)}
+                      </td>
+                      <td className="max-w-[180px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
+                        {p.proxima_acao || '—'}
+                        {p.proxima_acao_prazo && (
+                          <span className="ml-1 text-[10px] text-[var(--muted-foreground)]/70">
+                            ({formatDate(p.proxima_acao_prazo)})
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 pr-3">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${info.className}`}>
+                          {info.label}
+                        </span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {pacienteSelecionado && (
+        <PainelDetalhePaciente
+          paciente={pacienteSelecionado}
+          onClose={() => setPacienteSelecionado(null)}
+          onUpdate={(updates) => atualizarPaciente(pacienteSelecionado.id, updates)}
+        />
+      )}
+
+      {showGerenciarProtocolos && (
+        <ModalGerenciarProtocolos
+          protocolos={protocolos}
+          onClose={() => setShowGerenciarProtocolos(false)}
+          onChanged={fetchProtocolos}
+        />
+      )}
+
+      {showNovoPaciente && (
+        <ModalNovoPaciente
+          protocolos={protocolos}
+          prefil={prefilNovoPaciente}
+          onClose={() => setShowNovoPaciente(false)}
+          onCreated={() => {
+            setShowNovoPaciente(false)
+            fetchPacientes()
+            fetchVendasPendentes()
+          }}
+        />
+      )}
     </div>
   )
 }
 
-export default function ConversasPage() {
-  const { periodo, dataInicio, dataFim } = useFilters()
-  const [dados, setDados] = useState<ApiResponse | null>(null)
-  const [carregando, setCarregando] = useState(true)
-  const [filtroLista, setFiltroLista] = useState<'todas' | 'aguardando' | 'agendou' | 'objecao'>('todas')
-  const [transcript, setTranscript] = useState<TranscriptMsg[] | null>(null)
-  const [conversaAberta, setConversaAberta] = useState<ConversaItem | null>(null)
+// ---------- Subcomponentes ----------
 
-  const carregar = useCallback(async () => {
-    setCarregando(true)
-    try {
-      let url = `/api/conversas?periodo=${periodo}`
-      if (periodo === 'personalizado' && dataInicio && dataFim) {
-        url += `&inicio=${dataInicio}&fim=${dataFim}`
-      }
-
-      const res = await fetch(url)
-      const json: ApiResponse = await res.json()
-      if (json.ok) setDados(json)
-    } finally {
-      setCarregando(false)
-    }
-  }, [periodo, dataInicio, dataFim])
-
-  useEffect(() => {
-    carregar()
-  }, [carregar])
-
-  const abrirTranscript = async (c: ConversaItem) => {
-    setConversaAberta(c)
-    setTranscript(null)
-    const res = await fetch(`/api/conversas?contact_id=${c.contact_id}`)
-    const json = await res.json()
-    if (json.ok) setTranscript(json.transcript)
+function KpiMini({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ComponentType<{ size?: number }>
+  label: string
+  value: string | number
+  accent: 'blue' | 'purple' | 'red' | 'yellow' | 'green'
+}) {
+  const colors: Record<string, string> = {
+    blue: 'text-[var(--accent)] bg-[var(--accent)]/10',
+    purple: 'text-violet-400 bg-violet-400/10',
+    red: 'text-[var(--danger)] bg-[var(--danger)]/10',
+    yellow: 'text-[var(--warning)] bg-[var(--warning)]/10',
+    green: 'text-[var(--success)] bg-[var(--success)]/10',
   }
+  return (
+    <div className="metric-card">
+      <div className="flex items-center justify-between">
+        <p className="metric-label">{label}</p>
+        <div className={`rounded-[10px] p-2 ${colors[accent]}`}>
+          <Icon size={14} />
+        </div>
+      </div>
+      <h3 className="metric-value text-2xl">{value}</h3>
+    </div>
+  )
+}
 
-  // Usado pelo card de sinais de confusão, que só tem contact_id/nome — os
-  // outros campos do ConversaItem ficam vazios e a modal já lida bem com isso.
-  const abrirTranscriptPorContato = (contactId: string, nomeLead: string | null) => {
-    abrirTranscript({
-      lead_id: contactId,
-      contact_id: contactId,
-      name_lead: nomeLead,
-      campanha: null,
-      anuncio: null,
-      queixas: null,
-      objecao: null,
-      status: null,
-      resultado_conversa: null,
-      agendou: null,
-      vendeu: null,
-      msgs: null,
-      ultima_atividade: null,
-      aguardando: false,
-      nota: null,
-      resumo_qualidade: null,
+function PainelDetalhePaciente({
+  paciente,
+  onClose,
+  onUpdate,
+}: {
+  paciente: PacienteProtocolo
+  onClose: () => void
+  onUpdate: (updates: Record<string, unknown>) => Promise<{ ok?: boolean; error?: string }>
+}) {
+  const [novoItemChecklist, setNovoItemChecklist] = useState('')
+  const [novaObservacao, setNovaObservacao] = useState('')
+  const [salvando, setSalvando] = useState(false)
+
+  const [semanaAtual, setSemanaAtual] = useState(paciente.semana_atual)
+  const [status, setStatus] = useState(paciente.status)
+  const [ultimoContato, setUltimoContato] = useState(paciente.ultimo_contato || '')
+  const [adesao, setAdesao] = useState(paciente.adesao_percent ?? '')
+  const [saldoContratado, setSaldoContratado] = useState(paciente.saldo_contratado ?? '')
+  const [saldoRealizado, setSaldoRealizado] = useState(paciente.saldo_realizado ?? '')
+  const [proximaAcao, setProximaAcao] = useState(paciente.proxima_acao || '')
+  const [proximaAcaoResponsavel, setProximaAcaoResponsavel] = useState(paciente.proxima_acao_responsavel || '')
+  const [proximaAcaoPrazo, setProximaAcaoPrazo] = useState(paciente.proxima_acao_prazo || '')
+  const [proximaAcaoPrioridade, setProximaAcaoPrioridade] = useState(paciente.proxima_acao_prioridade || 'media')
+
+  const progresso = paciente.protocolo?.duracao_semanas
+    ? Math.min(100, Math.round((semanaAtual / paciente.protocolo.duracao_semanas) * 100))
+    : 0
+
+  async function salvarAlteracoes() {
+    setSalvando(true)
+    await onUpdate({
+      semanaAtual: Number(semanaAtual) || 0,
+      status,
+      ultimoContato: ultimoContato || null,
+      adesaoPercent: adesao === '' ? null : Number(adesao),
+      saldoContratado: saldoContratado === '' ? null : Number(saldoContratado),
+      saldoRealizado: saldoRealizado === '' ? null : Number(saldoRealizado),
+      proximaAcao: proximaAcao || null,
+      proximaAcaoResponsavel: proximaAcaoResponsavel || null,
+      proximaAcaoPrazo: proximaAcaoPrazo || null,
+      proximaAcaoPrioridade: proximaAcaoPrioridade || null,
     })
+    setSalvando(false)
   }
 
-  const kpis = dados?.kpis
-  const conversas = (dados?.conversas ?? []).filter((c) => {
-    if (filtroLista === 'aguardando') return c.aguardando
-    if (filtroLista === 'agendou') return c.agendou === true
-    if (filtroLista === 'objecao') return !!c.objecao
-    return true
-  })
+  async function alternarChecklistItem(index: number) {
+    const checklist = paciente.checklist.map((item, i) =>
+      i === index ? { ...item, status: item.status === 'concluido' ? 'pendente' : 'concluido' as const } : item
+    )
+    await onUpdate({ checklist })
+  }
 
-  const campanhaChart = (kpis?.funil.por_campanha ?? []).map((c) => ({
-    nome: c.campanha.length > 22 ? c.campanha.slice(0, 22) + '…' : c.campanha,
-    leads: c.leads,
-    agendados: c.agendados,
-  }))
+  async function adicionarItemChecklist() {
+    if (!novoItemChecklist.trim()) return
+    const checklist = [...paciente.checklist, { item: novoItemChecklist.trim(), status: 'pendente' as const }]
+    setNovoItemChecklist('')
+    await onUpdate({ checklist })
+  }
 
-  const CORES_GRAFICO = [
-    'var(--chart-blue)',
-    'var(--chart-green)',
-    'var(--chart-orange)',
-    'var(--chart-purple)',
-    'var(--chart-pink)',
-    'var(--chart-red)',
-    'var(--chart-darkRed)',
-  ]
+  async function removerItemChecklist(index: number) {
+    const checklist = paciente.checklist.filter((_, i) => i !== index)
+    await onUpdate({ checklist })
+  }
 
-  const canalChart = (kpis?.comportamento.por_canal ?? []).map((c) => ({
-    nome: c.channel === 'waba' ? 'WhatsApp' : c.channel || 'Outro',
-    leads: c.leads,
-  }))
-
-  const statusChart = (kpis?.comportamento.por_status ?? []).slice(0, 7).map((s) => ({
-    nome: s.status.length > 20 ? s.status.slice(0, 20) + '…' : s.status,
-    quantidade: s.quantidade,
-  }))
-
-  const mensagensChart = kpis?.comportamento.distribuicao_mensagens ?? []
-  const diaSemanaChart = kpis?.comportamento.por_dia_semana ?? []
-  const amostraRecente = kpis?.amostraRecente
-
-  const criterios = Object.entries(kpis?.qualidade.criterios_media ?? {})
-  const insights = construirInsights(kpis)
-
-  useSetPageHeader('Conversas — Análise Crítica')
+  async function adicionarObservacao() {
+    if (!novaObservacao.trim()) return
+    const observacoes = [
+      { texto: novaObservacao.trim(), criado_em: new Date().toISOString() },
+      ...paciente.observacoes,
+    ]
+    setNovaObservacao('')
+    await onUpdate({ observacoes })
+  }
 
   return (
-    <>
-      <div className="mb-6 grid grid-cols-1 gap-4 @sm:grid-cols-2 @xl:grid-cols-5">
-        <KpiCard
-          title="Leads no período"
-          value={kpis?.funil.total_leads ?? '—'}
-          subtitle={`${kpis?.operacao.total_conversas ?? 0} conversas ativas`}
-          icon={MessageSquare}
-        />
-        <KpiCard
-          title="Taxa de agendamento"
-          value={kpis?.funil.agendamento_confiavel ? `${kpis.funil.taxa_agendamento}%` : '—'}
-          subtitle={
-            kpis && !kpis.funil.agendamento_confiavel
-              ? 'agendou/vendeu não preenchido ainda, veja o insight'
-              : `${kpis?.funil.agendados ?? 0} agendados / ${kpis?.funil.vendidos ?? 0} vendas`
-          }
-          icon={CalendarCheck}
-          accent="green"
-        />
-        <KpiCard
-          title="Tempo médio entre mensagens"
-          value={fmtTempo(amostraRecente?.tempoMedioEntreMensagensSeg ?? null)}
-          subtitle={
-            amostraRecente
-              ? `amostra de ${amostraRecente.conversasAnalisadas} conversas recentes`
-              : '—'
-          }
-          icon={Timer}
-          accent="purple"
-        />
-        <KpiCard
-          title="Compreensão do atendimento"
-          value={amostraRecente?.compreensao.nota ?? '—'}
-          subtitle={
-            amostraRecente
-              ? `${amostraRecente.compreensao.sinaisPositivos} sinais positivos / ${amostraRecente.compreensao.sinaisConfusao} de confusão`
-              : 'sem sinal suficiente na amostra'
-          }
-          icon={Brain}
-        />
-        <KpiCard
-          title="Aguardando resposta"
-          value={kpis?.operacao.aguardando_resposta ?? '—'}
-          subtitle={
-            kpis
-              ? `de ${kpis.operacao.aguardando_resposta_amostra} conversas — última msg foi do paciente`
-              : 'pacientes sem retorno'
-          }
-          icon={AlertTriangle}
-          accent="red"
-        />
-      </div>
-
-      {insights.length > 0 && (
-        <section className="dashboard-section mb-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Sparkles size={18} className="text-[var(--accent)]" />
-            <h2 className="section-title">Insights automáticos</h2>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2.5 @sm:grid-cols-2 @xl:grid-cols-3">
-            {insights.map((insight, i) => (
-              <InsightTile key={i} insight={insight} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className="mb-6 grid grid-cols-1 gap-4 @xl:grid-cols-2">
-        <section className="dashboard-section">
-          <h2 className="section-title mb-4">Leads e agendamentos por campanha</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={campanhaChart} margin={{ left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis dataKey="nome" tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }} interval={0} angle={-18} height={60} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 12,
-                  }}
-                />
-                <Bar dataKey="leads" name="Leads" fill="var(--accent)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="agendados" name="Agendados" fill="var(--success)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-
-        <section className="dashboard-section">
-          <h2 className="section-title mb-4">Evolução diária de leads</h2>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={kpis?.operacao.evolucao_diaria ?? []} margin={{ left: -20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                <XAxis
-                  dataKey="dia"
-                  tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                  tickFormatter={(d: string) => d.slice(5).split('-').reverse().join('/')}
-                />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 12,
-                  }}
-                />
-                <Bar dataKey="leads" name="Leads" fill="var(--accent)" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-      </div>
-
-      <section className="dashboard-section mb-6">
-        <div className="mb-4 flex items-center gap-2">
-          <Activity size={18} className="text-[var(--accent)]" />
-          <h2 className="section-title">Comportamento dos leads</h2>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 @md:grid-cols-2 @xl:grid-cols-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
+        <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <p className="metric-label mb-2">Canal de origem</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={canalChart} layout="vertical" margin={{ left: 8 }}>
-                  <XAxis type="number" hide allowDecimals={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="nome"
-                    tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }}
-                    width={80}
-                  />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
-                  />
-                  <Bar dataKey="leads" radius={[0, 6, 6, 0]}>
-                    {canalChart.map((_, i) => (
-                      <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div>
-            <p className="metric-label mb-2">Situação das conversas</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusChart} layout="vertical" margin={{ left: 8 }}>
-                  <XAxis type="number" hide allowDecimals={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="nome"
-                    tick={{ fontSize: 10, fill: 'var(--muted-foreground)' }}
-                    width={110}
-                  />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
-                  />
-                  <Bar dataKey="quantidade" radius={[0, 6, 6, 0]}>
-                    {statusChart.map((_, i) => (
-                      <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div>
-            <p className="metric-label mb-2">Mensagens por conversa</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={mensagensChart} margin={{ left: -20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="faixa" tick={{ fontSize: 9, fill: 'var(--muted-foreground)' }} interval={0} />
-                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
-                  />
-                  <Bar dataKey="quantidade" fill="var(--accent)" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div>
-            <p className="metric-label mb-2">Leads por dia da semana</p>
-            <div className="h-40">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={diaSemanaChart} margin={{ left: -20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                  <XAxis dataKey="dia" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
-                  <YAxis tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 12 }}
-                  />
-                  <Bar dataKey="leads" fill="var(--chart-purple)" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="dashboard-section mb-6">
-        <div className="mb-4 flex items-center gap-2">
-          <MessageCircleQuestion size={18} className="text-[var(--accent)]" />
-          <h2 className="section-title">Principais motivos de contato</h2>
-        </div>
-
-        {!amostraRecente || amostraRecente.motivos.length === 0 ? (
-          <p className="metric-helper">
-            Sem mensagens suficientes na amostra recente pra identificar um padrão.
-          </p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-2.5 @sm:grid-cols-2 @xl:grid-cols-3">
-              {amostraRecente.motivos.map((m) => (
-                <div key={m.topico} className="subtle-card flex items-center justify-between">
-                  <span className="text-sm">{m.topico}</span>
-                  <span className="metric-value text-xl">{m.ocorrencias}</span>
-                </div>
-              ))}
-            </div>
-            <p className="metric-helper mt-3">
-              Baseado nas {amostraRecente.mensagensAnalisadas} mensagens das{' '}
-              {amostraRecente.conversasAnalisadas} conversas mais recentes do período — uma
-              amostra, não o histórico inteiro.
+            <h3 className="text-[17px] font-black text-[var(--foreground)]">{paciente.nome_paciente}</h3>
+            <p className="text-xs font-semibold text-[var(--muted-foreground)]">
+              {paciente.protocolo?.nome || 'Sem protocolo'} · {paciente.medico || 'sem médico'}
             </p>
-          </>
-        )}
-      </section>
-
-      <section className="dashboard-section mb-6">
-        <div className="mb-4 flex items-center gap-2">
-          <AlertTriangle size={18} className="text-[var(--danger)]" />
-          <h2 className="section-title">Sinais de confusão</h2>
-        </div>
-
-        {!amostraRecente || amostraRecente.compreensao.exemplosConfusao.length === 0 ? (
-          <p className="metric-helper">
-            Nenhum sinal de confusão ou insatisfação nas mensagens da amostra recente — pacientes
-            usando termos como &quot;não entendi&quot;, &quot;de novo&quot; ou reclamações.
-          </p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @xl:grid-cols-4">
-              {amostraRecente.compreensao.exemplosConfusao.map((ex, i) => (
-                <button
-                  key={i}
-                  onClick={() => abrirTranscriptPorContato(ex.contactId, ex.nomeLead)}
-                  className="subtle-card cursor-pointer text-left transition hover:border-[var(--danger)]/40"
-                >
-                  <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-semibold">
-                      {ex.nomeLead ?? `Contato ${ex.contactId}`}
-                    </span>
-                    <span className="shrink-0 text-[10px] font-semibold text-[var(--muted-foreground)]">
-                      {fmtData(ex.criadoEm)}
-                    </span>
-                  </div>
-                  <p className="line-clamp-3 whitespace-pre-wrap text-xs text-[var(--muted-foreground)]">
-                    &quot;{ex.trecho}&quot;
-                  </p>
-                </button>
-              ))}
-            </div>
-            <p className="metric-helper mt-3">
-              Trechos reais das mensagens dos pacientes na amostra recente — clique num card pra
-              abrir a conversa inteira.
-            </p>
-          </>
-        )}
-      </section>
-
-      <div className="mb-6 grid grid-cols-1 gap-4 @xl:grid-cols-3">
-        <section className="dashboard-section">
-          <h2 className="section-title mb-4">Objeções mais comuns</h2>
-          {(kpis?.objecoes.ranking ?? []).filter((o) => o.objecao).length === 0 ? (
-            <p className="metric-helper">
-              Sem objeções marcadas no período — esse campo depende da tag automática no CRM
-              (ainda não está em uso, então é esperado ficar vazio por enquanto).
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {(kpis?.objecoes.ranking ?? [])
-                .filter((o) => o.objecao)
-                .map((o) => (
-                  <li key={o.objecao} className="subtle-card flex items-center justify-between">
-                    <span className="text-sm">{o.objecao}</span>
-                    <span className="metric-value text-xl">{o.ocorrencias}</span>
-                  </li>
-                ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="dashboard-section">
-          <h2 className="section-title mb-4">Queixas dos pacientes</h2>
-          {(kpis?.funil.por_queixa ?? []).filter((q) => q.queixas).length === 0 ? (
-            <p className="metric-helper">
-              Sem queixas marcadas no período — veja &quot;Principais motivos de contato&quot;
-              acima, que já lê o conteúdo real das mensagens.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {(kpis?.funil.por_queixa ?? [])
-                .filter((q) => q.queixas)
-                .map((q) => (
-                  <li key={String(q.queixas)} className="subtle-card flex items-center justify-between">
-                    <span className="text-sm">{String(q.queixas)}</span>
-                    <span className="metric-helper">
-                      {String(q.leads)} leads · {String(q.agendados)} agendados
-                    </span>
-                  </li>
-                ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="dashboard-section">
-          <h2 className="section-title mb-4">Critérios de qualidade (média)</h2>
-          {criterios.length === 0 ? (
-            <p className="metric-helper">
-              Nenhuma avaliação registrada ainda. Ative o fluxo diário de análise crítica para
-              preencher esta seção.
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {criterios.map(([nome, media]) => (
-                <li key={nome}>
-                  <div className="mb-1 flex justify-between text-sm">
-                    <span className="capitalize">{nome.replaceAll('_', ' ')}</span>
-                    <span className="font-semibold">{media}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="h-full rounded-full bg-[var(--accent)]"
-                      style={{ width: `${Math.min(100, (Number(media) / 10) * 100)}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
-
-      {(kpis?.qualidade.piores ?? []).length > 0 && (
-        <section className="dashboard-section mb-6">
-          <h2 className="section-title mb-4">Conversas com pior avaliação</h2>
-          <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @xl:grid-cols-3">
-            {(kpis?.qualidade.piores ?? []).map((p) => (
-              <div key={p.contact_id} className="subtle-card">
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="text-sm font-semibold">{p.name_lead ?? `Contato ${p.contact_id}`}</span>
-                  <span className="metric-value text-xl text-[var(--danger)]">{p.nota}</span>
-                </div>
-                {p.resumo && <p className="metric-helper mb-1">{p.resumo}</p>}
-                {p.pontos_melhoria && (
-                  <p className="text-xs text-[var(--muted-foreground)]">Melhorar: {p.pontos_melhoria}</p>
-                )}
-              </div>
-            ))}
           </div>
-        </section>
-      )}
-
-      <section className="dashboard-section">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="section-title">
-            Conversas ({conversas.length}) {carregando && <span className="text-[var(--muted-foreground)]">· carregando…</span>}
-          </h2>
-          <div className="flex gap-2">
-            {(
-              [
-                ['todas', 'Todas'],
-                ['aguardando', 'Aguardando resposta'],
-                ['agendou', 'Agendaram'],
-                ['objecao', 'Com objeção'],
-              ] as const
-            ).map(([valor, label]) => (
-              <button
-                key={valor}
-                onClick={() => setFiltroLista(valor)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                  filtroLista === valor
-                    ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--background)]'
-                    : 'border-[var(--border)] text-[var(--muted-foreground)]'
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-xs uppercase text-[var(--muted-foreground)]">
-                <th className="py-2 pr-4">Lead</th>
-                <th className="py-2 pr-4">Campanha</th>
-                <th className="py-2 pr-4">Queixa</th>
-                <th className="py-2 pr-4">Msgs</th>
-                <th className="py-2 pr-4">Última atividade</th>
-                <th className="py-2 pr-4">Nota</th>
-                <th className="py-2 pr-4">Situação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {conversas.map((c) => (
-                <tr
-                  key={c.lead_id}
-                  onClick={() => abrirTranscript(c)}
-                  className="cursor-pointer border-b border-[var(--border)] transition hover:bg-[var(--metric-card)]"
-                >
-                  <td className="py-2.5 pr-4 font-medium">{c.name_lead ?? c.lead_id}</td>
-                  <td className="py-2.5 pr-4 text-xs text-[var(--muted-foreground)]">{c.campanha ?? '—'}</td>
-                  <td className="py-2.5 pr-4">{c.queixas ?? '—'}</td>
-                  <td className="py-2.5 pr-4">{c.msgs ?? '—'}</td>
-                  <td className="py-2.5 pr-4">{fmtData(c.ultima_atividade)}</td>
-                  <td className="py-2.5 pr-4">{c.nota ?? '—'}</td>
-                  <td className="py-2.5 pr-4">
-                    {c.vendeu ? (
-                      <span className="rounded-full bg-[var(--success)]/15 px-2 py-0.5 text-xs text-[var(--success)]">Vendeu</span>
-                    ) : c.agendou ? (
-                      <span className="rounded-full bg-[var(--success)]/15 px-2 py-0.5 text-xs text-[var(--success)]">Agendou</span>
-                    ) : c.aguardando ? (
-                      <span className="rounded-full bg-[var(--danger)]/15 px-2 py-0.5 text-xs text-[var(--danger)]">Aguardando</span>
-                    ) : (
-                      <span className="rounded-full bg-[var(--metric-card)] px-2 py-0.5 text-xs text-[var(--muted-foreground)]">
-                        {c.objecao ? 'Objeção' : c.status ?? 'Em andamento'}
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {conversaAberta && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
-          onClick={() => setConversaAberta(null)}
-        >
-          <div
-            className="dashboard-section flex max-h-[85vh] w-full max-w-2xl flex-col"
-            onClick={(e) => e.stopPropagation()}
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[var(--muted-foreground)] transition hover:bg-[var(--metric-card)]"
           >
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <h3 className="section-title">{conversaAberta.name_lead ?? conversaAberta.lead_id}</h3>
-                <p className="metric-helper">
-                  {conversaAberta.campanha ?? 'sem campanha'} · {conversaAberta.msgs ?? 0} mensagens
-                </p>
-              </div>
-              <button
-                onClick={() => setConversaAberta(null)}
-                className="rounded-full p-2 text-[var(--muted-foreground)] hover:bg-[var(--metric-card)]"
-              >
-                <X size={18} />
-              </button>
-            </div>
+            <X size={16} />
+          </button>
+        </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-              {transcript === null && <p className="metric-helper">Carregando conversa…</p>}
-              {transcript?.length === 0 && <p className="metric-helper">Sem mensagens registradas.</p>}
-              {transcript?.map((m, i) => (
-                <div
-                  key={i}
-                  className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${
-                    m.quem === 'sara'
-                      ? 'ml-auto bg-[var(--accent)]/15'
-                      : 'bg-[var(--metric-card)]'
+        <div className="mb-5">
+          <div className="progress-bar h-2">
+            <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${progresso}%` }} />
+          </div>
+          <p className="mt-1 text-[11px] font-bold text-[var(--muted-foreground)]">
+            Semana {semanaAtual}
+            {paciente.protocolo ? ` de ${paciente.protocolo.duracao_semanas}` : ''} · {progresso}% concluído
+          </p>
+        </div>
+
+        <div className="grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-3">
+          <Campo label="Status">
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
+              {STATUS_OPCOES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </Campo>
+          <Campo label="Semana atual">
+            <input
+              type="number"
+              min={0}
+              value={semanaAtual}
+              onChange={(e) => setSemanaAtual(Number(e.target.value))}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Adesão (%)">
+            <input
+              type="number"
+              min={0}
+              max={100}
+              value={adesao}
+              onChange={(e) => setAdesao(e.target.value === '' ? '' : Number(e.target.value))}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Último contato">
+            <input
+              type="date"
+              value={ultimoContato}
+              onChange={(e) => setUltimoContato(e.target.value)}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Saldo contratado">
+            <input
+              type="number"
+              min={0}
+              value={saldoContratado}
+              onChange={(e) => setSaldoContratado(e.target.value === '' ? '' : Number(e.target.value))}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Saldo realizado">
+            <input
+              type="number"
+              min={0}
+              value={saldoRealizado}
+              onChange={(e) => setSaldoRealizado(e.target.value === '' ? '' : Number(e.target.value))}
+              className={inputClass}
+            />
+          </Campo>
+        </div>
+
+        <h4 className="mb-2 mt-5 text-xs font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+          Próxima ação
+        </h4>
+        <div className="grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-4">
+          <div className="@lg:col-span-2">
+            <Campo label="Ação">
+              <input
+                value={proximaAcao}
+                onChange={(e) => setProximaAcao(e.target.value)}
+                placeholder="Ex: ligar para remarcar sessão"
+                className={inputClass}
+              />
+            </Campo>
+          </div>
+          <Campo label="Responsável">
+            <input
+              value={proximaAcaoResponsavel}
+              onChange={(e) => setProximaAcaoResponsavel(e.target.value)}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Prazo">
+            <input
+              type="date"
+              value={proximaAcaoPrazo}
+              onChange={(e) => setProximaAcaoPrazo(e.target.value)}
+              className={inputClass}
+            />
+          </Campo>
+          <Campo label="Prioridade">
+            <select
+              value={proximaAcaoPrioridade}
+              onChange={(e) => setProximaAcaoPrioridade(e.target.value)}
+              className={inputClass}
+            >
+              {PRIORIDADE_OPCOES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </Campo>
+        </div>
+
+        <button
+          onClick={salvarAlteracoes}
+          disabled={salvando}
+          className="mt-4 w-full rounded-xl bg-[var(--accent)] px-4 py-2.5 text-xs font-black text-white transition disabled:opacity-50"
+        >
+          {salvando ? 'Salvando...' : 'Salvar alterações'}
+        </button>
+
+        <h4 className="mb-2 mt-6 text-xs font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+          Checklist
+        </h4>
+        <div className="space-y-1.5">
+          {paciente.checklist.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between gap-2 rounded-xl bg-[var(--metric-card)] px-3 py-2"
+            >
+              <button onClick={() => alternarChecklistItem(i)} className="flex min-w-0 items-center gap-2 text-left">
+                <span
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                    item.status === 'concluido'
+                      ? 'border-[var(--success)] bg-[var(--success)] text-white'
+                      : 'border-[color:var(--border)]'
                   }`}
                 >
-                  <p className="mb-0.5 text-[10px] font-semibold uppercase text-[var(--muted-foreground)]">
-                    {m.quem === 'sara' ? 'Sara' : 'Paciente'} · {fmtData(m.criado_em)}
-                  </p>
-                  <p className="whitespace-pre-wrap">{m.conteudo}</p>
-                </div>
-              ))}
+                  {item.status === 'concluido' && <Check size={12} />}
+                </span>
+                <span
+                  className={`truncate text-xs font-semibold ${
+                    item.status === 'concluido'
+                      ? 'text-[var(--muted-foreground)] line-through'
+                      : 'text-[var(--foreground)]'
+                  }`}
+                >
+                  {item.item}
+                </span>
+              </button>
+              <button
+                onClick={() => removerItemChecklist(i)}
+                className="shrink-0 text-[var(--muted-foreground)] transition hover:text-[var(--danger)]"
+              >
+                <Trash2 size={13} />
+              </button>
             </div>
+          ))}
+          {paciente.checklist.length === 0 && (
+            <p className="text-xs font-semibold text-[var(--muted-foreground)]">Nenhum item ainda.</p>
+          )}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <input
+            value={novoItemChecklist}
+            onChange={(e) => setNovoItemChecklist(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && adicionarItemChecklist()}
+            placeholder="Novo item do checklist"
+            className={inputClass}
+          />
+          <button
+            onClick={adicionarItemChecklist}
+            className="flex shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)] px-3 text-[var(--foreground)] transition hover:bg-[var(--border)]"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
+
+        <h4 className="mb-2 mt-6 text-xs font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+          Observações
+        </h4>
+        <div className="flex gap-2">
+          <input
+            value={novaObservacao}
+            onChange={(e) => setNovaObservacao(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && adicionarObservacao()}
+            placeholder="Adicionar observação"
+            className={inputClass}
+          />
+          <button
+            onClick={adicionarObservacao}
+            className="flex shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)] px-3 text-[var(--foreground)] transition hover:bg-[var(--border)]"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
+        <div className="mt-2 max-h-[180px] space-y-2 overflow-y-auto">
+          {paciente.observacoes.map((obs, i) => (
+            <div key={i} className="rounded-xl bg-[var(--metric-card)] px-3 py-2">
+              <p className="text-xs font-semibold text-[var(--foreground)]">{obs.texto}</p>
+              <p className="mt-0.5 text-[10px] font-bold text-[var(--muted-foreground)]">
+                {new Date(obs.criado_em).toLocaleString('pt-BR')}
+              </p>
+            </div>
+          ))}
+          {paciente.observacoes.length === 0 && (
+            <p className="text-xs font-semibold text-[var(--muted-foreground)]">Nenhuma observação ainda.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block space-y-1">
+      <span className="text-[10px] font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+        {label}
+      </span>
+      {children}
+    </label>
+  )
+}
+
+function ModalGerenciarProtocolos({
+  protocolos,
+  onClose,
+  onChanged,
+}: {
+  protocolos: Protocolo[]
+  onClose: () => void
+  onChanged: () => void
+}) {
+  const [nome, setNome] = useState('')
+  const [produtos, setProdutos] = useState('')
+  const [duracaoSemanas, setDuracaoSemanas] = useState(12)
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  async function criarProtocolo() {
+    if (!nome.trim()) return
+    setSalvando(true)
+    setErro('')
+    try {
+      const res = await fetch('/api/protocolos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: nome.trim(),
+          produtosKommo: produtos.split(',').map((p) => p.trim()).filter(Boolean),
+          duracaoSemanas,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!json.ok) {
+        setErro(json.error || 'Erro ao criar protocolo')
+        return
+      }
+      setNome('')
+      setProdutos('')
+      setDuracaoSemanas(12)
+      onChanged()
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function alternarAtivo(p: Protocolo) {
+    await fetch(`/api/protocolos/${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativo: !p.ativo }),
+    })
+    onChanged()
+  }
+
+  async function removerProtocolo(p: Protocolo) {
+    await fetch(`/api/protocolos/${p.id}`, { method: 'DELETE' })
+    onChanged()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-[16px] font-black text-[var(--foreground)]">Gerenciar protocolos</h3>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[var(--muted-foreground)] transition hover:bg-[var(--metric-card)]"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {protocolos.map((p) => (
+            <div
+              key={p.id}
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5"
+            >
+              <div className="min-w-0">
+                <p className={`text-xs font-black ${p.ativo ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)] line-through'}`}>
+                  {p.nome}
+                </p>
+                <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+                  {p.duracao_semanas} semanas · {p.produtos_kommo.join(', ') || 'sem produtos vinculados'}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-1.5">
+                <button
+                  onClick={() => alternarAtivo(p)}
+                  className="rounded-lg px-2.5 py-1 text-[10px] font-black text-[var(--muted-foreground)] transition hover:bg-[var(--border)]"
+                >
+                  {p.ativo ? 'Desativar' : 'Ativar'}
+                </button>
+                <button
+                  onClick={() => removerProtocolo(p)}
+                  className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition hover:bg-[var(--danger)]/10 hover:text-[var(--danger)]"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+          {protocolos.length === 0 && (
+            <p className="text-xs font-semibold text-[var(--muted-foreground)]">Nenhum protocolo cadastrado.</p>
+          )}
+        </div>
+
+        <h4 className="mb-2 mt-5 text-xs font-black uppercase tracking-wide text-[var(--muted-foreground)]">
+          Novo protocolo
+        </h4>
+        <div className="grid gap-2.5 @sm:grid-cols-2">
+          <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do protocolo" className={inputClass} />
+          <input
+            type="number"
+            min={1}
+            value={duracaoSemanas}
+            onChange={(e) => setDuracaoSemanas(Number(e.target.value))}
+            placeholder="Duração (semanas)"
+            className={inputClass}
+          />
+          <div className="@sm:col-span-2">
+            <input
+              value={produtos}
+              onChange={(e) => setProdutos(e.target.value)}
+              placeholder="Produtos do Kommo vinculados, separados por vírgula"
+              className={inputClass}
+            />
           </div>
         </div>
-      )}
-    </>
+        {erro && <p className="mt-2 text-xs font-bold text-[var(--danger)]">{erro}</p>}
+        <button
+          onClick={criarProtocolo}
+          disabled={salvando || !nome.trim()}
+          className="mt-3 w-full rounded-xl bg-[var(--accent)] px-4 py-2.5 text-xs font-black text-white transition disabled:opacity-50"
+        >
+          {salvando ? 'Criando...' : 'Criar protocolo'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function ModalNovoPaciente({
+  protocolos,
+  prefil,
+  onClose,
+  onCreated,
+}: {
+  protocolos: Protocolo[]
+  prefil: VendaPendente | null
+  onClose: () => void
+  onCreated: () => void
+}) {
+  const [nomePaciente, setNomePaciente] = useState(prefil?.nomePaciente || '')
+  const [protocoloId, setProtocoloId] = useState(prefil?.protocoloId || '')
+  const [medico, setMedico] = useState(prefil?.medico || '')
+  const [dataInicio, setDataInicio] = useState(hojeISO())
+  const [salvando, setSalvando] = useState(false)
+  const [erro, setErro] = useState('')
+
+  async function criarPaciente() {
+    if (!nomePaciente.trim()) return
+    setSalvando(true)
+    setErro('')
+    try {
+      const res = await fetch('/api/pacientes-protocolo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nomePaciente: nomePaciente.trim(),
+          protocoloId: protocoloId || null,
+          medico: medico || null,
+          dataInicio: dataInicio || null,
+          kommoLeadId: prefil?.kommoLeadId || null,
+        }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (!json.ok) {
+        setErro(json.error || 'Erro ao criar paciente')
+        return
+      }
+      onCreated()
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-md rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-[16px] font-black text-[var(--foreground)]">Novo paciente</h3>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-[10px] text-[var(--muted-foreground)] transition hover:bg-[var(--metric-card)]"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-2.5">
+          <Campo label="Nome do paciente">
+            <input value={nomePaciente} onChange={(e) => setNomePaciente(e.target.value)} className={inputClass} />
+          </Campo>
+          <Campo label="Protocolo">
+            <select value={protocoloId} onChange={(e) => setProtocoloId(e.target.value)} className={inputClass}>
+              <option value="">Selecione um protocolo</option>
+              {protocolos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome}
+                </option>
+              ))}
+            </select>
+          </Campo>
+          <Campo label="Médico">
+            <input value={medico} onChange={(e) => setMedico(e.target.value)} className={inputClass} />
+          </Campo>
+          <Campo label="Data de início">
+            <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} className={inputClass} />
+          </Campo>
+        </div>
+
+        {erro && <p className="mt-2 text-xs font-bold text-[var(--danger)]">{erro}</p>}
+
+        <button
+          onClick={criarPaciente}
+          disabled={salvando || !nomePaciente.trim()}
+          className="mt-4 w-full rounded-xl bg-[var(--accent)] px-4 py-2.5 text-xs font-black text-white transition disabled:opacity-50"
+        >
+          {salvando ? 'Criando...' : 'Criar paciente'}
+        </button>
+      </div>
+    </div>
   )
 }

@@ -37,6 +37,7 @@ import 'react-day-picker/dist/style.css'
 import { ptBR } from 'date-fns/locale'
 
 const NOTIF_SEEN_KEY = 'criare-notif-propostas-seen-percent'
+const NOTIF_SEEN_PROTOCOLOS_KEY = 'criare-notif-protocolos-seen-count'
 const NOTIF_AUTO_CLOSE_MS = 30000
 
 const CONTAS: Record<string, { nome: string; email: string; senha: string }> = {
@@ -134,13 +135,17 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
 
   const [propostasPercent, setPropostasPercent] = useState<number | null>(null)
   const [lastSeenPercent, setLastSeenPercent] = useState<number | null>(null)
-  const [openMessage, setOpenMessage] = useState<string | null>(null)
+  const [vendasProtocoloPendentes, setVendasProtocoloPendentes] = useState(0)
+  const [lastSeenVendasProtocolo, setLastSeenVendasProtocolo] = useState(0)
 
   useEffect(() => {
     setMounted(true)
 
     const stored = localStorage.getItem(NOTIF_SEEN_KEY)
     if (stored) setLastSeenPercent(Number(stored))
+
+    const storedVendas = localStorage.getItem(NOTIF_SEEN_PROTOCOLOS_KEY)
+    if (storedVendas) setLastSeenVendasProtocolo(Number(storedVendas))
 
     fetchRole()
   }, [fetchRole])
@@ -186,26 +191,66 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   }, [periodo, tipoData, segmento, dataInicio, dataFim])
 
   useEffect(() => {
+    let cancelled = false
+
+    async function loadVendasProtocolo() {
+      try {
+        const res = await fetch('/api/pacientes-protocolo/novas-vendas', { cache: 'no-store' })
+        const json = await res.json().catch(() => ({}))
+        if (cancelled || !json.ok) return
+        setVendasProtocoloPendentes(Array.isArray(json.vendas) ? json.vendas.length : 0)
+      } catch {
+        // silencioso: exige a segunda senha da página de Protocolos desbloqueada
+      }
+    }
+
+    loadVendasProtocolo()
+    const interval = setInterval(loadVendasProtocolo, 60000)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [])
+
+  useEffect(() => {
     return () => {
       if (notificationCloseTimer.current) clearTimeout(notificationCloseTimer.current)
     }
   }, [])
 
-  const notificationMessage =
+  const notifications = [
     propostasPercent !== null && propostasPercent >= 70
-      ? `Propostas fechadas acima de ${propostasPercent}% da meta. Continue assim!`
-      : null
+      ? {
+          id: 'propostas',
+          texto: `Propostas fechadas acima de ${propostasPercent}% da meta. Continue assim!`,
+          tone: 'success' as const,
+          vista: propostasPercent === lastSeenPercent,
+        }
+      : null,
+    vendasProtocoloPendentes > 0
+      ? {
+          id: 'protocolos',
+          texto: `${vendasProtocoloPendentes} venda(s) de protocolo aguardando acompanhamento em Protocolos.`,
+          tone: 'accent' as const,
+          vista: vendasProtocoloPendentes === lastSeenVendasProtocolo,
+        }
+      : null,
+  ].filter((n): n is NonNullable<typeof n> => n !== null)
 
-  const hasNotification =
-    notificationMessage !== null && propostasPercent !== lastSeenPercent
+  const hasNotification = notifications.some((n) => !n.vista)
 
   function handleOpenNotifications() {
-    if (!hasNotification || !notificationMessage || propostasPercent === null) return
+    if (notifications.length === 0) return
 
-    setOpenMessage(notificationMessage)
     setShowNotifications(true)
-    localStorage.setItem(NOTIF_SEEN_KEY, String(propostasPercent))
-    setLastSeenPercent(propostasPercent)
+
+    if (propostasPercent !== null) {
+      localStorage.setItem(NOTIF_SEEN_KEY, String(propostasPercent))
+      setLastSeenPercent(propostasPercent)
+    }
+    localStorage.setItem(NOTIF_SEEN_PROTOCOLOS_KEY, String(vendasProtocoloPendentes))
+    setLastSeenVendasProtocolo(vendasProtocoloPendentes)
 
     if (notificationCloseTimer.current) clearTimeout(notificationCloseTimer.current)
     notificationCloseTimer.current = setTimeout(() => {
@@ -386,12 +431,12 @@ function parseLocalDate(dateString?: string) {
                 <Bell size={18} />
                 {hasNotification && (
   <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--danger)] px-1 text-[10px] font-bold text-white">
-    1
+    {notifications.filter((n) => !n.vista).length}
   </span>
 )}
               </button>
 
-              {showNotifications && openMessage && (
+              {showNotifications && notifications.length > 0 && (
   <div className="absolute right-0 top-full mt-3 w-[calc(100vw-2rem)] max-w-[360px] rounded-[18px] border border-[var(--border)] bg-[var(--card)] p-4 shadow-2xl">
     <div className="mb-4 flex items-center justify-between">
       <div className="text-lg font-bold">Notificações</div>
@@ -405,9 +450,18 @@ function parseLocalDate(dateString?: string) {
     </div>
 
     <div className="space-y-3">
-      <div className="rounded-[18px] bg-[var(--success)]/10 p-4 text-[var(--success)]">
-        {openMessage}
-      </div>
+      {notifications.map((n) => (
+        <div
+          key={n.id}
+          className={`rounded-[18px] p-4 ${
+            n.tone === 'success'
+              ? 'bg-[var(--success)]/10 text-[var(--success)]'
+              : 'bg-[var(--accent)]/10 text-[var(--accent)]'
+          }`}
+        >
+          {n.texto}
+        </div>
+      ))}
     </div>
   </div>
 )}
