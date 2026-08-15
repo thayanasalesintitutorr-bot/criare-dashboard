@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Activity,
   BarChart3,
@@ -111,6 +112,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const router = useRouter()
   const { role: sessao, fetchRole } = useSessionRole()
   const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
+  const zoomEscala = NIVEIS_ZOOM[zoomIndice]
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -480,7 +482,18 @@ function parseLocalDate(dateString?: string) {
   {statusIndicator}
 </div>
 
-<div className="rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm">
+<div
+  className="@container rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm"
+  style={
+    zoomEscala === 1
+      ? undefined
+      : {
+          width: `${100 / zoomEscala}%`,
+          transform: `scale(${zoomEscala})`,
+          transformOrigin: 'top left',
+        }
+  }
+>
     <div className="grid grid-cols-1 gap-3 @mobile-h:grid-cols-2 @tablet:grid-cols-3">
       <div>
         <FiltroResumoCard
@@ -566,7 +579,7 @@ function parseLocalDate(dateString?: string) {
               Personalizado
             </button>
 
-            {showCalendar && (
+            {showCalendar && createPortal(
               <>
               <div
                 className="fixed inset-0 z-40 bg-black/40"
@@ -680,7 +693,8 @@ function parseLocalDate(dateString?: string) {
                   </div>
                 </div>
               </div>
-              </>
+              </>,
+              document.body
             )}
           </div>
         </div>
@@ -783,7 +797,7 @@ function parseLocalDate(dateString?: string) {
 
           {comparar && (
               <div ref={compararCalendarRef} className="relative">
-                {showCompararCalendar && (
+                {showCompararCalendar && createPortal(
                   <>
                   <div
                     className="fixed inset-0 z-40 bg-black/40"
@@ -894,7 +908,8 @@ function parseLocalDate(dateString?: string) {
                       </div>
                     </div>
                   </div>
-                  </>
+                  </>,
+                  document.body
                 )}
               </div>
           )}
