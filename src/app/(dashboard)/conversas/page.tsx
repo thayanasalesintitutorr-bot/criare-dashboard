@@ -70,6 +70,17 @@ type PacienteProtocolo = {
   atualizado_em: string
 }
 
+type VendaPendente = {
+  kommoLeadId: number
+  nomePaciente: string
+  medico: string | null
+  produto: string | null
+  valor: number | string | null
+  fechadoEm: string | null
+  protocoloId: string | null
+  protocoloNome: string | null
+}
+
 const ETAPAS_PADRAO = ['Onboarding', 'Em tratamento', 'Acompanhamento', 'Finalizado']
 
 const STATUS_OPCOES: { value: string; label: string }[] = [
@@ -119,6 +130,11 @@ function hojeISO() {
   return new Date().toISOString().slice(0, 10)
 }
 
+function formatMoney(v: number | string | null) {
+  const n = Number(v || 0)
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
+}
+
 function etapaEfetiva(paciente: PacienteProtocolo, etapas: string[]) {
   if (paciente.etapa_atual && etapas.includes(paciente.etapa_atual)) return paciente.etapa_atual
   return etapas[0]
@@ -140,6 +156,7 @@ export default function ProtocolosPage() {
   const [protocolos, setProtocolos] = useState<Protocolo[]>([])
   const [pacientes, setPacientes] = useState<PacienteProtocolo[]>([])
   const [pacientesGlobal, setPacientesGlobal] = useState<PacienteProtocolo[]>([])
+  const [vendasPendentes, setVendasPendentes] = useState<VendaPendente[]>([])
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -236,11 +253,18 @@ export default function ProtocolosPage() {
     if (json.ok) setPacientesGlobal(json.pacientes)
   }, [])
 
+  const fetchVendasPendentes = useCallback(async () => {
+    const res = await fetch('/api/pacientes-protocolo/novas-vendas')
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) setVendasPendentes(json.vendas)
+  }, [])
+
   useEffect(() => {
     if (gate !== 'unlocked') return
     fetchProtocolos()
     fetchPacientesGlobal()
-  }, [gate, fetchProtocolos, fetchPacientesGlobal])
+    fetchVendasPendentes()
+  }, [gate, fetchProtocolos, fetchPacientesGlobal, fetchVendasPendentes])
 
   useEffect(() => {
     if (gate !== 'unlocked') return
@@ -311,6 +335,31 @@ export default function ProtocolosPage() {
       adesaoMedia,
     }
   }, [pacientesGlobal])
+
+  const vendasPendentesDoProtocolo = useMemo(
+    () => vendasPendentes.filter((v) => v.protocoloId === protocoloSelecionadoId),
+    [vendasPendentes, protocoloSelecionadoId]
+  )
+
+  async function criarAcompanhamentoDaVenda(venda: VendaPendente) {
+    const res = await fetch('/api/pacientes-protocolo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nomePaciente: venda.nomePaciente,
+        protocoloId: venda.protocoloId,
+        medico: venda.medico,
+        kommoLeadId: venda.kommoLeadId,
+      }),
+    })
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) {
+      fetchPacientes()
+      fetchPacientesGlobal()
+      fetchVendasPendentes()
+    }
+    return json
+  }
 
   async function atualizarPaciente(id: string, updates: Record<string, unknown>) {
     const res = await fetch(`/api/pacientes-protocolo/${id}`, {
@@ -514,8 +563,10 @@ export default function ProtocolosPage() {
               <QuadroKanban
                 protocolo={protocoloSelecionado}
                 pacientes={pacientes}
+                vendasPendentes={vendasPendentesDoProtocolo}
                 onMoverEtapa={(pacienteId, novaEtapa) => atualizarPaciente(pacienteId, { etapaAtual: novaEtapa })}
                 onSelecionarPaciente={setPacienteSelecionado}
+                onConfirmarVenda={criarAcompanhamentoDaVenda}
               />
             ) : null}
           </>
@@ -558,13 +609,17 @@ export default function ProtocolosPage() {
 function QuadroKanban({
   protocolo,
   pacientes,
+  vendasPendentes,
   onMoverEtapa,
   onSelecionarPaciente,
+  onConfirmarVenda,
 }: {
   protocolo: Protocolo
   pacientes: PacienteProtocolo[]
+  vendasPendentes: VendaPendente[]
   onMoverEtapa: (pacienteId: string, novaEtapa: string) => void
   onSelecionarPaciente: (p: PacienteProtocolo) => void
+  onConfirmarVenda: (venda: VendaPendente) => void
 }) {
   const etapas = protocolo.etapas.length > 0 ? protocolo.etapas : ETAPAS_PADRAO
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
@@ -583,12 +638,14 @@ function QuadroKanban({
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
-        {etapas.map((etapa) => (
+        {etapas.map((etapa, i) => (
           <ColunaKanban
             key={etapa}
             etapa={etapa}
             pacientes={pacientes.filter((p) => etapaEfetiva(p, etapas) === etapa)}
+            vendasPendentes={i === 0 ? vendasPendentes : []}
             onSelecionarPaciente={onSelecionarPaciente}
+            onConfirmarVenda={onConfirmarVenda}
           />
         ))}
       </div>
@@ -599,11 +656,15 @@ function QuadroKanban({
 function ColunaKanban({
   etapa,
   pacientes,
+  vendasPendentes,
   onSelecionarPaciente,
+  onConfirmarVenda,
 }: {
   etapa: string
   pacientes: PacienteProtocolo[]
+  vendasPendentes: VendaPendente[]
   onSelecionarPaciente: (p: PacienteProtocolo) => void
+  onConfirmarVenda: (venda: VendaPendente) => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: etapa })
 
@@ -621,15 +682,35 @@ function ColunaKanban({
         </span>
       </div>
       <div className="space-y-2">
+        {vendasPendentes.map((v) => (
+          <CardVendaPendenteKanban key={v.kommoLeadId} venda={v} onConfirmar={() => onConfirmarVenda(v)} />
+        ))}
         {pacientes.map((p) => (
           <CardPacienteKanban key={p.id} paciente={p} onClick={() => onSelecionarPaciente(p)} />
         ))}
-        {pacientes.length === 0 && (
+        {pacientes.length === 0 && vendasPendentes.length === 0 && (
           <p className="px-1 py-6 text-center text-[10px] font-semibold text-[var(--muted-foreground)]">
             Arraste um paciente aqui
           </p>
         )}
       </div>
+    </div>
+  )
+}
+
+function CardVendaPendenteKanban({ venda, onConfirmar }: { venda: VendaPendente; onConfirmar: () => void }) {
+  return (
+    <div className="rounded-xl border border-dashed border-[var(--accent)]/40 bg-[var(--accent)]/5 p-3">
+      <p className="truncate text-xs font-black text-[var(--foreground)]">{venda.nomePaciente}</p>
+      <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+        {venda.produto} · {venda.medico || 'sem médico'} · {formatMoney(venda.valor)}
+      </p>
+      <button
+        onClick={onConfirmar}
+        className="mt-2 w-full rounded-lg bg-[var(--accent)] px-2 py-1.5 text-[10px] font-black text-white transition hover:brightness-110"
+      >
+        Confirmar acompanhamento
+      </button>
     </div>
   )
 }
