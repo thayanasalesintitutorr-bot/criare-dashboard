@@ -889,6 +889,15 @@ function PainelDetalhePaciente({
             <h3 className="text-[17px] font-black text-[var(--foreground)]">{paciente.nome_paciente}</h3>
             <p className="text-xs font-semibold text-[var(--muted-foreground)]">
               {paciente.protocolo?.nome || 'Sem protocolo'} · {paciente.medico || 'sem médico'}
+              {paciente.kommo_lead_id && (
+                <>
+                  {' '}
+                  ·{' '}
+                  <span className="rounded-full bg-[var(--metric-card)] px-1.5 py-0.5 text-[10px] font-black text-[var(--muted-foreground)]">
+                    #{paciente.kommo_lead_id}
+                  </span>
+                </>
+              )}
             </p>
           </div>
           <button
