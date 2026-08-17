@@ -23,7 +23,6 @@ import {
   Plus,
   Trash2,
   Check,
-  Sparkles,
   Loader2,
   Pencil,
 } from 'lucide-react'
@@ -67,17 +66,6 @@ type PacienteProtocolo = {
   observacoes: Observacao[]
   ativo: boolean
   atualizado_em: string
-}
-
-type VendaPendente = {
-  kommoLeadId: number
-  nomePaciente: string
-  medico: string | null
-  produto: string | null
-  valor: number | string | null
-  fechadoEm: string | null
-  protocoloId: string | null
-  protocoloNome: string | null
 }
 
 const ETAPAS_PADRAO = ['Onboarding', 'Em tratamento', 'Acompanhamento', 'Finalizado']
@@ -129,11 +117,6 @@ function hojeISO() {
   return new Date().toISOString().slice(0, 10)
 }
 
-function formatMoney(v: number | string | null) {
-  const n = Number(v || 0)
-  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
-}
-
 function etapaEfetiva(paciente: PacienteProtocolo, etapas: string[]) {
   if (paciente.etapa_atual && etapas.includes(paciente.etapa_atual)) return paciente.etapa_atual
   return etapas[0]
@@ -154,7 +137,6 @@ export default function ProtocolosPage() {
 
   const [protocolos, setProtocolos] = useState<Protocolo[]>([])
   const [pacientes, setPacientes] = useState<PacienteProtocolo[]>([])
-  const [vendasPendentes, setVendasPendentes] = useState<VendaPendente[]>([])
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -166,7 +148,6 @@ export default function ProtocolosPage() {
   const [pacienteSelecionado, setPacienteSelecionado] = useState<PacienteProtocolo | null>(null)
   const [showGerenciarProtocolos, setShowGerenciarProtocolos] = useState(false)
   const [showNovoPaciente, setShowNovoPaciente] = useState(false)
-  const [prefilNovoPaciente, setPrefilNovoPaciente] = useState<VendaPendente | null>(null)
 
   const checarGate = useCallback(async () => {
     try {
@@ -246,17 +227,10 @@ export default function ProtocolosPage() {
     }
   }, [protocoloSelecionadoId, filtroMedico, filtroStatus, filtroResponsavel])
 
-  const fetchVendasPendentes = useCallback(async () => {
-    const res = await fetch('/api/pacientes-protocolo/novas-vendas')
-    const json = await res.json().catch(() => ({}))
-    if (json.ok) setVendasPendentes(json.vendas)
-  }, [])
-
   useEffect(() => {
     if (gate !== 'unlocked') return
     fetchProtocolos()
-    fetchVendasPendentes()
-  }, [gate, fetchProtocolos, fetchVendasPendentes])
+  }, [gate, fetchProtocolos])
 
   useEffect(() => {
     if (gate !== 'unlocked') return
@@ -386,10 +360,7 @@ export default function ProtocolosPage() {
             Gerenciar protocolos
           </button>
           <button
-            onClick={() => {
-              setPrefilNovoPaciente(null)
-              setShowNovoPaciente(true)
-            }}
+            onClick={() => setShowNovoPaciente(true)}
             className="flex items-center gap-1.5 rounded-xl bg-[var(--accent)] px-3.5 py-2 text-xs font-black text-white transition hover:brightness-110"
           >
             <UserPlus size={14} />
@@ -397,42 +368,6 @@ export default function ProtocolosPage() {
           </button>
         </div>
       </div>
-
-      {vendasPendentes.length > 0 && (
-        <div className="dashboard-section border-[color:var(--accent)]/30">
-          <div className="mb-3 flex items-center gap-2">
-            <Sparkles size={16} className="text-[var(--accent)]" />
-            <h3 className="text-sm font-black text-[var(--foreground)]">
-              {vendasPendentes.length} venda(s) de protocolo sem acompanhamento
-            </h3>
-          </div>
-          <div className="space-y-2">
-            {vendasPendentes.map((v) => (
-              <div
-                key={v.kommoLeadId}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-black text-[var(--foreground)]">{v.nomePaciente}</p>
-                  <p className="truncate text-[11px] font-semibold text-[var(--muted-foreground)]">
-                    {v.produto} {v.protocoloNome ? `→ ${v.protocoloNome}` : ''} · {v.medico || 'sem médico'} ·{' '}
-                    {formatMoney(v.valor)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setPrefilNovoPaciente(v)
-                    setShowNovoPaciente(true)
-                  }}
-                  className="shrink-0 rounded-lg bg-[var(--accent)] px-3 py-1.5 text-[11px] font-black text-white transition hover:brightness-110"
-                >
-                  Criar acompanhamento
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="grid gap-3 @md:grid-cols-2 @lg:grid-cols-5">
         <KpiMini icon={Users} label="Pacientes ativos" value={kpis.ativos} accent="blue" />
@@ -563,12 +498,10 @@ export default function ProtocolosPage() {
       {showNovoPaciente && (
         <ModalNovoPaciente
           protocolos={protocolos}
-          prefil={prefilNovoPaciente}
           onClose={() => setShowNovoPaciente(false)}
           onCreated={() => {
             setShowNovoPaciente(false)
             fetchPacientes()
-            fetchVendasPendentes()
           }}
         />
       )}
@@ -1255,18 +1188,16 @@ function ModalGerenciarProtocolos({
 
 function ModalNovoPaciente({
   protocolos,
-  prefil,
   onClose,
   onCreated,
 }: {
   protocolos: Protocolo[]
-  prefil: VendaPendente | null
   onClose: () => void
   onCreated: () => void
 }) {
-  const [nomePaciente, setNomePaciente] = useState(prefil?.nomePaciente || '')
-  const [protocoloId, setProtocoloId] = useState(prefil?.protocoloId || '')
-  const [medico, setMedico] = useState(prefil?.medico || '')
+  const [nomePaciente, setNomePaciente] = useState('')
+  const [protocoloId, setProtocoloId] = useState('')
+  const [medico, setMedico] = useState('')
   const [dataInicio, setDataInicio] = useState(hojeISO())
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
@@ -1284,7 +1215,6 @@ function ModalNovoPaciente({
           protocoloId: protocoloId || null,
           medico: medico || null,
           dataInicio: dataInicio || null,
-          kommoLeadId: prefil?.kommoLeadId || null,
         }),
       })
       const json = await res.json().catch(() => ({}))
