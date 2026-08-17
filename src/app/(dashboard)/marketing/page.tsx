@@ -25,43 +25,6 @@ import {
   Trash2,
 } from 'lucide-react'
 
-// Glaze de vidro (efeito espelho) aplicado sobre os cards: um brilho fixo no
-// topo + uma faixa de luz que varre o card periodicamente.
-function MirrorShine() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[var(--accent)]/5 to-transparent" />
-      <span className="absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]" />
-      <span
-        className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--accent)]/12 to-transparent"
-        style={{ animation: 'shine-sweep 6s ease-in-out infinite' }}
-      />
-    </div>
-  )
-}
-
-// Blobs animados atrás do conteúdo da página — dão movimento ambiente. Os
-// cards ficam translúcidos (vidro) por cima, então o brilho aparece através
-// deles em vez de só nos vãos entre um card e outro.
-function AuroraBackground() {
-  return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[24px]">
-      <div
-        className="absolute left-[-10%] top-[-14%] h-[560px] w-[560px] rounded-full bg-[var(--accent)]/12 blur-3xl"
-        style={{ animation: 'aurora-drift-1 24s ease-in-out infinite' }}
-      />
-      <div
-        className="absolute right-[-12%] top-[8%] h-[520px] w-[520px] rounded-full bg-[var(--chart-purple)]/12 blur-3xl"
-        style={{ animation: 'aurora-drift-2 28s ease-in-out infinite' }}
-      />
-      <div
-        className="absolute bottom-[-14%] left-[22%] h-[500px] w-[500px] rounded-full bg-[var(--chart-pink)]/10 blur-3xl"
-        style={{ animation: 'aurora-drift-3 32s ease-in-out infinite' }}
-      />
-    </div>
-  )
-}
-
 const INVESTIMENTO_STORAGE_KEY = 'criare-marketing-investimentos-por-origem'
 const INVESTIMENTO_TOTAL_STORAGE_KEY = 'criare-marketing-investimento-total'
 const SIDEBAR_ORIGENS_WIDTH_KEY = 'criare-marketing-sidebar-origens-width'
@@ -296,7 +259,6 @@ extraAoLado?: ReactNode
 
  return (
   <div className="relative h-full rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 flex flex-col overflow-visible shadow-[var(--card-shadow)]">
-    <MirrorShine />
   <div className="mb-1 flex min-h-[40px] items-center gap-3">
   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)]">
     <Icon
@@ -582,7 +544,6 @@ function RoiPorOrigemCard({
 
   return (
     <div className="relative flex flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 overflow-hidden shadow-[var(--card-shadow)]">
-      <MirrorShine />
       <div className="mb-5 flex shrink-0 items-center justify-between">
         <div>
           <div className={`${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
@@ -806,7 +767,6 @@ function UtmLinksCard({
 
   return (
     <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)]">
-      <MirrorShine />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 text-[16px] font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]">
@@ -1188,7 +1148,6 @@ function IndicadoresCard({ insights }: { insights: Insight[] }) {
 
   return (
     <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)]">
-      <MirrorShine />
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} font-black uppercase leading-[1.12] tracking-[0.08em] text-[var(--foreground)]`}>
@@ -1563,14 +1522,12 @@ const insights = buildInsights({
 
 return (
   <div className="relative space-y-5">
-    <AuroraBackground />
 
     <div
       className="grid min-w-0 grid-cols-1 gap-5 @xl:grid-cols-[var(--sidebar-origens-w)_1fr]"
       style={{ '--sidebar-origens-w': `${sidebarOrigensWidth}px` } as React.CSSProperties}
     >
   <aside className="relative flex min-w-0 flex-col rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-5 shadow-[var(--card-shadow)] xl:sticky xl:top-5 xl:max-h-[calc(100vh-40px)]">
-    <MirrorShine />
     <div
       onMouseDown={handleSidebarResizeStart}
       className="absolute -right-2 top-0 z-10 hidden h-full w-4 cursor-col-resize items-center justify-center xl:flex"
@@ -1714,7 +1671,6 @@ return (
 
       <section className="flex min-w-0 flex-col space-y-4">
         <div className="relative grid rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)] @xl:grid-cols-5">
-          <MirrorShine />
           <div className="flex items-center gap-3 border-r border-[color:var(--border)] px-3">
             <Wallet className="text-[var(--accent)]" size={28} />
             <div>
@@ -1745,7 +1701,6 @@ return (
         </div>
 
         <div className="relative rounded-[18px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 p-4 shadow-[var(--card-shadow)]">
-          <MirrorShine />
 <div className="grid gap-3 @md:grid-cols-2 @xl:grid-cols-4">
 
 <MarketingMetricCard
