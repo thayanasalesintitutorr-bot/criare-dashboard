@@ -45,11 +45,11 @@ type Protocolo = {
   ativo: boolean
 }
 
+type OcorrenciaChecklist = { data: string | null; execucao: 'agendado' | 'realizado' | null }
 type ChecklistItem = {
   item: string
   status: 'pendente' | 'concluido'
-  data?: string | null
-  execucao?: 'agendado' | 'realizado' | null
+  ocorrencias?: OcorrenciaChecklist[]
 }
 type Observacao = { texto: string; criado_em: string }
 
@@ -882,8 +882,17 @@ function PainelDetalhePaciente({
     await onUpdate({ checklist })
   }
 
-  async function atualizarDetalheChecklistItem(index: number, patch: Partial<ChecklistItem>) {
-    const checklist = paciente.checklist.map((item, i) => (i === index ? { ...item, ...patch } : item))
+  async function atualizarOcorrencia(itemIndex: number, ocIndex: number, patch: Partial<OcorrenciaChecklist>) {
+    const checklist = paciente.checklist.map((item, i) => {
+      if (i !== itemIndex) return item
+      const quantidade = quantidadeDoItem(item.item)
+      const atuais = Array.from(
+        { length: quantidade },
+        (_, idx): OcorrenciaChecklist => item.ocorrencias?.[idx] || { data: null, execucao: null }
+      )
+      const novasOcorrencias = atuais.map((oc, idx) => (idx === ocIndex ? { ...oc, ...patch } : oc))
+      return { ...item, ocorrencias: novasOcorrencias }
+    })
     await onUpdate({ checklist })
   }
 
@@ -1069,7 +1078,7 @@ function PainelDetalhePaciente({
         </h4>
         <div className="space-y-1.5">
           {paciente.checklist.map((item, i) => {
-            const temQuantidade = quantidadeDoItem(item.item) > 1
+            const quantidade = quantidadeDoItem(item.item)
             return (
               <div key={i} className="rounded-xl bg-[var(--metric-card)] px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
@@ -1104,27 +1113,51 @@ function PainelDetalhePaciente({
                   </button>
                 </div>
 
-                {temQuantidade && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-[color:var(--border)] pt-2">
-                    <input
-                      type="date"
-                      value={item.data || ''}
-                      onChange={(e) => atualizarDetalheChecklistItem(i, { data: e.target.value || null })}
-                      className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
-                    />
-                    <select
-                      value={item.execucao || ''}
-                      onChange={(e) =>
-                        atualizarDetalheChecklistItem(i, {
-                          execucao: (e.target.value || null) as ChecklistItem['execucao'],
-                        })
-                      }
-                      className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
-                    >
-                      <option value="">Agendado ou realizado?</option>
-                      <option value="agendado">Agendado</option>
-                      <option value="realizado">Realizado</option>
-                    </select>
+                {quantidade > 1 && (
+                  <div className="mt-2 space-y-1.5 border-t border-[color:var(--border)] pt-2">
+                    {Array.from({ length: quantidade }, (_, ocIndex) => {
+                      const oc = item.ocorrencias?.[ocIndex] || { data: null, execucao: null }
+                      return (
+                        <div key={ocIndex} className="flex flex-wrap items-center gap-2">
+                          <span className="w-5 shrink-0 text-[10px] font-black text-[var(--muted-foreground)]">
+                            #{ocIndex + 1}
+                          </span>
+                          <button
+                            onClick={() =>
+                              atualizarOcorrencia(i, ocIndex, {
+                                execucao: oc.execucao === 'realizado' ? null : 'realizado',
+                              })
+                            }
+                            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                              oc.execucao === 'realizado'
+                                ? 'border-[var(--success)] bg-[var(--success)] text-white'
+                                : 'border-[color:var(--border)]'
+                            }`}
+                          >
+                            {oc.execucao === 'realizado' && <Check size={12} />}
+                          </button>
+                          <input
+                            type="date"
+                            value={oc.data || ''}
+                            onChange={(e) => atualizarOcorrencia(i, ocIndex, { data: e.target.value || null })}
+                            className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+                          />
+                          <select
+                            value={oc.execucao || ''}
+                            onChange={(e) =>
+                              atualizarOcorrencia(i, ocIndex, {
+                                execucao: (e.target.value || null) as OcorrenciaChecklist['execucao'],
+                              })
+                            }
+                            className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+                          >
+                            <option value="">Agendado ou realizado?</option>
+                            <option value="agendado">Agendado</option>
+                            <option value="realizado">Realizado</option>
+                          </select>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
