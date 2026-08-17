@@ -27,6 +27,7 @@ import {
   Pencil,
   ClipboardCheck,
   CheckCircle2,
+  Hourglass,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
 
@@ -335,7 +336,8 @@ export default function ProtocolosPage() {
       : 0
 
     return {
-      vendidos: vendidosTotal.length,
+      vendidos: vendidosTotal.length + vendasPendentes.length,
+      pendentesConfirmacao: vendasPendentes.length,
       ativos: ativos.length,
       encerrados: encerrados.length,
       acaoHoje,
@@ -343,7 +345,7 @@ export default function ProtocolosPage() {
       semContato,
       adesaoMedia,
     }
-  }, [pacientesGlobal])
+  }, [pacientesGlobal, vendasPendentes])
 
   const vendasPendentesDoProtocolo = useMemo(
     () => vendasPendentes.filter((v) => v.protocoloId === protocoloSelecionadoId),
@@ -459,6 +461,7 @@ export default function ProtocolosPage() {
 
       <div className="grid gap-3 @md:grid-cols-2 @lg:grid-cols-4">
         <KpiMini icon={ClipboardCheck} label="Protocolos vendidos" value={kpis.vendidos} accent="blue" />
+        <KpiMini icon={Hourglass} label="Pendentes confirmação" value={kpis.pendentesConfirmacao} accent="red" />
         <KpiMini icon={Users} label="Ainda ativos" value={kpis.ativos} accent="green" />
         <KpiMini icon={CheckCircle2} label="Encerrados" value={kpis.encerrados} accent="purple" />
         <KpiMini icon={CalendarClock} label="Ação prevista hoje" value={kpis.acaoHoje} accent="purple" />
