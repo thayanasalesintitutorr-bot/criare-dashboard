@@ -26,6 +26,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     cor?: string
     ativo?: boolean
     etapas?: string[]
+    checklistPadrao?: string[]
   }
 
   try {
@@ -56,6 +57,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ ok: false, error: 'O protocolo precisa de pelo menos uma etapa' }, { status: 400 })
     }
     updates.etapas = etapas
+  }
+  if (body.checklistPadrao !== undefined) {
+    updates.checklist_padrao = Array.isArray(body.checklistPadrao)
+      ? body.checklistPadrao.map((c) => String(c).trim()).filter(Boolean)
+      : []
   }
 
   if (Object.keys(updates).length === 0) {

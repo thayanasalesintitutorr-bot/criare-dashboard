@@ -86,13 +86,17 @@ export async function POST(req: NextRequest) {
   }
 
   let etapaAtual = body.etapaAtual || null
-  if (!etapaAtual && body.protocoloId) {
+  let checklistInicial: { item: string; status: 'pendente' }[] = []
+  if (body.protocoloId) {
     const { data: protocolo } = await supabaseAdmin
       .from('protocolos')
-      .select('etapas')
+      .select('etapas, checklist_padrao')
       .eq('id', body.protocoloId)
       .single()
-    etapaAtual = protocolo?.etapas?.[0] || null
+    if (!etapaAtual) etapaAtual = protocolo?.etapas?.[0] || null
+    if (Array.isArray(protocolo?.checklist_padrao)) {
+      checklistInicial = protocolo.checklist_padrao.map((item: string) => ({ item, status: 'pendente' as const }))
+    }
   }
 
   const { data, error } = await supabaseAdmin
@@ -115,7 +119,7 @@ export async function POST(req: NextRequest) {
       proxima_acao_prioridade: body.proximaAcaoPrioridade || null,
       saldo_contratado: body.saldoContratado ?? null,
       saldo_realizado: body.saldoRealizado ?? null,
-      checklist: Array.isArray(body.checklist) ? body.checklist : [],
+      checklist: Array.isArray(body.checklist) ? body.checklist : checklistInicial,
       observacoes: Array.isArray(body.observacoes) ? body.observacoes : [],
     })
     .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor, etapas)')

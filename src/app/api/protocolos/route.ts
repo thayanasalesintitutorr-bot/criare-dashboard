@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
     duracaoSemanas?: number
     cor?: string
     etapas?: string[]
+    checklistPadrao?: string[]
   }
 
   try {
@@ -71,6 +72,10 @@ export async function POST(req: NextRequest) {
     ? body.etapas.map((e) => String(e).trim()).filter(Boolean)
     : ETAPAS_PADRAO
 
+  const checklistPadrao = Array.isArray(body.checklistPadrao)
+    ? body.checklistPadrao.map((c) => String(c).trim()).filter(Boolean)
+    : []
+
   const { data, error } = await supabaseAdmin
     .from('protocolos')
     .insert({
@@ -79,6 +84,7 @@ export async function POST(req: NextRequest) {
       duracao_semanas: duracaoSemanas,
       cor: body.cor || null,
       etapas: etapas.length > 0 ? etapas : ETAPAS_PADRAO,
+      checklist_padrao: checklistPadrao,
     })
     .select()
     .single()

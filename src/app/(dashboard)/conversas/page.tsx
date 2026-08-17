@@ -28,6 +28,7 @@ import {
   ClipboardCheck,
   CheckCircle2,
   Hourglass,
+  ListChecks,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
 
@@ -39,6 +40,7 @@ type Protocolo = {
   produtos_kommo: string[]
   duracao_semanas: number
   etapas: string[]
+  checklist_padrao: string[]
   cor: string | null
   ativo: boolean
 }
@@ -1161,11 +1163,15 @@ function ModalGerenciarProtocolos({
   const [produtos, setProdutos] = useState('')
   const [duracaoSemanas, setDuracaoSemanas] = useState(12)
   const [etapas, setEtapas] = useState(ETAPAS_PADRAO.join(', '))
+  const [checklistPadrao, setChecklistPadrao] = useState('')
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
 
   const [editandoEtapasId, setEditandoEtapasId] = useState<string | null>(null)
   const [etapasEditando, setEtapasEditando] = useState('')
+
+  const [editandoChecklistId, setEditandoChecklistId] = useState<string | null>(null)
+  const [checklistEditando, setChecklistEditando] = useState('')
 
   async function criarProtocolo() {
     if (!nome.trim()) return
@@ -1180,6 +1186,7 @@ function ModalGerenciarProtocolos({
           produtosKommo: produtos.split(',').map((p) => p.trim()).filter(Boolean),
           duracaoSemanas,
           etapas: etapas.split(',').map((e) => e.trim()).filter(Boolean),
+          checklistPadrao: checklistPadrao.split('\n').map((c) => c.trim()).filter(Boolean),
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -1191,6 +1198,7 @@ function ModalGerenciarProtocolos({
       setProdutos('')
       setDuracaoSemanas(12)
       setEtapas(ETAPAS_PADRAO.join(', '))
+      setChecklistPadrao('')
       onChanged()
     } finally {
       setSalvando(false)
@@ -1228,6 +1236,22 @@ function ModalGerenciarProtocolos({
     onChanged()
   }
 
+  function abrirEdicaoChecklist(p: Protocolo) {
+    setEditandoChecklistId(p.id)
+    setChecklistEditando(p.checklist_padrao.join('\n'))
+  }
+
+  async function salvarChecklistPadrao(p: Protocolo) {
+    const novoChecklist = checklistEditando.split('\n').map((c) => c.trim()).filter(Boolean)
+    await fetch(`/api/protocolos/${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checklistPadrao: novoChecklist }),
+    })
+    setEditandoChecklistId(null)
+    onChanged()
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
@@ -1255,8 +1279,18 @@ function ModalGerenciarProtocolos({
                   <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
                     Etapas: {(p.etapas.length ? p.etapas : ETAPAS_PADRAO).join(' → ')}
                   </p>
+                  <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+                    Checklist padrão: {p.checklist_padrao.length ? `${p.checklist_padrao.length} itens` : 'nenhum item ainda'}
+                  </p>
                 </div>
                 <div className="flex shrink-0 gap-1.5">
+                  <button
+                    onClick={() => abrirEdicaoChecklist(p)}
+                    title="Editar checklist padrão"
+                    className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition hover:bg-[var(--border)] hover:text-[var(--foreground)]"
+                  >
+                    <ListChecks size={13} />
+                  </button>
                   <button
                     onClick={() => abrirEdicaoEtapas(p)}
                     title="Editar etapas"
@@ -1301,6 +1335,32 @@ function ModalGerenciarProtocolos({
                   </button>
                 </div>
               )}
+
+              {editandoChecklistId === p.id && (
+                <div className="mt-2.5 space-y-2">
+                  <textarea
+                    value={checklistEditando}
+                    onChange={(e) => setChecklistEditando(e.target.value)}
+                    placeholder="Um item por linha — tudo que está incluído no pacote"
+                    rows={6}
+                    className={`${inputClass} resize-y`}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => salvarChecklistPadrao(p)}
+                      className="rounded-xl bg-[var(--accent)] px-3 py-1.5 text-[11px] font-black text-white transition hover:brightness-110"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      onClick={() => setEditandoChecklistId(null)}
+                      className="rounded-xl bg-[var(--card)] px-3 py-1.5 text-[11px] font-black text-[var(--muted-foreground)] transition hover:bg-[var(--border)]"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
           {protocolos.length === 0 && (
@@ -1335,6 +1395,15 @@ function ModalGerenciarProtocolos({
               onChange={(e) => setEtapas(e.target.value)}
               placeholder="Etapas da jornada, separadas por vírgula, na ordem"
               className={inputClass}
+            />
+          </div>
+          <div className="@sm:col-span-2">
+            <textarea
+              value={checklistPadrao}
+              onChange={(e) => setChecklistPadrao(e.target.value)}
+              placeholder="Checklist padrão: um item por linha — tudo que está incluído no pacote"
+              rows={4}
+              className={`${inputClass} resize-y`}
             />
           </div>
         </div>
