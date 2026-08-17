@@ -719,7 +719,12 @@ function ColunaKanban({
 function CardVendaPendenteKanban({ venda, onConfirmar }: { venda: VendaPendente; onConfirmar: () => void }) {
   return (
     <div className="rounded-xl border border-dashed border-[var(--accent)]/40 bg-[var(--accent)]/5 p-3">
-      <p className="truncate text-xs font-black text-[var(--foreground)]">{venda.nomePaciente}</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="truncate text-xs font-black text-[var(--foreground)]">{venda.nomePaciente}</p>
+        <span className="shrink-0 rounded-full bg-[var(--metric-card)] px-1.5 py-0.5 text-[9px] font-black text-[var(--muted-foreground)]">
+          #{venda.kommoLeadId}
+        </span>
+      </div>
       <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
         {venda.produto} · {venda.medico || 'sem médico'} · {formatMoney(venda.valor)}
       </p>
