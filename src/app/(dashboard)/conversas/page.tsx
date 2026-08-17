@@ -2,6 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  DndContext,
+  PointerSensor,
+  useDraggable,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
   Users,
   CalendarClock,
   AlertTriangle,
@@ -16,6 +25,7 @@ import {
   Check,
   Sparkles,
   Loader2,
+  Pencil,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
 
@@ -26,6 +36,7 @@ type Protocolo = {
   nome: string
   produtos_kommo: string[]
   duracao_semanas: number
+  etapas: string[]
   cor: string | null
   ativo: boolean
 }
@@ -37,11 +48,12 @@ type PacienteProtocolo = {
   id: string
   nome_paciente: string
   protocolo_id: string | null
-  protocolo: { id: string; nome: string; duracao_semanas: number; cor: string | null } | null
+  protocolo: { id: string; nome: string; duracao_semanas: number; cor: string | null; etapas: string[] } | null
   medico: string | null
   kommo_lead_id: number | null
   data_inicio: string | null
   semana_atual: number
+  etapa_atual: string | null
   status: string
   adesao_percent: number | null
   ultimo_contato: string | null
@@ -67,6 +79,8 @@ type VendaPendente = {
   protocoloId: string | null
   protocoloNome: string | null
 }
+
+const ETAPAS_PADRAO = ['Onboarding', 'Em tratamento', 'Acompanhamento', 'Finalizado']
 
 const STATUS_OPCOES: { value: string; label: string }[] = [
   { value: 'onboarding', label: 'Onboarding' },
@@ -120,6 +134,11 @@ function formatMoney(v: number | string | null) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 }
 
+function etapaEfetiva(paciente: PacienteProtocolo, etapas: string[]) {
+  if (paciente.etapa_atual && etapas.includes(paciente.etapa_atual)) return paciente.etapa_atual
+  return etapas[0]
+}
+
 const inputClass =
   'w-full rounded-xl border border-[color:var(--border)] bg-[var(--card)] px-3 py-2 text-xs font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]'
 
@@ -139,8 +158,8 @@ export default function ProtocolosPage() {
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
+  const [protocoloSelecionadoId, setProtocoloSelecionadoId] = useState('')
   const [filtroMedico, setFiltroMedico] = useState('')
-  const [filtroProtocolo, setFiltroProtocolo] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('')
   const [filtroResponsavel, setFiltroResponsavel] = useState('')
 
@@ -194,12 +213,16 @@ export default function ProtocolosPage() {
   }, [])
 
   const fetchPacientes = useCallback(async () => {
+    if (!protocoloSelecionadoId) {
+      setPacientes([])
+      return
+    }
     setCarregando(true)
     setErro('')
     try {
       const params = new URLSearchParams()
+      params.set('protocoloId', protocoloSelecionadoId)
       if (filtroMedico) params.set('medico', filtroMedico)
-      if (filtroProtocolo) params.set('protocoloId', filtroProtocolo)
       if (filtroStatus) params.set('status', filtroStatus)
       if (filtroResponsavel) params.set('responsavel', filtroResponsavel)
 
@@ -221,7 +244,7 @@ export default function ProtocolosPage() {
     } finally {
       setCarregando(false)
     }
-  }, [filtroMedico, filtroProtocolo, filtroStatus, filtroResponsavel])
+  }, [protocoloSelecionadoId, filtroMedico, filtroStatus, filtroResponsavel])
 
   const fetchVendasPendentes = useCallback(async () => {
     const res = await fetch('/api/pacientes-protocolo/novas-vendas')
@@ -240,6 +263,18 @@ export default function ProtocolosPage() {
     fetchPacientes()
   }, [gate, fetchPacientes])
 
+  const protocolosAtivos = useMemo(() => protocolos.filter((p) => p.ativo), [protocolos])
+
+  useEffect(() => {
+    if (protocoloSelecionadoId) return
+    if (protocolosAtivos.length > 0) setProtocoloSelecionadoId(protocolosAtivos[0].id)
+  }, [protocolosAtivos, protocoloSelecionadoId])
+
+  const protocoloSelecionado = useMemo(
+    () => protocolos.find((p) => p.id === protocoloSelecionadoId) || null,
+    [protocolos, protocoloSelecionadoId]
+  )
+
   const medicosDisponiveis = useMemo(
     () => Array.from(new Set(pacientes.map((p) => p.medico).filter(Boolean))) as string[],
     [pacientes]
@@ -248,12 +283,6 @@ export default function ProtocolosPage() {
     () =>
       Array.from(new Set(pacientes.map((p) => p.proxima_acao_responsavel).filter(Boolean))) as string[],
     [pacientes]
-  )
-
-  const protocolosParaExibirProdutos = useMemo(
-    () =>
-      filtroProtocolo ? protocolos.filter((p) => p.id === filtroProtocolo) : protocolos.filter((p) => p.ativo),
-    [protocolos, filtroProtocolo]
   )
 
   const kpis = useMemo(() => {
@@ -414,164 +443,104 @@ export default function ProtocolosPage() {
       </div>
 
       <div className="dashboard-section">
-        <div className="mb-4 grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-4">
-          <select value={filtroMedico} onChange={(e) => setFiltroMedico(e.target.value)} className={inputClass}>
-            <option value="">Todos os médicos</option>
-            {medicosDisponiveis.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filtroProtocolo}
-            onChange={(e) => setFiltroProtocolo(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">Todos os protocolos</option>
-            {protocolos
-              .filter((p) => p.ativo)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
+        {protocolosAtivos.length === 0 ? (
+          <p className="py-6 text-center text-xs font-semibold text-[var(--muted-foreground)]">
+            Nenhum protocolo cadastrado ainda. Use &ldquo;Gerenciar protocolos&rdquo; para criar o primeiro.
+          </p>
+        ) : (
+          <>
+            <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+              {protocolosAtivos.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setProtocoloSelecionadoId(p.id)}
+                  className={`shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-black transition ${
+                    p.id === protocoloSelecionadoId
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--metric-card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                  }`}
+                >
                   {p.nome}
-                </option>
+                </button>
               ))}
-          </select>
+            </div>
 
-          <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className={inputClass}>
-            <option value="">Todos os status</option>
-            {STATUS_OPCOES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={filtroResponsavel}
-            onChange={(e) => setFiltroResponsavel(e.target.value)}
-            className={inputClass}
-          >
-            <option value="">Todos os responsáveis</option>
-            {responsaveisDisponiveis.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {protocolosParaExibirProdutos.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {protocolosParaExibirProdutos.map((p) => (
-              <div
-                key={p.id}
-                className="flex flex-wrap items-center gap-1.5 rounded-xl bg-[var(--metric-card)] px-3 py-1.5"
-              >
-                <span className="text-[10px] font-black text-[var(--foreground)]">{p.nome}:</span>
-                {p.produtos_kommo.length > 0 ? (
-                  p.produtos_kommo.map((produto) => (
-                    <span
-                      key={produto}
-                      className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--accent)]"
-                    >
-                      {produto}
-                    </span>
-                  ))
-                ) : (
-                  <span className="text-[10px] font-semibold text-[var(--muted-foreground)]">
-                    sem produtos vinculados
+            {protocoloSelecionado && (
+              <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5 text-[10px] font-bold text-[var(--muted-foreground)]">
+                <span>
+                  Jornada:{' '}
+                  <span className="text-[var(--foreground)]">
+                    {(protocoloSelecionado.etapas.length ? protocoloSelecionado.etapas : ETAPAS_PADRAO).join(' → ')}
+                  </span>
+                </span>
+                {protocoloSelecionado.produtos_kommo.length > 0 && (
+                  <span className="flex flex-wrap items-center gap-1.5">
+                    Produtos Kommo:
+                    {protocoloSelecionado.produtos_kommo.map((produto) => (
+                      <span
+                        key={produto}
+                        className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--accent)]"
+                      >
+                        {produto}
+                      </span>
+                    ))}
                   </span>
                 )}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {erro && (
-          <p className="mb-3 rounded-xl bg-[var(--danger)]/10 px-3 py-2 text-xs font-bold text-[var(--danger)]">
-            {erro}
-          </p>
-        )}
+            <div className="mb-4 grid gap-2.5 @sm:grid-cols-3">
+              <select value={filtroMedico} onChange={(e) => setFiltroMedico(e.target.value)} className={inputClass}>
+                <option value="">Todos os médicos</option>
+                {medicosDisponiveis.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
 
-        {carregando ? (
-          <div className="flex items-center justify-center py-16 text-[var(--muted-foreground)]">
-            <Loader2 className="animate-spin" size={20} />
-          </div>
-        ) : pacientes.length === 0 ? (
-          <p className="py-12 text-center text-xs font-semibold text-[var(--muted-foreground)]">
-            Nenhum paciente encontrado com esses filtros.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-xs">
-              <thead>
-                <tr className="border-b border-[color:var(--border)] text-[10px] font-black uppercase tracking-wide text-[var(--muted-foreground)]">
-                  <th className="py-2 pr-3">Paciente</th>
-                  <th className="py-2 pr-3">Protocolo</th>
-                  <th className="py-2 pr-3">Médico</th>
-                  <th className="py-2 pr-3">Progresso</th>
-                  <th className="py-2 pr-3">Último contato</th>
-                  <th className="py-2 pr-3">Próxima ação</th>
-                  <th className="py-2 pr-3">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pacientes.map((p) => {
-                  const progresso = p.protocolo?.duracao_semanas
-                    ? Math.min(100, Math.round((p.semana_atual / p.protocolo.duracao_semanas) * 100))
-                    : 0
-                  const info = statusInfo(p.status)
-                  return (
-                    <tr
-                      key={p.id}
-                      onClick={() => setPacienteSelecionado(p)}
-                      className="cursor-pointer border-b border-[color:var(--border)] transition hover:bg-[var(--metric-card)]"
-                    >
-                      <td className="max-w-[180px] truncate py-2.5 pr-3 font-black text-[var(--foreground)]">
-                        {p.nome_paciente}
-                      </td>
-                      <td className="max-w-[160px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
-                        {p.protocolo?.nome || '—'}
-                      </td>
-                      <td className="max-w-[140px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
-                        {p.medico || '—'}
-                      </td>
-                      <td className="w-[130px] py-2.5 pr-3">
-                        <div className="progress-bar h-1.5">
-                          <div
-                            className="h-full rounded-full bg-[var(--accent)]"
-                            style={{ width: `${progresso}%` }}
-                          />
-                        </div>
-                        <span className="mt-1 block text-[10px] font-bold text-[var(--muted-foreground)]">
-                          Semana {p.semana_atual}
-                          {p.protocolo ? `/${p.protocolo.duracao_semanas}` : ''} · {progresso}%
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
-                        {formatDate(p.ultimo_contato)}
-                      </td>
-                      <td className="max-w-[180px] truncate py-2.5 pr-3 font-semibold text-[var(--muted-foreground)]">
-                        {p.proxima_acao || '—'}
-                        {p.proxima_acao_prazo && (
-                          <span className="ml-1 text-[10px] text-[var(--muted-foreground)]/70">
-                            ({formatDate(p.proxima_acao_prazo)})
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2.5 pr-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${info.className}`}>
-                          {info.label}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+              <select value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)} className={inputClass}>
+                <option value="">Todos os status</option>
+                {STATUS_OPCOES.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filtroResponsavel}
+                onChange={(e) => setFiltroResponsavel(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Todos os responsáveis</option>
+                {responsaveisDisponiveis.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {erro && (
+              <p className="mb-3 rounded-xl bg-[var(--danger)]/10 px-3 py-2 text-xs font-bold text-[var(--danger)]">
+                {erro}
+              </p>
+            )}
+
+            {carregando ? (
+              <div className="flex items-center justify-center py-16 text-[var(--muted-foreground)]">
+                <Loader2 className="animate-spin" size={20} />
+              </div>
+            ) : protocoloSelecionado ? (
+              <QuadroKanban
+                protocolo={protocoloSelecionado}
+                pacientes={pacientes}
+                onMoverEtapa={(pacienteId, novaEtapa) => atualizarPaciente(pacienteId, { etapaAtual: novaEtapa })}
+                onSelecionarPaciente={setPacienteSelecionado}
+              />
+            ) : null}
+          </>
         )}
       </div>
 
@@ -603,6 +572,119 @@ export default function ProtocolosPage() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+// ---------- Kanban ----------
+
+function QuadroKanban({
+  protocolo,
+  pacientes,
+  onMoverEtapa,
+  onSelecionarPaciente,
+}: {
+  protocolo: Protocolo
+  pacientes: PacienteProtocolo[]
+  onMoverEtapa: (pacienteId: string, novaEtapa: string) => void
+  onSelecionarPaciente: (p: PacienteProtocolo) => void
+}) {
+  const etapas = protocolo.etapas.length > 0 ? protocolo.etapas : ETAPAS_PADRAO
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }))
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over) return
+    const novaEtapa = String(over.id)
+    const pacienteId = String(active.id)
+    const paciente = pacientes.find((p) => p.id === pacienteId)
+    if (paciente && etapaEfetiva(paciente, etapas) !== novaEtapa) {
+      onMoverEtapa(pacienteId, novaEtapa)
+    }
+  }
+
+  return (
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      <div className="flex gap-3 overflow-x-auto pb-2">
+        {etapas.map((etapa) => (
+          <ColunaKanban
+            key={etapa}
+            etapa={etapa}
+            pacientes={pacientes.filter((p) => etapaEfetiva(p, etapas) === etapa)}
+            onSelecionarPaciente={onSelecionarPaciente}
+          />
+        ))}
+      </div>
+    </DndContext>
+  )
+}
+
+function ColunaKanban({
+  etapa,
+  pacientes,
+  onSelecionarPaciente,
+}: {
+  etapa: string
+  pacientes: PacienteProtocolo[]
+  onSelecionarPaciente: (p: PacienteProtocolo) => void
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: etapa })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`w-[260px] shrink-0 rounded-[16px] border p-2.5 transition-colors ${
+        isOver ? 'border-[var(--accent)] bg-[var(--accent)]/5' : 'border-[color:var(--border)] bg-[var(--background)]'
+      }`}
+    >
+      <div className="mb-2.5 flex items-center justify-between px-1">
+        <h4 className="truncate text-[11px] font-black uppercase tracking-wide text-[var(--foreground)]">{etapa}</h4>
+        <span className="shrink-0 rounded-full bg-[var(--metric-card)] px-2 py-0.5 text-[10px] font-black text-[var(--muted-foreground)]">
+          {pacientes.length}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {pacientes.map((p) => (
+          <CardPacienteKanban key={p.id} paciente={p} onClick={() => onSelecionarPaciente(p)} />
+        ))}
+        {pacientes.length === 0 && (
+          <p className="px-1 py-6 text-center text-[10px] font-semibold text-[var(--muted-foreground)]">
+            Arraste um paciente aqui
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function CardPacienteKanban({ paciente, onClick }: { paciente: PacienteProtocolo; onClick: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: paciente.id })
+  const info = statusInfo(paciente.status)
+  const style = transform
+    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 10 }
+    : undefined
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      onClick={onClick}
+      className={`cursor-grab touch-none rounded-xl border border-[color:var(--border)] bg-[var(--card)] p-3 transition active:cursor-grabbing ${
+        isDragging ? 'opacity-40' : 'hover:border-[var(--accent)]/40'
+      }`}
+    >
+      <p className="truncate text-xs font-black text-[var(--foreground)]">{paciente.nome_paciente}</p>
+      <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+        {paciente.medico || 'sem médico'}
+      </p>
+      {paciente.proxima_acao && (
+        <p className="mt-1.5 truncate text-[10px] font-semibold text-[var(--accent)]">→ {paciente.proxima_acao}</p>
+      )}
+      <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[9px] font-black ${info.className}`}>
+        {info.label}
+      </span>
     </div>
   )
 }
@@ -653,7 +735,10 @@ function PainelDetalhePaciente({
   const [novaObservacao, setNovaObservacao] = useState('')
   const [salvando, setSalvando] = useState(false)
 
+  const etapasProtocolo = paciente.protocolo?.etapas?.length ? paciente.protocolo.etapas : ETAPAS_PADRAO
+
   const [semanaAtual, setSemanaAtual] = useState(paciente.semana_atual)
+  const [etapaAtual, setEtapaAtual] = useState(etapaEfetiva(paciente, etapasProtocolo))
   const [status, setStatus] = useState(paciente.status)
   const [ultimoContato, setUltimoContato] = useState(paciente.ultimo_contato || '')
   const [adesao, setAdesao] = useState(paciente.adesao_percent ?? '')
@@ -672,6 +757,7 @@ function PainelDetalhePaciente({
     setSalvando(true)
     await onUpdate({
       semanaAtual: Number(semanaAtual) || 0,
+      etapaAtual,
       status,
       ultimoContato: ultimoContato || null,
       adesaoPercent: adesao === '' ? null : Number(adesao),
@@ -743,6 +829,15 @@ function PainelDetalhePaciente({
         </div>
 
         <div className="grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-3">
+          <Campo label="Etapa">
+            <select value={etapaAtual} onChange={(e) => setEtapaAtual(e.target.value)} className={inputClass}>
+              {etapasProtocolo.map((e) => (
+                <option key={e} value={e}>
+                  {e}
+                </option>
+              ))}
+            </select>
+          </Campo>
           <Campo label="Status">
             <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}>
               {STATUS_OPCOES.map((s) => (
@@ -967,8 +1062,12 @@ function ModalGerenciarProtocolos({
   const [nome, setNome] = useState('')
   const [produtos, setProdutos] = useState('')
   const [duracaoSemanas, setDuracaoSemanas] = useState(12)
+  const [etapas, setEtapas] = useState(ETAPAS_PADRAO.join(', '))
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
+
+  const [editandoEtapasId, setEditandoEtapasId] = useState<string | null>(null)
+  const [etapasEditando, setEtapasEditando] = useState('')
 
   async function criarProtocolo() {
     if (!nome.trim()) return
@@ -982,6 +1081,7 @@ function ModalGerenciarProtocolos({
           nome: nome.trim(),
           produtosKommo: produtos.split(',').map((p) => p.trim()).filter(Boolean),
           duracaoSemanas,
+          etapas: etapas.split(',').map((e) => e.trim()).filter(Boolean),
         }),
       })
       const json = await res.json().catch(() => ({}))
@@ -992,6 +1092,7 @@ function ModalGerenciarProtocolos({
       setNome('')
       setProdutos('')
       setDuracaoSemanas(12)
+      setEtapas(ETAPAS_PADRAO.join(', '))
       onChanged()
     } finally {
       setSalvando(false)
@@ -1012,6 +1113,23 @@ function ModalGerenciarProtocolos({
     onChanged()
   }
 
+  function abrirEdicaoEtapas(p: Protocolo) {
+    setEditandoEtapasId(p.id)
+    setEtapasEditando((p.etapas.length ? p.etapas : ETAPAS_PADRAO).join(', '))
+  }
+
+  async function salvarEtapas(p: Protocolo) {
+    const novasEtapas = etapasEditando.split(',').map((e) => e.trim()).filter(Boolean)
+    if (novasEtapas.length === 0) return
+    await fetch(`/api/protocolos/${p.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ etapas: novasEtapas }),
+    })
+    setEditandoEtapasId(null)
+    onChanged()
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-[18px] border border-[color:var(--border)] bg-[var(--card)] p-6">
@@ -1027,32 +1145,64 @@ function ModalGerenciarProtocolos({
 
         <div className="space-y-2">
           {protocolos.map((p) => (
-            <div
-              key={p.id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5"
-            >
-              <div className="min-w-0">
-                <p className={`text-xs font-black ${p.ativo ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)] line-through'}`}>
-                  {p.nome}
-                </p>
-                <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
-                  {p.duracao_semanas} semanas · {p.produtos_kommo.join(', ') || 'sem produtos vinculados'}
-                </p>
+            <div key={p.id} className="rounded-xl bg-[var(--metric-card)] px-3.5 py-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className={`text-xs font-black ${p.ativo ? 'text-[var(--foreground)]' : 'text-[var(--muted-foreground)] line-through'}`}>
+                    {p.nome}
+                  </p>
+                  <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+                    {p.duracao_semanas} semanas · {p.produtos_kommo.join(', ') || 'sem produtos vinculados'}
+                  </p>
+                  <p className="truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
+                    Etapas: {(p.etapas.length ? p.etapas : ETAPAS_PADRAO).join(' → ')}
+                  </p>
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  <button
+                    onClick={() => abrirEdicaoEtapas(p)}
+                    title="Editar etapas"
+                    className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition hover:bg-[var(--border)] hover:text-[var(--foreground)]"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => alternarAtivo(p)}
+                    className="rounded-lg px-2.5 py-1 text-[10px] font-black text-[var(--muted-foreground)] transition hover:bg-[var(--border)]"
+                  >
+                    {p.ativo ? 'Desativar' : 'Ativar'}
+                  </button>
+                  <button
+                    onClick={() => removerProtocolo(p)}
+                    className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition hover:bg-[var(--danger)]/10 hover:text-[var(--danger)]"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
-              <div className="flex shrink-0 gap-1.5">
-                <button
-                  onClick={() => alternarAtivo(p)}
-                  className="rounded-lg px-2.5 py-1 text-[10px] font-black text-[var(--muted-foreground)] transition hover:bg-[var(--border)]"
-                >
-                  {p.ativo ? 'Desativar' : 'Ativar'}
-                </button>
-                <button
-                  onClick={() => removerProtocolo(p)}
-                  className="rounded-lg p-1.5 text-[var(--muted-foreground)] transition hover:bg-[var(--danger)]/10 hover:text-[var(--danger)]"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
+
+              {editandoEtapasId === p.id && (
+                <div className="mt-2.5 flex gap-2">
+                  <input
+                    value={etapasEditando}
+                    onChange={(e) => setEtapasEditando(e.target.value)}
+                    placeholder="Etapas separadas por vírgula, na ordem da jornada"
+                    className={inputClass}
+                  />
+                  <button
+                    onClick={() => salvarEtapas(p)}
+                    className="shrink-0 rounded-xl bg-[var(--accent)] px-3 text-[11px] font-black text-white transition hover:brightness-110"
+                  >
+                    Salvar
+                  </button>
+                  <button
+                    onClick={() => setEditandoEtapasId(null)}
+                    className="shrink-0 rounded-xl bg-[var(--card)] px-3 text-[11px] font-black text-[var(--muted-foreground)] transition hover:bg-[var(--border)]"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
             </div>
           ))}
           {protocolos.length === 0 && (
@@ -1078,6 +1228,14 @@ function ModalGerenciarProtocolos({
               value={produtos}
               onChange={(e) => setProdutos(e.target.value)}
               placeholder="Produtos do Kommo vinculados, separados por vírgula"
+              className={inputClass}
+            />
+          </div>
+          <div className="@sm:col-span-2">
+            <input
+              value={etapas}
+              onChange={(e) => setEtapas(e.target.value)}
+              placeholder="Etapas da jornada, separadas por vírgula, na ordem"
               className={inputClass}
             />
           </div>

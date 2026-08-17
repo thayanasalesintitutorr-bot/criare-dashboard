@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabaseAdmin
     .from('pacientes_protocolo')
-    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor)')
+    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor, etapas)')
     .order('atualizado_em', { ascending: false })
 
   if (somenteAtivos) query = query.eq('ativo', true)
@@ -71,6 +71,7 @@ export async function POST(req: NextRequest) {
     saldoRealizado?: number
     checklist?: unknown[]
     observacoes?: unknown[]
+    etapaAtual?: string
   }
 
   try {
@@ -84,6 +85,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Nome do paciente é obrigatório' }, { status: 400 })
   }
 
+  let etapaAtual = body.etapaAtual || null
+  if (!etapaAtual && body.protocoloId) {
+    const { data: protocolo } = await supabaseAdmin
+      .from('protocolos')
+      .select('etapas')
+      .eq('id', body.protocoloId)
+      .single()
+    etapaAtual = protocolo?.etapas?.[0] || null
+  }
+
   const { data, error } = await supabaseAdmin
     .from('pacientes_protocolo')
     .insert({
@@ -94,6 +105,7 @@ export async function POST(req: NextRequest) {
       kommo_contact_id: body.kommoContactId || null,
       data_inicio: body.dataInicio || null,
       semana_atual: Number(body.semanaAtual) || 0,
+      etapa_atual: etapaAtual,
       status: body.status || 'onboarding',
       adesao_percent: body.adesaoPercent ?? null,
       ultimo_contato: body.ultimoContato || null,
@@ -106,7 +118,7 @@ export async function POST(req: NextRequest) {
       checklist: Array.isArray(body.checklist) ? body.checklist : [],
       observacoes: Array.isArray(body.observacoes) ? body.observacoes : [],
     })
-    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor)')
+    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor, etapas)')
     .single()
 
   if (error) {

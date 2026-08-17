@@ -25,6 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     duracaoSemanas?: number
     cor?: string
     ativo?: boolean
+    etapas?: string[]
   }
 
   try {
@@ -49,6 +50,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
   if (body.cor !== undefined) updates.cor = body.cor || null
   if (body.ativo !== undefined) updates.ativo = Boolean(body.ativo)
+  if (body.etapas !== undefined) {
+    const etapas = Array.isArray(body.etapas) ? body.etapas.map((e) => String(e).trim()).filter(Boolean) : []
+    if (etapas.length === 0) {
+      return NextResponse.json({ ok: false, error: 'O protocolo precisa de pelo menos uma etapa' }, { status: 400 })
+    }
+    updates.etapas = etapas
+  }
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ ok: false, error: 'Nada para atualizar' }, { status: 400 })

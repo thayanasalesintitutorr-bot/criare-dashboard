@@ -10,6 +10,8 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
 
+const ETAPAS_PADRAO = ['Onboarding', 'Em tratamento', 'Acompanhamento', 'Finalizado']
+
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req)
   if (!auth.ok) return auth.response
@@ -45,6 +47,7 @@ export async function POST(req: NextRequest) {
     produtosKommo?: string[]
     duracaoSemanas?: number
     cor?: string
+    etapas?: string[]
   }
 
   try {
@@ -64,6 +67,10 @@ export async function POST(req: NextRequest) {
 
   const duracaoSemanas = Number(body.duracaoSemanas) > 0 ? Math.round(Number(body.duracaoSemanas)) : 12
 
+  const etapas = Array.isArray(body.etapas)
+    ? body.etapas.map((e) => String(e).trim()).filter(Boolean)
+    : ETAPAS_PADRAO
+
   const { data, error } = await supabaseAdmin
     .from('protocolos')
     .insert({
@@ -71,6 +78,7 @@ export async function POST(req: NextRequest) {
       produtos_kommo: produtosKommo,
       duracao_semanas: duracaoSemanas,
       cor: body.cor || null,
+      etapas: etapas.length > 0 ? etapas : ETAPAS_PADRAO,
     })
     .select()
     .single()

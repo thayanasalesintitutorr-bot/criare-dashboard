@@ -18,6 +18,7 @@ const CAMPOS_ATUALIZAVEIS: Record<string, string> = {
   kommoContactId: 'kommo_contact_id',
   dataInicio: 'data_inicio',
   semanaAtual: 'semana_atual',
+  etapaAtual: 'etapa_atual',
   status: 'status',
   adesaoPercent: 'adesao_percent',
   ultimoContato: 'ultimo_contato',
@@ -43,7 +44,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { data, error } = await supabaseAdmin
     .from('pacientes_protocolo')
-    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor)')
+    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor, etapas)')
     .eq('id', id)
     .single()
 
@@ -86,7 +87,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .from('pacientes_protocolo')
     .update(updates)
     .eq('id', id)
-    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor)')
+    .select('*, protocolo:protocolos(id, nome, duracao_semanas, cor, etapas)')
     .single()
 
   if (error) {
