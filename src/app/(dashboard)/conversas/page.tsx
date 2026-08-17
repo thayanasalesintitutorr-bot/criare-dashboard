@@ -45,7 +45,12 @@ type Protocolo = {
   ativo: boolean
 }
 
-type ChecklistItem = { item: string; status: 'pendente' | 'concluido' }
+type ChecklistItem = {
+  item: string
+  status: 'pendente' | 'concluido'
+  data?: string | null
+  execucao?: 'agendado' | 'realizado' | null
+}
 type Observacao = { texto: string; criado_em: string }
 
 type PacienteProtocolo = {
@@ -141,6 +146,14 @@ function formatMoney(v: number | string | null) {
 function etapaEfetiva(paciente: PacienteProtocolo, etapas: string[]) {
   if (paciente.etapa_atual && etapas.includes(paciente.etapa_atual)) return paciente.etapa_atual
   return etapas[0]
+}
+
+const REGEX_QUANTIDADE_ITEM =
+  /(\d+)\s*(sessões?|sessão|doses?|dose|consultas?|consulta|protocolos?|protocolo|unidades?|unidade|retoques?|retoque)/i
+
+function quantidadeDoItem(texto: string): number {
+  const match = texto.match(REGEX_QUANTIDADE_ITEM)
+  return match ? Number(match[1]) : 0
 }
 
 const inputClass =
@@ -869,6 +882,11 @@ function PainelDetalhePaciente({
     await onUpdate({ checklist })
   }
 
+  async function atualizarDetalheChecklistItem(index: number, patch: Partial<ChecklistItem>) {
+    const checklist = paciente.checklist.map((item, i) => (i === index ? { ...item, ...patch } : item))
+    await onUpdate({ checklist })
+  }
+
   async function adicionarItemChecklist() {
     if (!novoItemChecklist.trim()) return
     const checklist = [...paciente.checklist, { item: novoItemChecklist.trim(), status: 'pendente' as const }]
@@ -1050,39 +1068,68 @@ function PainelDetalhePaciente({
           Checklist
         </h4>
         <div className="space-y-1.5">
-          {paciente.checklist.map((item, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between gap-2 rounded-xl bg-[var(--metric-card)] px-3 py-2"
-            >
-              <button onClick={() => alternarChecklistItem(i)} className="flex min-w-0 items-center gap-2 text-left">
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
-                    item.status === 'concluido'
-                      ? 'border-[var(--success)] bg-[var(--success)] text-white'
-                      : 'border-[color:var(--border)]'
-                  }`}
-                >
-                  {item.status === 'concluido' && <Check size={12} />}
-                </span>
-                <span
-                  className={`truncate text-xs font-semibold ${
-                    item.status === 'concluido'
-                      ? 'text-[var(--muted-foreground)] line-through'
-                      : 'text-[var(--foreground)]'
-                  }`}
-                >
-                  {item.item}
-                </span>
-              </button>
-              <button
-                onClick={() => removerItemChecklist(i)}
-                className="shrink-0 text-[var(--muted-foreground)] transition hover:text-[var(--danger)]"
-              >
-                <Trash2 size={13} />
-              </button>
-            </div>
-          ))}
+          {paciente.checklist.map((item, i) => {
+            const temQuantidade = quantidadeDoItem(item.item) > 1
+            return (
+              <div key={i} className="rounded-xl bg-[var(--metric-card)] px-3 py-2">
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => alternarChecklistItem(i)}
+                    className="flex min-w-0 items-center gap-2 text-left"
+                  >
+                    <span
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
+                        item.status === 'concluido'
+                          ? 'border-[var(--success)] bg-[var(--success)] text-white'
+                          : 'border-[color:var(--border)]'
+                      }`}
+                    >
+                      {item.status === 'concluido' && <Check size={12} />}
+                    </span>
+                    <span
+                      className={`truncate text-xs font-semibold ${
+                        item.status === 'concluido'
+                          ? 'text-[var(--muted-foreground)] line-through'
+                          : 'text-[var(--foreground)]'
+                      }`}
+                    >
+                      {item.item}
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => removerItemChecklist(i)}
+                    className="shrink-0 text-[var(--muted-foreground)] transition hover:text-[var(--danger)]"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+
+                {temQuantidade && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-[color:var(--border)] pt-2">
+                    <input
+                      type="date"
+                      value={item.data || ''}
+                      onChange={(e) => atualizarDetalheChecklistItem(i, { data: e.target.value || null })}
+                      className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+                    />
+                    <select
+                      value={item.execucao || ''}
+                      onChange={(e) =>
+                        atualizarDetalheChecklistItem(i, {
+                          execucao: (e.target.value || null) as ChecklistItem['execucao'],
+                        })
+                      }
+                      className="rounded-lg border border-[color:var(--border)] bg-[var(--card)] px-2 py-1 text-[10px] font-bold text-[var(--foreground)] outline-none focus:border-[var(--accent)]"
+                    >
+                      <option value="">Agendado ou realizado?</option>
+                      <option value="agendado">Agendado</option>
+                      <option value="realizado">Realizado</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            )
+          })}
           {paciente.checklist.length === 0 && (
             <p className="text-xs font-semibold text-[var(--muted-foreground)]">Nenhum item ainda.</p>
           )}
