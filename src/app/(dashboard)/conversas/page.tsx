@@ -134,6 +134,14 @@ function diasDesde(iso: string | null) {
   return Math.floor((Date.now() - data.getTime()) / (1000 * 60 * 60 * 24))
 }
 
+function diasEntre(isoA: string | null, isoB: string | null) {
+  if (!isoA || !isoB) return null
+  const a = new Date(`${isoA}T00:00:00`)
+  const b = new Date(`${isoB}T00:00:00`)
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return null
+  return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24))
+}
+
 function hojeISO() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -1117,6 +1125,8 @@ function PainelDetalhePaciente({
                   <div className="mt-2 space-y-1.5 border-t border-[color:var(--border)] pt-2">
                     {Array.from({ length: quantidade }, (_, ocIndex) => {
                       const oc = item.ocorrencias?.[ocIndex] || { data: null, execucao: null }
+                      const ocAnterior = ocIndex > 0 ? item.ocorrencias?.[ocIndex - 1] : null
+                      const dias = ocAnterior ? diasEntre(ocAnterior.data, oc.data) : null
                       return (
                         <div key={ocIndex} className="flex flex-wrap items-center gap-2">
                           <span className="w-5 shrink-0 text-[10px] font-black text-[var(--muted-foreground)]">
@@ -1155,6 +1165,11 @@ function PainelDetalhePaciente({
                             <option value="agendado">Agendado</option>
                             <option value="realizado">Realizado</option>
                           </select>
+                          {dias !== null && (
+                            <span className="text-[10px] font-bold text-[var(--muted-foreground)]">
+                              {dias >= 0 ? `+${dias}` : dias} dia{Math.abs(dias) === 1 ? '' : 's'} desde #{ocIndex}
+                            </span>
+                          )}
                         </div>
                       )
                     })}
