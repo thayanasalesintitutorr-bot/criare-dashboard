@@ -756,7 +756,14 @@ function CardPacienteKanban({ paciente, onClick }: { paciente: PacienteProtocolo
         isDragging ? 'opacity-40' : 'hover:border-[var(--accent)]/40'
       }`}
     >
-      <p className="truncate text-xs font-black text-[var(--foreground)]">{paciente.nome_paciente}</p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="truncate text-xs font-black text-[var(--foreground)]">{paciente.nome_paciente}</p>
+        {paciente.kommo_lead_id && (
+          <span className="shrink-0 rounded-full bg-[var(--metric-card)] px-1.5 py-0.5 text-[9px] font-black text-[var(--muted-foreground)]">
+            #{paciente.kommo_lead_id}
+          </span>
+        )}
+      </div>
       <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
         {paciente.medico || 'sem médico'}
       </p>
