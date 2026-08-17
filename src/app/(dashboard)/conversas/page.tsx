@@ -292,6 +292,15 @@ export default function ProtocolosPage() {
     return contagem
   }, [pacientesGlobal])
 
+  const pendentesPorProtocolo = useMemo(() => {
+    const contagem = new Map<string, number>()
+    for (const v of vendasPendentes) {
+      if (!v.protocoloId) continue
+      contagem.set(v.protocoloId, (contagem.get(v.protocoloId) || 0) + 1)
+    }
+    return contagem
+  }, [vendasPendentes])
+
   const medicosDisponiveis = useMemo(
     () => Array.from(new Set(pacientes.map((p) => p.medico).filter(Boolean))) as string[],
     [pacientes]
@@ -468,6 +477,7 @@ export default function ProtocolosPage() {
             <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
               {protocolosAtivos.map((p) => {
                 const ativos = ativosPorProtocolo.get(p.id) || 0
+                const pendentes = pendentesPorProtocolo.get(p.id) || 0
                 const selecionado = p.id === protocoloSelecionadoId
                 return (
                   <button
@@ -487,6 +497,14 @@ export default function ProtocolosPage() {
                     >
                       {ativos}
                     </span>
+                    {pendentes > 0 && (
+                      <span
+                        title={`${pendentes} venda(s) pendente(s) de confirmar`}
+                        className="rounded-full bg-[var(--danger)] px-1.5 py-0.5 text-[10px] font-black text-white"
+                      >
+                        {pendentes}
+                      </span>
+                    )}
                   </button>
                 )
               })}
