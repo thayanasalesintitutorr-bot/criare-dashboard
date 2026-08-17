@@ -164,7 +164,6 @@ export default function ProtocolosPage() {
   const [protocoloSelecionadoId, setProtocoloSelecionadoId] = useState('')
   const [filtroMedico, setFiltroMedico] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('')
-  const [filtroResponsavel, setFiltroResponsavel] = useState('')
 
   const [pacienteSelecionado, setPacienteSelecionado] = useState<PacienteProtocolo | null>(null)
   const [showGerenciarProtocolos, setShowGerenciarProtocolos] = useState(false)
@@ -226,7 +225,6 @@ export default function ProtocolosPage() {
       params.set('protocoloId', protocoloSelecionadoId)
       if (filtroMedico) params.set('medico', filtroMedico)
       if (filtroStatus) params.set('status', filtroStatus)
-      if (filtroResponsavel) params.set('responsavel', filtroResponsavel)
 
       const res = await fetch(`/api/pacientes-protocolo?${params.toString()}`)
       const json = await res.json().catch(() => ({}))
@@ -246,7 +244,7 @@ export default function ProtocolosPage() {
     } finally {
       setCarregando(false)
     }
-  }, [protocoloSelecionadoId, filtroMedico, filtroStatus, filtroResponsavel])
+  }, [protocoloSelecionadoId, filtroMedico, filtroStatus])
 
   const fetchPacientesGlobal = useCallback(async () => {
     const res = await fetch('/api/pacientes-protocolo')
@@ -304,11 +302,6 @@ export default function ProtocolosPage() {
 
   const medicosDisponiveis = useMemo(
     () => Array.from(new Set(pacientes.map((p) => p.medico).filter(Boolean))) as string[],
-    [pacientes]
-  )
-  const responsaveisDisponiveis = useMemo(
-    () =>
-      Array.from(new Set(pacientes.map((p) => p.proxima_acao_responsavel).filter(Boolean))) as string[],
     [pacientes]
   )
 
@@ -537,7 +530,7 @@ export default function ProtocolosPage() {
               </div>
             )}
 
-            <div className="mb-4 grid gap-2.5 @sm:grid-cols-3">
+            <div className="mb-4 grid gap-2.5 @sm:grid-cols-2">
               <select value={filtroMedico} onChange={(e) => setFiltroMedico(e.target.value)} className={inputClass}>
                 <option value="">Todos os médicos</option>
                 {medicosDisponiveis.map((m) => (
@@ -552,19 +545,6 @@ export default function ProtocolosPage() {
                 {STATUS_OPCOES.map((s) => (
                   <option key={s.value} value={s.value}>
                     {s.label}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filtroResponsavel}
-                onChange={(e) => setFiltroResponsavel(e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Todos os responsáveis</option>
-                {responsaveisDisponiveis.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
                   </option>
                 ))}
               </select>
