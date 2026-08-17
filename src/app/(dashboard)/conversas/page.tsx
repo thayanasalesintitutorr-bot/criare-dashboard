@@ -728,9 +728,19 @@ function CardVendaPendenteKanban({ venda, onConfirmar }: { venda: VendaPendente;
           #{venda.kommoLeadId}
         </span>
       </div>
-      <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">
-        {venda.produto} · {venda.medico || 'sem médico'} · {formatMoney(venda.valor)}
-      </p>
+      <p className="mt-0.5 truncate text-[10px] font-semibold text-[var(--muted-foreground)]">{venda.produto}</p>
+      <div className="mt-1.5 space-y-0.5 text-[10px] font-semibold text-[var(--muted-foreground)]">
+        <p className="truncate">
+          Médico: <span className="text-[var(--foreground)]">{venda.medico || 'sem médico'}</span>
+        </p>
+        <p className="truncate">
+          Fechamento:{' '}
+          <span className="text-[var(--foreground)]">{formatDate(venda.fechadoEm?.slice(0, 10) || null)}</span>
+        </p>
+        <p className="truncate">
+          Valor: <span className="text-[var(--foreground)]">{formatMoney(venda.valor)}</span>
+        </p>
+      </div>
       <button
         onClick={onConfirmar}
         className="mt-2 w-full rounded-lg bg-[var(--accent)] px-2 py-1.5 text-[10px] font-black text-white transition hover:brightness-110"
