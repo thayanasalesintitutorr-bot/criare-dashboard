@@ -800,8 +800,16 @@ function KpiMini({
     yellow: 'text-[var(--warning)] bg-[var(--warning)]/10',
     green: 'text-[var(--success)] bg-[var(--success)]/10',
   }
+  const barColors: Record<string, string> = {
+    blue: 'bg-[var(--accent)]',
+    purple: 'bg-violet-400',
+    red: 'bg-[var(--danger)]',
+    yellow: 'bg-[var(--warning)]',
+    green: 'bg-[var(--success)]',
+  }
   return (
-    <div className="metric-card">
+    <div className="metric-card relative overflow-hidden">
+      <div className={`absolute inset-x-0 top-0 h-[3px] ${barColors[accent]}`} />
       <div className="flex items-center justify-between">
         <p className="metric-label">{label}</p>
         <div className={`rounded-[10px] p-2 ${colors[accent]}`}>
