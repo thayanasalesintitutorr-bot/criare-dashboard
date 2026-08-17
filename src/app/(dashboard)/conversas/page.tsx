@@ -25,6 +25,8 @@ import {
   Check,
   Loader2,
   Pencil,
+  ClipboardCheck,
+  CheckCircle2,
 } from 'lucide-react'
 import { useSetPageHeader } from '@/store/use-page-header'
 
@@ -137,6 +139,7 @@ export default function ProtocolosPage() {
 
   const [protocolos, setProtocolos] = useState<Protocolo[]>([])
   const [pacientes, setPacientes] = useState<PacienteProtocolo[]>([])
+  const [pacientesGlobal, setPacientesGlobal] = useState<PacienteProtocolo[]>([])
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState('')
 
@@ -227,10 +230,17 @@ export default function ProtocolosPage() {
     }
   }, [protocoloSelecionadoId, filtroMedico, filtroStatus, filtroResponsavel])
 
+  const fetchPacientesGlobal = useCallback(async () => {
+    const res = await fetch('/api/pacientes-protocolo')
+    const json = await res.json().catch(() => ({}))
+    if (json.ok) setPacientesGlobal(json.pacientes)
+  }, [])
+
   useEffect(() => {
     if (gate !== 'unlocked') return
     fetchProtocolos()
-  }, [gate, fetchProtocolos])
+    fetchPacientesGlobal()
+  }, [gate, fetchProtocolos, fetchPacientesGlobal])
 
   useEffect(() => {
     if (gate !== 'unlocked') return
@@ -261,7 +271,9 @@ export default function ProtocolosPage() {
 
   const kpis = useMemo(() => {
     const hoje = hojeISO()
-    const ativos = pacientes.filter((p) => p.ativo)
+    const vendidosTotal = pacientesGlobal.filter((p) => p.ativo)
+    const encerrados = vendidosTotal.filter((p) => p.status === 'finalizado')
+    const ativos = vendidosTotal.filter((p) => p.status !== 'finalizado')
     const acaoHoje = ativos.filter((p) => p.proxima_acao_prazo === hoje).length
     const emAtencao = ativos.filter((p) => p.status === 'atrasado' || p.status === 'critico').length
     const semContato = ativos.filter((p) => {
@@ -280,8 +292,16 @@ export default function ProtocolosPage() {
       ? Math.round(progressos.reduce((a, b) => a + b, 0) / progressos.length)
       : 0
 
-    return { ativos: ativos.length, acaoHoje, emAtencao, semContato, adesaoMedia }
-  }, [pacientes])
+    return {
+      vendidos: vendidosTotal.length,
+      ativos: ativos.length,
+      encerrados: encerrados.length,
+      acaoHoje,
+      emAtencao,
+      semContato,
+      adesaoMedia,
+    }
+  }, [pacientesGlobal])
 
   async function atualizarPaciente(id: string, updates: Record<string, unknown>) {
     const res = await fetch(`/api/pacientes-protocolo/${id}`, {
@@ -292,6 +312,7 @@ export default function ProtocolosPage() {
     const json = await res.json().catch(() => ({}))
     if (json.ok) {
       setPacientes((prev) => prev.map((p) => (p.id === id ? json.paciente : p)))
+      setPacientesGlobal((prev) => prev.map((p) => (p.id === id ? json.paciente : p)))
       setPacienteSelecionado((prev) => (prev && prev.id === id ? json.paciente : prev))
     }
     return json
@@ -369,8 +390,10 @@ export default function ProtocolosPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 @md:grid-cols-2 @lg:grid-cols-5">
-        <KpiMini icon={Users} label="Pacientes ativos" value={kpis.ativos} accent="blue" />
+      <div className="grid gap-3 @md:grid-cols-2 @lg:grid-cols-4">
+        <KpiMini icon={ClipboardCheck} label="Protocolos vendidos" value={kpis.vendidos} accent="blue" />
+        <KpiMini icon={Users} label="Ainda ativos" value={kpis.ativos} accent="green" />
+        <KpiMini icon={CheckCircle2} label="Encerrados" value={kpis.encerrados} accent="purple" />
         <KpiMini icon={CalendarClock} label="Ação prevista hoje" value={kpis.acaoHoje} accent="purple" />
         <KpiMini icon={AlertTriangle} label="Em atenção" value={kpis.emAtencao} accent="red" />
         <KpiMini icon={Clock} label="Sem contato 7+ dias" value={kpis.semContato} accent="yellow" />
@@ -502,6 +525,7 @@ export default function ProtocolosPage() {
           onCreated={() => {
             setShowNovoPaciente(false)
             fetchPacientes()
+            fetchPacientesGlobal()
           }}
         />
       )}
