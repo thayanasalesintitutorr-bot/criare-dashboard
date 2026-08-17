@@ -336,25 +336,12 @@ function parseLocalDate(dateString?: string) {
   return (
     <header className="z-30 border-b border-[var(--border)] bg-[var(--background)]">
       <div className="flex flex-col gap-3 px-4 pt-4 pb-1 sm:px-6 md:px-8">
-        <div
-          className={
-            isProtocolosPage
-              ? 'grid grid-cols-1 items-center gap-3 tablet:grid-cols-[1fr_auto_1fr] tablet:gap-6'
-              : 'flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6'
-          }
-        >
+        <div className="flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6">
 
-          {isProtocolosPage ? (
-            <>
-              <div className="hidden tablet:block" />
-              <h1 className="text-center text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
-            </>
-          ) : (
-            <div className="flex-1 space-y-4">
-              <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
-            </div>
-          )}
-<div className={`flex shrink-0 flex-wrap items-center gap-2 sm:gap-3 ${isProtocolosPage ? 'justify-center tablet:justify-end' : ''}`}>
+          <div className="flex-1 space-y-4">
+            <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
+          </div>
+<div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="inline-flex items-center gap-3 rounded-[18px] bg-[var(--card)] px-4 py-3 transition-colors duration-200 hover:bg-[var(--metric-card)]"
