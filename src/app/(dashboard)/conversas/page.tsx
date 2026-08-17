@@ -142,6 +142,20 @@ function diasEntre(isoA: string | null, isoB: string | null) {
   return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24))
 }
 
+function prazoFinalTratamento(paciente: PacienteProtocolo): Date | null {
+  if (!paciente.data_inicio || !paciente.protocolo?.duracao_semanas) return null
+  const inicio = new Date(`${paciente.data_inicio}T00:00:00`)
+  if (Number.isNaN(inicio.getTime())) return null
+  return new Date(inicio.getTime() + paciente.protocolo.duracao_semanas * 7 * 24 * 60 * 60 * 1000)
+}
+
+// Positivo = dias além do prazo, negativo = dias restantes, null = sem dados pra calcular
+function diasAposPrazo(paciente: PacienteProtocolo): number | null {
+  const prazo = prazoFinalTratamento(paciente)
+  if (!prazo) return null
+  return Math.floor((Date.now() - prazo.getTime()) / (1000 * 60 * 60 * 24))
+}
+
 function hojeISO() {
   return new Date().toISOString().slice(0, 10)
 }
@@ -377,6 +391,7 @@ export default function ProtocolosPage() {
         protocoloId: venda.protocoloId,
         medico: venda.medico,
         kommoLeadId: venda.kommoLeadId,
+        dataInicio: venda.fechadoEm ? venda.fechadoEm.slice(0, 10) : null,
       }),
     })
     const json = await res.json().catch(() => ({}))
@@ -757,6 +772,7 @@ function CardVendaPendenteKanban({ venda, onConfirmar }: { venda: VendaPendente;
 function CardPacienteKanban({ paciente, onClick }: { paciente: PacienteProtocolo; onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: paciente.id })
   const info = statusInfo(paciente.status)
+  const atraso = paciente.status !== 'finalizado' ? diasAposPrazo(paciente) : null
   const style = transform
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 10 }
     : undefined
@@ -786,9 +802,16 @@ function CardPacienteKanban({ paciente, onClick }: { paciente: PacienteProtocolo
       {paciente.proxima_acao && (
         <p className="mt-1.5 truncate text-[10px] font-semibold text-[var(--accent)]">→ {paciente.proxima_acao}</p>
       )}
-      <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-[9px] font-black ${info.className}`}>
-        {info.label}
-      </span>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <span className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-black ${info.className}`}>
+          {info.label}
+        </span>
+        {atraso !== null && atraso > 0 && (
+          <span className="inline-block rounded-full bg-[var(--danger)] px-2 py-0.5 text-[9px] font-black text-white">
+            {atraso}d atrasado
+          </span>
+        )}
+      </div>
     </div>
   )
 }
@@ -852,6 +875,7 @@ function PainelDetalhePaciente({
   const [semanaAtual, setSemanaAtual] = useState(paciente.semana_atual)
   const [etapaAtual, setEtapaAtual] = useState(etapaEfetiva(paciente, etapasProtocolo))
   const [status, setStatus] = useState(paciente.status)
+  const [dataInicio, setDataInicio] = useState(paciente.data_inicio || '')
   const [ultimoContato, setUltimoContato] = useState(paciente.ultimo_contato || '')
   const [adesao, setAdesao] = useState(paciente.adesao_percent ?? '')
   const [saldoContratado, setSaldoContratado] = useState(paciente.saldo_contratado ?? '')
@@ -865,12 +889,22 @@ function PainelDetalhePaciente({
     ? Math.min(100, Math.round((semanaAtual / paciente.protocolo.duracao_semanas) * 100))
     : 0
 
+  const prazoFinal =
+    dataInicio && paciente.protocolo?.duracao_semanas
+      ? new Date(
+          new Date(`${dataInicio}T00:00:00`).getTime() +
+            paciente.protocolo.duracao_semanas * 7 * 24 * 60 * 60 * 1000
+        )
+      : null
+  const diasAtraso = prazoFinal ? Math.floor((Date.now() - prazoFinal.getTime()) / (1000 * 60 * 60 * 24)) : null
+
   async function salvarAlteracoes() {
     setSalvando(true)
     await onUpdate({
       semanaAtual: Number(semanaAtual) || 0,
       etapaAtual,
       status,
+      dataInicio: dataInicio || null,
       ultimoContato: ultimoContato || null,
       adesaoPercent: adesao === '' ? null : Number(adesao),
       saldoContratado: saldoContratado === '' ? null : Number(saldoContratado),
@@ -963,6 +997,31 @@ function PainelDetalhePaciente({
           </p>
         </div>
 
+        {status !== 'finalizado' && (
+          <div
+            className={`mb-5 rounded-xl px-3.5 py-2.5 text-xs font-bold ${
+              diasAtraso === null
+                ? 'bg-[var(--metric-card)] text-[var(--muted-foreground)]'
+                : diasAtraso > 0
+                  ? 'bg-[var(--danger)]/10 text-[var(--danger)]'
+                  : 'bg-[var(--success)]/10 text-[var(--success)]'
+            }`}
+          >
+            {dataInicio ? (
+              <>
+                Fechou em {formatDate(dataInicio)}
+                {prazoFinal &&
+                  diasAtraso !== null &&
+                  (diasAtraso > 0
+                    ? ` · ${diasAtraso} dia${diasAtraso === 1 ? '' : 's'} além do prazo de ${paciente.protocolo?.duracao_semanas} semanas (venceu em ${formatDate(prazoFinal.toISOString().slice(0, 10))})`
+                    : ` · No prazo · faltam ${Math.abs(diasAtraso)} dia${Math.abs(diasAtraso) === 1 ? '' : 's'} para o fim do prazo (${formatDate(prazoFinal.toISOString().slice(0, 10))})`)}
+              </>
+            ) : (
+              'Sem data de fechamento definida — preencha "Data de início" para calcular o prazo do tratamento.'
+            )}
+          </div>
+        )}
+
         <div className="grid gap-2.5 @sm:grid-cols-2 @lg:grid-cols-3">
           <Campo label="Etapa">
             <select value={etapaAtual} onChange={(e) => setEtapaAtual(e.target.value)} className={inputClass}>
@@ -981,6 +1040,14 @@ function PainelDetalhePaciente({
                 </option>
               ))}
             </select>
+          </Campo>
+          <Campo label="Data de início (fechamento)">
+            <input
+              type="date"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              className={inputClass}
+            />
           </Campo>
           <Campo label="Semana atual">
             <input
