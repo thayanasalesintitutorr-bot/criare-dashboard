@@ -259,6 +259,15 @@ export default function ProtocolosPage() {
     [protocolos, protocoloSelecionadoId]
   )
 
+  const ativosPorProtocolo = useMemo(() => {
+    const contagem = new Map<string, number>()
+    for (const p of pacientesGlobal) {
+      if (!p.protocolo_id || p.status === 'finalizado') continue
+      contagem.set(p.protocolo_id, (contagem.get(p.protocolo_id) || 0) + 1)
+    }
+    return contagem
+  }, [pacientesGlobal])
+
   const medicosDisponiveis = useMemo(
     () => Array.from(new Set(pacientes.map((p) => p.medico).filter(Boolean))) as string[],
     [pacientes]
@@ -408,19 +417,30 @@ export default function ProtocolosPage() {
         ) : (
           <>
             <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
-              {protocolosAtivos.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => setProtocoloSelecionadoId(p.id)}
-                  className={`shrink-0 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-black transition ${
-                    p.id === protocoloSelecionadoId
-                      ? 'bg-[var(--accent)] text-white'
-                      : 'bg-[var(--metric-card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
-                  }`}
-                >
-                  {p.nome}
-                </button>
-              ))}
+              {protocolosAtivos.map((p) => {
+                const ativos = ativosPorProtocolo.get(p.id) || 0
+                const selecionado = p.id === protocoloSelecionadoId
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setProtocoloSelecionadoId(p.id)}
+                    className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-black transition ${
+                      selecionado
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--metric-card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
+                    }`}
+                  >
+                    {p.nome}
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+                        selecionado ? 'bg-white/20 text-white' : 'bg-[var(--accent)]/15 text-[var(--accent)]'
+                      }`}
+                    >
+                      {ativos}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
 
             {protocoloSelecionado && (
