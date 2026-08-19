@@ -126,7 +126,9 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const [showZoom, setShowZoom] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
+  const calendarPopupRef = useRef<HTMLDivElement>(null)
   const compararCalendarRef = useRef<HTMLDivElement>(null)
+  const compararCalendarPopupRef = useRef<HTMLDivElement>(null)
   const zoomRef = useRef<HTMLDivElement>(null)
   const [categoriaAberta, setCategoriaAberta] = useState<
     'periodo' | 'segmento' | 'comparacao' | null
@@ -269,11 +271,15 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
     function handleClick(e: MouseEvent) {
       const target = e.target as Node
 
-      if (calendarRef.current && !calendarRef.current.contains(target)) {
+      const dentroDoGatilhoCalendario = calendarRef.current?.contains(target)
+      const dentroDoPopupCalendario = calendarPopupRef.current?.contains(target)
+      if (!dentroDoGatilhoCalendario && !dentroDoPopupCalendario) {
         setShowCalendar(false)
       }
 
-      if (compararCalendarRef.current && !compararCalendarRef.current.contains(target)) {
+      const dentroDoGatilhoComparar = compararCalendarRef.current?.contains(target)
+      const dentroDoPopupComparar = compararCalendarPopupRef.current?.contains(target)
+      if (!dentroDoGatilhoComparar && !dentroDoPopupComparar) {
         setShowCompararCalendar(false)
       }
 
@@ -642,7 +648,7 @@ function parseLocalDate(dateString?: string) {
                 className="fixed inset-0 z-40 bg-black/40"
                 onClick={() => setShowCalendar(false)}
               />
-              <div className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
+              <div ref={calendarPopupRef} className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
                 <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
                     <CalendarDays size={16} />
@@ -860,7 +866,7 @@ function parseLocalDate(dateString?: string) {
                     className="fixed inset-0 z-40 bg-black/40"
                     onClick={() => setShowCompararCalendar(false)}
                   />
-                  <div className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
+                  <div ref={compararCalendarPopupRef} className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100vh-2.5rem)] w-[360px] max-w-[calc(100vw-2.5rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[18px] border border-[var(--border)] bg-[var(--card)] shadow-2xl">
                     <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--muted)]">
                         <CalendarDays size={16} />
