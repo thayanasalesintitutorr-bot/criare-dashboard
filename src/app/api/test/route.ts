@@ -530,8 +530,48 @@ function mesclarVazioEmPaciente(origens: ReturnType<typeof buildOrigens>) {
   )
 }
 
+// Formata um Date nos componentes locais (ano/mês/dia/hora...) como string
+// "naive" (sem sufixo de fuso), igual ao formato que parseDateLocal() já
+// assume ao interpretar os timestamps do Kommo. Não usar toISOString() aqui
+// — ele converte pra UTC e deslocaria a janela.
+function toNaiveIsoString(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+// Janela seguraça (superset) que cobre todo intervalo de data que qualquer
+// cálculo do arquivo possa consultar: período atual, período de comparação
+// e a janela de "próxima semana" (usada por closest_task_at) — com 1 dia de
+// folga em cada ponta. Qualquer inRange(...) existente continua rodando
+// depois, sem mudança nenhuma — isso aqui só evita baixar o histórico
+// inteiro quando só uma fatia pequena dele é usada.
+function buildJanelaSegura(janelas: { start: Date; end: Date }[]) {
+  const minTime = Math.min(...janelas.map((j) => j.start.getTime()))
+  const maxTime = Math.max(...janelas.map((j) => j.end.getTime()))
+  const umDiaMs = 24 * 60 * 60 * 1000
+  return {
+    min: toNaiveIsoString(new Date(minTime - umDiaMs)),
+    max: toNaiveIsoString(new Date(maxTime + umDiaMs)),
+  }
+}
+
+// Filtro OR do PostgREST: inclui o lead se QUALQUER UM dos 4 campos de data
+// usados pelos cálculos (created_at, closed_at, scheduled_at,
+// closest_task_at) cair dentro da janela segura. Como os filtros originais
+// de cada métrica continuam intactos e rodam depois, esse pré-filtro só
+// precisa ser um superconjunto — nunca pode excluir uma linha que algum
+// inRange() mais adiante ainda vá usar.
+function buildFiltroJanelaOr(min: string, max: string) {
+  const campos = ['created_at', 'closed_at', 'scheduled_at', 'closest_task_at']
+  const grupos = campos
+    .map((campo) => `and(${campo}.gte.${min},${campo}.lte.${max})`)
+    .join(',')
+  return `or=(${grupos})`
+}
+
 async function fetchAllLeadsByPipeline(
-  pipelineId: 'CONSULTA' | 'VENDAS' | 'REABORD'
+  pipelineId: 'CONSULTA' | 'VENDAS' | 'REABORD',
+  janelaFiltro?: string
 ) {
   let allData: Lead[] = []
   let from = 0
@@ -540,7 +580,7 @@ async function fetchAllLeadsByPipeline(
   while (true) {
 
   const response = await fetch(
-  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio,utm_campaing,utm_content&offset=${from}&limit=${pageSize}`,
+  `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/leads?pipeline_id=eq.${pipelineId}${janelaFiltro ? `&${janelaFiltro}` : ''}&select=id,name,pipeline_id,status_id,faturamento,venda,created_at,updated_at,closed_at,closest_task_at,campanha,source,tag,medico,scheduled_at,Produto,Atendimento,Data_de_atendimento,Convenio,utm_campaing,utm_content&offset=${from}&limit=${pageSize}`,
   {
     headers: {
   apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -567,6 +607,62 @@ const data = await response.json()
 }
 
   return allData
+}
+
+async function fetchNps() {
+  const npsResponse = await fetch(
+    'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/nps?select=*',
+    {
+      headers: {
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        'Accept-Profile': 'kommo',
+      },
+    }
+  )
+
+  if (!npsResponse.ok) {
+    const errorText = await npsResponse.text()
+    throw new Error(errorText)
+  }
+
+  return npsResponse.json()
+}
+
+async function fetchAllNoShow() {
+  let noShowData: any[] = []
+  let from = 0
+  const pageSize = 1000
+
+  while (true) {
+    const noShowResponse = await fetch(
+      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*&offset=${from}&limit=${pageSize}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+          'Accept-Profile': 'kommo',
+        },
+      }
+    )
+
+    if (!noShowResponse.ok) {
+      const errorText = await noShowResponse.text()
+      throw new Error(errorText)
+    }
+
+    const page = await noShowResponse.json()
+
+    if (!page || page.length === 0) break
+
+    noShowData = noShowData.concat(page)
+
+    if (page.length < pageSize) break
+
+    from += pageSize
+  }
+
+  return noShowData
 }
 
     export async function GET(req: Request) {
@@ -608,10 +704,24 @@ const data = await response.json()
             end: parseLocalDate(compararFim, true),
           }
         : getPreviousRange(periodo, range.start, range.end)
-    const [consultaBase, vendasBase, reabordBase] = await Promise.all([
-      fetchAllLeadsByPipeline('CONSULTA'),
-      fetchAllLeadsByPipeline('VENDAS'),
+    const nextWeekRange = getNextWeekRangeSaturdayToFriday(new Date())
+
+    // Superconjunto seguro de datas: cobre período atual + anterior + próxima
+    // semana, com folga de 1 dia. Evita baixar o histórico inteiro de leads
+    // a cada filtro, sem mudar nenhum cálculo (que continua filtrando de
+    // novo, com precisão, em cima do que chega aqui). REABORD fica de fora
+    // desse filtro de propósito: é pequeno (não é o gargalo) e a resposta
+    // devolve reabordLeads inteiro, sem filtro de período, pra quem consome
+    // esse campo direto.
+    const janelaSegura = buildJanelaSegura([range, previousRange, nextWeekRange])
+    const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
+
+    const [consultaBase, vendasBase, reabordBase, npsData, noShowData] = await Promise.all([
+      fetchAllLeadsByPipeline('CONSULTA', janelaFiltro),
+      fetchAllLeadsByPipeline('VENDAS', janelaFiltro),
       fetchAllLeadsByPipeline('REABORD'),
+      fetchNps(),
+      fetchAllNoShow(),
     ])
 
     const consultaLeads = filterBySegmento(
@@ -628,7 +738,6 @@ const data = await response.json()
       reabordBase.filter((l) => normalize(l.pipeline_id) === 'REABORD'),
       segmento
     )
-    const nextWeekRange = getNextWeekRangeSaturdayToFriday(new Date())
 
 const tarefasProximaSemanaConsulta = consultaLeads.filter((l) => {
   const criadoNoPeriodo = inRange(
@@ -1457,25 +1566,7 @@ const origensVendaConsulta = campanhasConsulta
 
 const origensPropostasFechadas = campanhasVendidas
 
-  const npsResponse = await fetch(
-  'https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/nps?select=*',
-  {
-    headers: {
-  apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-  'Accept-Profile': 'kommo',
-},
-  }
-)
-
-if (!npsResponse.ok) {
-  const errorText = await npsResponse.text()
-  throw new Error(errorText)
-}
-
-const npsData = await npsResponse.json()
-
-const npsFiltrado = (npsData || []).filter((item: any) => {
+  const npsFiltrado = (npsData || []).filter((item: any) => {
   return inRange(
     parseDateLocal(String(item.id)),
     range.start,
@@ -1489,40 +1580,6 @@ const npsGoogle = npsFiltrado.reduce((total: number, item: any) => {
 
 const metaNpsGoogle = getMetaNps(range.start, range.end)
 const npsGooglePercent = safePercent(npsGoogle, metaNpsGoogle)
-
-let noShowData: any[] = []
-{
-  let from = 0
-  const pageSize = 1000
-
-  while (true) {
-    const noShowResponse = await fetch(
-      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*&offset=${from}&limit=${pageSize}`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-          'Accept-Profile': 'kommo',
-        },
-      }
-    )
-
-    if (!noShowResponse.ok) {
-      const errorText = await noShowResponse.text()
-      throw new Error(errorText)
-    }
-
-    const page = await noShowResponse.json()
-
-    if (!page || page.length === 0) break
-
-    noShowData = noShowData.concat(page)
-
-    if (page.length < pageSize) break
-
-    from += pageSize
-  }
-}
 
 const noShowFiltrado = (noShowData || []).filter((item: any) => {
   const data = parseDataAmplimed(item['Data e hora Agendada'])
