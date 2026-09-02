@@ -292,7 +292,7 @@ function filterBySegmento(leads: Lead[], segmento: string) {
   return leads.filter((lead) => segmentoDoLead(lead) === segmento)
 }
 
-const META_MENSAL_VENDAS = 750000
+const META_MENSAL_VENDAS = 1000000
 const META_TICKET_MEDIO = 2800
 const META_MENSAL_NPS = 25
 
@@ -362,8 +362,8 @@ function getMetaNps(start: Date, end: Date) {
 // Função única para obter a meta de vendas de qualquer período.
 //
 // Regras:
-// - Mês atual / mês passado / mês inteiro selecionado: meta mensal cheia (R$ 750.000).
-// - Hoje / ontem: meta diária do mês da data (750.000 / dias úteis do mês).
+// - Mês atual / mês passado / mês inteiro selecionado: meta mensal cheia (R$ 1.000.000).
+// - Hoje / ontem: meta diária do mês da data (1.000.000 / dias úteis do mês).
 // - Semana / personalizado / qualquer intervalo parcial: soma da meta diária
 //   de cada dia útil dentro do intervalo (usando a meta diária do mês de cada dia).
 function getGoalForPeriod(startDate: Date, endDate: Date, periodType: string) {
