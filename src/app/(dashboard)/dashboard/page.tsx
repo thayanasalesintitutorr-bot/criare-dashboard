@@ -654,7 +654,7 @@ function MedicoSnapshotCard({
       <div className={`mt-3 grid grid-cols-2 gap-2 border-t pt-3 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
         <div>
           <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
-            Ocupação da agenda
+            Taxa de comparecimento
           </p>
           <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
             {formatPercent(ocupacao)}

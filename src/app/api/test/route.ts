@@ -2031,26 +2031,6 @@ const cirurgiasMedicoLista = atendimentosAgendaMedico.filter((item: any) => {
 })
 
 const cirurgiasMedico = cirurgiasMedicoLista.length
-  
-  const capacidadeSemanal = med.includes('CLAUDIA') ? 28 : 40
-const capacidadeDiaria = med.includes('CLAUDIA') ? 6 : 8
-
-const capacidadeCalculada =
-  periodo === 'hoje' || periodo === 'ontem'
-    ? capacidadeDiaria
-    : periodo === 'semana'
-    ? capacidadeSemanal
-    : periodo === 'mes-atual' || periodo === 'mes-passado'
-    ? capacidadeDiaria * 20
-    : capacidadeDiaria *
-      Math.max(
-        1,
-        Math.floor(
-          (startOfDay(range.end).getTime() -
-            startOfDay(range.start).getTime()) /
-            (1000 * 60 * 60 * 24)
-        ) + 1
-      )
 
   const noShowMedico = atendimentosAgendaMedico.filter((item: any) => {
     const status = normalize(item['Status'])
@@ -2322,11 +2302,16 @@ produto.includes('PLENO TOTAL 6 MESES') ||
   manha,
   tarde,
   retornos,
+  // Taxa de comparecimento: % das consultas agendadas no período que
+  // efetivamente aconteceram (status FINALIZADO), sobre o total de
+  // agendamentos do médico no período (finalizados + no-show + cancelados +
+  // reagendados). Antes era "atendimentos ÷ capacidade fixa chutada por
+  // médico" — trocado porque a capacidade era um número inventado, igual
+  // pra todo mundo, e não refletia a agenda real de cada médico.
   capacidadeAgenda:
-    capacidadeCalculada > 0
-  ? Math.min(
-      Math.round((atendimentosMedico / capacidadeCalculada) * 100),
-      100
+    atendimentosAgendaMedico.length > 0
+  ? Math.round(
+      (atendimentosMedico / atendimentosAgendaMedico.length) * 100
     )
   : 0,
   noShow: noShowMedico,

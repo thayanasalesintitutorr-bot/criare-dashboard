@@ -808,7 +808,7 @@ const ticketProcedimentosMedico =
 
     <div className={isImac ? 'w-[140px] shrink-0' : isApresentacao ? 'w-[160px] shrink-0' : 'w-full shrink-0'}>
       <p className={`${isImac ? 'text-[10px]' : isApresentacao ? 'text-[12px]' : 'text-[11px]'} font-bold uppercase tracking-[0.06em] text-[var(--muted-foreground)]`}>
-        Ocupação da agenda
+        Taxa de comparecimento
       </p>
 
       {(() => {
