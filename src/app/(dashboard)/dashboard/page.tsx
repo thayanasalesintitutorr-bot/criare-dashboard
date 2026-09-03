@@ -696,7 +696,7 @@ function MedicoSnapshotCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[18px]' : 'text-[18px]'}`}>
+          <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[17px]' : 'text-[17px]'}`}>
             {nome}
           </p>
 
@@ -712,78 +712,63 @@ function MedicoSnapshotCard({
         </div>
       </div>
 
-      <div className={`mt-4 grid grid-cols-2 gap-x-3 gap-y-3 border-t pt-4 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
+      <div className={`mt-3 grid grid-cols-2 gap-2 border-t pt-3 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
         <div>
-          <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ocupação da agenda
           </p>
-          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
             {formatPercent(ocupacao)}
           </p>
         </div>
 
         <div>
-          <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Consolidado
           </p>
-          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${textPrimary()}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
             {formatMoneyShort(faturamentoConsolidado || 0)}
             <DeltaBadge atual={faturamentoConsolidado} anterior={faturamentoConsolidadoAnterior} />
           </p>
         </div>
 
         <div>
-          <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ticket Médio
           </p>
-          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${textPrimary()}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
             {formatMoney(ticketConsulta || 0)}
           </p>
         </div>
 
         <div>
-          <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Alcance da meta
           </p>
-          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
             {formatPercent(percentualMeta || 0)}
           </p>
         </div>
 
-        <div className="col-span-2 grid grid-cols-3 gap-x-3">
-          <div>
-            <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
-              Propostas
-            </p>
-            <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${textPrimary()}`}>
-              {propostasEnviadas ?? 0}
-            </p>
-          </div>
-
-          <div>
-            <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
-              Fechadas
-            </p>
-            <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${textPrimary()}`}>
-              {vendasFechadas ?? 0}
-            </p>
-          </div>
-
-          <div>
-            <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
-              Conversão
-            </p>
-            <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${statusClass(conversaoOk, conversaoAlerta)}`}>
-              {formatPercent(taxaConversao || 0)}
-            </p>
-          </div>
+        <div className="col-span-2">
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Conversão
+          </p>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
+            {formatPercent(taxaConversao || 0)}
+            {propostasEnviadas !== undefined && (
+              <span className={`ml-1.5 text-[13px] font-medium ${textSecondary()}`}>
+                ({vendasFechadas ?? 0} de {propostasEnviadas} propostas)
+              </span>
+            )}
+          </p>
         </div>
 
         <div className="col-span-2">
-          <p className={`text-[14px] font-medium ${textSecondary()} ${isApresentacao ? 'text-[16px]' : ''}`}>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Pacientes novos
           </p>
-          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[36px]' : 'text-[32px]'} tracking-[-0.02em] ${textPrimary()}`}>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
             {consultasPrimeiraVez ?? 0}
             {retornos !== undefined && (
               <span className={`ml-1.5 text-[13px] font-medium ${textSecondary()}`}>
@@ -1516,7 +1501,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
               className={`grid gap-3 ${
                 viewMode === 'apresentacao' || viewMode === 'iphone'
                   ? 'grid-cols-1'
-                  : 'grid-cols-[repeat(auto-fit,minmax(360px,1fr))]'
+                  : 'grid-cols-[repeat(auto-fit,minmax(310px,1fr))]'
               }`}
             >
               {medicosSnapshot.map((m) => (
