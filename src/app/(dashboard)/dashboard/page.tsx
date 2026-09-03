@@ -683,7 +683,7 @@ function MedicoSnapshotCard({
       : 'text-[var(--danger)]'
 
   return (
-    <div className={`${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'p-3'} ${metricCardBg()}`}>
+    <div className={`${isApresentacao ? 'p-6' : 'p-4'} ${metricCardBg()}`}>
       <div className="flex items-center gap-4">
         <div className={`shrink-0 overflow-hidden rounded-full bg-[var(--accent)]/15 ${isApresentacao ? 'h-20 w-20' : viewMode === 'iphone' ? 'h-14 w-14' : 'h-12 w-12'}`}>
           {avatar ? (
@@ -696,11 +696,11 @@ function MedicoSnapshotCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[15px]' : 'text-[14px]'}`}>
+          <p className={`truncate font-bold ${textPrimary()} ${isApresentacao ? 'text-[24px]' : viewMode === 'iphone' ? 'text-[17px]' : 'text-[16px]'}`}>
             {nome}
           </p>
 
-          <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-medium`}>
+          <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isApresentacao ? 'text-[16px]' : 'text-[13px]'} font-medium`}>
             <span className="inline-flex items-center">
               {atendimentos ?? 0} atend.
               <DeltaBadge atual={atendimentos} anterior={atendimentosAnterior} />
@@ -712,66 +712,66 @@ function MedicoSnapshotCard({
         </div>
       </div>
 
-      <div className={`mt-3 grid grid-cols-2 gap-2 border-t pt-3 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
+      <div className={`mt-4 grid grid-cols-2 gap-x-3 gap-y-3 border-t pt-4 ${isApresentacao ? 'border-[color:var(--border)]' : 'border-[color:var(--border)]'}`}>
         <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Taxa de comparecimento
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
             {formatPercent(ocupacao)}
           </p>
         </div>
 
         <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Consolidado
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${textPrimary()}`}>
             {formatMoneyShort(faturamentoConsolidado || 0)}
             <DeltaBadge atual={faturamentoConsolidado} anterior={faturamentoConsolidadoAnterior} />
           </p>
         </div>
 
         <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ticket Médio
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${textPrimary()}`}>
             {formatMoney(ticketConsulta || 0)}
           </p>
         </div>
 
         <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Alcance da meta
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${statusClass(metaOk, (percentualMeta || 0) >= 50 && !metaOk)}`}>
             {formatPercent(percentualMeta || 0)}
           </p>
         </div>
 
-        <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
-            Conversão (propostas → venda)
+        <div className="col-span-2">
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Conversão
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
             {formatPercent(taxaConversao || 0)}
             {propostasEnviadas !== undefined && (
-              <span className={`ml-1 text-[10px] font-medium ${textSecondary()}`}>
-                ({vendasFechadas ?? 0}/{propostasEnviadas})
+              <span className={`ml-1.5 text-[12px] font-medium ${textSecondary()}`}>
+                ({vendasFechadas ?? 0} de {propostasEnviadas} propostas)
               </span>
             )}
           </p>
         </div>
 
-        <div>
-          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+        <div className="col-span-2">
+          <p className={`text-[11px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Pacientes novos
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+          <p className={`mt-1 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[19px]'} ${textPrimary()}`}>
             {consultasPrimeiraVez ?? 0}
             {retornos !== undefined && (
-              <span className={`ml-1 text-[10px] font-medium ${textSecondary()}`}>
+              <span className={`ml-1.5 text-[12px] font-medium ${textSecondary()}`}>
                 · {retornos} retorno{retornos === 1 ? '' : 's'}
               </span>
             )}
@@ -781,8 +781,8 @@ function MedicoSnapshotCard({
 
       {(noShow !== undefined || cancelados !== undefined || reagendados !== undefined) && (
         <div
-          className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-2 ${textSecondary()} ${
-            isApresentacao ? 'text-[14px] border-[color:var(--border)]' : 'text-[11px] border-[color:var(--border)]'
+          className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 ${textSecondary()} ${
+            isApresentacao ? 'text-[14px] border-[color:var(--border)]' : 'text-[13px] border-[color:var(--border)]'
           } font-medium`}
         >
           <span>No-show: <span className={textPrimary()}>{noShow ?? 0}</span></span>
@@ -1498,10 +1498,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
             </div>
 
             <div
-              className={`grid gap-2 ${
+              className={`grid gap-3 ${
                 viewMode === 'apresentacao' || viewMode === 'iphone'
                   ? 'grid-cols-1'
-                  : 'grid-cols-[repeat(auto-fit,minmax(240px,1fr))]'
+                  : 'grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'
               }`}
             >
               {medicosSnapshot.map((m) => (
