@@ -292,9 +292,23 @@ function filterBySegmento(leads: Lead[], segmento: string) {
   return leads.filter((lead) => segmentoDoLead(lead) === segmento)
 }
 
-const META_MENSAL_VENDAS = 1000000
 const META_TICKET_MEDIO = 2800
 const META_MENSAL_NPS = 25
+
+// Meta mensal de vendas: R$ 750.000 até agosto/2026 (inclusive), R$ 1.000.000
+// a partir de setembro/2026 (inclusive) — a meta subiu só a partir desse mês,
+// meses anteriores continuam valendo pela meta antiga. `mes` é 0-indexado
+// (padrão JS Date: janeiro = 0).
+function getMetaMensalVendas(ano: number, mes: number) {
+  const CORTE_ANO = 2026
+  const CORTE_MES = 8 // setembro
+
+  if (ano > CORTE_ANO || (ano === CORTE_ANO && mes >= CORTE_MES)) {
+    return 1000000
+  }
+
+  return 750000
+}
 
 
 function isDiaUtil(date: Date) {
@@ -323,12 +337,14 @@ function getBusinessDaysInMonth(ano: number, mes: number) {
   return countDiasUteis(inicio, fim)
 }
 
-// Meta diária do mês ao qual a data pertence: meta mensal fixa dividida
-// apenas pelos dias úteis daquele mês (nunca pelos dias corridos).
+// Meta diária do mês ao qual a data pertence: meta mensal daquele mês
+// (ver getMetaMensalVendas) dividida apenas pelos dias úteis do mês
+// (nunca pelos dias corridos).
 function getDailyGoalForMonth(data: Date) {
   const diasUteisDoMes = getBusinessDaysInMonth(data.getFullYear(), data.getMonth())
+  const metaMensal = getMetaMensalVendas(data.getFullYear(), data.getMonth())
 
-  return diasUteisDoMes > 0 ? META_MENSAL_VENDAS / diasUteisDoMes : 0
+  return diasUteisDoMes > 0 ? metaMensal / diasUteisDoMes : 0
 }
 
 // Soma a meta diária (do mês correspondente a cada dia) de todo dia útil
@@ -362,10 +378,13 @@ function getMetaNps(start: Date, end: Date) {
 // Função única para obter a meta de vendas de qualquer período.
 //
 // Regras:
-// - Mês atual / mês passado / mês inteiro selecionado: meta mensal cheia (R$ 1.000.000).
-// - Hoje / ontem: meta diária do mês da data (1.000.000 / dias úteis do mês).
+// - Mês atual / mês passado / mês inteiro selecionado: meta mensal cheia do
+//   mês em questão (ver getMetaMensalVendas — R$ 750.000 até agosto/2026,
+//   R$ 1.000.000 a partir de setembro/2026).
+// - Hoje / ontem: meta diária do mês da data (meta mensal do mês / dias úteis do mês).
 // - Semana / personalizado / qualquer intervalo parcial: soma da meta diária
-//   de cada dia útil dentro do intervalo (usando a meta diária do mês de cada dia).
+//   de cada dia útil dentro do intervalo (usando a meta diária do mês de cada dia —
+//   um período que atravessa a virada de mês muda de meta no meio automaticamente).
 function getGoalForPeriod(startDate: Date, endDate: Date, periodType: string) {
   const startDay = startOfDay(startDate)
   const endDay = startOfDay(endDate)
@@ -387,7 +406,7 @@ function getGoalForPeriod(startDate: Date, endDate: Date, periodType: string) {
     periodType === 'mes-passado' ||
     selecionouMesInteiro
   ) {
-    return META_MENSAL_VENDAS
+    return getMetaMensalVendas(startDay.getFullYear(), startDay.getMonth())
   }
 
   if (periodType === 'hoje' || periodType === 'ontem') {
