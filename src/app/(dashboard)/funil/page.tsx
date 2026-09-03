@@ -210,6 +210,7 @@ function getFotoMedico(nome: string) {
   if (n.includes('RODOLPHO')) return '/medicos/rodolpho.png'
   if (n.includes('CLAUDIA')) return '/medicos/claudia.png'
   if (n.includes('BRENO')) return '/medicos/breno.png'
+  if (n.includes('ALBA')) return '/medicos/alba.png'
 
   if (n.includes('JESSICA') || n.includes('FISIOTERAPIA')) {
   return '/medicos/jessica.png'

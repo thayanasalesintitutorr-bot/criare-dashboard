@@ -582,6 +582,7 @@ function getAvatarMedico(nome: string) {
   if (n.includes('BRENO')) return '/medicos/breno.png'
   if (n.includes('CLAUDIA')) return '/medicos/claudia.png'
   if (n.includes('JESSICA')) return '/medicos/jessica.png'
+  if (n.includes('ALBA')) return '/medicos/alba.png'
 
   return null
 }
