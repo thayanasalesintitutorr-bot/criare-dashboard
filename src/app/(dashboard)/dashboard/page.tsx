@@ -191,11 +191,22 @@ conveniosConsulta?: {
   atendimentos: number
   noShow: number
   noShowPercent: number
+  cancelados: number
+  reagendados: number
+  consultasPrimeiraVez: number
+  retornos: number
   quantidadeConsulta: number
   valorConsulta: number
   ticketMedio: number
   proximosAtendimentos: number
   capacidadeAgenda?: number
+  atendimentosAnterior?: number
+  faturamentoConsolidadoAnterior?: number
+  consultasPrimeiraVezAnterior?: number
+  retornosAnterior?: number
+  noShowAnterior?: number
+  canceladosAnterior?: number
+  reagendadosAnterior?: number
 }[]
 campanhasConsulta?: {
   nome: string
@@ -209,6 +220,9 @@ vendasPorMedico?: {
   valor: number
   meta: number
   percentual: number
+  propostasEnviadas?: number
+  vendasFechadas?: number
+  taxaConversao?: number
   produtos?: {
     produto: string
     qtd: number
@@ -592,22 +606,64 @@ function getAvatarMedico(nome: string) {
   return null
 }
 
+// Seta + % de variação vs o período anterior. Sem "anterior" (0 ou
+// indefinido) não dá pra calcular variação de forma confiável, então some.
+function DeltaBadge({ atual, anterior }: { atual?: number; anterior?: number }) {
+  if (!anterior || anterior <= 0) return null
+
+  const diff = Math.round((((atual || 0) - anterior) / anterior) * 100)
+  if (diff === 0) return null
+
+  const positivo = diff > 0
+
+  return (
+    <span
+      className={`ml-1.5 inline-flex items-center gap-0.5 text-[11px] font-bold ${
+        positivo ? 'text-[var(--success)]' : 'text-[var(--danger)]'
+      }`}
+    >
+      {positivo ? '↑' : '↓'}
+      {Math.abs(diff)}%
+    </span>
+  )
+}
+
 function MedicoSnapshotCard({
   nome,
   atendimentos,
+  atendimentosAnterior,
   ticketConsulta,
   faturamentoConsolidado,
+  faturamentoConsolidadoAnterior,
   percentualMeta,
   procedimentos,
   capacidadeAgenda,
+  noShow,
+  cancelados,
+  reagendados,
+  consultasPrimeiraVez,
+  retornos,
+  taxaConversao,
+  propostasEnviadas,
+  vendasFechadas,
 }: {
   nome: string
   atendimentos?: number
+  atendimentosAnterior?: number
   ticketConsulta?: number
   faturamentoConsolidado?: number
+  faturamentoConsolidadoAnterior?: number
   percentualMeta?: number
   procedimentos?: number
   capacidadeAgenda?: number
+  noShow?: number
+  cancelados?: number
+  reagendados?: number
+  consultasPrimeiraVez?: number
+  retornos?: number
+  taxaConversao?: number
+  propostasEnviadas?: number
+  vendasFechadas?: number
 }) {
   const { viewMode } = useFilters()
   const isApresentacao = viewMode === 'apresentacao'
@@ -616,6 +672,8 @@ function MedicoSnapshotCard({
   const ocupacao = capacidadeAgenda ?? 0
   const ocupacaoOk = ocupacao >= 80
   const ocupacaoAlerta = ocupacao >= 50 && ocupacao < 80
+  const conversaoOk = (taxaConversao || 0) >= 50
+  const conversaoAlerta = (taxaConversao || 0) >= 25 && (taxaConversao || 0) < 50
 
   const statusClass = (good: boolean, alerta: boolean) =>
     good
@@ -643,7 +701,10 @@ function MedicoSnapshotCard({
           </p>
 
           <div className={`mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 ${textSecondary()} ${isApresentacao ? 'text-[16px]' : 'text-[11px]'} font-medium`}>
-            <span>{atendimentos ?? 0} atend.</span>
+            <span className="inline-flex items-center">
+              {atendimentos ?? 0} atend.
+              <DeltaBadge atual={atendimentos} anterior={atendimentosAnterior} />
+            </span>
             {procedimentos !== undefined && (
               <span>{procedimentos} procedimento{procedimentos === 1 ? '' : 's'}</span>
             )}
@@ -667,6 +728,7 @@ function MedicoSnapshotCard({
           </p>
           <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
             {formatMoneyShort(faturamentoConsolidado || 0)}
+            <DeltaBadge atual={faturamentoConsolidado} anterior={faturamentoConsolidadoAnterior} />
           </p>
         </div>
 
@@ -687,7 +749,47 @@ function MedicoSnapshotCard({
             {formatPercent(percentualMeta || 0)}
           </p>
         </div>
+
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Conversão (propostas → venda)
+          </p>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
+            {formatPercent(taxaConversao || 0)}
+            {propostasEnviadas !== undefined && (
+              <span className={`ml-1 text-[10px] font-medium ${textSecondary()}`}>
+                ({vendasFechadas ?? 0}/{propostasEnviadas})
+              </span>
+            )}
+          </p>
+        </div>
+
+        <div>
+          <p className={`text-[10px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Pacientes novos
+          </p>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[16px]'} ${textPrimary()}`}>
+            {consultasPrimeiraVez ?? 0}
+            {retornos !== undefined && (
+              <span className={`ml-1 text-[10px] font-medium ${textSecondary()}`}>
+                · {retornos} retorno{retornos === 1 ? '' : 's'}
+              </span>
+            )}
+          </p>
+        </div>
       </div>
+
+      {(noShow !== undefined || cancelados !== undefined || reagendados !== undefined) && (
+        <div
+          className={`mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-2 ${textSecondary()} ${
+            isApresentacao ? 'text-[14px] border-[color:var(--border)]' : 'text-[11px] border-[color:var(--border)]'
+          } font-medium`}
+        >
+          <span>No-show: <span className={textPrimary()}>{noShow ?? 0}</span></span>
+          <span>Cancelados: <span className={textPrimary()}>{cancelados ?? 0}</span></span>
+          <span>Reagendados: <span className={textPrimary()}>{reagendados ?? 0}</span></span>
+        </div>
+      )}
     </div>
   )
 }
@@ -786,6 +888,21 @@ export default function DashboardPage() {
       meta?: number
       procedimentos?: number
       capacidadeAgenda?: number
+      noShow?: number
+      cancelados?: number
+      reagendados?: number
+      consultasPrimeiraVez?: number
+      retornos?: number
+      atendimentosAnterior?: number
+      faturamentoConsolidadoAnterior?: number
+      consultasPrimeiraVezAnterior?: number
+      retornosAnterior?: number
+      noShowAnterior?: number
+      canceladosAnterior?: number
+      reagendadosAnterior?: number
+      propostasEnviadas?: number
+      vendasFechadas?: number
+      taxaConversao?: number
     }
   >()
 
@@ -797,6 +914,18 @@ export default function DashboardPage() {
       quantidadeConsulta: m.quantidadeConsulta,
       valorConsulta: m.valorConsulta,
       capacidadeAgenda: m.capacidadeAgenda,
+      noShow: m.noShow,
+      cancelados: m.cancelados,
+      reagendados: m.reagendados,
+      consultasPrimeiraVez: m.consultasPrimeiraVez,
+      retornos: m.retornos,
+      atendimentosAnterior: m.atendimentosAnterior,
+      faturamentoConsolidadoAnterior: m.faturamentoConsolidadoAnterior,
+      consultasPrimeiraVezAnterior: m.consultasPrimeiraVezAnterior,
+      retornosAnterior: m.retornosAnterior,
+      noShowAnterior: m.noShowAnterior,
+      canceladosAnterior: m.canceladosAnterior,
+      reagendadosAnterior: m.reagendadosAnterior,
     })
   })
 
@@ -809,6 +938,9 @@ export default function DashboardPage() {
       valorVendas: m.valor,
       meta: m.meta,
       procedimentos,
+      propostasEnviadas: m.propostasEnviadas,
+      vendasFechadas: m.vendasFechadas,
+      taxaConversao: m.taxaConversao,
     })
   })
 
@@ -1377,11 +1509,21 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
                   key={m.nome}
                   nome={m.nome}
                   atendimentos={m.atendimentos}
+                  atendimentosAnterior={m.atendimentosAnterior}
                   ticketConsulta={m.ticketConsulta}
                   faturamentoConsolidado={m.faturamentoConsolidado}
+                  faturamentoConsolidadoAnterior={m.faturamentoConsolidadoAnterior}
                   percentualMeta={m.percentualMeta}
                   procedimentos={m.procedimentos}
                   capacidadeAgenda={m.capacidadeAgenda}
+                  noShow={m.noShow}
+                  cancelados={m.cancelados}
+                  reagendados={m.reagendados}
+                  consultasPrimeiraVez={m.consultasPrimeiraVez}
+                  retornos={m.retornos}
+                  taxaConversao={m.taxaConversao}
+                  propostasEnviadas={m.propostasEnviadas}
+                  vendasFechadas={m.vendasFechadas}
                 />
               ))}
             </div>

@@ -1139,15 +1139,16 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
   string,
   {
     valor: number
+    qtd: number
     produtos: Record<string, { qtd: number; valor: number }>
   }
 > = {
-  'DR. RODOLPHO REIS': { valor: 0, produtos: {} },
-  'DRA. CLAUDIA LAMEIRA': { valor: 0, produtos: {} },
-  'DR. BRENO PITANGUI': { valor: 0, produtos: {} },
-  'DRA. CATHARINA HOFF': { valor: 0, produtos: {} },
-  'DRA. KENIA': { valor: 0, produtos: {} },
-  'DRA. ALBA GODOY': { valor: 0, produtos: {} },
+  'DR. RODOLPHO REIS': { valor: 0, qtd: 0, produtos: {} },
+  'DRA. CLAUDIA LAMEIRA': { valor: 0, qtd: 0, produtos: {} },
+  'DR. BRENO PITANGUI': { valor: 0, qtd: 0, produtos: {} },
+  'DRA. CATHARINA HOFF': { valor: 0, qtd: 0, produtos: {} },
+  'DRA. KENIA': { valor: 0, qtd: 0, produtos: {} },
+  'DRA. ALBA GODOY': { valor: 0, qtd: 0, produtos: {} },
 }
 
 const propostasPorMedicoMap: Record<string, number> = {
@@ -1206,11 +1207,13 @@ vendasLeads
   if (!medicosMap[medico]) {
     medicosMap[medico] = {
       valor: 0,
+      qtd: 0,
       produtos: {},
     }
   }
 
   medicosMap[medico].valor += valorVenda
+  medicosMap[medico].qtd += 1
 
   produtos.forEach((produto) => {
     if (!medicosMap[medico].produtos[produto]) {
@@ -1227,13 +1230,19 @@ const vendasPorMedico = Object.entries(medicosMap)
   const meta = getMetaMedico(nome, periodo, range.start, range.end)
 
   const percentual = meta > 0 ? item.valor / meta : 0
+  const propostasEnviadas = propostasPorMedicoMap[nome] || 0
 
   return {
     nome,
     valor: item.valor,
     meta,
     percentual,
-    propostasEnviadas: propostasPorMedicoMap[nome] || 0,
+    propostasEnviadas,
+    vendasFechadas: item.qtd,
+    // Taxa de conversão do próprio médico: das propostas que ele enviou
+    // no período, quantas viraram venda fechada.
+    taxaConversao:
+      propostasEnviadas > 0 ? (item.qtd / propostasEnviadas) * 100 : 0,
     produtos: Object.entries(item.produtos)
       .map(([produto, dado]) => ({
         produto,
