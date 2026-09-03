@@ -1127,12 +1127,18 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
   'DR. RODOLPHO REIS': { valor: 0, produtos: {} },
   'DRA. CLAUDIA LAMEIRA': { valor: 0, produtos: {} },
   'DR. BRENO PITANGUI': { valor: 0, produtos: {} },
+  'DRA. CATHARINA HOFF': { valor: 0, produtos: {} },
+  'DRA. KENIA': { valor: 0, produtos: {} },
+  'DRA. ALBA GODOY': { valor: 0, produtos: {} },
 }
 
 const propostasPorMedicoMap: Record<string, number> = {
   'DR. RODOLPHO REIS': 0,
   'DRA. CLAUDIA LAMEIRA': 0,
   'DR. BRENO PITANGUI': 0,
+  'DRA. CATHARINA HOFF': 0,
+  'DRA. KENIA': 0,
+  'DRA. ALBA GODOY': 0,
 }
 
 vendasLeads
@@ -1221,24 +1227,41 @@ const vendasPorMedico = Object.entries(medicosMap)
 })
   .sort((a, b) => b.valor - a.valor)
 
+  // Percentual de cada médico sobre a meta geral do mês. A partir de
+  // setembro/2026 (junto com a meta geral indo pra R$ 1.000.000), a divisão
+  // passou a incluir mais médicos com percentuais novos; antes disso valia
+  // a divisão antiga (só Rodolpho/Claudia/Breno tinham meta). `mes` é
+  // 0-indexado (padrão JS Date), mesmo corte usado em getMetaMensalVendas.
+  function getPercentualMedico(nomeNorm: string, ano: number, mes: number) {
+    const CORTE_ANO = 2026
+    const CORTE_MES = 8 // setembro
+    const usaDivisaoNova = ano > CORTE_ANO || (ano === CORTE_ANO && mes >= CORTE_MES)
+
+    if (usaDivisaoNova) {
+      if (nomeNorm.includes('RODOLPHO')) return 0.40
+      if (nomeNorm.includes('BRENO')) return 0.35
+      if (nomeNorm.includes('CATHARINA')) return 0.10
+      if (nomeNorm.includes('CLAUDIA')) return 0.08
+      if (nomeNorm.includes('KENIA')) return 0.06
+      if (nomeNorm.includes('ALBA')) return 0.01
+      return 0
+    }
+
+    if (nomeNorm.includes('RODOLPHO')) return 0.45
+    if (nomeNorm.includes('CLAUDIA')) return 0.10
+    if (nomeNorm.includes('BRENO')) return 0.45
+
+    return 0
+  }
+
   function getMetaMedico(nome: string, periodo: string, start: Date, end: Date) {
   const nomeNorm = normalize(nome)
 
   const metaGeral = getMetaVendas(periodo, start, end)
+  const startDay = startOfDay(start)
+  const percentual = getPercentualMedico(nomeNorm, startDay.getFullYear(), startDay.getMonth())
 
-  if (nomeNorm.includes('RODOLPHO')) {
-    return metaGeral * 0.45
-  }
-
-  if (nomeNorm.includes('CLAUDIA')) {
-    return metaGeral * 0.10
-  }
-
-  if (nomeNorm.includes('BRENO')) {
-    return metaGeral * 0.45
-  }
-
-  return 0
+  return metaGeral * percentual
 }
 
 propostasFechadasLeads.forEach((lead) => {
