@@ -750,18 +750,33 @@ function MedicoSnapshotCard({
           </p>
         </div>
 
-        <div className="col-span-2">
-          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
-            Conversão
-          </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
-            {formatPercent(taxaConversao || 0)}
-            {propostasEnviadas !== undefined && (
-              <span className={`ml-1.5 text-[13px] font-medium ${textSecondary()}`}>
-                ({vendasFechadas ?? 0} de {propostasEnviadas} propostas)
-              </span>
-            )}
-          </p>
+        <div className="col-span-2 grid grid-cols-3 gap-2">
+          <div>
+            <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+              Propostas
+            </p>
+            <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+              {propostasEnviadas ?? 0}
+            </p>
+          </div>
+
+          <div>
+            <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+              Fechadas
+            </p>
+            <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+              {vendasFechadas ?? 0}
+            </p>
+          </div>
+
+          <div>
+            <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+              Conversão
+            </p>
+            <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(conversaoOk, conversaoAlerta)}`}>
+              {formatPercent(taxaConversao || 0)}
+            </p>
+          </div>
         </div>
 
         <div className="col-span-2">
