@@ -1790,7 +1790,44 @@ const medicosPermitidos: string[] =
         ])
       )
 
-  
+
+// Capacidade diária estimada de cada médico: maior quantidade de
+// atendimentos finalizados que ele teve em um único dia, nos últimos 90
+// dias corridos contados a partir de hoje (não do período selecionado no
+// filtro — a capacidade do médico não muda porque o usuário trocou o
+// período de visualização). Não existe no banco nenhum dado de "vagas
+// disponíveis" ou horário configurado por médico, então usamos o pico
+// real observado como proxy da capacidade máxima dele.
+const hojeRefCapacidade = new Date()
+const inicioJanelaCapacidade = startOfDay(
+  new Date(
+    hojeRefCapacidade.getFullYear(),
+    hojeRefCapacidade.getMonth(),
+    hojeRefCapacidade.getDate() - 90
+  )
+)
+
+function getCapacidadeDiariaEstimada(med: string) {
+  const porDia: Record<string, number> = {}
+
+  ;(noShowData || []).forEach((item: any) => {
+    const profissional = normalize(item['Profissional'])
+    if (!profissional.includes(med.split(' ')[1] || med)) return
+
+    if (!normalize(item['Status']).includes('FINALIZADO')) return
+
+    const data = parseDataAmplimed(item['Data e hora Agendada'])
+    if (!data) return
+    if (data < inicioJanelaCapacidade || data > hojeRefCapacidade) return
+
+    const chave = `${data.getFullYear()}-${data.getMonth()}-${data.getDate()}`
+    porDia[chave] = (porDia[chave] || 0) + 1
+  })
+
+  const valoresPorDia = Object.values(porDia)
+  return valoresPorDia.length > 0 ? Math.max(...valoresPorDia) : 0
+}
+
 const consultaPorMedico = medicosPermitidos.map((medico) => {
   const med = normalize(medico)
   const medKey = medicoKey(medico)
@@ -2311,18 +2348,21 @@ produto.includes('PLENO TOTAL 6 MESES') ||
   manha,
   tarde,
   retornos,
-  // Taxa de comparecimento: % das consultas agendadas no período que
-  // efetivamente aconteceram (status FINALIZADO), sobre o total de
-  // agendamentos do médico no período (finalizados + no-show + cancelados +
-  // reagendados). Antes era "atendimentos ÷ capacidade fixa chutada por
-  // médico" — trocado porque a capacidade era um número inventado, igual
-  // pra todo mundo, e não refletia a agenda real de cada médico.
-  capacidadeAgenda:
-    atendimentosAgendaMedico.length > 0
-  ? Math.round(
-      (atendimentosMedico / atendimentosAgendaMedico.length) * 100
-    )
-  : 0,
+  // Ocupação da agenda: dos atendimentos que o médico tem capacidade de
+  // fazer no período selecionado (capacidade diária estimada pelo pico
+  // histórico × dias úteis do período), quantos ele de fato realizou.
+  capacidadeAgenda: (() => {
+    const capacidadeDiaria = getCapacidadeDiariaEstimada(med)
+    const diasUteisPeriodo = countDiasUteis(range.start, range.end)
+    const capacidadePeriodo = capacidadeDiaria * diasUteisPeriodo
+
+    return capacidadePeriodo > 0
+      ? Math.min(
+          Math.round((atendimentosMedico / capacidadePeriodo) * 100),
+          100
+        )
+      : 0
+  })(),
   noShow: noShowMedico,
   noShowPercent:
   atendimentosAgendaMedico.length > 0
