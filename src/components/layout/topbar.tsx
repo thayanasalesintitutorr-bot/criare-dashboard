@@ -31,6 +31,7 @@ import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
 import { useSessionRole } from '../../store/use-session-role'
 import { useZoom, NIVEIS_ZOOM } from '../../store/use-zoom'
+import { useScaledHeight } from '../../store/use-scaled-height'
 import { useRouter, usePathname } from 'next/navigation'
 import { DayPicker } from 'react-day-picker'
 import 'react-day-picker/dist/style.css'
@@ -116,6 +117,7 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const { role: sessao, fetchRole } = useSessionRole()
   const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
   const zoomEscala = NIVEIS_ZOOM[zoomIndice]
+  const { ref: filtroRef, altura: filtroAltura } = useScaledHeight(zoomEscala)
 
   const [mounted, setMounted] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
@@ -546,6 +548,14 @@ function parseLocalDate(dateString?: string) {
 
 {!isProtocolosPage && (
 <div
+  style={
+    zoomEscala === 1 || !filtroAltura
+      ? undefined
+      : { height: filtroAltura }
+  }
+>
+<div
+  ref={filtroRef}
   className="@container rounded-[18px] bg-[var(--card)] px-3 py-3 sm:px-5 shadow-sm"
   style={
     zoomEscala === 1
@@ -981,6 +991,7 @@ function parseLocalDate(dateString?: string) {
       </div>
 
     </div>
+</div>
 </div>
 )}
           </div>

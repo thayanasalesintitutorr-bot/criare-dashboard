@@ -7,11 +7,13 @@ import { Sidebar, MobileBottomNav } from './sidebar'
 import { Topbar } from './topbar'
 import { usePageHeader } from '@/store/use-page-header'
 import { useZoom, NIVEIS_ZOOM } from '@/store/use-zoom'
+import { useScaledHeight } from '@/store/use-scaled-height'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { title, statusIndicator } = usePageHeader()
   const pathname = usePathname()
   const escala = NIVEIS_ZOOM[useZoom((s) => s.indice)]
+  const { ref: conteudoRef, altura: conteudoAltura } = useScaledHeight(escala)
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
@@ -37,18 +39,27 @@ export function AppShell({ children }: { children: ReactNode }) {
                   usam variantes @sm/@md/@xl reagirem a essa largura reduzida
                   (não à largura real da tela), então eles também empilham. */}
               <div
-                className="@container"
                 style={
-                  escala === 1
+                  escala === 1 || !conteudoAltura
                     ? undefined
-                    : {
-                        width: `${100 / escala}%`,
-                        transform: `scale(${escala})`,
-                        transformOrigin: 'top left',
-                      }
+                    : { height: conteudoAltura }
                 }
               >
-                {children}
+                <div
+                  ref={conteudoRef}
+                  className="@container"
+                  style={
+                    escala === 1
+                      ? undefined
+                      : {
+                          width: `${100 / escala}%`,
+                          transform: `scale(${escala})`,
+                          transformOrigin: 'top left',
+                        }
+                  }
+                >
+                  {children}
+                </div>
               </div>
             </motion.main>
           </AnimatePresence>
