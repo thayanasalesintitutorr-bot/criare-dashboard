@@ -935,6 +935,24 @@ const origensPrimeiraMensagem = mesclarVazioEmPaciente(buildOrigens(leadsPrimeir
   )
 }).length
 
+    // Mesmo cálculo de "convertidos" acima, mas restrito a leads com a tag
+    // A/B/C/D correspondente — alimenta o "Convertido" filtrado do card
+    // "Leads aceitos (SAL)" quando o usuário seleciona uma tag específica.
+    function convertidosComTag(tag: string) {
+      return consultaLeads.filter((l) => {
+        return (
+          inRange(parseDateLocal(l.created_at), range.start, range.end) &&
+          (statusIs(l, 'AGENDADO') || statusIs(l, 'GANHOU')) &&
+          normalize(l.tag).includes(tag)
+        )
+      }).length
+    }
+
+    const convertidoLeadA = convertidosComTag('LEAD A')
+    const convertidoLeadB = convertidosComTag('LEAD B')
+    const convertidoLeadC = convertidosComTag('LEAD C')
+    const convertidoLeadD = convertidosComTag('LEAD D')
+
     const agendadosLeadsPeriodo = consultaLeads.filter((l) => {
   return (
     statusIs(l, 'AGENDADO') &&
@@ -2581,6 +2599,10 @@ const painelAtendimento = {
       leadB,
       leadC,
       leadD,
+      convertidoLeadA,
+      convertidoLeadB,
+      convertidoLeadC,
+      convertidoLeadD,
        },
       comercialConsulta: {
       quantidadeConsulta,

@@ -44,6 +44,10 @@ type DashboardResponse = {
   leadB: number
   leadC: number
   leadD: number
+  convertidoLeadA: number
+  convertidoLeadB: number
+  convertidoLeadC: number
+  convertidoLeadD: number
 }
     comercialConsulta: {
   quantidadeConsulta: number
@@ -860,9 +864,24 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     0
   )
 
+  // Convertido filtrado pelas mesmas tags (A/B/C/D) selecionadas em "Leads
+  // aceitos (SAL)" — só conta convertidos que têm a tag selecionada. O
+  // "Convertido geral" (sem filtro de tag) usa marketing.convertidos direto.
+  const convertidoPorTag = {
+    A: marketing?.convertidoLeadA || 0,
+    B: marketing?.convertidoLeadB || 0,
+    C: marketing?.convertidoLeadC || 0,
+    D: marketing?.convertidoLeadD || 0,
+  }
+
+  const convertidoFiltrado = leadsSelecionados.reduce(
+    (total, item) => total + convertidoPorTag[item],
+    0
+  )
+
   const convertidosFiltradoPercent =
   quantidadeLeadSelecionado > 0
-    ? (Number(marketing?.convertidos || 0) / quantidadeLeadSelecionado) * 100
+    ? (convertidoFiltrado / quantidadeLeadSelecionado) * 100
     : 0
 
 
@@ -980,11 +999,18 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </div>
             <GoalMetric
   label="Convertido"
-  value={marketing?.convertidos || 0}
+  value={convertidoFiltrado}
   percent={convertidosFiltradoPercent}
   target={30}
   mode="min"
   empty={quantidadeLeadSelecionado === 0}
+/>
+            <GoalMetric
+  label="Convertido geral"
+  value={marketing?.convertidos || 0}
+  percent={marketing?.convertidosPercent || 0}
+  target={30}
+  mode="min"
 />
           </GroupCard>
 
