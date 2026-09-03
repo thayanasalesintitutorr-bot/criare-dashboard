@@ -684,6 +684,47 @@ async function fetchAllNoShow() {
   return noShowData
 }
 
+// kommo.amplimed: mesma ideia do noshow, mas com um dado que o noshow não
+// tem — "Duração agen(min)", a duração real (em minutos) de cada
+// agendamento. Usado só pra estimar a capacidade diária de cada médico de
+// um jeito ponderado pelo tempo real de cada atendimento (uma cirurgia de
+// 150min não conta igual a uma consulta de 20min).
+async function fetchAllAmplimed() {
+  let amplimedData: any[] = []
+  let from = 0
+  const pageSize = 1000
+
+  while (true) {
+    const amplimedResponse = await fetch(
+      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/amplimed?select=*&offset=${from}&limit=${pageSize}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+          'Accept-Profile': 'kommo',
+        },
+      }
+    )
+
+    if (!amplimedResponse.ok) {
+      const errorText = await amplimedResponse.text()
+      throw new Error(errorText)
+    }
+
+    const page = await amplimedResponse.json()
+
+    if (!page || page.length === 0) break
+
+    amplimedData = amplimedData.concat(page)
+
+    if (page.length < pageSize) break
+
+    from += pageSize
+  }
+
+  return amplimedData
+}
+
     export async function GET(req: Request) {
   try {
     const auth = await requireSession(req)
@@ -735,12 +776,13 @@ async function fetchAllNoShow() {
     const janelaSegura = buildJanelaSegura([range, previousRange, nextWeekRange])
     const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
 
-    const [consultaBase, vendasBase, reabordBase, npsData, noShowData] = await Promise.all([
+    const [consultaBase, vendasBase, reabordBase, npsData, noShowData, amplimedData] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA', janelaFiltro),
       fetchAllLeadsByPipeline('VENDAS', janelaFiltro),
       fetchAllLeadsByPipeline('REABORD'),
       fetchNps(),
       fetchAllNoShow(),
+      fetchAllAmplimed(),
     ])
 
     const consultaLeads = filterBySegmento(
@@ -1791,41 +1833,49 @@ const medicosPermitidos: string[] =
       )
 
 
-// Capacidade diária estimada de cada médico: maior quantidade de
-// atendimentos finalizados que ele teve em um único dia, nos últimos 90
-// dias corridos contados a partir de hoje (não do período selecionado no
-// filtro — a capacidade do médico não muda porque o usuário trocou o
-// período de visualização). Não existe no banco nenhum dado de "vagas
-// disponíveis" ou horário configurado por médico, então usamos o pico
-// real observado como proxy da capacidade máxima dele.
-const hojeRefCapacidade = new Date()
-const inicioJanelaCapacidade = startOfDay(
-  new Date(
-    hojeRefCapacidade.getFullYear(),
-    hojeRefCapacidade.getMonth(),
-    hojeRefCapacidade.getDate() - 90
-  )
-)
-
+// Capacidade diária estimada de cada médico, calculada a partir de
+// kommo.amplimed (não do noshow) — essa tabela tem "Duração agen(min)", a
+// duração real de cada agendamento, o que o noshow não tinha. Não existe
+// no banco nenhum dado de "vagas disponíveis" ou horário configurado por
+// médico, então a capacidade continua sendo um proxy pelo pico real
+// observado, mas agora ponderado pelo tempo de cada atendimento — uma
+// cirurgia de 150min não conta igual a uma consulta de 20min.
+//
+// 1) Acha o dia mais cheio do médico (maior soma de minutos agendados,
+//    olhando todo o histórico disponível em amplimed).
+// 2) Divide esse pico (em minutos) pela duração média dos atendimentos
+//    dele, pra converter de volta pra uma "quantidade de atendimentos"
+//    comparável com o número real de atendimentos do período (que
+//    continua vindo do noshow, com cobertura histórica maior).
 function getCapacidadeDiariaEstimada(med: string) {
-  const porDia: Record<string, number> = {}
+  const minutosPorDia: Record<string, number> = {}
+  let somaDuracoes = 0
+  let qtdDuracoes = 0
 
-  ;(noShowData || []).forEach((item: any) => {
+  ;(amplimedData || []).forEach((item: any) => {
     const profissional = normalize(item['Profissional'])
     if (!profissional.includes(med.split(' ')[1] || med)) return
 
     if (!normalize(item['Status']).includes('FINALIZADO')) return
 
+    const duracao = toNumber(item['Duração agen(min)'])
+    if (duracao <= 0) return
+
     const data = parseDataAmplimed(item['Data e hora Agendada'])
     if (!data) return
-    if (data < inicioJanelaCapacidade || data > hojeRefCapacidade) return
 
     const chave = `${data.getFullYear()}-${data.getMonth()}-${data.getDate()}`
-    porDia[chave] = (porDia[chave] || 0) + 1
+    minutosPorDia[chave] = (minutosPorDia[chave] || 0) + duracao
+
+    somaDuracoes += duracao
+    qtdDuracoes += 1
   })
 
-  const valoresPorDia = Object.values(porDia)
-  return valoresPorDia.length > 0 ? Math.max(...valoresPorDia) : 0
+  const valoresPorDia = Object.values(minutosPorDia)
+  const picoMinutosDia = valoresPorDia.length > 0 ? Math.max(...valoresPorDia) : 0
+  const duracaoMedia = qtdDuracoes > 0 ? somaDuracoes / qtdDuracoes : 0
+
+  return duracaoMedia > 0 ? Math.round(picoMinutosDia / duracaoMedia) : 0
 }
 
 const consultaPorMedico = medicosPermitidos.map((medico) => {
