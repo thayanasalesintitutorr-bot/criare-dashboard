@@ -1183,7 +1183,11 @@ vendasLeads
 
 vendasLeads
   .filter((l) =>
-    normalize(l.status_id).includes('GANHA') &&
+    // Match exato com "VENDA GANHA" (não um includes('GANHA') solto) pra
+    // não ter chance nenhuma de misturar com o status "GANHOU" do funil de
+    // Consulta — são conceitos diferentes (venda fechada vs consulta
+    // realizada) e cada um já usa seu próprio campo (venda vs faturamento).
+    statusIs(l, 'VENDA GANHA') &&
     toNumber(l.venda) > 0 &&
     inRange(parseDateLocal(l.closed_at), range.start, range.end)
   )
