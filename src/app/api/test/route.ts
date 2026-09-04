@@ -648,47 +648,11 @@ async function fetchNps() {
   return npsResponse.json()
 }
 
-async function fetchAllNoShow() {
-  let noShowData: any[] = []
-  let from = 0
-  const pageSize = 1000
-
-  while (true) {
-    const noShowResponse = await fetch(
-      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/noshow?select=*&offset=${from}&limit=${pageSize}`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-          'Accept-Profile': 'kommo',
-        },
-      }
-    )
-
-    if (!noShowResponse.ok) {
-      const errorText = await noShowResponse.text()
-      throw new Error(errorText)
-    }
-
-    const page = await noShowResponse.json()
-
-    if (!page || page.length === 0) break
-
-    noShowData = noShowData.concat(page)
-
-    if (page.length < pageSize) break
-
-    from += pageSize
-  }
-
-  return noShowData
-}
-
-// kommo.amplimed: mesma ideia do noshow, mas com um dado que o noshow não
-// tem — "Duração agen(min)", a duração real (em minutos) de cada
-// agendamento. Usado só pra estimar a capacidade diária de cada médico de
-// um jeito ponderado pelo tempo real de cada atendimento (uma cirurgia de
-// 150min não conta igual a uma consulta de 20min).
+// kommo.amplimed: fonte única de dados de agenda do painel (substitui o
+// kommo.noshow — tinha dado sobreposto e mais pobre, sem duração real do
+// agendamento nem tempo de espera/atendimento). Alimenta tudo relacionado
+// a agenda: atendimentos, no-show, cancelados, reagendados, capacidade
+// estimada de cada médico e os tempos médios de espera/atendimento.
 async function fetchAllAmplimed() {
   let amplimedData: any[] = []
   let from = 0
@@ -776,12 +740,11 @@ async function fetchAllAmplimed() {
     const janelaSegura = buildJanelaSegura([range, previousRange, nextWeekRange])
     const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
 
-    const [consultaBase, vendasBase, reabordBase, npsData, noShowData, amplimedData] = await Promise.all([
+    const [consultaBase, vendasBase, reabordBase, npsData, amplimedData] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA', janelaFiltro),
       fetchAllLeadsByPipeline('VENDAS', janelaFiltro),
       fetchAllLeadsByPipeline('REABORD'),
       fetchNps(),
-      fetchAllNoShow(),
       fetchAllAmplimed(),
     ])
 
@@ -1693,7 +1656,11 @@ const npsGoogle = npsFiltrado.reduce((total: number, item: any) => {
 const metaNpsGoogle = getMetaNps(range.start, range.end)
 const npsGooglePercent = safePercent(npsGoogle, metaNpsGoogle)
 
-const noShowFiltrado = (noShowData || []).filter((item: any) => {
+// Segue com o nome "noShowFiltrado" (e os outros nomes de variável
+// derivados dele mais abaixo) por conveniência — evita renomear dezenas de
+// referências espalhadas pelo arquivo — mas a fonte agora é
+// kommo.amplimed, não kommo.noshow.
+const noShowFiltrado = (amplimedData || []).filter((item: any) => {
   const data = parseDataAmplimed(item['Data e hora Agendada'])
 
   if (!inRange(data, range.start, range.end)) return false
@@ -1734,7 +1701,7 @@ const totalFinalizados = noShowFiltrado.filter((item: any) =>
 
 const totalAtendimentos = totalFinalizados + totalNoShow
 
-const noShowFiltradoAnterior = (noShowData || []).filter((item: any) => {
+const noShowFiltradoAnterior = (amplimedData || []).filter((item: any) => {
   const data = parseDataAmplimed(item['Data e hora Agendada'])
 
   if (!inRange(data, previousRange.start, previousRange.end)) return false
@@ -1810,6 +1777,12 @@ function medicoKey(nome: unknown) {
   if (n.includes('RODOLPHO')) return 'DR. RODOLPHO REIS'
   if (n.includes('CLAUDIA')) return 'DRA. CLAUDIA LAMEIRA'
   if (n.includes('BRENO')) return 'DR. BRENO PITANGUI'
+  if (n.includes('CATHARINA')) return 'DRA. CATHARINA HOFF'
+  if (n.includes('KENIA')) return 'DRA. KENIA'
+  // "Profissional" no amplimed tem várias grafias pra mesma pessoa (ex:
+  // "alba", "Alba Gogoy", "Dra. Alba Almeida Rodrigues de Godoy") — sem
+  // canonizar, cada variante virava um card de médico duplicado.
+  if (n.includes('ALBA')) return 'DRA. ALBA GODOY'
 
   return n || 'SEM MÉDICO'
 }
@@ -1921,6 +1894,33 @@ const reagendadosMedico = atendimentosAgendaMedico.filter((item: any) => {
   )
 
   const atendimentosMedico = atendimentosFinalizadosMedico.length
+
+  // Tempo médio de espera e de atendimento (em minutos), só dos
+  // atendimentos finalizados no período — vem de kommo.amplimed
+  // ("Tempo espera(min)" / "Tempo atend(min)"), dado que o noshow não tinha.
+  const temposEspera = atendimentosFinalizadosMedico
+    .map((item: any) => toNumber(item['Tempo espera(min)']))
+    .filter((min: number) => min > 0)
+
+  const temposAtendimento = atendimentosFinalizadosMedico
+    .map((item: any) => toNumber(item['Tempo atend(min)']))
+    .filter((min: number) => min > 0)
+
+  const tempoEsperaMedio =
+    temposEspera.length > 0
+      ? Math.round(
+          temposEspera.reduce((acc: number, min: number) => acc + min, 0) /
+            temposEspera.length
+        )
+      : 0
+
+  const tempoAtendimentoMedio =
+    temposAtendimento.length > 0
+      ? Math.round(
+          temposAtendimento.reduce((acc: number, min: number) => acc + min, 0) /
+            temposAtendimento.length
+        )
+      : 0
 
   const manha = atendimentosFinalizadosMedico.filter((item: any) => {
     const data = parseDataAmplimed(item['Data e hora Agendada'])
@@ -2398,12 +2398,14 @@ produto.includes('PLENO TOTAL 6 MESES') ||
   manha,
   tarde,
   retornos,
-  // Sinaliza quando não existe NENHUM registro de agenda (noshow) pro
+  tempoEsperaMedio,
+  tempoAtendimentoMedio,
+  // Sinaliza quando não existe NENHUM registro de agenda (amplimed) pro
   // médico nesse período — diferente de "teve agenda mas zero
-  // comparecimento". Sem isso, um atraso na sincronização do
-  // noshow/amplimed (ex: dado só vai até 31/08 e o usuário filtra
-  // setembro) aparece como "0%" de ocupação, que parece um resultado real
-  // em vez de "não dá pra calcular, falta sincronizar".
+  // comparecimento". Sem isso, um atraso na sincronização do amplimed
+  // (ex: dado só vai até 31/08 e o usuário filtra setembro) aparece como
+  // "0%" de ocupação, que parece um resultado real em vez de "não dá pra
+  // calcular, falta sincronizar".
   agendaSemDados: atendimentosAgendaMedico.length === 0,
   // Ocupação da agenda: dos atendimentos que o médico tem capacidade de
   // fazer no período selecionado (capacidade diária estimada pelo pico

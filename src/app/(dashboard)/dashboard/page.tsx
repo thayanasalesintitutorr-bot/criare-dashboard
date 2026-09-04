@@ -195,6 +195,8 @@ conveniosConsulta?: {
   reagendados: number
   consultasPrimeiraVez: number
   retornos: number
+  tempoEsperaMedio?: number
+  tempoAtendimentoMedio?: number
   quantidadeConsulta: number
   valorConsulta: number
   ticketMedio: number
@@ -645,6 +647,8 @@ function MedicoSnapshotCard({
   reagendados,
   consultasPrimeiraVez,
   retornos,
+  tempoEsperaMedio,
+  tempoAtendimentoMedio,
   taxaConversao,
   propostasEnviadas,
   vendasFechadas,
@@ -664,6 +668,8 @@ function MedicoSnapshotCard({
   reagendados?: number
   consultasPrimeiraVez?: number
   retornos?: number
+  tempoEsperaMedio?: number
+  tempoAtendimentoMedio?: number
   taxaConversao?: number
   propostasEnviadas?: number
   vendasFechadas?: number
@@ -804,6 +810,28 @@ function MedicoSnapshotCard({
             )}
           </p>
         </div>
+
+        {((tempoEsperaMedio || 0) > 0 || (tempoAtendimentoMedio || 0) > 0) && (
+          <>
+            <div>
+              <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+                Tempo de espera
+              </p>
+              <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+                {tempoEsperaMedio ?? 0} min
+              </p>
+            </div>
+
+            <div>
+              <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+                Tempo de atendimento
+              </p>
+              <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+                {tempoAtendimentoMedio ?? 0} min
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {(noShow !== undefined || cancelados !== undefined || reagendados !== undefined) && (
@@ -921,6 +949,8 @@ export default function DashboardPage() {
       reagendados?: number
       consultasPrimeiraVez?: number
       retornos?: number
+      tempoEsperaMedio?: number
+      tempoAtendimentoMedio?: number
       atendimentosAnterior?: number
       faturamentoConsolidadoAnterior?: number
       consultasPrimeiraVezAnterior?: number
@@ -948,6 +978,8 @@ export default function DashboardPage() {
       reagendados: m.reagendados,
       consultasPrimeiraVez: m.consultasPrimeiraVez,
       retornos: m.retornos,
+      tempoEsperaMedio: m.tempoEsperaMedio,
+      tempoAtendimentoMedio: m.tempoAtendimentoMedio,
       atendimentosAnterior: m.atendimentosAnterior,
       faturamentoConsolidadoAnterior: m.faturamentoConsolidadoAnterior,
       consultasPrimeiraVezAnterior: m.consultasPrimeiraVezAnterior,
@@ -1546,6 +1578,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
                   procedimentos={m.procedimentos}
                   capacidadeAgenda={m.capacidadeAgenda}
                   agendaSemDados={m.agendaSemDados}
+                  tempoEsperaMedio={m.tempoEsperaMedio}
+                  tempoAtendimentoMedio={m.tempoAtendimentoMedio}
                   noShow={m.noShow}
                   cancelados={m.cancelados}
                   reagendados={m.reagendados}
