@@ -747,8 +747,10 @@ function MedicoSnapshotCard({
           </p>
           <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
             {formatMoneyShort(faturamentoConsolidado || 0)}
-            <DeltaBadge atual={faturamentoConsolidado} anterior={faturamentoConsolidadoAnterior} />
           </p>
+          <div className="min-h-[16px]">
+            <DeltaBadge atual={faturamentoConsolidado} anterior={faturamentoConsolidadoAnterior} />
+          </div>
         </div>
 
         <div>
@@ -812,40 +814,34 @@ function MedicoSnapshotCard({
           </p>
         </div>
 
-        {((tempoEsperaMedio || 0) > 0 || (tempoAtendimentoMedio || 0) > 0) && (
-          <>
-            <div>
-              <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
-                Tempo de espera
-              </p>
-              <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
-                {tempoEsperaMedio ?? 0} min
-              </p>
-            </div>
+        <div>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Tempo de espera
+          </p>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+            {agendaSemDados ? '—' : `${tempoEsperaMedio ?? 0} min`}
+          </p>
+        </div>
 
-            <div>
-              <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
-                Tempo de atendimento
-              </p>
-              <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
-                {tempoAtendimentoMedio ?? 0} min
-              </p>
-            </div>
-          </>
-        )}
+        <div>
+          <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
+            Tempo de atendimento
+          </p>
+          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textPrimary()}`}>
+            {agendaSemDados ? '—' : `${tempoAtendimentoMedio ?? 0} min`}
+          </p>
+        </div>
       </div>
 
-      {(noShow !== undefined || cancelados !== undefined || reagendados !== undefined) && (
-        <div
-          className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 ${textSecondary()} ${
-            isApresentacao ? 'text-[16px] border-[color:var(--border)]' : 'text-[14px] border-[color:var(--border)]'
-          } font-medium`}
-        >
-          <span>No-show: <span className={textPrimary()}>{noShow ?? 0}</span></span>
-          <span>Cancelados: <span className={textPrimary()}>{cancelados ?? 0}</span></span>
-          <span>Reagendados: <span className={textPrimary()}>{reagendados ?? 0}</span></span>
-        </div>
-      )}
+      <div
+        className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t pt-3 ${textSecondary()} ${
+          isApresentacao ? 'text-[16px] border-[color:var(--border)]' : 'text-[14px] border-[color:var(--border)]'
+        } font-medium`}
+      >
+        <span>No-show: <span className={textPrimary()}>{noShow ?? 0}</span></span>
+        <span>Cancelados: <span className={textPrimary()}>{cancelados ?? 0}</span></span>
+        <span>Reagendados: <span className={textPrimary()}>{reagendados ?? 0}</span></span>
+      </div>
     </div>
   )
 }
