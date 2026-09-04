@@ -1783,6 +1783,7 @@ function medicoKey(nome: unknown) {
   // "alba", "Alba Gogoy", "Dra. Alba Almeida Rodrigues de Godoy") — sem
   // canonizar, cada variante virava um card de médico duplicado.
   if (n.includes('ALBA')) return 'DRA. ALBA GODOY'
+  if (n.includes('JOANA')) return 'NUTRICIONISTA JOANA GUARANYS'
 
   return n || 'SEM MÉDICO'
 }
