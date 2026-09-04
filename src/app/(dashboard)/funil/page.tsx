@@ -56,6 +56,7 @@ type DashboardResponse = {
   manha?: number
 tarde?: number
 capacidadeAgenda?: number
+agendaSemDados?: boolean
 procedimentos?: number
 cirurgias?: number
 cancelados?: number
@@ -825,6 +826,17 @@ const ticketProcedimentosMedico =
             : ocupacao >= 50
               ? 'bg-[var(--warning)]'
               : 'bg-[var(--danger)]'
+
+        if (medico.agendaSemDados) {
+          return (
+            <p
+              className={`mt-1 ${isImac ? 'text-[24px]' : isApresentacao ? 'text-[30px]' : 'text-[26px]'} font-medium leading-none text-[var(--muted-foreground)]`}
+              title="Sem agenda sincronizada para esse período ainda — não dá pra calcular"
+            >
+              —
+            </p>
+          )
+        }
 
         return (
           <>

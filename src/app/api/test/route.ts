@@ -2398,6 +2398,13 @@ produto.includes('PLENO TOTAL 6 MESES') ||
   manha,
   tarde,
   retornos,
+  // Sinaliza quando não existe NENHUM registro de agenda (noshow) pro
+  // médico nesse período — diferente de "teve agenda mas zero
+  // comparecimento". Sem isso, um atraso na sincronização do
+  // noshow/amplimed (ex: dado só vai até 31/08 e o usuário filtra
+  // setembro) aparece como "0%" de ocupação, que parece um resultado real
+  // em vez de "não dá pra calcular, falta sincronizar".
+  agendaSemDados: atendimentosAgendaMedico.length === 0,
   // Ocupação da agenda: dos atendimentos que o médico tem capacidade de
   // fazer no período selecionado (capacidade diária estimada pelo pico
   // histórico × dias úteis do período), quantos ele de fato realizou.

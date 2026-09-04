@@ -200,6 +200,7 @@ conveniosConsulta?: {
   ticketMedio: number
   proximosAtendimentos: number
   capacidadeAgenda?: number
+  agendaSemDados?: boolean
   atendimentosAnterior?: number
   faturamentoConsolidadoAnterior?: number
   consultasPrimeiraVezAnterior?: number
@@ -638,6 +639,7 @@ function MedicoSnapshotCard({
   percentualMeta,
   procedimentos,
   capacidadeAgenda,
+  agendaSemDados,
   noShow,
   cancelados,
   reagendados,
@@ -656,6 +658,7 @@ function MedicoSnapshotCard({
   percentualMeta?: number
   procedimentos?: number
   capacidadeAgenda?: number
+  agendaSemDados?: boolean
   noShow?: number
   cancelados?: number
   reagendados?: number
@@ -717,9 +720,18 @@ function MedicoSnapshotCard({
           <p className={`text-[12px] font-bold uppercase tracking-[0.06em] ${textSecondary()} ${isApresentacao ? 'text-[13px]' : ''}`}>
             Ocupação da agenda
           </p>
-          <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
-            {formatPercent(ocupacao)}
-          </p>
+          {agendaSemDados ? (
+            <p
+              className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${textSecondary()}`}
+              title="Sem agenda sincronizada para esse período ainda — não dá pra calcular"
+            >
+              —
+            </p>
+          ) : (
+            <p className={`mt-0.5 font-medium ${isApresentacao ? 'text-[24px]' : 'text-[21px]'} ${statusClass(ocupacaoOk, ocupacaoAlerta)}`}>
+              {formatPercent(ocupacao)}
+            </p>
+          )}
         </div>
 
         <div>
@@ -903,6 +915,7 @@ export default function DashboardPage() {
       meta?: number
       procedimentos?: number
       capacidadeAgenda?: number
+      agendaSemDados?: boolean
       noShow?: number
       cancelados?: number
       reagendados?: number
@@ -929,6 +942,7 @@ export default function DashboardPage() {
       quantidadeConsulta: m.quantidadeConsulta,
       valorConsulta: m.valorConsulta,
       capacidadeAgenda: m.capacidadeAgenda,
+      agendaSemDados: m.agendaSemDados,
       noShow: m.noShow,
       cancelados: m.cancelados,
       reagendados: m.reagendados,
@@ -1531,6 +1545,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
                   percentualMeta={m.percentualMeta}
                   procedimentos={m.procedimentos}
                   capacidadeAgenda={m.capacidadeAgenda}
+                  agendaSemDados={m.agendaSemDados}
                   noShow={m.noShow}
                   cancelados={m.cancelados}
                   reagendados={m.reagendados}
