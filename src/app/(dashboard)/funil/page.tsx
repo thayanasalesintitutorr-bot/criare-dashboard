@@ -26,6 +26,8 @@ import {
   CalendarX2,
   CalendarClock,
   ChartNoAxesCombined,
+  Hourglass,
+  Clock,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -69,6 +71,8 @@ injetaveisVendidos?: number
 valorInjetaveisVendidos?: number
 protocolosVendidos?: number
 retornos?: number
+tempoEsperaMedio?: number
+tempoAtendimentoMedio?: number
 
 atendimentosAnterior?: number
 retornosAnterior?: number
@@ -911,6 +915,20 @@ const ticketProcedimentosMedico =
       icon={CalendarClock}
       anterior={medico.reagendadosAnterior}
       showCompare={comparar}
+    />
+
+    <MetricMini
+      label="Tempo de espera"
+      value={medico.agendaSemDados ? '—' : `${medico.tempoEsperaMedio ?? 0} min`}
+      color="orange"
+      icon={Hourglass}
+    />
+
+    <MetricMini
+      label="Tempo de atendimento"
+      value={medico.agendaSemDados ? '—' : `${medico.tempoAtendimentoMedio ?? 0} min`}
+      color="blue"
+      icon={Clock}
     />
   </div>
 
