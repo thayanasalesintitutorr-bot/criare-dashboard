@@ -753,8 +753,17 @@ async function fetchAllAmplimed() {
       segmento
     )
 
+    // Leads de "complemento" (venda adicional em cima de um pacote já
+    // vendido, ex: "COMPLEMENTO CLACS - ...") não devem contar em nenhuma
+    // métrica de vendas — nem propostas, nem fechadas, nem valor, nem nos
+    // cards por médico. Como vendasLeads alimenta tudo isso, filtrar aqui
+    // já remove o complemento de toda a cadeia de uma vez.
     const vendasLeads = filterBySegmento(
-      vendasBase.filter((l) => normalize(l.pipeline_id) === 'VENDAS'),
+      vendasBase.filter(
+        (l) =>
+          normalize(l.pipeline_id) === 'VENDAS' &&
+          !normalize(l.name).includes('COMPLEMENTO')
+      ),
       segmento
     )
 
