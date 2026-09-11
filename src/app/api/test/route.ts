@@ -1156,6 +1156,14 @@ const leadsParadosVendas = vendasLeads.filter((l) => {
   'DRA. ALBA GODOY': { valor: 0, qtd: 0, produtos: {} },
 }
 
+// O Dr. Rodolpho pediu pra CRIO (CRIOESCLEROTERAPIA) não contar nas métricas
+// dele nos cards de médico (propostas, fechadas, consolidado, ticket médio,
+// conversão) — nem no card em si nem no cálculo. Não afeta outros médicos.
+function ehVendaCrioDoRodolpho(medico: string, produtoRaw: unknown) {
+  if (medico !== 'DR. RODOLPHO REIS') return false
+  return normalize(produtoRaw).includes('CRIO')
+}
+
 const propostasPorMedicoMap: Record<string, number> = {
   'DR. RODOLPHO REIS': 0,
   'DRA. CLAUDIA LAMEIRA': 0,
@@ -1177,6 +1185,8 @@ vendasLeads
       : medicoNorm.includes('BRENO')
       ? 'DR. BRENO PITANGUI'
       : medicoRaw
+
+    if (ehVendaCrioDoRodolpho(medico, lead.Produto)) return
 
     propostasPorMedicoMap[medico] = (propostasPorMedicoMap[medico] || 0) + 1
   })
@@ -1212,6 +1222,7 @@ vendasLeads
         .filter(Boolean)
 
   if (valorVenda <= 0) return
+  if (ehVendaCrioDoRodolpho(medico, produtosRaw)) return
 
   if (!medicosMap[medico]) {
     medicosMap[medico] = {
