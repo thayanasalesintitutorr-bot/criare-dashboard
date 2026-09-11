@@ -1598,6 +1598,17 @@ const consolidadoTicketMedio =
     ? consolidadoValorVendas / consolidadoQtdVendas
     : 0
 
+// Meta de ticket médio do Consolidado: em vez de um valor fixo, é a meta
+// geral de vendas do período (já ajustada ao filtro selecionado) dividida
+// pela quantidade de vendas já feitas — ou seja, "quanto cada venda já
+// fechada precisaria valer, em média, pra essas vendas sozinhas baterem a
+// meta do período". Sem vendas no período ainda, cai no valor fixo antigo
+// (META_TICKET_MEDIO) só pra não dividir por zero.
+const metaTicketMedioConsolidado =
+  consolidadoQtdVendas > 0
+    ? metaValorTotalVendas / consolidadoQtdVendas
+    : META_TICKET_MEDIO
+
     const evolucaoDiaria = buildEvolucaoDiaria(
       vendasLeads,
       consultaBasePeriodo,
@@ -2770,7 +2781,7 @@ painelAtendimento,
         valorVendas: consolidadoValorVendas,
         ticketMedio: consolidadoTicketMedio,
         metaValorVendas: metaValorTotalVendas,
-        metaTicketMedio: META_TICKET_MEDIO,
+        metaTicketMedio: metaTicketMedioConsolidado,
     
       },
       comparativo: {
