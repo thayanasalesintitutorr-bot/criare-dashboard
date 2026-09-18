@@ -757,12 +757,18 @@ async function fetchAllAmplimed() {
     // vendido, ex: "COMPLEMENTO CLACS - ...") não devem contar em nenhuma
     // métrica de vendas — nem propostas, nem fechadas, nem valor, nem nos
     // cards por médico. Como vendasLeads alimenta tudo isso, filtrar aqui
-    // já remove o complemento de toda a cadeia de uma vez.
+    // já remove o complemento de toda a cadeia de uma vez. No Kommo o valor
+    // do complemento já está somado no "Valor total" do lead original (o
+    // complemento fica com valor 0), então só sai quem tem venda zerada —
+    // um complemento com "Valor total" preenchido continua contando.
     const vendasLeads = filterBySegmento(
       vendasBase.filter(
         (l) =>
           normalize(l.pipeline_id) === 'VENDAS' &&
-          !normalize(l.name).includes('COMPLEMENTO')
+          !(
+            normalize(l.name).includes('COMPLEMENTO') &&
+            toNumber(l.venda) <= 0
+          )
       ),
       segmento
     )
