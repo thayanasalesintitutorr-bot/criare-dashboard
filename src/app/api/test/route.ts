@@ -521,34 +521,6 @@ function buildOrigens(
     .sort((a, b) => b.quantidade - a.quantidade)
 }
 
-// Usado só no card "Origens dos leads" da Visão Geral — "VAZIO" e "PACIENTE" são,
-// na prática, a mesma origem (paciente que chegou sem campanha marcada), então
-// mostramos como um bucket só. Não mexe em nenhum outro lugar que usa buildOrigens.
-function mesclarVazioEmPaciente(origens: ReturnType<typeof buildOrigens>) {
-  const vazio = origens.find((o) => o.nome === 'VAZIO')
-  if (!vazio) return origens
-
-  const semVazio = origens.filter((o) => o.nome !== 'VAZIO')
-  const paciente = semVazio.find((o) => o.nome === 'PACIENTE')
-
-  const detalhesMesclados: Record<string, number> = {}
-  for (const item of [...(paciente?.detalhes || []), ...vazio.detalhes]) {
-    detalhesMesclados[item.nome] = (detalhesMesclados[item.nome] || 0) + item.quantidade
-  }
-
-  const pacienteMesclado = {
-    nome: 'PACIENTE',
-    quantidade: (paciente?.quantidade || 0) + vazio.quantidade,
-    detalhes: Object.entries(detalhesMesclados)
-      .map(([nome, quantidade]) => ({ nome, quantidade }))
-      .sort((a, b) => b.quantidade - a.quantidade),
-  }
-
-  return [...semVazio.filter((o) => o.nome !== 'PACIENTE'), pacienteMesclado].sort(
-    (a, b) => b.quantidade - a.quantidade
-  )
-}
-
 // Formata um Date nos componentes locais (ano/mês/dia/hora...) como string
 // "naive" (sem sufixo de fuso), igual ao formato que parseDateLocal() já
 // assume ao interpretar os timestamps do Kommo. Não usar toISOString() aqui
@@ -943,7 +915,7 @@ const leadsPrimeiraMensagem = consultaBasePeriodo.filter((l) => {
   return temPrimeiraMensagem && !temLeadGrade
 })
 
-const origensPrimeiraMensagem = mesclarVazioEmPaciente(buildOrigens(leadsPrimeiraMensagem, origemModo, true))
+const origensPrimeiraMensagem = buildOrigens(leadsPrimeiraMensagem, origemModo, true)
 
     const convertidos = consultaLeads.filter((l) => {
   return (
@@ -1641,7 +1613,7 @@ const metaTicketMedioConsolidado =
       range
     )
 
-    const origens = mesclarVazioEmPaciente(buildOrigens(consultaBasePeriodo, origemModo, true))
+    const origens = buildOrigens(consultaBasePeriodo, origemModo, true)
 
     const leadsEntrada = consultaBasePeriodo
 
