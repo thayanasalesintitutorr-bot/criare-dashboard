@@ -350,20 +350,27 @@ export default function Home() {
               />
 
               <div className="relative flex flex-col items-center text-center">
-                {/* Selo com borda em gradiente animado */}
-                <div
-                  className="mb-7 rounded-full p-[1.5px]"
-                  style={{
-                    background:
-                      'linear-gradient(120deg, rgba(96,165,250,0.95), rgba(192,132,252,0.95), rgba(244,114,182,0.9), rgba(96,165,250,0.95))',
-                    backgroundSize: '300% 300%',
-                    animation: 'gradient-border-move 5s linear infinite',
-                  }}
-                >
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#05070D]/90 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#C4B5FD] backdrop-blur-md">
-                    <Sparkles size={12} className="shrink-0" />
+                {/* Selo "Painel Inteligente" — só aparece depois que o
+                    "Criare" termina de se formar, como um clarão de luz
+                    (nada de card/borda/ícone, só texto com um flash de
+                    brilho passando por trás na hora que surge). */}
+                <div className="relative mb-7">
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute left-1/2 top-1/2 h-14 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(192,132,252,0.9),transparent_70%)] blur-xl"
+                    initial={{ opacity: 0, scale: 0.4 }}
+                    animate={{ opacity: [0, 1, 0], scale: [0.4, 1.3, 1.8] }}
+                    transition={{ duration: 1, delay: 1.95, ease: 'easeOut' }}
+                  />
+                  <motion.p
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1.95, ease: 'easeOut' }}
+                    className="relative text-[11px] font-semibold uppercase tracking-[0.28em] text-[#C4B5FD]"
+                    style={{ textShadow: '0 0 20px rgba(167,139,250,0.75), 0 0 40px rgba(167,139,250,0.35)' }}
+                  >
                     Painel Inteligente
-                  </span>
+                  </motion.p>
                 </div>
 
                 <Wordmark
