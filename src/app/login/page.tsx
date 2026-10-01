@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, Wallet, Clock, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
 import { GlowHover } from '@/components/landing/glow-hover'
@@ -330,54 +330,25 @@ export default function LoginPage() {
               className="text-7xl font-black leading-none tracking-[-0.04em] sm:text-8xl"
             />
 
-            <p className="relative mt-4 text-sm text-slate-400">Qual painel você quer acessar?</p>
+            <p className="relative mt-4 text-sm text-slate-400">Gestão de clínica de forma inteligente</p>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <GlowHover magnetic strength={7} className="rounded-[28px]">
-              <div className="relative rounded-[28px]">
-                {/* Glow de fundo, revelado no hover */}
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-3 rounded-[32px] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-70"
-                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.5), rgba(168,85,247,0.45), rgba(236,72,153,0.3))' }}
+          <div className="flex justify-center">
+            <GlowHover magnetic strength={10} className="rounded-2xl">
+              <button
+                onClick={() => setEtapa('form')}
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] px-10 py-4 text-base font-semibold text-white transition-transform duration-300"
+                style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
+              >
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+                <span
+                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                  style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
                 />
-                {/* Borda em gradiente, revelada no hover */}
-                <div className="relative rounded-[28px] bg-white/10 p-[1.5px] transition-colors duration-500">
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                    style={{ background: 'linear-gradient(135deg, rgba(96,165,250,0.9), rgba(192,132,252,0.9), rgba(244,114,182,0.75))' }}
-                  />
-                  <button
-                    onClick={() => setEtapa('form')}
-                    className="group relative w-full overflow-hidden rounded-[27px] bg-[#0B1220]/90 p-7 text-left backdrop-blur-xl backdrop-saturate-150 transition-all duration-500 hover:-translate-y-1.5"
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#A855F7] text-white shadow-[0_10px_24px_rgba(139,92,246,0.45)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                      <ShieldCheck size={24} />
-                    </div>
-                    <p className="mt-5 text-lg font-black tracking-[-0.02em] text-white">Painel Administrativo</p>
-                    <p className="mt-1 text-sm text-slate-400">Operação, funil, marketing e atendimento</p>
-                    <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-[#A78BFA] transition-colors duration-300 group-hover:text-[#C4B5FD]">
-                      Acessar
-                      <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
-                    </div>
-                  </button>
-                </div>
-              </div>
+                <span className="relative">Acesse seu painel</span>
+                <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1.5" />
+              </button>
             </GlowHover>
-
-            <div className="relative cursor-not-allowed overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-7 text-left opacity-70 backdrop-blur-xl">
-              <span className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-                <Clock size={11} />
-                Em breve
-              </span>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.06] text-slate-500">
-                <Wallet size={24} />
-              </div>
-              <p className="mt-5 text-lg font-black tracking-[-0.02em] text-slate-500">Painel Financeiro</p>
-              <p className="mt-1 text-sm text-slate-500">Receitas, custos e fluxo de caixa</p>
-            </div>
           </div>
         </motion.div>
       )}
