@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, Wallet, Clock, Sparkle
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
 import { GlowHover } from '@/components/landing/glow-hover'
+import { Wordmark } from '@/components/landing/wordmark'
 
 function formatMoney(v: number) {
   return v.toLocaleString('pt-BR', {
@@ -323,18 +324,11 @@ export default function LoginPage() {
               style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
             />
 
-            <motion.h2
-              initial={{ opacity: 0, scale: 0.8, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-              className="relative bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-7xl font-black leading-none tracking-[-0.04em] text-transparent sm:text-8xl"
-              style={{
-                backgroundSize: '200% 100%',
-                animation: 'text-shimmer 4s ease-in-out infinite',
-              }}
-            >
-              Criare
-            </motion.h2>
+            <Wordmark
+              as="h2"
+              delay={0.1}
+              className="text-7xl font-black leading-none tracking-[-0.04em] sm:text-8xl"
+            />
 
             <p className="relative mt-4 text-sm text-slate-400">Qual painel você quer acessar?</p>
           </div>

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles, Zap, TrendingUp } from 'lucide-react'
 import { GhostCard, Sparkle, CARD_LABEL } from '@/components/landing/ghost-card'
 import { GlowHover } from '@/components/landing/glow-hover'
+import { Wordmark } from '@/components/landing/wordmark'
 
 function formatMoney(v: number) {
   return v.toLocaleString('pt-BR', {
@@ -310,7 +311,7 @@ export default function Home() {
                 de distância, um vidro muito transparente deixaria o blur
                 "engolir" o painel inteiro com a cor da borda em vez de só
                 deixar vazar um brilho sutil nas bordas. */}
-            <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[#0A0E18]/85 px-7 py-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl backdrop-saturate-150 sm:px-14 sm:py-16">
+            <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[#0A0E18]/92 px-7 py-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] sm:px-14 sm:py-16">
               {/* Halo pulsante atrás do título */}
               <div
                 aria-hidden
@@ -341,18 +342,11 @@ export default function Home() {
                   </span>
                 </div>
 
-                <motion.h1
-                  initial={{ opacity: 0, scale: 0.8, y: 14 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-                  className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text pr-2 text-6xl font-black leading-[1.1] tracking-[-0.03em] text-transparent sm:text-7xl md:text-8xl"
-                  style={{
-                    backgroundSize: '200% 100%',
-                    animation: 'text-shimmer 4s ease-in-out infinite',
-                  }}
-                >
-                  Criare
-                </motion.h1>
+                <Wordmark
+                  as="h1"
+                  delay={0.15}
+                  className="text-6xl font-black leading-[1.1] tracking-[-0.03em] sm:text-7xl md:text-8xl"
+                />
 
                 <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-white sm:whitespace-nowrap sm:text-2xl md:text-3xl">
                   Inteligência para transformar operação em decisão
