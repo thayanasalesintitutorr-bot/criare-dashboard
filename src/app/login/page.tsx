@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, Wallet, Clock } from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
+import { GlowHover } from '@/components/landing/glow-hover'
 
 function formatMoney(v: number) {
   return v.toLocaleString('pt-BR', {
@@ -318,20 +319,22 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <button
-              onClick={() => setEtapa('form')}
-              className="group relative overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-7 text-left shadow-xl backdrop-blur-xl transition hover:-translate-y-1 hover:border-[#2563EB]/30 hover:shadow-2xl"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB]">
-                <ShieldCheck size={24} />
-              </div>
-              <p className="mt-5 text-lg font-black tracking-[-0.02em] text-[#1f2233]">Painel Administrativo</p>
-              <p className="mt-1 text-sm text-slate-500">Operação, funil, marketing e atendimento</p>
-              <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-[#2563EB]">
-                Acessar
-                <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </div>
-            </button>
+            <GlowHover magnetic strength={7} className="rounded-3xl">
+              <button
+                onClick={() => setEtapa('form')}
+                className="group relative w-full overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-7 text-left shadow-xl backdrop-blur-xl backdrop-saturate-150 transition hover:-translate-y-1 hover:border-[#2563EB]/40 hover:shadow-2xl"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB] transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#2563EB]/15">
+                  <ShieldCheck size={24} />
+                </div>
+                <p className="mt-5 text-lg font-black tracking-[-0.02em] text-[#1f2233]">Painel Administrativo</p>
+                <p className="mt-1 text-sm text-slate-500">Operação, funil, marketing e atendimento</p>
+                <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-[#2563EB]">
+                  Acessar
+                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
+                </div>
+              </button>
+            </GlowHover>
 
             <div className="relative cursor-not-allowed overflow-hidden rounded-3xl border border-white/50 bg-white/40 p-7 text-left opacity-70 shadow-lg backdrop-blur-xl">
               <span className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
@@ -424,22 +427,24 @@ export default function LoginPage() {
                 </motion.p>
               )}
 
-              <button
-                onClick={handleLogin}
-                disabled={loading || !email || !password}
-                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] py-4 text-sm font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
-                style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
-              >
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
-                <span
-                  className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-                  style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
-                />
-                <span className="relative">{loading ? 'Entrando...' : 'Entrar'}</span>
-                {!loading && (
-                  <ArrowRight size={16} className="relative transition-transform duration-300 group-hover:translate-x-1" />
-                )}
-              </button>
+              <GlowHover magnetic strength={6} className="block rounded-2xl">
+                <button
+                  onClick={handleLogin}
+                  disabled={loading || !email || !password}
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] py-4 text-sm font-semibold text-white transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
+                  style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
+                >
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+                  <span
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                    style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+                  />
+                  <span className="relative">{loading ? 'Entrando...' : 'Entrar'}</span>
+                  {!loading && (
+                    <ArrowRight size={16} className="relative transition-transform duration-300 group-hover:translate-x-1.5" />
+                  )}
+                </button>
+              </GlowHover>
             </div>
           </div>
         </motion.div>

@@ -84,7 +84,7 @@ export function GhostCard({
       <motion.div
         animate={{ x: offset.x, y: offset.y }}
         transition={{ type: 'spring', stiffness: 160, damping: 14, mass: 0.6 }}
-        className={`${width} rounded-[20px] border border-white/70 bg-white/50 p-4 text-left opacity-45 shadow-[0_20px_50px_rgba(37,99,235,0.10)] backdrop-blur-sm ${rotate}`}
+        className={`${width} rounded-[20px] border border-white/80 bg-white/35 p-4 text-left opacity-55 shadow-[0_20px_50px_rgba(37,99,235,0.14),inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-xl backdrop-saturate-150 ${rotate}`}
       >
         {children}
       </motion.div>

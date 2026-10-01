@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Sparkles, Zap, TrendingUp } from 'lucide-react'
 import { GhostCard, Sparkle, CARD_LABEL } from '@/components/landing/ghost-card'
+import { GlowHover } from '@/components/landing/glow-hover'
 
 function formatMoney(v: number) {
   return v.toLocaleString('pt-BR', {
@@ -289,51 +290,113 @@ export default function Home() {
       </div>
 
       <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
-        <section className="relative z-10 mx-auto flex w-full max-w-3xl flex-col items-center text-center">
-          <span className="mb-7 inline-flex items-center rounded-full border border-[#BFDBFE]/70 bg-white/50 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2563EB] shadow-[0_1px_3px_rgba(37,99,235,0.08)] backdrop-blur-md">
-            Painel Inteligente
-          </span>
-
-          <h1
-            className="bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
-            style={{ filter: 'drop-shadow(0 8px 18px rgba(37,99,235,0.22))' }}
-          >
-            Criare
-          </h1>
-
-          <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-[#1f2233] sm:whitespace-nowrap sm:text-2xl md:text-3xl">
-            Inteligência para transformar operação em decisão
-          </h2>
-
-          <p className="mt-4 max-w-xl text-base text-[#64748B] sm:text-lg">
-            Dados, metas e desempenho em uma visão clara para o crescimento da operação.
-          </p>
-
-          <Link
-            href="/login"
-            className="group relative mt-11 inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-10 py-4 text-base font-semibold text-white transition-transform duration-300 hover:-translate-y-0.5"
-            style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
-          >
-            <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
-            <span
-              className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-              style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          className="relative z-10 mx-auto w-full max-w-3xl"
+        >
+          {/* Painel de vidro central — o "palco" do hero, com vidro mais forte
+              (blur + saturação) do que os cards fantasma de fundo, pra ficar
+              claro que é o elemento principal. */}
+          <div className="relative overflow-hidden rounded-[36px] border border-white/70 bg-white/25 px-7 py-12 shadow-[0_30px_90px_rgba(37,99,235,0.18),inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-2xl backdrop-saturate-150 sm:px-14 sm:py-16">
+            {/* Halo pulsante atrás do título */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-[18%] h-[220px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.35),transparent_70%)] blur-[40px]"
+              style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
             />
-            <span className="relative">Acessar painel</span>
-            <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1" />
-          </Link>
 
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
-            {['Dados em tempo real', 'Funil comercial', 'Metas inteligentes'].map((texto) => (
-              <span
-                key={texto}
-                className="rounded-full border border-[#DCEAFF] bg-white/55 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#475569] backdrop-blur-sm"
+            {/* Brilho de vidro no topo do painel */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent"
+            />
+
+            <div className="relative flex flex-col items-center text-center">
+              {/* Selo com borda em gradiente animado */}
+              <div
+                className="mb-7 rounded-full p-[1.5px]"
+                style={{
+                  background:
+                    'linear-gradient(120deg, rgba(37,99,235,0.9), rgba(147,197,253,0.9), rgba(96,165,250,0.9), rgba(37,99,235,0.9))',
+                  backgroundSize: '300% 300%',
+                  animation: 'gradient-border-move 5s linear infinite',
+                }}
               >
-                {texto}
-              </span>
-            ))}
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2563EB] backdrop-blur-md">
+                  <Sparkles size={12} className="shrink-0" />
+                  Painel Inteligente
+                </span>
+              </div>
+
+              <h1
+                className="bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
+                style={{ filter: 'drop-shadow(0 8px 18px rgba(37,99,235,0.22))' }}
+              >
+                Criare
+              </h1>
+
+              <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-[#1f2233] sm:whitespace-nowrap sm:text-2xl md:text-3xl">
+                Inteligência para transformar operação em decisão
+              </h2>
+
+              <p className="mt-4 max-w-xl text-base text-[#64748B] sm:text-lg">
+                Dados, metas e desempenho em uma visão clara para o crescimento da operação.
+              </p>
+
+              <GlowHover magnetic strength={10} className="mt-11 rounded-2xl">
+                <Link
+                  href="/login"
+                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-10 py-4 text-base font-semibold text-white transition-transform duration-300"
+                  style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
+                >
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+                  <span
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                    style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+                  />
+                  <span className="relative">Acessar painel</span>
+                  <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1.5" />
+                </Link>
+              </GlowHover>
+
+              {/* Tira de métricas vivas dentro do próprio vidro do hero */}
+              <div className="mt-10 grid w-full grid-cols-3 gap-3 sm:max-w-md">
+                {[
+                  { label: 'Receita', valor: formatMoney(receita), icon: TrendingUp },
+                  { label: 'Meta', valor: `${meta}%`, icon: Sparkles },
+                  { label: 'Desempenho', valor: `${desempenho}%`, icon: Zap },
+                ].map(({ label, valor, icon: Icon }) => (
+                  <div
+                    key={label}
+                    className="rounded-2xl border border-white/60 bg-white/40 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-md"
+                  >
+                    <div className="flex items-center justify-center gap-1 text-[#2563EB]">
+                      <Icon size={12} />
+                      <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
+                        {label}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm font-black tracking-[-0.01em] text-[#1f2233] sm:text-base">
+                      {valor}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+                {['Dados em tempo real', 'Funil comercial', 'Metas inteligentes'].map((texto) => (
+                  <GlowHover key={texto} className="rounded-full">
+                    <span className="inline-flex rounded-full border border-[#DCEAFF] bg-white/55 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#475569] backdrop-blur-sm transition-colors duration-300 group-hover:border-[#93C5FD] group-hover:text-[#2563EB]">
+                      {texto}
+                    </span>
+                  </GlowHover>
+                ))}
+              </div>
+            </div>
           </div>
-        </section>
+        </motion.section>
       </div>
     </main>
   )

@@ -316,3 +316,29 @@ body {
     transform: translate(-4%, 10%) scale(0.95);
   }
 }
+
+/* Borda com gradiente "vivo" — usada no painel de vidro do hero e no selo
+   de destaque. A borda em si é um elemento com esse fundo + padding de 1px,
+   o conteúdo real vai num filho sólido por cima. */
+@keyframes gradient-border-move {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Leve respiração de brilho atrás do título do hero. */
+@keyframes halo-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
