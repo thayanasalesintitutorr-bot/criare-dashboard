@@ -168,7 +168,7 @@ export default function LoginPage() {
       </div>
 
       {/* Cards fantasma, iguais aos da página inicial (maiores e vivos), mais perto do centro */}
-      <GhostCard position="left-[5%] top-[10%]" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]" breakpoint="lg">
+      <GhostCard position="left-[4%] top-[8%]" rotate="rotate-[-6deg]" delay="0s" width="w-[260px]" breakpoint="lg">
         <div className="flex items-center justify-between">
           <p className={CARD_LABEL}>Receita</p>
           <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
@@ -189,7 +189,7 @@ export default function LoginPage() {
         </svg>
       </GhostCard>
 
-      <GhostCard position="right-[5%] top-[10%]" rotate="rotate-[5deg]" delay="0.8s" width="w-[210px]" breakpoint="lg">
+      <GhostCard position="right-[4%] top-[8%]" rotate="rotate-[5deg]" delay="0.8s" width="w-[260px]" breakpoint="lg">
         <p className={CARD_LABEL}>Metas</p>
         <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-white">{meta}%</p>
         <p className="text-[10px] font-medium text-slate-500">da meta alcançada</p>
@@ -204,7 +204,7 @@ export default function LoginPage() {
         </p>
       </GhostCard>
 
-      <GhostCard position="left-[4%] top-1/2 -translate-y-1/2" rotate="rotate-[-4deg]" delay="1.6s" width="w-[190px]" breakpoint="lg">
+      <GhostCard position="left-[3%] top-1/2 -translate-y-1/2" rotate="rotate-[-4deg]" delay="1.6s" width="w-[230px]" breakpoint="lg">
         <p className={CARD_LABEL}>Desempenho</p>
         <div className="relative mt-2 flex h-20 w-20 items-center justify-center self-center">
           <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
@@ -227,7 +227,7 @@ export default function LoginPage() {
         <p className="mt-2 text-center text-[10px] font-medium text-slate-500">da meta mensal</p>
       </GhostCard>
 
-      <GhostCard position="right-[4%] top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[210px]" breakpoint="lg">
+      <GhostCard position="right-[3%] top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[260px]" breakpoint="lg">
         <p className={CARD_LABEL}>Evolução de Vendas</p>
         <svg viewBox="0 0 140 44" className="mt-2 h-11 w-full">
           <polyline
@@ -245,7 +245,7 @@ export default function LoginPage() {
         </div>
       </GhostCard>
 
-      <GhostCard position="left-[5%] bottom-[10%]" rotate="rotate-[-5deg]" delay="1.1s" width="w-[240px]" breakpoint="lg">
+      <GhostCard position="left-[4%] bottom-[8%]" rotate="rotate-[-5deg]" delay="1.1s" width="w-[290px]" breakpoint="lg">
         <p className={`${CARD_LABEL} mb-3`}>Funil Comercial</p>
         <div className="flex items-center gap-4">
           <div className="flex shrink-0 flex-col items-center gap-1.5">
@@ -275,7 +275,7 @@ export default function LoginPage() {
         </div>
       </GhostCard>
 
-      <GhostCard position="right-[5%] bottom-[10%]" rotate="rotate-[6deg]" delay="1.9s" width="w-[230px]" breakpoint="lg">
+      <GhostCard position="right-[4%] bottom-[8%]" rotate="rotate-[6deg]" delay="1.9s" width="w-[280px]" breakpoint="lg">
         <p className={`${CARD_LABEL} mb-3`}>Top Produtos</p>
         <div className="space-y-2">
           {produtos.map((p) => (
@@ -300,15 +300,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           className="relative z-10 w-full max-w-2xl px-6"
         >
-          <button
-            onClick={() => router.push('/')}
-            className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-
-          <div className="mb-10 text-center">
+          <div className="relative mb-6 text-center">
             <div
               className="mx-auto mb-5 inline-flex rounded-full p-[1.5px]"
               style={{
@@ -323,13 +315,28 @@ export default function LoginPage() {
                 Painel Inteligente
               </span>
             </div>
-            <h2
-              className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-4xl font-black tracking-[-0.04em] text-transparent"
-              style={{ filter: 'drop-shadow(0 6px 20px rgba(139,92,246,0.3))' }}
+
+            {/* Halo atrás da wordmark */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-[52%] h-[180px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.45),transparent_70%)] blur-[45px]"
+              style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
+            />
+
+            <motion.h2
+              initial={{ opacity: 0, scale: 0.8, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              className="relative bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-7xl font-black leading-none tracking-[-0.04em] text-transparent sm:text-8xl"
+              style={{
+                backgroundSize: '200% 100%',
+                animation: 'text-shimmer 4s ease-in-out infinite',
+              }}
             >
               Criare
-            </h2>
-            <p className="mt-2 text-sm text-slate-400">Qual painel você quer acessar?</p>
+            </motion.h2>
+
+            <p className="relative mt-4 text-sm text-slate-400">Qual painel você quer acessar?</p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -407,10 +414,7 @@ export default function LoginPage() {
         >
           <div className="rounded-[31px] border border-white/10 bg-[#0B1220]/90 p-8 backdrop-blur-2xl backdrop-saturate-150">
             <div className="mb-6 text-center">
-              <h2
-                className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-4xl font-black tracking-[-0.04em] text-transparent"
-                style={{ filter: 'drop-shadow(0 6px 20px rgba(139,92,246,0.3))' }}
-              >
+              <h2 className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-4xl font-black tracking-[-0.04em] text-transparent">
                 Criare
               </h2>
               <p className="mt-2 text-sm text-slate-400">

@@ -132,7 +132,7 @@ export default function Home() {
           WebkitMaskImage: 'radial-gradient(ellipse 52% 58% at center, transparent 15%, black 68%)',
         }}
       >
-      <GhostCard position="left-10 top-16" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]">
+      <GhostCard position="left-6 top-10" rotate="rotate-[-6deg]" delay="0s" width="w-[260px]">
         <div className="flex items-center justify-between">
           <p className={CARD_LABEL}>Receita</p>
           <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
@@ -153,7 +153,7 @@ export default function Home() {
         </svg>
       </GhostCard>
 
-      <GhostCard position="right-10 top-16" rotate="rotate-[5deg]" delay="0.8s" width="w-[210px]">
+      <GhostCard position="right-6 top-10" rotate="rotate-[5deg]" delay="0.8s" width="w-[260px]">
         <p className={CARD_LABEL}>Metas</p>
         <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-white">{meta}%</p>
         <p className="text-[10px] font-medium text-slate-500">da meta alcançada</p>
@@ -168,7 +168,7 @@ export default function Home() {
         </p>
       </GhostCard>
 
-      <GhostCard position="left-10 top-1/2 -translate-y-1/2" rotate="rotate-[-4deg]" delay="1.6s" width="w-[190px]">
+      <GhostCard position="left-6 top-1/2 -translate-y-1/2" rotate="rotate-[-4deg]" delay="1.6s" width="w-[230px]">
         <p className={CARD_LABEL}>Desempenho</p>
         <div className="relative mt-2 flex h-20 w-20 items-center justify-center self-center">
           <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
@@ -191,7 +191,7 @@ export default function Home() {
         <p className="mt-2 text-center text-[10px] font-medium text-slate-500">da meta mensal</p>
       </GhostCard>
 
-      <GhostCard position="right-10 top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[210px]">
+      <GhostCard position="right-6 top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[260px]">
         <p className={CARD_LABEL}>Evolução de Vendas</p>
         <svg viewBox="0 0 140 44" className="mt-2 h-11 w-full">
           <polyline
@@ -209,7 +209,7 @@ export default function Home() {
         </div>
       </GhostCard>
 
-      <GhostCard position="left-10 bottom-16" rotate="rotate-[-5deg]" delay="1.1s" width="w-[240px]">
+      <GhostCard position="left-6 bottom-10" rotate="rotate-[-5deg]" delay="1.1s" width="w-[290px]">
         <p className={`${CARD_LABEL} mb-3`}>Funil Comercial</p>
         <div className="flex items-center gap-4">
           <div className="flex shrink-0 flex-col items-center gap-1.5">
@@ -239,7 +239,7 @@ export default function Home() {
         </div>
       </GhostCard>
 
-      <GhostCard position="right-10 bottom-16" rotate="rotate-[6deg]" delay="1.9s" width="w-[230px]">
+      <GhostCard position="right-6 bottom-10" rotate="rotate-[6deg]" delay="1.9s" width="w-[280px]">
         <p className={`${CARD_LABEL} mb-3`}>Top Produtos</p>
         <div className="space-y-2">
           {produtos.map((p) => (
@@ -257,7 +257,7 @@ export default function Home() {
         </div>
       </GhostCard>
 
-      <GhostCard position="left-[26%] top-[10%]" rotate="rotate-[-3deg]" delay="0.4s" width="w-[170px]">
+      <GhostCard position="left-[24%] top-[8%]" rotate="rotate-[-3deg]" delay="0.4s" width="w-[200px]">
         <p className={CARD_LABEL}>Conversão</p>
         <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">32%</p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
@@ -265,13 +265,13 @@ export default function Home() {
         </div>
       </GhostCard>
 
-      <GhostCard position="right-[26%] top-[10%]" rotate="rotate-[3deg]" delay="1.3s" width="w-[170px]">
+      <GhostCard position="right-[24%] top-[8%]" rotate="rotate-[3deg]" delay="1.3s" width="w-[200px]">
         <p className={CARD_LABEL}>Ticket Médio</p>
         <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">R$ 1.390</p>
         <p className="text-[10px] font-medium text-slate-500">por atendimento</p>
       </GhostCard>
 
-      <GhostCard position="left-[24%] bottom-[12%]" rotate="rotate-[4deg]" delay="2.1s" width="w-[170px]">
+      <GhostCard position="left-[22%] bottom-[10%]" rotate="rotate-[4deg]" delay="2.1s" width="w-[200px]">
         <p className={CARD_LABEL}>NPS</p>
         <div className="mt-1 flex items-baseline gap-1">
           <p className="text-xl font-black tracking-[-0.02em] text-white">92</p>
@@ -279,7 +279,7 @@ export default function Home() {
         </div>
       </GhostCard>
 
-      <GhostCard position="right-[24%] bottom-[12%]" rotate="rotate-[-4deg]" delay="0.9s" width="w-[170px]">
+      <GhostCard position="right-[22%] bottom-[10%]" rotate="rotate-[-4deg]" delay="0.9s" width="w-[200px]">
         <p className={CARD_LABEL}>Ocupação</p>
         <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">78%</p>
         <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
@@ -341,12 +341,18 @@ export default function Home() {
                   </span>
                 </div>
 
-                <h1
-                  className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
-                  style={{ filter: 'drop-shadow(0 8px 28px rgba(139,92,246,0.35))' }}
+                <motion.h1
+                  initial={{ opacity: 0, scale: 0.8, y: 14 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+                  className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text pr-2 text-6xl font-black leading-[1.1] tracking-[-0.03em] text-transparent sm:text-7xl md:text-8xl"
+                  style={{
+                    backgroundSize: '200% 100%',
+                    animation: 'text-shimmer 4s ease-in-out infinite',
+                  }}
                 >
                   Criare
-                </h1>
+                </motion.h1>
 
                 <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-white sm:whitespace-nowrap sm:text-2xl md:text-3xl">
                   Inteligência para transformar operação em decisão
