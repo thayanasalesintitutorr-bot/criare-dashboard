@@ -49,7 +49,14 @@ export function Wordmark({
   }
 
   return (
-    <div className={`relative flex items-center justify-center ${className}`}>
+    <div className={`relative block ${className}`}>
+      {/* Wrapper interno inline-flex: encolhe pro tamanho real do
+          conteúdo (bolinha + "Criare"), diferente do wrapper de fora que
+          é block só pra garantir que isso ocupe sua própria linha no
+          layout (sem ficar colado ao lado do selo "Painel Inteligente").
+          Sem esse encolhimento, o brilho (w-1/3 abaixo) vira uma faixa
+          enorme relativa à largura inteira do painel, não da palavra. */}
+      <div className="relative inline-flex items-center justify-center">
       {/* Bolinha quicando — some assim que vira o "C". Sem tamanho de
           fonte próprio: herda o da className (mesma do Tag abaixo), por
           isso o "em" bate com o tamanho real do "C" em qualquer breakpoint. */}
@@ -68,8 +75,14 @@ export function Wordmark({
             times: [0, 0.35, 0.55, 0.7, 0.85, 1],
             ease: 'easeOut',
           }}
-          className="absolute h-[0.5em] w-[0.5em] rounded-full"
+          className="absolute left-1/2 top-1/2 h-[0.5em] w-[0.5em] rounded-full"
           style={{
+            // Centraliza com margem negativa, não com transform: o
+            // framer-motion já usa `transform` pra animar y/scale, e um
+            // transform de centralização na className seria sobrescrito
+            // pelo transform inline que o framer-motion aplica.
+            marginLeft: '-0.25em',
+            marginTop: '-0.25em',
             background: 'linear-gradient(135deg, #60A5FA, #C084FC)',
             boxShadow: '0 0 40px rgba(139,92,246,0.65)',
           }}
@@ -104,13 +117,16 @@ export function Wordmark({
         </span>
       </Tag>
 
-      {/* Brilho único, logo que a palavra termina de se formar */}
+      {/* Brilho único, logo que a palavra termina de se formar. Sem
+          mix-blend-mode — já vimos blend mode se comportar de forma
+          inconsistente nesse app (vira um bloco cinza sólido em vez de
+          um brilho suave), então aqui é só um gradiente branco bem
+          translúcido por cima, sem blend. */}
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-transparent via-white/80 to-transparent"
-        style={{ mixBlendMode: 'overlay' }}
-        initial={{ x: '-220%', opacity: 0 }}
-        animate={{ x: '520%', opacity: [0, 1, 1, 0] }}
+        className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent"
+        initial={{ x: '-180%', opacity: 0 }}
+        animate={{ x: '380%', opacity: [0, 1, 1, 0] }}
         transition={{
           duration: 1.1,
           delay: delay + 1.55,
@@ -118,6 +134,7 @@ export function Wordmark({
           times: [0, 0.2, 0.75, 1],
         }}
       />
+      </div>
     </div>
   )
 }

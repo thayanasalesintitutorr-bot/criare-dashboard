@@ -15,6 +15,8 @@ import {
   Users,
   Activity,
   ClipboardCheck,
+  MessageCircle,
+  CalendarCheck,
 } from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
@@ -307,6 +309,36 @@ export default function LoginPage() {
         </div>
       </GhostCard>
 
+      <GhostCard position="left-[31%] top-[13%]" rotate="rotate-[-3deg]" delay="0.4s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Conversão</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">32%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]" />
+        </div>
+      </GhostCard>
+
+      <GhostCard position="right-[31%] top-[13%]" rotate="rotate-[3deg]" delay="1.3s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Ticket Médio</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">R$ 1.390</p>
+        <p className="text-[10px] font-medium text-slate-500">por atendimento</p>
+      </GhostCard>
+
+      <GhostCard position="left-[29%] bottom-[14%]" rotate="rotate-[4deg]" delay="2.1s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>NPS</p>
+        <div className="mt-1 flex items-baseline gap-1">
+          <p className="text-xl font-black tracking-[-0.02em] text-white">92</p>
+          <span className="text-[10px] font-bold text-emerald-400">Excelente</span>
+        </div>
+      </GhostCard>
+
+      <GhostCard position="right-[29%] bottom-[14%]" rotate="rotate-[-4deg]" delay="0.9s" width="w-[170px]" breakpoint="lg">
+        <p className={CARD_LABEL}>Ocupação</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">78%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]" />
+        </div>
+      </GhostCard>
+
       {/* Ícones soltos — mais pontos interativos no fundo, sem dados dentro */}
       <FloatingIcon icon={Bell} position="left-1/2 top-[3%] -translate-x-1/2" delay="0.2s" size={44} breakpoint="lg" />
       <FloatingIcon icon={Stethoscope} position="left-[1%] top-[32%]" delay="1.4s" size={52} breakpoint="lg" />
@@ -314,6 +346,8 @@ export default function LoginPage() {
       <FloatingIcon icon={Users} position="left-[16%] top-[70%]" delay="0.6s" size={44} breakpoint="lg" />
       <FloatingIcon icon={Activity} position="right-[16%] top-[70%]" delay="1.8s" size={44} breakpoint="lg" />
       <FloatingIcon icon={ClipboardCheck} position="left-1/2 bottom-[2%] -translate-x-1/2" delay="1s" size={44} breakpoint="lg" />
+      <FloatingIcon icon={MessageCircle} position="left-[38%] top-[2%]" delay="2.6s" size={38} breakpoint="xl" />
+      <FloatingIcon icon={CalendarCheck} position="right-[38%] top-[2%]" delay="0.4s" size={38} breakpoint="xl" />
 
       {/* Escolha do painel */}
       {etapa === 'escolha' && (
@@ -358,9 +392,10 @@ export default function LoginPage() {
             <GlowHover magnetic strength={10} className="rounded-2xl">
               <button
                 onClick={() => setEtapa('form')}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] px-10 py-4 text-base font-semibold text-white transition-transform duration-300"
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl border border-white/25 bg-white/10 px-10 py-4 text-base font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300"
                 style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
               >
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/45 via-[#7C6CF0]/45 to-[#A855F7]/45" />
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                 <span
                   className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
@@ -460,9 +495,10 @@ export default function LoginPage() {
                 <button
                   onClick={handleLogin}
                   disabled={loading || !email || !password}
-                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] py-4 text-sm font-semibold text-white transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/25 bg-white/10 py-4 text-sm font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
                   style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
                 >
+                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/45 via-[#7C6CF0]/45 to-[#A855F7]/45" />
                   <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                   <span
                     className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
