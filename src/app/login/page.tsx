@@ -3,9 +3,22 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Bell,
+  Stethoscope,
+  HeartPulse,
+  Users,
+  Activity,
+  ClipboardCheck,
+} from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
+import { FloatingIcon } from '@/components/landing/floating-icon'
 import { GlowHover } from '@/components/landing/glow-hover'
 import { Wordmark } from '@/components/landing/wordmark'
 
@@ -293,6 +306,14 @@ export default function LoginPage() {
           ))}
         </div>
       </GhostCard>
+
+      {/* Ícones soltos — mais pontos interativos no fundo, sem dados dentro */}
+      <FloatingIcon icon={Bell} position="left-1/2 top-[3%] -translate-x-1/2" delay="0.2s" size={44} breakpoint="lg" />
+      <FloatingIcon icon={Stethoscope} position="left-[1%] top-[32%]" delay="1.4s" size={52} breakpoint="lg" />
+      <FloatingIcon icon={HeartPulse} position="right-[1%] top-[32%]" delay="2.2s" size={52} breakpoint="lg" />
+      <FloatingIcon icon={Users} position="left-[16%] top-[70%]" delay="0.6s" size={44} breakpoint="lg" />
+      <FloatingIcon icon={Activity} position="right-[16%] top-[70%]" delay="1.8s" size={44} breakpoint="lg" />
+      <FloatingIcon icon={ClipboardCheck} position="left-1/2 bottom-[2%] -translate-x-1/2" delay="1s" size={44} breakpoint="lg" />
 
       {/* Escolha do painel */}
       {etapa === 'escolha' && (

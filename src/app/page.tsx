@@ -3,8 +3,22 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles, Zap, TrendingUp } from 'lucide-react'
+import {
+  ArrowRight,
+  Sparkles,
+  Zap,
+  TrendingUp,
+  Stethoscope,
+  CalendarCheck,
+  Bell,
+  Users,
+  Activity,
+  ClipboardCheck,
+  HeartPulse,
+  MessageCircle,
+} from 'lucide-react'
 import { GhostCard, Sparkle, CARD_LABEL } from '@/components/landing/ghost-card'
+import { FloatingIcon } from '@/components/landing/floating-icon'
 import { GlowHover } from '@/components/landing/glow-hover'
 import { Wordmark } from '@/components/landing/wordmark'
 
@@ -287,6 +301,16 @@ export default function Home() {
           <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]" />
         </div>
       </GhostCard>
+
+      {/* Ícones soltos — mais pontos interativos no fundo, sem dados dentro */}
+      <FloatingIcon icon={Bell} position="left-1/2 top-[4%] -translate-x-1/2" delay="0.2s" size={48} breakpoint="lg" />
+      <FloatingIcon icon={Stethoscope} position="left-[2%] top-[36%]" delay="1.4s" size={56} breakpoint="lg" />
+      <FloatingIcon icon={HeartPulse} position="right-[2%] top-[36%]" delay="2.2s" size={56} breakpoint="lg" />
+      <FloatingIcon icon={Users} position="left-[15%] top-[64%]" delay="0.6s" size={48} breakpoint="lg" />
+      <FloatingIcon icon={Activity} position="right-[15%] top-[64%]" delay="1.8s" size={48} breakpoint="lg" />
+      <FloatingIcon icon={ClipboardCheck} position="left-1/2 bottom-[3%] -translate-x-1/2" delay="1s" size={48} breakpoint="lg" />
+      <FloatingIcon icon={MessageCircle} position="left-[38%] top-[2%]" delay="2.6s" size={40} breakpoint="xl" />
+      <FloatingIcon icon={CalendarCheck} position="right-[38%] top-[2%]" delay="0.4s" size={40} breakpoint="xl" />
       </div>
 
       <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
