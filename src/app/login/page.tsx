@@ -392,10 +392,10 @@ export default function LoginPage() {
             <GlowHover magnetic strength={10} className="rounded-2xl">
               <button
                 onClick={() => setEtapa('form')}
-                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl border border-white/25 bg-white/10 px-10 py-4 text-base font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300"
+                className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl border border-white/15 bg-white/5 px-10 py-4 text-base font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300"
                 style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
               >
-                <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/45 via-[#7C6CF0]/45 to-[#A855F7]/45" />
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/25 via-[#7C6CF0]/25 to-[#A855F7]/25" />
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                 <span
                   className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
@@ -495,10 +495,10 @@ export default function LoginPage() {
                 <button
                   onClick={handleLogin}
                   disabled={loading || !email || !password}
-                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/25 bg-white/10 py-4 text-sm font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl border border-white/15 bg-white/5 py-4 text-sm font-semibold text-white backdrop-blur-xl backdrop-saturate-150 transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
                   style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
                 >
-                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/45 via-[#7C6CF0]/45 to-[#A855F7]/45" />
+                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#3B82F6]/25 via-[#7C6CF0]/25 to-[#A855F7]/25" />
                   <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                   <span
                     className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"

@@ -355,3 +355,16 @@ body {
     background-position: 100% 50%;
   }
 }
+
+/* Respiração lenta de opacidade — usada nos cards e ícones fantasma do
+   fundo (GhostCard / FloatingIcon) pra eles aparecerem e desaparecerem
+   suavemente ao longo do tempo, em vez de ficarem sempre visíveis. */
+@keyframes fade-breathe {
+  0%,
+  100% {
+    opacity: 0.12;
+  }
+  50% {
+    opacity: 1;
+  }
+}

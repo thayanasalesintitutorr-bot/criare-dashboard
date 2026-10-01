@@ -11,8 +11,7 @@ type Phase = 'ball' | 'letter' | 'reveal'
 // formar "Criare" por completo — tudo ainda centralizado o tempo todo
 // (o "C" só parece se afastar porque o grupo continua centrado enquanto
 // "riare" ganha espaço; é um truque de CSS puro com grid-template-columns
-// indo de 0fr pra 1fr, sem precisar medir largura em JS). Por fim, um
-// brilho atravessa a palavra já completa uma única vez.
+// indo de 0fr pra 1fr, sem precisar medir largura em JS).
 //
 // Importante: nada aqui usa `filter`, rotateX/preserve-3d, nem anima
 // `width` via framer-motion no elemento com `background-clip: text` —
@@ -116,24 +115,6 @@ export function Wordmark({
           </span>
         </span>
       </Tag>
-
-      {/* Brilho único, logo que a palavra termina de se formar. Sem
-          mix-blend-mode — já vimos blend mode se comportar de forma
-          inconsistente nesse app (vira um bloco cinza sólido em vez de
-          um brilho suave), então aqui é só um gradiente branco bem
-          translúcido por cima, sem blend. */}
-      <motion.span
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/35 to-transparent"
-        initial={{ x: '-180%', opacity: 0 }}
-        animate={{ x: '380%', opacity: [0, 1, 1, 0] }}
-        transition={{
-          duration: 1.1,
-          delay: delay + 1.55,
-          ease: 'easeInOut',
-          times: [0, 0.2, 0.75, 1],
-        }}
-      />
       </div>
     </div>
   )

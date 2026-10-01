@@ -41,16 +41,23 @@ export function GhostCard({
 
   const breakpointClass = { lg: 'lg:block', xl: 'xl:block', '2xl': '2xl:block' }[breakpoint]
 
+  // Duração da respiração varia por card (baseada no próprio delay, que já
+  // é diferente em cada chamada) pra não pulsarem todos em sincronia.
+  const breatheDuration = 9 + (parseFloat(delay) || 0) * 1.6
+
   return (
     <div
       ref={ref}
       className={`pointer-events-none absolute hidden select-none ${breakpointClass} ${position}`}
-      style={{ animation: 'float-slow 7s ease-in-out infinite', animationDelay: delay }}
+      style={{
+        animation: `float-slow 7s ease-in-out infinite, fade-breathe ${breatheDuration}s ease-in-out infinite`,
+        animationDelay: `${delay}, ${delay}`,
+      }}
     >
       <motion.div
         animate={{ x: offset.x, y: offset.y }}
         transition={{ type: 'spring', stiffness: 160, damping: 14, mass: 0.6 }}
-        className={`${width} rounded-[20px] border border-white/10 bg-white/[0.06] p-4 text-left opacity-80 shadow-[0_20px_50px_rgba(59,130,246,0.12),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl backdrop-saturate-150 ${rotate}`}
+        className={`${width} rounded-[20px] border border-white/10 bg-white/[0.06] p-4 text-left shadow-[0_20px_50px_rgba(59,130,246,0.12),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl backdrop-saturate-150 ${rotate}`}
       >
         {children}
       </motion.div>

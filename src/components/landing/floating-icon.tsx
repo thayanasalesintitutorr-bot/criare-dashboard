@@ -28,11 +28,18 @@ export function FloatingIcon({
 
   const breakpointClass = { lg: 'lg:flex', xl: 'xl:flex', '2xl': '2xl:flex' }[breakpoint]
 
+  // Duração da respiração varia por ícone (baseada no próprio delay) pra
+  // não pulsarem todos em sincronia.
+  const breatheDuration = 10 + (parseFloat(delay) || 0) * 1.4
+
   return (
     <div
       ref={ref}
       className={`pointer-events-none absolute hidden select-none ${breakpointClass} ${position}`}
-      style={{ animation: 'float-slow 8s ease-in-out infinite', animationDelay: delay }}
+      style={{
+        animation: `float-slow 8s ease-in-out infinite, fade-breathe ${breatheDuration}s ease-in-out infinite`,
+        animationDelay: `${delay}, ${delay}`,
+      }}
     >
       <motion.div
         animate={{ x: offset.x, y: offset.y }}
