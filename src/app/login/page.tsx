@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, Wallet, Clock } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Eye, EyeOff, ShieldCheck, Wallet, Clock, Sparkles } from 'lucide-react'
 import { useAuth } from '@/store/use-auth'
 import { GhostCard, CARD_LABEL } from '@/components/landing/ghost-card'
 import { GlowHover } from '@/components/landing/glow-hover'
@@ -110,35 +110,35 @@ export default function LoginPage() {
     }
   }
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#EFF6FF] via-white to-[#DBEAFE]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#05070D] text-white">
       {/* Animação sutil de fundo */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.08, 0.95, 1] }}
+          animate={{ x: [0, 60, -20, 0], y: [0, -40, 25, 0], scale: [1, 1.1, 0.95, 1] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-[#2563EB]/8 blur-[100px]"
+          className="absolute -left-32 -top-32 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.4),transparent_70%)] blur-[30px]"
         />
         <motion.div
-          animate={{ x: [0, -30, 40, 0], y: [0, 20, -30, 0], scale: [1, 0.95, 1.1, 1] }}
+          animate={{ x: [0, -40, 40, 0], y: [0, 25, -30, 0], scale: [1, 0.95, 1.1, 1] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -bottom-32 -right-32 h-[600px] w-[600px] rounded-full bg-[#2563EB]/6 blur-[120px]"
+          className="absolute -bottom-32 -right-32 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.35),transparent_70%)] blur-[30px]"
         />
         <motion.div
           animate={{ x: [0, 20, -15, 0], y: [0, -20, 15, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute left-1/2 top-1/3 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-[#60A5FA]/5 blur-[80px]"
+          className="absolute left-1/2 top-1/3 h-[340px] w-[340px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.25),transparent_70%)] blur-[20px]"
         />
         <motion.div
           animate={{ x: [0, -25, 15, 0], y: [0, 15, -25, 0], scale: [1, 1.08, 0.94, 1] }}
           transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute bottom-[-10%] left-[8%] h-[260px] w-[260px] rounded-full bg-[#93C5FD]/10 blur-[70px]"
+          className="absolute bottom-[-10%] left-[8%] h-[300px] w-[300px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.3),transparent_70%)] blur-[15px]"
         />
 
         {/* Grid sutil, com respiração lenta */}
         <motion.div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
-            backgroundImage: 'linear-gradient(rgba(37,99,235,0.25) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.25) 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
             backgroundSize: '60px 60px',
           }}
           animate={{ backgroundPosition: ['0px 0px', '60px 60px'] }}
@@ -157,7 +157,7 @@ export default function LoginPage() {
             key={i}
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="absolute hidden text-[#93C5FD] sm:block"
+            className="absolute hidden text-[#A5B4FC] sm:block"
             style={{ top: p.top, left: p.left, width: p.size, height: p.size }}
             animate={{ opacity: [0.15, 0.7, 0.15], scale: [0.85, 1.1, 0.85] }}
             transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: p.delay }}
@@ -171,17 +171,17 @@ export default function LoginPage() {
       <GhostCard position="left-[5%] top-[10%]" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]" breakpoint="lg">
         <div className="flex items-center justify-between">
           <p className={CARD_LABEL}>Receita</p>
-          <span className="rounded-full bg-[#059669]/10 px-2 py-0.5 text-[10px] font-bold text-[#059669]">
+          <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
             +{receitaVar.toFixed(1)}%
           </span>
         </div>
-        <p className="mt-2 text-xl font-black tracking-[-0.02em] text-[#1f2233]">{formatMoney(receita)}</p>
-        <p className="text-[10px] font-medium text-[#94A3B8]">vs. mês anterior</p>
+        <p className="mt-2 text-xl font-black tracking-[-0.02em] text-white">{formatMoney(receita)}</p>
+        <p className="text-[10px] font-medium text-slate-500">vs. mês anterior</p>
         <svg viewBox="0 0 140 44" className="mt-2 h-11 w-full">
           <polyline
             points={toPoints(receitaSerie)}
             fill="none"
-            stroke="#2563EB"
+            stroke="#60A5FA"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -191,15 +191,15 @@ export default function LoginPage() {
 
       <GhostCard position="right-[5%] top-[10%]" rotate="rotate-[5deg]" delay="0.8s" width="w-[210px]" breakpoint="lg">
         <p className={CARD_LABEL}>Metas</p>
-        <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-[#1f2233]">{meta}%</p>
-        <p className="text-[10px] font-medium text-[#94A3B8]">da meta alcançada</p>
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
+        <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-white">{meta}%</p>
+        <p className="text-[10px] font-medium text-slate-500">da meta alcançada</p>
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]"
+            className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]"
             style={{ width: `${meta}%`, transition: 'width 1s ease' }}
           />
         </div>
-        <p className="mt-2 text-[10px] font-medium text-[#94A3B8]">
+        <p className="mt-2 text-[10px] font-medium text-slate-500">
           {formatMoney(metaValor)} / {formatMoney(1000000)}
         </p>
       </GhostCard>
@@ -208,13 +208,13 @@ export default function LoginPage() {
         <p className={CARD_LABEL}>Desempenho</p>
         <div className="relative mt-2 flex h-20 w-20 items-center justify-center self-center">
           <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="#DCEAFF" strokeWidth="8" />
+            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
             <circle
               cx="40"
               cy="40"
               r="34"
               fill="none"
-              stroke="#2563EB"
+              stroke="#60A5FA"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 34}
@@ -222,9 +222,9 @@ export default function LoginPage() {
               style={{ transition: 'stroke-dashoffset 1s ease' }}
             />
           </svg>
-          <span className="absolute text-lg font-black text-[#1f2233]">{desempenho}%</span>
+          <span className="absolute text-lg font-black text-white">{desempenho}%</span>
         </div>
-        <p className="mt-2 text-center text-[10px] font-medium text-[#94A3B8]">da meta mensal</p>
+        <p className="mt-2 text-center text-[10px] font-medium text-slate-500">da meta mensal</p>
       </GhostCard>
 
       <GhostCard position="right-[4%] top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[210px]" breakpoint="lg">
@@ -233,15 +233,15 @@ export default function LoginPage() {
           <polyline
             points={toPoints(evolucaoSerie)}
             fill="none"
-            stroke="#2563EB"
+            stroke="#C084FC"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
         <div className="mt-2 flex items-baseline justify-between">
-          <span className="text-lg font-black text-[#2563EB]">+{evolucao.toFixed(1)}%</span>
-          <span className="text-[10px] font-medium text-[#94A3B8]">vs. mês anterior</span>
+          <span className="text-lg font-black text-[#C084FC]">+{evolucao.toFixed(1)}%</span>
+          <span className="text-[10px] font-medium text-slate-500">vs. mês anterior</span>
         </div>
       </GhostCard>
 
@@ -249,27 +249,27 @@ export default function LoginPage() {
         <p className={`${CARD_LABEL} mb-3`}>Funil Comercial</p>
         <div className="flex items-center gap-4">
           <div className="flex shrink-0 flex-col items-center gap-1.5">
-            <div className="h-2.5 w-[64px] rounded-sm bg-[#2563EB]/70" />
-            <div className="h-2.5 w-[48px] rounded-sm bg-[#2563EB]/58" />
-            <div className="h-2.5 w-[32px] rounded-sm bg-[#2563EB]/46" />
-            <div className="h-2.5 w-[18px] rounded-sm bg-[#2563EB]/34" />
+            <div className="h-2.5 w-[64px] rounded-sm bg-[#60A5FA]/70" />
+            <div className="h-2.5 w-[48px] rounded-sm bg-[#60A5FA]/58" />
+            <div className="h-2.5 w-[32px] rounded-sm bg-[#60A5FA]/46" />
+            <div className="h-2.5 w-[18px] rounded-sm bg-[#60A5FA]/34" />
           </div>
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Leads</span>
-              <span className="font-bold text-[#1f2233]">{funil.leads.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Leads</span>
+              <span className="font-bold text-white">{funil.leads.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Qualificados</span>
-              <span className="font-bold text-[#1f2233]">{funil.qualificados.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Qualificados</span>
+              <span className="font-bold text-white">{funil.qualificados.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Propostas</span>
-              <span className="font-bold text-[#1f2233]">{funil.propostas.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Propostas</span>
+              <span className="font-bold text-white">{funil.propostas.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Fechados</span>
-              <span className="font-bold text-[#1f2233]">{funil.fechados.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Fechados</span>
+              <span className="font-bold text-white">{funil.fechados.toLocaleString('pt-BR')}</span>
             </div>
           </div>
         </div>
@@ -280,14 +280,14 @@ export default function LoginPage() {
         <div className="space-y-2">
           {produtos.map((p) => (
             <div key={p.nome} className="flex items-center gap-2 text-[11px]">
-              <span className="w-[64px] shrink-0 text-[#64748B]">{p.nome}</span>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#DCEAFF]">
+              <span className="w-[64px] shrink-0 text-slate-400">{p.nome}</span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-[#2563EB]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]"
                   style={{ width: `${p.percent}%`, transition: 'width 1s ease' }}
                 />
               </div>
-              <span className="w-8 shrink-0 text-right font-bold text-[#1f2233]">{p.percent}%</span>
+              <span className="w-8 shrink-0 text-right font-bold text-white">{p.percent}%</span>
             </div>
           ))}
         </div>
@@ -302,50 +302,80 @@ export default function LoginPage() {
         >
           <button
             onClick={() => router.push('/')}
-            className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-700"
+            className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300"
           >
             <ArrowLeft size={16} />
             Voltar
           </button>
 
-          <div className="mb-8 text-center">
+          <div className="mb-10 text-center">
+            <div
+              className="mx-auto mb-5 inline-flex rounded-full p-[1.5px]"
+              style={{
+                background:
+                  'linear-gradient(120deg, rgba(96,165,250,0.95), rgba(192,132,252,0.95), rgba(244,114,182,0.9), rgba(96,165,250,0.95))',
+                backgroundSize: '300% 300%',
+                animation: 'gradient-border-move 5s linear infinite',
+              }}
+            >
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#05070D]/90 px-4 py-1 text-[10px] font-semibold uppercase tracking-[0.26em] text-[#C4B5FD]">
+                <Sparkles size={11} />
+                Painel Inteligente
+              </span>
+            </div>
             <h2
-              className="text-4xl font-black tracking-[-0.04em] text-[#2563EB]"
-              style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+              className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-4xl font-black tracking-[-0.04em] text-transparent"
+              style={{ filter: 'drop-shadow(0 6px 20px rgba(139,92,246,0.3))' }}
             >
               Criare
             </h2>
-            <p className="mt-2 text-sm text-slate-500">Qual painel você quer acessar?</p>
+            <p className="mt-2 text-sm text-slate-400">Qual painel você quer acessar?</p>
           </div>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <GlowHover magnetic strength={7} className="rounded-3xl">
-              <button
-                onClick={() => setEtapa('form')}
-                className="group relative w-full overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-7 text-left shadow-xl backdrop-blur-xl backdrop-saturate-150 transition hover:-translate-y-1 hover:border-[#2563EB]/40 hover:shadow-2xl"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#2563EB]/10 text-[#2563EB] transition-transform duration-300 group-hover:scale-110 group-hover:bg-[#2563EB]/15">
-                  <ShieldCheck size={24} />
+            <GlowHover magnetic strength={7} className="rounded-[28px]">
+              <div className="relative rounded-[28px]">
+                {/* Glow de fundo, revelado no hover */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-3 rounded-[32px] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-70"
+                  style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.5), rgba(168,85,247,0.45), rgba(236,72,153,0.3))' }}
+                />
+                {/* Borda em gradiente, revelada no hover */}
+                <div className="relative rounded-[28px] bg-white/10 p-[1.5px] transition-colors duration-500">
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[28px] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    style={{ background: 'linear-gradient(135deg, rgba(96,165,250,0.9), rgba(192,132,252,0.9), rgba(244,114,182,0.75))' }}
+                  />
+                  <button
+                    onClick={() => setEtapa('form')}
+                    className="group relative w-full overflow-hidden rounded-[27px] bg-[#0B1220]/90 p-7 text-left backdrop-blur-xl backdrop-saturate-150 transition-all duration-500 hover:-translate-y-1.5"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3B82F6] to-[#A855F7] text-white shadow-[0_10px_24px_rgba(139,92,246,0.45)] transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <p className="mt-5 text-lg font-black tracking-[-0.02em] text-white">Painel Administrativo</p>
+                    <p className="mt-1 text-sm text-slate-400">Operação, funil, marketing e atendimento</p>
+                    <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-[#A78BFA] transition-colors duration-300 group-hover:text-[#C4B5FD]">
+                      Acessar
+                      <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
+                    </div>
+                  </button>
                 </div>
-                <p className="mt-5 text-lg font-black tracking-[-0.02em] text-[#1f2233]">Painel Administrativo</p>
-                <p className="mt-1 text-sm text-slate-500">Operação, funil, marketing e atendimento</p>
-                <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-[#2563EB]">
-                  Acessar
-                  <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1.5" />
-                </div>
-              </button>
+              </div>
             </GlowHover>
 
-            <div className="relative cursor-not-allowed overflow-hidden rounded-3xl border border-white/50 bg-white/40 p-7 text-left opacity-70 shadow-lg backdrop-blur-xl">
-              <span className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-slate-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+            <div className="relative cursor-not-allowed overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.03] p-7 text-left opacity-70 backdrop-blur-xl">
+              <span className="absolute right-5 top-5 flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">
                 <Clock size={11} />
                 Em breve
               </span>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-500/10 text-slate-400">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.06] text-slate-500">
                 <Wallet size={24} />
               </div>
-              <p className="mt-5 text-lg font-black tracking-[-0.02em] text-slate-400">Painel Financeiro</p>
-              <p className="mt-1 text-sm text-slate-400">Receitas, custos e fluxo de caixa</p>
+              <p className="mt-5 text-lg font-black tracking-[-0.02em] text-slate-500">Painel Financeiro</p>
+              <p className="mt-1 text-sm text-slate-500">Receitas, custos e fluxo de caixa</p>
             </div>
           </div>
         </motion.div>
@@ -360,21 +390,30 @@ export default function LoginPage() {
       >
         <button
           onClick={() => setEtapa('escolha')}
-          className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-700"
+          className="mb-6 flex items-center gap-2 text-sm text-slate-500 transition hover:text-slate-300"
         >
           <ArrowLeft size={16} />
           Voltar
         </button>
 
-        <div className="rounded-3xl border border-white/60 bg-white/70 p-8 shadow-xl backdrop-blur-xl">
+        <div
+          className="relative rounded-[32px] p-[1.5px] shadow-[0_30px_90px_rgba(99,102,241,0.25)]"
+          style={{
+            background:
+              'linear-gradient(120deg, rgba(59,130,246,0.6), rgba(168,85,247,0.6), rgba(236,72,153,0.4), rgba(59,130,246,0.6))',
+            backgroundSize: '300% 300%',
+            animation: 'gradient-border-move 8s linear infinite',
+          }}
+        >
+          <div className="rounded-[31px] border border-white/10 bg-[#0B1220]/90 p-8 backdrop-blur-2xl backdrop-saturate-150">
             <div className="mb-6 text-center">
               <h2
-                className="text-4xl font-black tracking-[-0.04em] text-[#2563EB]"
-                style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+                className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text text-4xl font-black tracking-[-0.04em] text-transparent"
+                style={{ filter: 'drop-shadow(0 6px 20px rgba(139,92,246,0.3))' }}
               >
                 Criare
               </h2>
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2 text-sm text-slate-400">
                 Painel Administrativo
               </p>
             </div>
@@ -390,7 +429,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                   placeholder="seu@email.com"
-                  className="w-full rounded-xl border-0 bg-[#DBEAFE]/40 px-4 py-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#DBEAFE]/60 focus:ring-2 focus:ring-[#2563EB]/30"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#A78BFA]/40 focus:bg-white/[0.08] focus:ring-2 focus:ring-[#A78BFA]/20"
                 />
               </div>
 
@@ -405,12 +444,12 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
                     placeholder="••••••••"
-                    className="w-full rounded-xl border-0 bg-[#DBEAFE]/40 px-4 py-3.5 pr-12 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:bg-[#DBEAFE]/60 focus:ring-2 focus:ring-[#2563EB]/30"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.05] px-4 py-3.5 pr-12 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-[#A78BFA]/40 focus:bg-white/[0.08] focus:ring-2 focus:ring-[#A78BFA]/20"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-300"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -421,7 +460,7 @@ export default function LoginPage() {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="text-center text-sm font-medium text-rose-500"
+                  className="text-center text-sm font-medium text-rose-400"
                 >
                   {error}
                 </motion.p>
@@ -431,10 +470,10 @@ export default function LoginPage() {
                 <button
                   onClick={handleLogin}
                   disabled={loading || !email || !password}
-                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] py-4 text-sm font-semibold text-white transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
+                  className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] py-4 text-sm font-semibold text-white transition-transform duration-300 disabled:pointer-events-none disabled:opacity-50"
                   style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
                 >
-                  <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
+                  <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
                   <span
                     className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
                     style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
@@ -447,7 +486,8 @@ export default function LoginPage() {
               </GlowHover>
             </div>
           </div>
-        </motion.div>
+        </div>
+      </motion.div>
       )}
     </div>
   )

@@ -25,7 +25,6 @@ function toPoints(series: number[]) {
   return series.map((y, i) => `${i * step},${y}`).join(' ')
 }
 
-
 export default function Home() {
   const [receita, setReceita] = useState(1250000)
   const [receitaVar, setReceitaVar] = useState(18.5)
@@ -75,41 +74,41 @@ export default function Home() {
   const metaValor = Math.round((meta / 100) * 1000000)
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(135deg,#F0F6FF_0%,#E1ECFF_45%,#C7DCFF_100%)] text-[#191b2a]">
+    <main className="relative min-h-screen overflow-hidden bg-[#05070D] text-white">
       {/* Grid sutil, com respiração lenta */}
       <motion.div
-        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(37,99,235,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(37,99,235,0.06)_1px,transparent_1px)] bg-[size:88px_88px]"
+        className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:88px_88px]"
         animate={{ backgroundPosition: ['0px 0px', '88px 88px'] }}
         transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       />
 
       {/* Noise quase imperceptível */}
       <div
-        className="absolute inset-0 opacity-[0.025] mix-blend-multiply"
+        className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
         }}
       />
 
-      {/* Blobs de profundidade, à deriva */}
+      {/* Aurora — blobs vívidos de profundidade, à deriva, em azul/violeta/rosa */}
       <motion.div
-        className="absolute -left-40 -top-40 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.18),transparent_70%)] blur-[10px]"
-        animate={{ x: [0, 50, -20, 0], y: [0, -40, 25, 0], scale: [1, 1.1, 0.95, 1] }}
+        className="absolute -left-40 -top-40 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.45),transparent_70%)] blur-[20px]"
+        animate={{ x: [0, 60, -20, 0], y: [0, -40, 25, 0], scale: [1, 1.12, 0.95, 1] }}
         transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute -right-32 top-1/3 h-[480px] w-[480px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.16),transparent_70%)] blur-[10px]"
-        animate={{ x: [0, -40, 30, 0], y: [0, 30, -25, 0], scale: [1, 0.92, 1.08, 1] }}
+        className="absolute -right-32 top-1/4 h-[560px] w-[560px] rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.4),transparent_70%)] blur-[20px]"
+        animate={{ x: [0, -40, 30, 0], y: [0, 30, -25, 0], scale: [1, 0.92, 1.1, 1] }}
         transition={{ duration: 26, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute bottom-[-220px] left-1/2 h-[520px] w-[720px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.12),transparent_70%)] blur-[10px]"
+        className="absolute bottom-[-260px] left-1/2 h-[560px] w-[780px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.28),transparent_70%)] blur-[20px]"
         animate={{ x: ['-50%', '-46%', '-54%', '-50%'], scale: [1, 1.06, 0.97, 1] }}
         transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute left-1/4 top-1/4 h-[260px] w-[260px] rounded-full bg-[radial-gradient(circle,rgba(147,197,253,0.22),transparent_70%)] blur-[6px]"
+        className="absolute left-1/4 top-1/4 h-[300px] w-[300px] rounded-full bg-[radial-gradient(circle,rgba(96,165,250,0.3),transparent_70%)] blur-[10px]"
         animate={{ x: [0, 30, -15, 0], y: [0, 25, -20, 0] }}
         transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
       />
@@ -136,17 +135,17 @@ export default function Home() {
       <GhostCard position="left-10 top-16" rotate="rotate-[-6deg]" delay="0s" width="w-[210px]">
         <div className="flex items-center justify-between">
           <p className={CARD_LABEL}>Receita</p>
-          <span className="rounded-full bg-[#059669]/10 px-2 py-0.5 text-[10px] font-bold text-[#059669]">
+          <span className="rounded-full bg-emerald-400/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
             +{receitaVar.toFixed(1)}%
           </span>
         </div>
-        <p className="mt-2 text-xl font-black tracking-[-0.02em] text-[#1f2233]">{formatMoney(receita)}</p>
-        <p className="text-[10px] font-medium text-[#94A3B8]">vs. mês anterior</p>
+        <p className="mt-2 text-xl font-black tracking-[-0.02em] text-white">{formatMoney(receita)}</p>
+        <p className="text-[10px] font-medium text-slate-500">vs. mês anterior</p>
         <svg viewBox="0 0 140 44" className="mt-2 h-11 w-full">
           <polyline
             points={toPoints(receitaSerie)}
             fill="none"
-            stroke="#2563EB"
+            stroke="#60A5FA"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -156,15 +155,15 @@ export default function Home() {
 
       <GhostCard position="right-10 top-16" rotate="rotate-[5deg]" delay="0.8s" width="w-[210px]">
         <p className={CARD_LABEL}>Metas</p>
-        <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-[#1f2233]">{meta}%</p>
-        <p className="text-[10px] font-medium text-[#94A3B8]">da meta alcançada</p>
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
+        <p className="mt-1 text-2xl font-black tracking-[-0.02em] text-white">{meta}%</p>
+        <p className="text-[10px] font-medium text-slate-500">da meta alcançada</p>
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]"
+            className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]"
             style={{ width: `${meta}%`, transition: 'width 1s ease' }}
           />
         </div>
-        <p className="mt-2 text-[10px] font-medium text-[#94A3B8]">
+        <p className="mt-2 text-[10px] font-medium text-slate-500">
           {formatMoney(metaValor)} / {formatMoney(1000000)}
         </p>
       </GhostCard>
@@ -173,13 +172,13 @@ export default function Home() {
         <p className={CARD_LABEL}>Desempenho</p>
         <div className="relative mt-2 flex h-20 w-20 items-center justify-center self-center">
           <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="#DCEAFF" strokeWidth="8" />
+            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
             <circle
               cx="40"
               cy="40"
               r="34"
               fill="none"
-              stroke="#2563EB"
+              stroke="#60A5FA"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 34}
@@ -187,9 +186,9 @@ export default function Home() {
               style={{ transition: 'stroke-dashoffset 1s ease' }}
             />
           </svg>
-          <span className="absolute text-lg font-black text-[#1f2233]">{desempenho}%</span>
+          <span className="absolute text-lg font-black text-white">{desempenho}%</span>
         </div>
-        <p className="mt-2 text-center text-[10px] font-medium text-[#94A3B8]">da meta mensal</p>
+        <p className="mt-2 text-center text-[10px] font-medium text-slate-500">da meta mensal</p>
       </GhostCard>
 
       <GhostCard position="right-10 top-1/2 -translate-y-1/2" rotate="rotate-[4deg]" delay="2.4s" width="w-[210px]">
@@ -198,15 +197,15 @@ export default function Home() {
           <polyline
             points={toPoints(evolucaoSerie)}
             fill="none"
-            stroke="#2563EB"
+            stroke="#C084FC"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
         <div className="mt-2 flex items-baseline justify-between">
-          <span className="text-lg font-black text-[#2563EB]">+{evolucao.toFixed(1)}%</span>
-          <span className="text-[10px] font-medium text-[#94A3B8]">vs. mês anterior</span>
+          <span className="text-lg font-black text-[#C084FC]">+{evolucao.toFixed(1)}%</span>
+          <span className="text-[10px] font-medium text-slate-500">vs. mês anterior</span>
         </div>
       </GhostCard>
 
@@ -214,27 +213,27 @@ export default function Home() {
         <p className={`${CARD_LABEL} mb-3`}>Funil Comercial</p>
         <div className="flex items-center gap-4">
           <div className="flex shrink-0 flex-col items-center gap-1.5">
-            <div className="h-2.5 w-[64px] rounded-sm bg-[#2563EB]/70" />
-            <div className="h-2.5 w-[48px] rounded-sm bg-[#2563EB]/58" />
-            <div className="h-2.5 w-[32px] rounded-sm bg-[#2563EB]/46" />
-            <div className="h-2.5 w-[18px] rounded-sm bg-[#2563EB]/34" />
+            <div className="h-2.5 w-[64px] rounded-sm bg-[#60A5FA]/70" />
+            <div className="h-2.5 w-[48px] rounded-sm bg-[#60A5FA]/58" />
+            <div className="h-2.5 w-[32px] rounded-sm bg-[#60A5FA]/46" />
+            <div className="h-2.5 w-[18px] rounded-sm bg-[#60A5FA]/34" />
           </div>
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Leads</span>
-              <span className="font-bold text-[#1f2233]">{funil.leads.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Leads</span>
+              <span className="font-bold text-white">{funil.leads.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Qualificados</span>
-              <span className="font-bold text-[#1f2233]">{funil.qualificados.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Qualificados</span>
+              <span className="font-bold text-white">{funil.qualificados.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Propostas</span>
-              <span className="font-bold text-[#1f2233]">{funil.propostas.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Propostas</span>
+              <span className="font-bold text-white">{funil.propostas.toLocaleString('pt-BR')}</span>
             </div>
             <div className="flex items-center justify-between gap-3 text-[11px]">
-              <span className="text-[#64748B]">Fechados</span>
-              <span className="font-bold text-[#1f2233]">{funil.fechados.toLocaleString('pt-BR')}</span>
+              <span className="text-slate-400">Fechados</span>
+              <span className="font-bold text-white">{funil.fechados.toLocaleString('pt-BR')}</span>
             </div>
           </div>
         </div>
@@ -245,14 +244,14 @@ export default function Home() {
         <div className="space-y-2">
           {produtos.map((p) => (
             <div key={p.nome} className="flex items-center gap-2 text-[11px]">
-              <span className="w-[64px] shrink-0 text-[#64748B]">{p.nome}</span>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#DCEAFF]">
+              <span className="w-[64px] shrink-0 text-slate-400">{p.nome}</span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                 <div
-                  className="h-full rounded-full bg-[#2563EB]"
+                  className="h-full rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]"
                   style={{ width: `${p.percent}%`, transition: 'width 1s ease' }}
                 />
               </div>
-              <span className="w-8 shrink-0 text-right font-bold text-[#1f2233]">{p.percent}%</span>
+              <span className="w-8 shrink-0 text-right font-bold text-white">{p.percent}%</span>
             </div>
           ))}
         </div>
@@ -260,31 +259,31 @@ export default function Home() {
 
       <GhostCard position="left-[26%] top-[10%]" rotate="rotate-[-3deg]" delay="0.4s" width="w-[170px]">
         <p className={CARD_LABEL}>Conversão</p>
-        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">32%</p>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
-          <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]" />
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">32%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]" />
         </div>
       </GhostCard>
 
       <GhostCard position="right-[26%] top-[10%]" rotate="rotate-[3deg]" delay="1.3s" width="w-[170px]">
         <p className={CARD_LABEL}>Ticket Médio</p>
-        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">R$ 1.390</p>
-        <p className="text-[10px] font-medium text-[#94A3B8]">por atendimento</p>
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">R$ 1.390</p>
+        <p className="text-[10px] font-medium text-slate-500">por atendimento</p>
       </GhostCard>
 
       <GhostCard position="left-[24%] bottom-[12%]" rotate="rotate-[4deg]" delay="2.1s" width="w-[170px]">
         <p className={CARD_LABEL}>NPS</p>
         <div className="mt-1 flex items-baseline gap-1">
-          <p className="text-xl font-black tracking-[-0.02em] text-[#1f2233]">92</p>
-          <span className="text-[10px] font-bold text-[#059669]">Excelente</span>
+          <p className="text-xl font-black tracking-[-0.02em] text-white">92</p>
+          <span className="text-[10px] font-bold text-emerald-400">Excelente</span>
         </div>
       </GhostCard>
 
       <GhostCard position="right-[24%] bottom-[12%]" rotate="rotate-[-4deg]" delay="0.9s" width="w-[170px]">
         <p className={CARD_LABEL}>Ocupação</p>
-        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-[#1f2233]">78%</p>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#DCEAFF]">
-          <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-[#2563EB] to-[#60A5FA]" />
+        <p className="mt-1 text-xl font-black tracking-[-0.02em] text-white">78%</p>
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+          <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-[#3B82F6] to-[#A855F7]" />
         </div>
       </GhostCard>
       </div>
@@ -296,103 +295,116 @@ export default function Home() {
           transition={{ duration: 0.7, ease: 'easeOut' }}
           className="relative z-10 mx-auto w-full max-w-3xl"
         >
-          {/* Painel de vidro central — o "palco" do hero, com vidro mais forte
-              (blur + saturação) do que os cards fantasma de fundo, pra ficar
-              claro que é o elemento principal. */}
-          <div className="relative overflow-hidden rounded-[36px] border border-white/70 bg-white/25 px-7 py-12 shadow-[0_30px_90px_rgba(37,99,235,0.18),inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-2xl backdrop-saturate-150 sm:px-14 sm:py-16">
-            {/* Halo pulsante atrás do título */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute left-1/2 top-[18%] h-[220px] w-[520px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.35),transparent_70%)] blur-[40px]"
-              style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
-            />
-
-            {/* Brilho de vidro no topo do painel */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/90 to-transparent"
-            />
-
-            <div className="relative flex flex-col items-center text-center">
-              {/* Selo com borda em gradiente animado */}
+          {/* Moldura com gradiente animado — a "borda de vidro premium" do painel central */}
+          <div
+            className="relative rounded-[38px] p-[1.5px] shadow-[0_40px_120px_rgba(59,130,246,0.25)]"
+            style={{
+              background:
+                'linear-gradient(120deg, rgba(59,130,246,0.7), rgba(168,85,247,0.7), rgba(236,72,153,0.55), rgba(59,130,246,0.7))',
+              backgroundSize: '300% 300%',
+              animation: 'gradient-border-move 8s linear infinite',
+            }}
+          >
+            {/* Painel de vidro central — o "palco" do hero. Fundo escuro quase
+                opaco de propósito: como a borda em gradiente vivo fica a 1.5px
+                de distância, um vidro muito transparente deixaria o blur
+                "engolir" o painel inteiro com a cor da borda em vez de só
+                deixar vazar um brilho sutil nas bordas. */}
+            <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[#0A0E18]/85 px-7 py-12 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-2xl backdrop-saturate-150 sm:px-14 sm:py-16">
+              {/* Halo pulsante atrás do título */}
               <div
-                className="mb-7 rounded-full p-[1.5px]"
-                style={{
-                  background:
-                    'linear-gradient(120deg, rgba(37,99,235,0.9), rgba(147,197,253,0.9), rgba(96,165,250,0.9), rgba(37,99,235,0.9))',
-                  backgroundSize: '300% 300%',
-                  animation: 'gradient-border-move 5s linear infinite',
-                }}
-              >
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#2563EB] backdrop-blur-md">
-                  <Sparkles size={12} className="shrink-0" />
-                  Painel Inteligente
-                </span>
-              </div>
+                aria-hidden
+                className="pointer-events-none absolute left-1/2 top-[18%] h-[260px] w-[560px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.5),transparent_70%)] blur-[50px]"
+                style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
+              />
 
-              <h1
-                className="bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#60A5FA] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
-                style={{ filter: 'drop-shadow(0 8px 18px rgba(37,99,235,0.22))' }}
-              >
-                Criare
-              </h1>
+              {/* Brilho de vidro no topo do painel */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              />
 
-              <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-[#1f2233] sm:whitespace-nowrap sm:text-2xl md:text-3xl">
-                Inteligência para transformar operação em decisão
-              </h2>
-
-              <p className="mt-4 max-w-xl text-base text-[#64748B] sm:text-lg">
-                Dados, metas e desempenho em uma visão clara para o crescimento da operação.
-              </p>
-
-              <GlowHover magnetic strength={10} className="mt-11 rounded-2xl">
-                <Link
-                  href="/login"
-                  className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] px-10 py-4 text-base font-semibold text-white transition-transform duration-300"
-                  style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
+              <div className="relative flex flex-col items-center text-center">
+                {/* Selo com borda em gradiente animado */}
+                <div
+                  className="mb-7 rounded-full p-[1.5px]"
+                  style={{
+                    background:
+                      'linear-gradient(120deg, rgba(96,165,250,0.95), rgba(192,132,252,0.95), rgba(244,114,182,0.9), rgba(96,165,250,0.95))',
+                    backgroundSize: '300% 300%',
+                    animation: 'gradient-border-move 5s linear infinite',
+                  }}
                 >
-                  <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/20 to-transparent" />
-                  <span
-                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
-                    style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
-                  />
-                  <span className="relative">Acessar painel</span>
-                  <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1.5" />
-                </Link>
-              </GlowHover>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#05070D]/90 px-5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#C4B5FD] backdrop-blur-md">
+                    <Sparkles size={12} className="shrink-0" />
+                    Painel Inteligente
+                  </span>
+                </div>
 
-              {/* Tira de métricas vivas dentro do próprio vidro do hero */}
-              <div className="mt-10 grid w-full grid-cols-3 gap-3 sm:max-w-md">
-                {[
-                  { label: 'Receita', valor: formatMoney(receita), icon: TrendingUp },
-                  { label: 'Meta', valor: `${meta}%`, icon: Sparkles },
-                  { label: 'Desempenho', valor: `${desempenho}%`, icon: Zap },
-                ].map(({ label, valor, icon: Icon }) => (
-                  <div
-                    key={label}
-                    className="rounded-2xl border border-white/60 bg-white/40 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-md"
+                <h1
+                  className="bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text pr-2 text-5xl font-black leading-[1.15] tracking-[-0.03em] text-transparent sm:text-6xl md:text-7xl"
+                  style={{ filter: 'drop-shadow(0 8px 28px rgba(139,92,246,0.35))' }}
+                >
+                  Criare
+                </h1>
+
+                <h2 className="mt-7 max-w-4xl whitespace-normal text-xl font-semibold tracking-[-0.02em] text-white sm:whitespace-nowrap sm:text-2xl md:text-3xl">
+                  Inteligência para transformar operação em decisão
+                </h2>
+
+                <p className="mt-4 max-w-xl text-base text-slate-400 sm:text-lg">
+                  Dados, metas e desempenho em uma visão clara para o crescimento da operação.
+                </p>
+
+                <GlowHover magnetic strength={10} className="mt-11 rounded-2xl">
+                  <Link
+                    href="/login"
+                    className="group relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] px-10 py-4 text-base font-semibold text-white transition-transform duration-300"
+                    style={{ animation: 'glow-pulse 2.8s ease-in-out infinite' }}
                   >
-                    <div className="flex items-center justify-center gap-1 text-[#2563EB]">
-                      <Icon size={12} />
-                      <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[#64748B]">
-                        {label}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm font-black tracking-[-0.01em] text-[#1f2233] sm:text-base">
-                      {valor}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                    <span className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />
+                    <span
+                      className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                      style={{ animation: 'shine-sweep 3.2s ease-in-out infinite' }}
+                    />
+                    <span className="relative">Acessar painel</span>
+                    <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1.5" />
+                  </Link>
+                </GlowHover>
 
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
-                {['Dados em tempo real', 'Funil comercial', 'Metas inteligentes'].map((texto) => (
-                  <GlowHover key={texto} className="rounded-full">
-                    <span className="inline-flex rounded-full border border-[#DCEAFF] bg-white/55 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#475569] backdrop-blur-sm transition-colors duration-300 group-hover:border-[#93C5FD] group-hover:text-[#2563EB]">
-                      {texto}
-                    </span>
-                  </GlowHover>
-                ))}
+                {/* Tira de métricas vivas dentro do próprio vidro do hero */}
+                <div className="mt-10 grid w-full grid-cols-3 gap-3 sm:max-w-md">
+                  {[
+                    { label: 'Receita', valor: formatMoney(receita), icon: TrendingUp },
+                    { label: 'Meta', valor: `${meta}%`, icon: Sparkles },
+                    { label: 'Desempenho', valor: `${desempenho}%`, icon: Zap },
+                  ].map(({ label, valor, icon: Icon }) => (
+                    <div
+                      key={label}
+                      className="min-w-0 rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-md"
+                    >
+                      <div className="flex items-center justify-center gap-1 text-[#A78BFA]">
+                        <Icon size={12} />
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                          {label}
+                        </span>
+                      </div>
+                      <p className="mt-1 truncate text-xs font-black tracking-[-0.01em] text-white sm:text-base">
+                        {valor}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2.5">
+                  {['Dados em tempo real', 'Funil comercial', 'Metas inteligentes'].map((texto) => (
+                    <GlowHover key={texto} className="rounded-full">
+                      <span className="inline-flex rounded-full border border-white/10 bg-white/[0.05] px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 backdrop-blur-sm transition-colors duration-300 group-hover:border-[#A78BFA]/40 group-hover:text-[#C4B5FD]">
+                        {texto}
+                      </span>
+                    </GlowHover>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -7,13 +7,13 @@ import { motion } from 'framer-motion'
 const REPEL_RADIUS = 190
 const REPEL_STRENGTH = 46
 
-export const CARD_LABEL = 'text-[10px] font-semibold uppercase tracking-[0.1em] text-[#64748B]'
+export const CARD_LABEL = 'text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500'
 
 export function Sparkle({ className, delay }: { className: string; delay: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      className={`pointer-events-none absolute hidden text-[#93C5FD] lg:block ${className}`}
+      className={`pointer-events-none absolute hidden text-[#A5B4FC] lg:block ${className}`}
       style={{ animation: 'twinkle 4.5s ease-in-out infinite', animationDelay: delay }}
       fill="currentColor"
     >
@@ -84,7 +84,7 @@ export function GhostCard({
       <motion.div
         animate={{ x: offset.x, y: offset.y }}
         transition={{ type: 'spring', stiffness: 160, damping: 14, mass: 0.6 }}
-        className={`${width} rounded-[20px] border border-white/80 bg-white/35 p-4 text-left opacity-55 shadow-[0_20px_50px_rgba(37,99,235,0.14),inset_0_1px_0_rgba(255,255,255,0.6)] backdrop-blur-xl backdrop-saturate-150 ${rotate}`}
+        className={`${width} rounded-[20px] border border-white/10 bg-white/[0.06] p-4 text-left opacity-80 shadow-[0_20px_50px_rgba(59,130,246,0.12),inset_0_1px_0_rgba(255,255,255,0.12)] backdrop-blur-xl backdrop-saturate-150 ${rotate}`}
       >
         {children}
       </motion.div>
