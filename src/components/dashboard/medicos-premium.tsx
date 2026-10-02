@@ -253,6 +253,8 @@ export function MedicosPremium({
   const conv = m.taxaConversao || 0
   const fat = m.faturamentoConsolidado || 0
   const metaValor = m.meta || 0
+  const corMeta = metaOk ? 'var(--success)' : 'var(--danger)'
+  const faltam = Math.max(metaValor - fat, 0)
   const chave = chaveMedico(m.nome)
   const proj = chave ? projecoes[chave] : undefined
   const mediaProj = proj
@@ -396,10 +398,10 @@ export function MedicosPremium({
               </div>
 
               <div className="relative mt-5 flex w-full items-center justify-center gap-4 rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3">
-                <Anel valor={metaPct} cor={corStatus(metaOk, metaPct >= 50 && !metaOk)} tamanho={apresentacao ? 96 : 76}>
+                <Anel valor={metaPct} cor={corMeta} tamanho={apresentacao ? 96 : 76}>
                   <span
                     className={`${apresentacao ? 'text-[24px]' : 'text-[19px]'} font-black leading-none`}
-                    style={{ color: corStatus(metaOk, metaPct >= 50 && !metaOk) }}
+                    style={{ color: corMeta }}
                   >
                     {Math.round(metaPct)}%
                   </span>
@@ -407,7 +409,7 @@ export function MedicosPremium({
                 <div className="text-left">
                   <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Alcance da meta</p>
                   <p className={`${apresentacao ? 'text-[18px]' : 'text-[15px]'} font-semibold text-[var(--foreground)]`}>
-                    {metaOk ? 'Meta batida' : metaPct >= 50 ? 'No caminho' : 'Abaixo da meta'}
+                    {metaOk ? 'Meta batida' : 'Meta não atingida'}
                   </p>
                 </div>
               </div>
@@ -420,22 +422,19 @@ export function MedicosPremium({
                 {metaValor > 0 ? (
                   <>
                     <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3">
-                      <span className={`${apresentacao ? 'text-[30px]' : 'text-[24px]'} font-black tracking-tight text-[var(--foreground)]`}>
+                      <span className={`${apresentacao ? 'text-[32px]' : 'text-[26px]'} font-black tracking-tight text-[var(--foreground)]`}>
                         {formatMoneyShort(metaValor)}
                       </span>
-                      <span
-                        className="text-[13px] font-bold"
-                        style={{ color: fat >= metaValor ? 'var(--success)' : 'var(--muted-foreground)' }}
-                      >
-                        {fat >= metaValor
+                      <span className={`${apresentacao ? 'text-[20px]' : 'text-[17px]'} font-extrabold`} style={{ color: corMeta }}>
+                        {metaOk
                           ? `Superou em ${formatMoneyShort(fat - metaValor)}`
-                          : `Faltam ${formatMoneyShort(metaValor - fat)}`}
+                          : `Faltam ${formatMoneyShort(faltam)}`}
                       </span>
                     </div>
-                    <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                    <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
                       <motion.div
                         className="h-full rounded-full"
-                        style={{ background: `linear-gradient(90deg, #3B82F6, ${corStatus(metaOk, metaPct >= 50 && !metaOk)})` }}
+                        style={{ background: corMeta, boxShadow: `0 0 12px ${corMeta}` }}
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(metaPct, 100)}%` }}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -450,17 +449,47 @@ export function MedicosPremium({
 
             {/* Números */}
             <div className="min-w-0 space-y-3">
-              <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#3B82F6]/12 via-[#7C6CF0]/10 to-[#A855F7]/12 px-5 py-4">
-                <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Faturamento consolidado</p>
-                <div className="mt-1 flex flex-wrap items-end gap-3">
-                  <span className={`bg-gradient-to-r from-[#93C5FD] via-[#C4B5FD] to-[#F9A8D4] bg-clip-text font-black leading-none tracking-tight text-transparent ${apresentacao ? 'text-[68px]' : 'text-[48px]'}`}>
-                    {formatMoneyShort(m.faturamentoConsolidado || 0)}
-                  </span>
-                  <Delta atual={m.faturamentoConsolidado} anterior={m.faturamentoConsolidadoAnterior} />
+              <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-[1.5fr_1fr_1fr]">
+                <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#3B82F6]/12 via-[#7C6CF0]/10 to-[#A855F7]/12 px-5 py-4 @xl:col-span-2 @4xl:col-span-1">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Faturamento consolidado</p>
+                  <div className="mt-1 flex flex-wrap items-end gap-3">
+                    <span className={`bg-gradient-to-r from-[#93C5FD] via-[#C4B5FD] to-[#F9A8D4] bg-clip-text font-black leading-none tracking-tight text-transparent ${apresentacao ? 'text-[68px]' : 'text-[48px]'}`}>
+                      {formatMoneyShort(m.faturamentoConsolidado || 0)}
+                    </span>
+                    <Delta atual={m.faturamentoConsolidado} anterior={m.faturamentoConsolidadoAnterior} />
+                  </div>
                 </div>
-                <p className="mt-1 text-[14px] font-medium text-[var(--muted-foreground)]">
-                  Ticket médio <span className="font-bold text-[var(--foreground)]">{formatMoney(m.ticketConsulta || 0)}</span>
-                </p>
+
+                <div className="rounded-3xl border border-white/[0.08] bg-white/[0.04] px-5 py-4">
+                  <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Ticket médio</p>
+                  <p className={`mt-1 whitespace-nowrap font-black leading-none tracking-tight text-[var(--foreground)] ${apresentacao ? 'text-[44px]' : 'text-[34px]'}`}>
+                    {formatMoney(m.ticketConsulta || 0)}
+                  </p>
+                </div>
+
+                <div
+                  className="rounded-3xl border px-5 py-4"
+                  style={{
+                    borderColor: metaValor > 0 ? `color-mix(in srgb, ${corMeta} 40%, transparent)` : 'rgba(255,255,255,0.08)',
+                    background: metaValor > 0 ? `color-mix(in srgb, ${corMeta} 10%, transparent)` : 'rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+                    {metaValor > 0 ? (metaOk ? 'Meta atingida' : 'Falta para a meta') : 'Meta'}
+                  </p>
+                  {metaValor > 0 ? (
+                    <>
+                      <p className={`mt-1 whitespace-nowrap font-black leading-none tracking-tight ${apresentacao ? 'text-[44px]' : 'text-[34px]'}`} style={{ color: corMeta }}>
+                        {metaOk ? `+${formatMoneyShort(fat - metaValor)}` : formatMoneyShort(faltam)}
+                      </p>
+                      <p className="mt-1.5 text-[13px] font-semibold text-[var(--muted-foreground)]">
+                        Meta {formatMoneyShort(metaValor)} · {Math.round(metaPct)}%
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-[16px] font-medium text-[var(--muted-foreground)]">Sem meta definida</p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 @4xl:grid-cols-4">
