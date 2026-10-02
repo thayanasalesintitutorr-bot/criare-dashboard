@@ -478,7 +478,8 @@ function buildEvolucaoDiaria(
 function buildOrigens(
   leads: Lead[],
   modo: 'campanha' | 'anuncio' = 'campanha',
-  fallbackCampanha = true
+  fallbackCampanha = true,
+  somenteCampanha = false
 ) {
   const map: Record<
     string,
@@ -493,7 +494,14 @@ function buildOrigens(
     // do Kommo (ex: "FACEBOOK" e "Facebook" são a mesma origem, só
     // digitadas diferente) — sem isso cada grafia virava uma barra própria
     // no card, fragmentando a contagem de uma origem só em várias menores.
-    const origemBruto = origemField(lead, modo, fallbackCampanha)
+    //
+    // somenteCampanha ignora o utm_campaing e usa só a coluna "campanha" —
+    // o card "Origens dos leads" pediu isso porque o UTM às vezes vem
+    // trocado entre médicos (herdado de outro anúncio no Kommo/Meta) e
+    // misturava a contagem de uma origem na de outra.
+    const origemBruto = somenteCampanha
+      ? (lead.campanha || '').trim()
+      : origemField(lead, modo, fallbackCampanha)
     const origem = origemBruto ? origemBruto.toUpperCase() : 'Sem origem'
 
     const pipeline = lead.pipeline_id || 'SEM PIPELINE'
@@ -920,7 +928,10 @@ const leadsPrimeiraMensagem = consultaBasePeriodo.filter((l) => {
   return temPrimeiraMensagem && !temLeadGrade
 })
 
-const origensPrimeiraMensagem = buildOrigens(leadsPrimeiraMensagem, origemModo, true)
+// somenteCampanha=true pra bater com os nomes de "origens" (card Origens
+// dos leads) — senão um lead com UTM trocado cairia num bucket de nome
+// diferente aqui e o "X parados na 1ª mensagem" não encontrava o par certo.
+const origensPrimeiraMensagem = buildOrigens(leadsPrimeiraMensagem, origemModo, true, true)
 
     const convertidos = consultaLeads.filter((l) => {
   return (
@@ -1618,7 +1629,7 @@ const metaTicketMedioConsolidado =
       range
     )
 
-    const origens = buildOrigens(consultaBasePeriodo, origemModo, true)
+    const origens = buildOrigens(consultaBasePeriodo, origemModo, true, true)
 
     const leadsEntrada = consultaBasePeriodo
 
