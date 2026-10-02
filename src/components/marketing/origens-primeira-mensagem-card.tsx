@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Funnel, Sparkles } from 'lucide-react'
+import { ChevronDown, Funnel, Megaphone, Sparkles } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 
 type DetalheItem = {
@@ -87,23 +87,18 @@ const ESTILO_RANK = [
   { fundo: 'linear-gradient(135deg,#3B82F6,#7C6CF0 60%,#A855F7)', brilho: '0 4px 14px rgba(99,102,241,0.4)', texto: '#FFFFFF' },
 ]
 
-const SIGLAS = new Set(['WPP', 'ADV', 'RMKT', 'LP', 'NPS', 'SAL', 'PCT', 'AD'])
-
-// Nome de campanha vem em CAIXA_ALTA_COM_UNDERLINE; no card fica mais
-// legível como "Claudia Conversao Leads WPP ADV". O valor cru do Kommo
-// continua no title (tooltip).
+// Nome da origem sempre em CAIXA ALTA (com espaço no lugar do underline pra
+// ler melhor). O valor cru do Kommo continua no title (tooltip).
 function formatarOrigem(nome: string) {
-  return nome
-    .replace(/_/g, ' ')
-    .split(' ')
-    .filter(Boolean)
-    .map((p) => {
-      if (p === '|' || p === '-') return p
-      const up = p.toUpperCase()
-      if (SIGLAS.has(up) || /\d/.test(up)) return up
-      return up.charAt(0) + up.slice(1).toLowerCase()
-    })
-    .join(' ')
+  return nome.replace(/_/g, ' ').replace(/\s+/g, ' ').trim().toUpperCase()
+}
+
+// Campanha de anúncio vem com nome técnico e comprido (ex:
+// RODOLPHO_CONVERSAO_LEADS_WPP_ADV, AD002_R_GERAL_VID..., E04 - ...), bem
+// diferente de origens simples como "GOOGLE" ou "LINK BIO | ALTUUS CLINIC".
+function ehCampanha(nome: string) {
+  const n = nome.trim().toUpperCase()
+  return n.includes('_') || /^E\d{2,3}\b/.test(n) || /^AD\d/.test(n) || n.length >= 30
 }
 
 const RAIO = 36
@@ -277,12 +272,25 @@ export function OrigensPrimeiraMensagemCard({
                           >
                             #{idx + 1}
                           </span>
-                          <h4
-                            title={item.nome}
-                            className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-2 min-w-0 break-words pt-0.5 font-bold leading-snug text-[var(--foreground)]`}
-                          >
-                            {formatarOrigem(item.nome)}
-                          </h4>
+                          <div className="min-w-0 pt-0.5">
+                            {ehCampanha(item.nome) && (
+                              <span
+                                className={`mb-1 inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-extrabold uppercase tracking-[0.12em] text-[#C4B5FD] ${
+                                  isApresentacao ? 'text-[13px]' : 'text-[11px]'
+                                }`}
+                                style={{ background: 'color-mix(in srgb, #A855F7 20%, transparent)', boxShadow: 'inset 0 0 0 1px rgba(192,132,252,0.35)' }}
+                              >
+                                <Megaphone size={isApresentacao ? 14 : 12} />
+                                Campanha
+                              </span>
+                            )}
+                            <h4
+                              title={item.nome}
+                              className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-3 min-w-0 break-words font-bold uppercase leading-snug text-[var(--foreground)]`}
+                            >
+                              {formatarOrigem(item.nome)}
+                            </h4>
+                          </div>
                         </div>
                         <div className="shrink-0 text-right">
                           <div className={`${isApresentacao ? 'text-[44px]' : 'text-[38px]'} font-extrabold leading-none tracking-tight text-[var(--foreground)] tabular-nums`}>
