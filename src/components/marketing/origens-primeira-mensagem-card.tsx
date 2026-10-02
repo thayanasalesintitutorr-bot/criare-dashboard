@@ -116,7 +116,7 @@ function Rosca({
   let acumulado = 0
 
   return (
-    <div className={`relative shrink-0 ${grande ? 'h-[130px] w-[130px]' : 'h-[96px] w-[96px]'}`}>
+    <div className={`relative shrink-0 ${grande ? 'h-[130px] w-[130px]' : 'h-[116px] w-[116px]'}`}>
       <svg viewBox="0 0 88 88" className="h-full w-full -rotate-90">
         <circle cx="44" cy="44" r={RAIO} fill="none" stroke="var(--progress-bg)" strokeWidth="10" />
         {etapas.map(({ key, quantidade }) => {
@@ -144,12 +144,12 @@ function Rosca({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className={`${grande ? 'text-[26px]' : 'text-[19px]'} font-black leading-none tracking-tight`}
+          className={`${grande ? 'text-[28px]' : 'text-[24px]'} font-extrabold leading-none tracking-tight`}
           style={{ color: pctConvertido > 0 ? 'var(--success)' : 'var(--foreground)' }}
         >
           {Math.round(pctConvertido)}%
         </span>
-        <span className={`${grande ? 'text-[11px]' : 'text-[9px]'} mt-0.5 font-semibold uppercase tracking-wider text-[var(--muted-foreground)]`}>
+        <span className={`${grande ? 'text-[12px]' : 'text-[11px]'} mt-0.5 font-semibold uppercase tracking-wider text-[var(--muted-foreground)]`}>
           conversão
         </span>
       </div>
@@ -189,17 +189,17 @@ export function OrigensPrimeiraMensagemCard({
           </div>
           <div>
             <h3
-              className={`${isApresentacao ? 'text-[38px]' : 'text-[18px]'} bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text font-black tracking-[-0.02em] text-transparent`}
+              className={`${isApresentacao ? 'text-[38px]' : 'text-[20px]'} bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text font-black tracking-[-0.02em] text-transparent`}
             >
               Origens dos leads
             </h3>
-            <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11.5px]'} text-[var(--muted-foreground)]`}>
+            <p className={`${isApresentacao ? 'text-[16px]' : 'text-[13.5px]'} text-[var(--muted-foreground)]`}>
               De onde vêm os leads e em que etapa do funil cada um está
             </p>
           </div>
         </div>
 
-        <div className={`flex flex-wrap items-center gap-2 ${isApresentacao ? 'text-[16px]' : 'text-[11.5px]'}`}>
+        <div className={`flex flex-wrap items-center gap-2 ${isApresentacao ? 'text-[16px]' : 'text-[13px]'}`}>
           <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
             <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
             recebidos <span className="text-[var(--foreground)]">{origensTotal}</span>
@@ -211,9 +211,9 @@ export function OrigensPrimeiraMensagemCard({
         </div>
       </div>
 
-      <div className={`relative mb-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} text-[var(--muted-foreground)]`}>
+      <div className={`relative mb-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[13px]'} text-[var(--muted-foreground)]`}>
         {ORDEM.filter((k) => presentes.has(k)).map((k) => (
-          <span key={k} className="flex items-center gap-1.5 font-medium">
+          <span key={k} className="flex items-center gap-1.5 font-semibold">
             <span className="h-2.5 w-2.5 rounded-full" style={{ background: ETAPAS[k].cor }} />
             {ETAPAS[k].label}
           </span>
@@ -226,7 +226,7 @@ export function OrigensPrimeiraMensagemCard({
         </div>
       ) : (
         <div className="relative max-h-[760px] overflow-y-auto pr-1">
-          <div className="grid grid-cols-1 items-start gap-4 @lg:grid-cols-2 @4xl:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 @lg:grid-cols-2 @6xl:grid-cols-3">
             {origens.map((item, idx) => {
               const etapas = agruparPorEtapa(item.detalhes)
               const total = item.quantidade || 1
@@ -244,7 +244,7 @@ export function OrigensPrimeiraMensagemCard({
                   transition={{ duration: 0.4, delay: Math.min(idx, 12) * 0.04, ease: 'easeOut' }}
                 >
                   <div
-                    className={`fx-card-mini group rounded-[21px] border bg-[var(--card)] p-4 transition-colors ${
+                    className={`fx-card-mini group rounded-[21px] border bg-[var(--card)] p-5 transition-colors ${
                       aberto ? 'border-white/15' : 'border-white/[0.07]'
                     }`}
                   >
@@ -257,31 +257,31 @@ export function OrigensPrimeiraMensagemCard({
                       <div className="mb-3 flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="mb-1 flex items-center gap-2">
-                            <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-[var(--muted-foreground)]">
+                            <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[12px] font-bold tabular-nums text-[var(--muted-foreground)]">
                               #{idx + 1}
                             </span>
                             {ganhos > 0 && (
                               <span
-                                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--success)]"
+                                className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-[var(--success)]"
                                 style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
                               >
-                                <Sparkles size={10} />
+                                <Sparkles size={12} />
                                 {ganhos} convertido{ganhos > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
                           <h4
                             title={item.nome}
-                            className={`${isApresentacao ? 'text-[22px]' : 'text-[14px]'} line-clamp-2 break-words font-bold leading-snug text-[var(--foreground)]`}
+                            className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-2 break-words font-bold leading-snug text-[var(--foreground)]`}
                           >
                             {formatarOrigem(item.nome)}
                           </h4>
                         </div>
                         <div className="shrink-0 text-right">
-                          <div className={`${isApresentacao ? 'text-[44px]' : 'text-[30px]'} font-black leading-none tracking-tight text-[var(--foreground)] tabular-nums`}>
+                          <div className={`${isApresentacao ? 'text-[44px]' : 'text-[38px]'} font-extrabold leading-none tracking-tight text-[var(--foreground)] tabular-nums`}>
                             {item.quantidade}
                           </div>
-                          <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                          <div className="mt-1 text-[12px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                             leads
                           </div>
                         </div>
@@ -292,16 +292,16 @@ export function OrigensPrimeiraMensagemCard({
                         <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
                           {presa > 0 && (
                             <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[14px]' : 'text-[10.5px]'} font-semibold leading-tight text-[var(--warning)]`}
+                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[15px]' : 'text-[13px]'} font-semibold leading-tight text-[var(--warning)]`}
                               style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
                             >
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
                               {presa} parados na 1ª msg · {Math.round(pctPresa)}%
                             </span>
                           )}
-                          <span className="flex items-center gap-1 whitespace-nowrap text-[10.5px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
+                          <span className="flex items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
                             {aberto ? 'Ocultar etapas' : 'Ver etapas'}
-                            <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={15} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
                           </span>
                         </div>
                       </div>
@@ -310,16 +310,16 @@ export function OrigensPrimeiraMensagemCard({
                         {etapas.map(({ key, quantidade }) => (
                           <div
                             key={key}
-                            className="flex min-w-0 items-center gap-2 rounded-lg py-1.5 pl-2.5 pr-2"
+                            className="flex min-w-0 items-center gap-2.5 rounded-lg py-2 pl-3 pr-2"
                             style={{
                               background: `color-mix(in srgb, ${ETAPAS[key].cor} 15%, transparent)`,
                               boxShadow: `inset 3px 0 0 ${ETAPAS[key].cor}`,
                             }}
                           >
-                            <span className={`${isApresentacao ? 'text-[20px]' : 'text-[16px]'} font-extrabold leading-none tabular-nums text-[var(--foreground)]`}>
+                            <span className={`${isApresentacao ? 'text-[22px]' : 'text-[21px]'} font-bold leading-none tabular-nums text-[var(--foreground)]`}>
                               {quantidade}
                             </span>
-                            <span className={`${isApresentacao ? 'text-[12px]' : 'text-[10px]'} min-w-0 truncate font-semibold uppercase leading-none tracking-wide text-[var(--muted-foreground)]`}>
+                            <span className={`${isApresentacao ? 'text-[14px]' : 'text-[13px]'} min-w-0 truncate font-semibold leading-none text-[var(--muted-foreground)]`}>
                               {ETAPAS[key].label}
                             </span>
                           </div>
@@ -337,26 +337,26 @@ export function OrigensPrimeiraMensagemCard({
                           className="overflow-hidden"
                         >
                           <div className="mt-3.5 space-y-2 border-t border-white/[0.07] pt-3.5">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                            <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
                               Onde estão no Kommo
                             </p>
                             {etapas.map(({ key, quantidade }) => {
                               const pct = (quantidade / total) * 100
                               return (
                                 <div key={key}>
-                                  <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
+                                  <div className="mb-1.5 flex items-center justify-between gap-2 text-[14px]">
                                     <span className="flex min-w-0 items-center gap-2 font-medium text-[var(--foreground)]">
                                       <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: ETAPAS[key].cor }} />
                                       <span className="truncate">{ETAPAS[key].completo}</span>
                                     </span>
                                     <span className="shrink-0 font-bold tabular-nums text-[var(--foreground)]">
                                       {quantidade}
-                                      <span className="ml-1.5 text-[10.5px] font-semibold text-[var(--muted-foreground)]">
+                                      <span className="ml-1.5 text-[12.5px] font-semibold text-[var(--muted-foreground)]">
                                         {Math.round(pct)}%
                                       </span>
                                     </span>
                                   </div>
-                                  <div className="h-2.5 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                                  <div className="h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
                                     <div
                                       className="h-full rounded-full"
                                       style={{ width: `${Math.max(pct, 3)}%`, background: ETAPAS[key].cor }}
