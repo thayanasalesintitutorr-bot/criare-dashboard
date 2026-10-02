@@ -449,8 +449,8 @@ export function MedicosPremium({
 
             {/* Números */}
             <div className="min-w-0 space-y-3">
-              <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2 @4xl:grid-cols-[1.5fr_1fr_1fr]">
-                <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#3B82F6]/12 via-[#7C6CF0]/10 to-[#A855F7]/12 px-5 py-4 @xl:col-span-2 @4xl:col-span-1">
+              <div className="grid grid-cols-1 gap-3 @xl:grid-cols-[1.6fr_1fr]">
+                <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#3B82F6]/12 via-[#7C6CF0]/10 to-[#A855F7]/12 px-5 py-4">
                   <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Faturamento consolidado</p>
                   <div className="mt-1 flex flex-wrap items-end gap-3">
                     <span className={`bg-gradient-to-r from-[#93C5FD] via-[#C4B5FD] to-[#F9A8D4] bg-clip-text font-black leading-none tracking-tight text-transparent ${apresentacao ? 'text-[68px]' : 'text-[48px]'}`}>
@@ -465,30 +465,6 @@ export function MedicosPremium({
                   <p className={`mt-1 whitespace-nowrap font-black leading-none tracking-tight text-[var(--foreground)] ${apresentacao ? 'text-[44px]' : 'text-[34px]'}`}>
                     {formatMoney(m.ticketConsulta || 0)}
                   </p>
-                </div>
-
-                <div
-                  className="rounded-3xl border px-5 py-4"
-                  style={{
-                    borderColor: metaValor > 0 ? `color-mix(in srgb, ${corMeta} 40%, transparent)` : 'rgba(255,255,255,0.08)',
-                    background: metaValor > 0 ? `color-mix(in srgb, ${corMeta} 10%, transparent)` : 'rgba(255,255,255,0.04)',
-                  }}
-                >
-                  <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
-                    {metaValor > 0 ? (metaOk ? 'Meta atingida' : 'Falta para a meta') : 'Meta'}
-                  </p>
-                  {metaValor > 0 ? (
-                    <>
-                      <p className={`mt-1 whitespace-nowrap font-black leading-none tracking-tight ${apresentacao ? 'text-[44px]' : 'text-[34px]'}`} style={{ color: corMeta }}>
-                        {metaOk ? `+${formatMoneyShort(fat - metaValor)}` : formatMoneyShort(faltam)}
-                      </p>
-                      <p className="mt-1.5 text-[13px] font-semibold text-[var(--muted-foreground)]">
-                        Meta {formatMoneyShort(metaValor)} · {Math.round(metaPct)}%
-                      </p>
-                    </>
-                  ) : (
-                    <p className="mt-1 text-[16px] font-medium text-[var(--muted-foreground)]">Sem meta definida</p>
-                  )}
                 </div>
               </div>
 
