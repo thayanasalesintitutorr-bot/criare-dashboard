@@ -476,3 +476,17 @@ body {
     animation: none;
   }
 }
+
+/* Anel em gradiente girando ao redor da foto do médico (a foto em si gira
+   ao contrário pra ficar parada) */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slow-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
