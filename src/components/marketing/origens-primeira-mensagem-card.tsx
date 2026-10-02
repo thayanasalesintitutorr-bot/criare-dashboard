@@ -16,29 +16,27 @@ type OrigemItem = {
   detalhes?: DetalheItem[]
 }
 
-type Categoria = 'convertido' | 'agendado' | 'perdido' | 'andamento'
+type Categoria = 'andamento' | 'agendado' | 'convertido' | 'perdido'
 
-const CORES_CATEGORIA: Record<Categoria, string> = {
+const ORDEM: Categoria[] = ['andamento', 'agendado', 'convertido', 'perdido']
+
+const COR: Record<Categoria, string> = {
   andamento: '#3B82F6',
   agendado: '#A855F7',
   convertido: 'var(--success)',
   perdido: 'var(--danger)',
 }
 
-const LABEL_CATEGORIA: Record<Categoria, string> = {
-  andamento: 'em andamento',
-  agendado: 'agendados',
-  convertido: 'convertidos',
-  perdido: 'perdidos',
+const LABEL: Record<Categoria, string> = {
+  andamento: 'Em andamento',
+  agendado: 'Agendados',
+  convertido: 'Convertidos',
+  perdido: 'Perdidos',
 }
 
-// O "nome" de cada item de detalhes vem como "PIPELINE | STATUS" (ex:
-// "CONSULTA | GANHOU") — aqui só interessa o status, já que esse card
-// sempre olha o funil CONSULTA. Agrupa os status reais do Kommo em 4
-// categorias de negócio: "GANHOU" é a consulta efetivamente convertida
-// (o que a clínica chama de gerar venda), "AGENDADO" ainda não aconteceu,
-// "PERDEU..." (qualquer variante) é perda, e o resto é lead ainda em
-// trabalho (1º contato, follow-up, qualificado, formulário...).
+// "GANHOU" é a consulta efetivamente convertida (o que a clínica chama de
+// gerar venda), "AGENDADO" ainda não aconteceu, qualquer "PERDEU..." é perda
+// e o resto é lead ainda em trabalho (1º contato, follow-up, qualificado...).
 function categorizarStatus(nomeCompleto: string): Categoria {
   const status = nomeCompleto.split('|').pop()?.trim().toUpperCase() ?? ''
   if (status.includes('GANHOU')) return 'convertido'
@@ -55,17 +53,88 @@ function formatarStatus(nomeCompleto: string) {
     .replace(/(^|\s)\S/g, (c) => c.toUpperCase())
 }
 
-function agruparPorCategoria(detalhes: DetalheItem[] = []) {
-  const grupos: Record<Categoria, number> = {
-    andamento: 0,
-    agendado: 0,
-    convertido: 0,
-    perdido: 0,
-  }
-  for (const d of detalhes) {
-    grupos[categorizarStatus(d.nome)] += d.quantidade
-  }
-  return grupos
+const SIGLAS = new Set(['WPP', 'ADV', 'RMKT', 'LP', 'NPS', 'SAL', 'PCT', 'AD'])
+
+// Nome de campanha vem em CAIXA_ALTA_COM_UNDERLINE; pro card fica mais
+// legível como "Claudia Conversao Leads WPP ADV". O nome cru continua no
+// title (tooltip) pra quem precisar do valor exato do Kommo.
+function formatarOrigem(nome: string) {
+  return nome
+    .replace(/_/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map((p) => {
+      if (p === '|' || p === '-') return p
+      const up = p.toUpperCase()
+      if (SIGLAS.has(up) || /\d/.test(up)) return up
+      return up.charAt(0) + up.slice(1).toLowerCase()
+    })
+    .join(' ')
+}
+
+function agrupar(detalhes: DetalheItem[] = []) {
+  const g: Record<Categoria, number> = { andamento: 0, agendado: 0, convertido: 0, perdido: 0 }
+  for (const d of detalhes) g[categorizarStatus(d.nome)] += d.quantidade
+  return g
+}
+
+const RAIO = 36
+const CIRC = 2 * Math.PI * RAIO
+
+function Rosca({
+  grupos,
+  total,
+  pctConvertido,
+  grande,
+}: {
+  grupos: Record<Categoria, number>
+  total: number
+  pctConvertido: number
+  grande: boolean
+}) {
+  const ativos = ORDEM.filter((c) => grupos[c] > 0)
+  const folga = ativos.length > 1 ? 2.5 : 0
+  let acumulado = 0
+
+  return (
+    <div className={`relative shrink-0 ${grande ? 'h-[130px] w-[130px]' : 'h-[92px] w-[92px]'}`}>
+      <svg viewBox="0 0 88 88" className="h-full w-full -rotate-90">
+        <circle cx="44" cy="44" r={RAIO} fill="none" stroke="var(--progress-bg)" strokeWidth="9" />
+        {ativos.map((cat) => {
+          const len = Math.max((grupos[cat] / total) * CIRC - folga, 1.5)
+          const offset = -acumulado
+          acumulado += (grupos[cat] / total) * CIRC
+          return (
+            <motion.circle
+              key={cat}
+              cx="44"
+              cy="44"
+              r={RAIO}
+              fill="none"
+              strokeWidth="9"
+              strokeLinecap="round"
+              style={{ stroke: COR[cat] }}
+              strokeDashoffset={offset}
+              initial={{ strokeDasharray: `0 ${CIRC}` }}
+              animate={{ strokeDasharray: `${len} ${CIRC - len}` }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+            />
+          )
+        })}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span
+          className={`${grande ? 'text-[26px]' : 'text-[19px]'} font-black leading-none tracking-tight`}
+          style={{ color: pctConvertido > 0 ? 'var(--success)' : 'var(--foreground)' }}
+        >
+          {Math.round(pctConvertido)}%
+        </span>
+        <span className={`${grande ? 'text-[11px]' : 'text-[9px]'} mt-0.5 font-semibold uppercase tracking-wider text-[var(--muted-foreground)]`}>
+          conversão
+        </span>
+      </div>
+    </div>
+  )
 }
 
 export function OrigensPrimeiraMensagemCard({
@@ -83,185 +152,226 @@ export function OrigensPrimeiraMensagemCard({
   const isApresentacao = viewMode === 'apresentacao'
   const [expandido, setExpandido] = useState<string | null>(null)
 
-  const maiorQuantidade = Math.max(...origens.map((o) => o.quantidade), 1)
-
   return (
-    <section className="relative overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--card)] p-5 shadow-[var(--card-shadow)]">
-      {/* Glow discreto no canto, só pra dar a mesma textura "premium" da
-          home/login — bem sutil aqui porque é uma tela de trabalho, não
-          a vitrine. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full opacity-[0.07] blur-3xl"
-        style={{ background: 'radial-gradient(circle, #A855F7, transparent 70%)' }}
-      />
+    <section className="relative overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/70 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
+      {/* Aurora de fundo — mesma paleta azul/roxo/rosa da entrada do login */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -left-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.22),transparent_70%)] blur-3xl" />
+        <div className="absolute -right-24 top-1/3 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.18),transparent_70%)] blur-3xl" />
+        <div className="absolute -bottom-32 left-1/3 h-72 w-96 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.12),transparent_70%)] blur-3xl" />
+      </div>
 
       <div className="relative mb-5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
-            className={`flex shrink-0 items-center justify-center rounded-xl bg-[var(--metric-card)] ${
-              isApresentacao ? 'h-14 w-14' : 'h-9 w-9'
+            className={`flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]  ${
+              isApresentacao ? 'h-14 w-14' : 'h-10 w-10'
             }`}
           >
-            <Funnel size={isApresentacao ? 30 : 18} strokeWidth={2.2} className="text-[var(--accent)]" />
+            <Funnel size={isApresentacao ? 30 : 19} strokeWidth={2.2} className="text-[var(--accent)]" />
           </div>
-          <h3 className={`${isApresentacao ? 'text-[38px]' : 'text-[17px]'} font-bold tracking-[-0.01em] text-[var(--foreground)]`}>
-            Origens dos leads
-          </h3>
+          <div>
+            <h3
+              className={`${isApresentacao ? 'text-[38px]' : 'text-[18px]'} bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text font-black tracking-[-0.02em] text-transparent`}
+            >
+              Origens dos leads
+            </h3>
+            <p className={`${isApresentacao ? 'text-[16px]' : 'text-[11.5px]'} text-[var(--muted-foreground)]`}>
+              De onde vêm os leads e em que etapa do funil cada um está
+            </p>
+          </div>
         </div>
 
-        <div className={`flex items-center gap-5 ${isApresentacao ? 'text-[18px]' : 'text-[12px]'}`}>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--accent)]" />
-            <span className="font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-              recebidos <span className="text-[var(--foreground)]">{origensTotal}</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--warning)]" />
-            <span className="font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
-              parados na 1ª msg <span className="text-[var(--foreground)]">{primeiraMensagemTotal}</span>
-            </span>
-          </div>
+        <div className={`flex flex-wrap items-center gap-2 ${isApresentacao ? 'text-[16px]' : 'text-[11.5px]'}`}>
+          <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
+            recebidos <span className="text-[var(--foreground)]">{origensTotal}</span>
+          </span>
+          <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 font-semibold uppercase tracking-wide text-[var(--muted-foreground)]">
+            <span className="h-2 w-2 rounded-full bg-[var(--warning)]" />
+            parados na 1ª msg <span className="text-[var(--foreground)]">{primeiraMensagemTotal}</span>
+          </span>
         </div>
       </div>
 
+      <div className={`relative mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 ${isApresentacao ? 'text-[15px]' : 'text-[11.5px]'} text-[var(--muted-foreground)]`}>
+        {ORDEM.map((c) => (
+          <span key={c} className="flex items-center gap-1.5 font-medium">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: COR[c] }} />
+            {LABEL[c]}
+          </span>
+        ))}
+      </div>
+
       {origens.length === 0 ? (
-        <div className={`flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] bg-transparent px-5 ${isApresentacao ? 'text-[20px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
+        <div className={`relative flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] px-5 ${isApresentacao ? 'text-[20px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
           Sem dados no período
         </div>
       ) : (
-        <div className={`relative max-h-[560px] overflow-y-auto pr-1 ${isApresentacao ? 'space-y-3' : 'space-y-2'}`}>
-          {origens.map((item) => {
-            const pctDoMaior = (item.quantidade / maiorQuantidade) * 100
-            const presaNaPrimeira = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
-            const pctPresaNaCampanha = item.quantidade > 0 ? (presaNaPrimeira / item.quantidade) * 100 : 0
+        <div className="relative max-h-[760px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 items-start gap-4 @lg:grid-cols-2 @4xl:grid-cols-3">
+            {origens.map((item, idx) => {
+              const grupos = agrupar(item.detalhes)
+              const total = item.quantidade || 1
+              const pctConvertido = (grupos.convertido / total) * 100
+              const presa = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
+              const pctPresa = (presa / total) * 100
+              const aberto = expandido === item.nome
+              const nomeBonito = formatarOrigem(item.nome)
 
-            const grupos = agruparPorCategoria(item.detalhes)
-            const pctConvertido = item.quantidade > 0 ? (grupos.convertido / item.quantidade) * 100 : 0
-            const aberto = expandido === item.nome
-
-            const segmentos = (
-              ['andamento', 'agendado', 'convertido', 'perdido'] as Categoria[]
-            )
-              .map((cat) => ({
-                cat,
-                quantidade: grupos[cat],
-                pct: item.quantidade > 0 ? (grupos[cat] / item.quantidade) * 100 : 0,
-              }))
-              .filter((s) => s.quantidade > 0)
-
-            return (
-              <div
-                key={item.nome}
-                className="group rounded-2xl border border-transparent px-2.5 py-2.5 transition-colors hover:border-[color:var(--border)] hover:bg-white/[0.025]"
-              >
-                <button
-                  type="button"
-                  onClick={() => setExpandido(aberto ? null : item.nome)}
-                  className="flex w-full flex-col gap-1.5 text-left"
+              return (
+                <motion.div
+                  key={item.nome}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: Math.min(idx, 12) * 0.04, ease: 'easeOut' }}
+                  className="group relative"
                 >
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className={`flex min-w-0 items-center gap-1.5 ${isApresentacao ? 'text-[22px]' : 'text-[13px]'} font-semibold text-[var(--foreground)]`}>
-                      <ChevronDown
-                        size={isApresentacao ? 18 : 13}
-                        strokeWidth={2.5}
-                        className={`shrink-0 text-[var(--muted-foreground)] transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`}
-                      />
-                      <span className="truncate">{item.nome}</span>
-                      {grupos.convertido > 0 && (
-                        <span
-                          className="ml-1 inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--success)]"
-                          style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
-                        >
-                          <Sparkles size={10} />
-                          {grupos.convertido} convertido{grupos.convertido > 1 ? 's' : ''} · {Math.round(pctConvertido)}%
-                        </span>
-                      )}
-                    </span>
-
-                    <span className={`shrink-0 tabular-nums ${isApresentacao ? 'text-[24px]' : 'text-[13px]'} font-semibold text-[var(--muted-foreground)]`}>
-                      {item.quantidade}
-                    </span>
-                  </div>
-
-                  {/* Barra composta: o comprimento mostra o volume da origem
-                      em relação à maior, e o preenchimento interno mostra
-                      a composição por estágio do funil (cores) — dá pra ver
-                      de relance tanto o tamanho quanto "onde estão" os leads. */}
-                  <div className={`relative w-full overflow-hidden rounded-full bg-[var(--progress-bg)] ${isApresentacao ? 'h-4' : 'h-2.5'}`}>
-                    <div
-                      className="flex h-full gap-[1.5px] transition-[width] duration-500 ease-out"
-                      style={{ width: `${Math.max(pctDoMaior, 2)}%` }}
+                  {/* Borda em gradiente que acende no hover, igual aos
+                      painéis da home/login */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute -inset-px rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{
+                      background:
+                        'linear-gradient(120deg, rgba(96,165,250,0.7), rgba(192,132,252,0.7), rgba(244,114,182,0.55), rgba(96,165,250,0.7))',
+                      backgroundSize: '300% 300%',
+                      animation: 'gradient-border-move 6s linear infinite',
+                    }}
+                  />
+                  <div
+                    className={`relative rounded-[21px] border bg-[var(--card)] p-4 transition-colors ${
+                      aberto ? 'border-white/15' : 'border-white/[0.07]'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setExpandido(aberto ? null : item.nome)}
+                      className="block w-full text-left"
+                      aria-expanded={aberto}
                     >
-                      {segmentos.map((s) => (
-                        <div
-                          key={s.cat}
-                          className="h-full first:rounded-l-full last:rounded-r-full"
-                          style={{ width: `${s.pct}%`, background: CORES_CATEGORIA[s.cat], minWidth: 2 }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    {segmentos
-                      .filter((s) => s.cat !== 'convertido')
-                      .map((s) => (
-                        <span
-                          key={s.cat}
-                          className={`flex items-center gap-1.5 ${isApresentacao ? 'text-[14px]' : 'text-[11px]'} font-medium text-[var(--muted-foreground)]`}
-                        >
-                          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: CORES_CATEGORIA[s.cat] }} />
-                          {s.quantidade} {LABEL_CATEGORIA[s.cat]}
-                        </span>
-                      ))}
-                    {presaNaPrimeira > 0 && (
-                      <span className={`flex items-center gap-1.5 ${isApresentacao ? 'text-[14px]' : 'text-[11px]'} font-medium text-[var(--muted-foreground)]`}>
-                        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
-                        {presaNaPrimeira} parados na 1ª mensagem · {Math.round(pctPresaNaCampanha)}%
-                      </span>
-                    )}
-                  </div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {aberto && item.detalhes && item.detalhes.length > 0 && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22, ease: 'easeOut' }}
-                      className="overflow-hidden"
-                    >
-                      <div className="ml-[22px] mt-2.5 space-y-1.5 border-l border-[color:var(--border)] pl-3">
-                        {[...item.detalhes]
-                          .sort((a, b) => b.quantidade - a.quantidade)
-                          .map((d) => {
-                            const cat = categorizarStatus(d.nome)
-                            const pct = item.quantidade > 0 ? (d.quantidade / item.quantidade) * 100 : 0
-                            return (
-                              <div key={d.nome} className="flex items-center gap-2.5">
-                                <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: CORES_CATEGORIA[cat] }} />
-                                <span className="min-w-0 flex-1 truncate text-[11.5px] text-[var(--muted-foreground)]">
-                                  {formatarStatus(d.nome)}
-                                </span>
-                                <span className="shrink-0 text-[11.5px] font-semibold tabular-nums text-[var(--foreground)]">
-                                  {d.quantidade}
-                                </span>
-                                <span className="w-9 shrink-0 text-right text-[10.5px] tabular-nums text-[var(--muted-foreground)]">
-                                  {Math.round(pct)}%
-                                </span>
-                              </div>
-                            )
-                          })}
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="mb-1 flex items-center gap-2">
+                            <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-[var(--muted-foreground)]">
+                              #{idx + 1}
+                            </span>
+                            {grupos.convertido > 0 && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--success)]"
+                                style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
+                              >
+                                <Sparkles size={10} />
+                                {grupos.convertido} convertido{grupos.convertido > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
+                          <h4
+                            title={item.nome}
+                            className={`${isApresentacao ? 'text-[22px]' : 'text-[14px]'} line-clamp-2 break-words font-bold leading-snug text-[var(--foreground)]`}
+                          >
+                            {nomeBonito}
+                          </h4>
+                        </div>
+                        <div className="shrink-0 text-right">
+                          <div className={`${isApresentacao ? 'text-[44px]' : 'text-[30px]'} font-black leading-none tracking-tight text-[var(--foreground)] tabular-nums`}>
+                            {item.quantidade}
+                          </div>
+                          <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                            leads
+                          </div>
+                        </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )
-          })}
+
+                      <div className="flex items-center gap-4">
+                        <Rosca grupos={grupos} total={total} pctConvertido={pctConvertido} grande={isApresentacao} />
+                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-3 gap-y-2">
+                          {ORDEM.map((c) => (
+                            <div
+                              key={c}
+                              className={`rounded-xl px-2.5 py-1.5 ${grupos[c] === 0 ? 'opacity-40' : ''}`}
+                              style={{ background: `color-mix(in srgb, ${COR[c]} 11%, transparent)` }}
+                            >
+                              <div className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} font-extrabold leading-none tabular-nums`} style={{ color: COR[c] }}>
+                                {grupos[c]}
+                              </div>
+                              <div className={`${isApresentacao ? 'text-[12px]' : 'text-[9.5px]'} mt-1 font-semibold uppercase tracking-wide text-[var(--muted-foreground)]`}>
+                                {LABEL[c]}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
+                        {presa > 0 ? (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[14px]' : 'text-[10.5px]'} font-semibold text-[var(--warning)]`}
+                            style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
+                          >
+                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />
+                            {presa} parados na 1ª msg · {Math.round(pctPresa)}%
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <span className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap text-[10.5px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
+                          {aberto ? 'Ocultar etapas' : 'Ver etapas'}
+                          <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
+                        </span>
+                      </div>
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {aberto && item.detalhes && item.detalhes.length > 0 && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: 'easeOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3.5 space-y-2 border-t border-white/[0.07] pt-3.5">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
+                              Onde estão no Kommo
+                            </p>
+                            {[...item.detalhes]
+                              .sort((a, b) => b.quantidade - a.quantidade)
+                              .map((d) => {
+                                const cat = categorizarStatus(d.nome)
+                                const pct = (d.quantidade / total) * 100
+                                return (
+                                  <div key={d.nome}>
+                                    <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
+                                      <span className="flex min-w-0 items-center gap-2 font-medium text-[var(--foreground)]">
+                                        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: COR[cat] }} />
+                                        <span className="truncate">{formatarStatus(d.nome)}</span>
+                                      </span>
+                                      <span className="shrink-0 font-bold tabular-nums text-[var(--foreground)]">
+                                        {d.quantidade}
+                                        <span className="ml-1.5 text-[10.5px] font-semibold text-[var(--muted-foreground)]">
+                                          {Math.round(pct)}%
+                                        </span>
+                                      </span>
+                                    </div>
+                                    <div className="h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                                      <div
+                                        className="h-full rounded-full"
+                                        style={{ width: `${Math.max(pct, 3)}%`, background: COR[cat] }}
+                                      />
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
         </div>
       )}
     </section>
