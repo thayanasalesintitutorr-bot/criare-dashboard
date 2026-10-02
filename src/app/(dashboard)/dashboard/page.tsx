@@ -828,6 +828,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     : 0
 
 
+  // Reabord só aparece quando tem valor; sem ele o card fica só com Consulta
+  // (o "Total semanal" seria idêntico, então some junto).
+  const temReabord =
+    (comercialConsulta?.quantidadeReabord || 0) > 0 ||
+    (comercialConsulta?.valorTotalReabord || 0) > 0
+
   const fatosFundo = [
     { label: 'Leads recebidos', valor: String(marketing?.totalEntradas ?? 0) },
     { label: 'Convertidos', valor: String(marketing?.convertidos ?? 0) },
@@ -973,7 +979,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </GroupCard>
 
           <GroupCard title="Comercial I e II" icon={<Stethoscope size={26} />}>
-  <div className="grid grid-cols-2 gap-4 md:gap-7">
+  <div className={temReabord ? 'grid grid-cols-2 gap-4 md:gap-7' : ''}>
     <div className="min-w-0 space-y-2">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 shrink-0 rounded-full bg-[var(--accent)]" />
@@ -1004,6 +1010,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 />
     </div>
 
+    {temReabord && (
     <div className="min-w-0 space-y-2">
       <div className="flex items-center gap-3">
         <span className="h-3 w-3 shrink-0 rounded-full bg-[var(--accent)]" />
@@ -1034,8 +1041,10 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   empty={!comercialConsulta?.quantidadeReabord}
 />
     </div>
+    )}
   </div>
 
+  {temReabord && (
   <div className="border-t border-[color:var(--border)] pt-1">
     <div className="mb-1 flex items-center gap-3">
       <span className="h-3 w-3 rounded-full bg-[var(--accent)]" />
@@ -1068,6 +1077,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 />
     </div>
   </div>
+  )}
 </GroupCard>
 
           <GroupCard title="Comercial III" icon={<Users size={26} />}>
