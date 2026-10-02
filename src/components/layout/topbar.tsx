@@ -22,10 +22,9 @@ import {
   X,
   Maximize2,
   Minimize2,
-  ChevronDown,
-  ChevronUp,
   ZoomIn,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
@@ -54,39 +53,63 @@ const CONTAS: Record<string, { nome: string; email: string; senha: string }> = {
   },
 }
 
-function FiltroResumoCard({
-  icon,
-  label,
-  valor,
-  aberto,
+const OPCOES_PERIODO = [
+  { valor: 'hoje', label: 'Hoje' },
+  { valor: 'ontem', label: 'Ontem' },
+  { valor: 'semana', label: 'Semana' },
+  { valor: 'mes-atual', label: 'Mês atual' },
+  { valor: 'mes-passado', label: 'Mês passado' },
+] as const
+
+const OPCOES_SEGMENTO = [
+  { valor: 'geral', label: 'Geral', icone: BarChart3 },
+  { valor: 'vascular', label: 'Vascular', icone: Activity },
+  { valor: 'emagrecimento', label: 'Emagrecimento', icone: Heart },
+] as const
+
+const rotuloFiltro =
+  'mb-1.5 flex items-center gap-1.5 px-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--muted-foreground)]'
+const trilhoFiltro =
+  'relative flex flex-wrap items-center gap-1 rounded-2xl border border-[color:var(--border)] bg-[var(--metric-card)]/60 p-1.5'
+
+// Opção de filtro com "pílula" de destaque que desliza (layoutId) até a
+// opção escolhida, em vez de só trocar a cor — dá a sensação de controle
+// físico e deixa claro o que está selecionado.
+function OpcaoFiltro({
+  ativo,
+  layoutId,
   onClick,
+  icon,
+  children,
 }: {
-  icon: ReactNode
-  label: string
-  valor: string
-  aberto: boolean
+  ativo: boolean
+  layoutId: string
   onClick: () => void
+  icon?: ReactNode
+  children: ReactNode
 }) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onClick}
-      className={`flex w-full items-center justify-between gap-2 rounded-2xl border px-3.5 py-2.5 text-left text-sm transition-colors ${
-        aberto
-          ? 'border-[var(--accent)] bg-[var(--accent)]/10'
-          : 'border-[var(--border)] bg-[var(--card)] hover:bg-[var(--metric-card)]'
+      whileTap={{ scale: 0.94 }}
+      whileHover={{ y: -1 }}
+      className={`relative inline-flex items-center whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors ${
+        ativo ? 'text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
       }`}
     >
-      <span className="flex items-center gap-1.5 font-bold">
+      {ativo && (
+        <motion.span
+          layoutId={layoutId}
+          transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+          className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] shadow-[0_6px_18px_rgba(99,102,241,0.45)]"
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-2">
         {icon}
-        {label}
+        {children}
       </span>
-
-      <span className="flex shrink-0 items-center gap-1.5 text-[var(--muted-foreground)]">
-        <span className="whitespace-nowrap font-semibold text-[var(--foreground)]">{valor}</span>
-        {aberto ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-      </span>
-    </button>
+    </motion.button>
   )
 }
 
@@ -132,9 +155,6 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const compararCalendarRef = useRef<HTMLDivElement>(null)
   const compararCalendarPopupRef = useRef<HTMLDivElement>(null)
   const zoomRef = useRef<HTMLDivElement>(null)
-  const [categoriaAberta, setCategoriaAberta] = useState<
-    'periodo' | 'segmento' | 'comparacao' | null
-  >(null)
   const profileRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const notificationCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -329,11 +349,6 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
     router.push('/login')
   }
 
-  const groupClass = 'flex flex-wrap items-center gap-1.5 rounded-[20px] bg-[var(--card)] p-2'
- const pillBase =
-  'inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all whitespace-nowrap'
-  const pillActive = 'bg-[var(--accent)] text-[var(--background)] shadow-sm'
-  const pillInactive = 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
 
 function parseLocalDate(dateString?: string) {
   if (!dateString) return undefined
@@ -567,90 +582,33 @@ function parseLocalDate(dateString?: string) {
         }
   }
 >
-    <div className="grid grid-cols-1 gap-3 @mobile-h:grid-cols-2 @tablet:grid-cols-3">
-      <div>
-        <FiltroResumoCard
-          icon={<CalendarDays size={15} className="text-[var(--accent)]" />}
-          label="Período"
-          valor={
-            periodo === 'hoje'
-              ? 'Hoje'
-              : periodo === 'ontem'
-                ? 'Ontem'
-                : periodo === 'semana'
-                  ? 'Semana'
-                  : periodo === 'mes-atual'
-                    ? 'Mês atual'
-                    : periodo === 'mes-passado'
-                      ? 'Mês passado'
-                      : 'Personalizado'
-          }
-          aberto={categoriaAberta === 'periodo'}
-          onClick={() =>
-            setCategoriaAberta((atual) => (atual === 'periodo' ? null : 'periodo'))
-          }
-        />
-
-        {categoriaAberta === 'periodo' && (
-        <div className={`${groupClass} mt-3`}>
-          <button
-            onClick={() => {
-              setPeriodo('hoje')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${periodo === 'hoje' ? pillActive : pillInactive}`}
-          >
-            Hoje
-          </button>
-
-          <button
-            onClick={() => {
-              setPeriodo('ontem')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${periodo === 'ontem' ? pillActive : pillInactive}`}
-          >
-            Ontem
-          </button>
-
-          <button
-            onClick={() => {
-              setPeriodo('semana')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${periodo === 'semana' ? pillActive : pillInactive}`}
-          >
-            Semana
-          </button>
-
-          <button
-            onClick={() => {
-              setPeriodo('mes-atual')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${periodo === 'mes-atual' ? pillActive : pillInactive}`}
-          >
-            Mês atual
-          </button>
-
-          <button
-            onClick={() => {
-              setPeriodo('mes-passado')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${periodo === 'mes-passado' ? pillActive : pillInactive}`}
-          >
-            Mês passado
-          </button>
+    <div className="relative flex flex-wrap items-start gap-x-8 gap-y-4">
+      <div className="min-w-0">
+        <p className={rotuloFiltro}>
+          <CalendarDays size={14} className="text-[var(--accent)]" />
+          Período
+        </p>
+        <div className={trilhoFiltro}>
+          {OPCOES_PERIODO.map((o) => (
+            <OpcaoFiltro
+              key={o.valor}
+              ativo={periodo === o.valor}
+              layoutId="filtro-periodo"
+              onClick={() => setPeriodo(o.valor)}
+            >
+              {o.label}
+            </OpcaoFiltro>
+          ))}
 
           <div ref={calendarRef} className="relative">
-            <button
+            <OpcaoFiltro
+              ativo={periodo === 'personalizado'}
+              layoutId="filtro-periodo"
               onClick={() => setShowCalendar((v) => !v)}
-              className={`${pillBase} ${periodo === 'personalizado' ? pillActive : pillInactive}`}
+              icon={<CalendarDays size={15} />}
             >
-              <CalendarDays size={16} />
               Personalizado
-            </button>
+            </OpcaoFiltro>
 
             {showCalendar && createPortal(
               <>
@@ -771,105 +729,88 @@ function parseLocalDate(dateString?: string) {
             )}
           </div>
         </div>
-        )}
       </div>
 
-      <div>
-        <FiltroResumoCard
-          icon={<Activity size={15} className="text-[var(--accent)]" />}
-          label="Segmento"
-          valor={
-            segmento === 'vascular'
-              ? 'Vascular'
-              : segmento === 'emagrecimento'
-                ? 'Emagrecimento'
-                : 'Geral'
-          }
-          aberto={categoriaAberta === 'segmento'}
-          onClick={() =>
-            setCategoriaAberta((atual) => (atual === 'segmento' ? null : 'segmento'))
-          }
-        />
-
-        {categoriaAberta === 'segmento' && (
-        <div className={`${groupClass} mt-3`}>
-          <button
-            onClick={() => {
-              setSegmento('vascular')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${segmento === 'vascular' ? pillActive : pillInactive}`}
-          >
-            <Activity size={16} />
-            Vascular
-          </button>
-
-          <button
-            onClick={() => {
-              setSegmento('emagrecimento')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${segmento === 'emagrecimento' ? pillActive : pillInactive}`}
-          >
-            <Heart size={16} />
-            Emagrecimento
-          </button>
-
-          <button
-            onClick={() => {
-              setSegmento('geral')
-              setCategoriaAberta(null)
-            }}
-            className={`${pillBase} ${segmento === 'geral' ? pillActive : pillInactive}`}
-          >
-            <BarChart3 size={16} />
-            Geral
-          </button>
+      <div className="min-w-0">
+        <p className={rotuloFiltro}>
+          <Activity size={14} className="text-[var(--accent)]" />
+          Segmento
+        </p>
+        <div className={trilhoFiltro}>
+          {OPCOES_SEGMENTO.map((o) => {
+            const Icone = o.icone
+            return (
+              <OpcaoFiltro
+                key={o.valor}
+                ativo={segmento === o.valor}
+                layoutId="filtro-segmento"
+                onClick={() => setSegmento(o.valor)}
+                icon={<Icone size={15} />}
+              >
+                {o.label}
+              </OpcaoFiltro>
+            )
+          })}
         </div>
-        )}
       </div>
 
-      <div>
-        <FiltroResumoCard
-          icon={<BarChart3 size={15} className="text-[var(--accent)]" />}
-          label="Comparação"
-          valor={
-            !comparar
-              ? 'Sem comparar'
-              : compararInicio && compararFim
-                ? `${parseLocalDate(compararInicio)?.toLocaleDateString('pt-BR')} a ${parseLocalDate(compararFim)?.toLocaleDateString('pt-BR')}`
-                : 'Período anterior'
-          }
-          aberto={categoriaAberta === 'comparacao'}
-          onClick={() =>
-            setCategoriaAberta((atual) => (atual === 'comparacao' ? null : 'comparacao'))
-          }
-        />
-
-        {categoriaAberta === 'comparacao' && (
-        <div className={`${groupClass} mt-3`}>
-          <button
+      <div className="min-w-0">
+        <p className={rotuloFiltro}>
+          <BarChart3 size={14} className="text-[var(--accent)]" />
+          Comparação
+        </p>
+        <div className={`${trilhoFiltro} gap-2.5 pr-3`}>
+          <motion.button
+            type="button"
+            role="switch"
+            aria-checked={comparar}
+            whileTap={{ scale: 0.96 }}
             onClick={() => {
-              setComparar(false)
-              setCategoriaAberta(null)
+              if (comparar) {
+                setComparar(false)
+              } else {
+                setComparar(true)
+                setShowCompararCalendar(true)
+              }
             }}
-            className={`${pillBase} ${!comparar ? pillActive : pillInactive}`}
+            className="flex items-center gap-2.5 rounded-xl px-2 py-1.5 text-sm font-semibold text-[var(--foreground)]"
           >
-            Sem comparar
-          </button>
+            <span
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+                comparar ? 'bg-gradient-to-r from-[#3B82F6] to-[#A855F7] shadow-[0_0_14px_rgba(99,102,241,0.55)]' : 'bg-[var(--progress-bg)]'
+              }`}
+            >
+              <motion.span
+                className="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow"
+                animate={{ x: comparar ? 20 : 0 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            </span>
+            {comparar ? 'Comparando' : 'Comparar período'}
+          </motion.button>
 
-          <button
-            onClick={() => {
-              setComparar(true)
-              setShowCompararCalendar(true)
-            }}
-            className={`${pillBase} ${comparar ? pillActive : pillInactive}`}
-          >
-            Comparar
-          </button>
+          <AnimatePresence initial={false}>
+            {comparar && (
+              <motion.div
+                key="chip-comparar"
+                ref={compararCalendarRef}
+                initial={{ opacity: 0, x: -8, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -8, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="relative"
+              >
+                <button
+                  type="button"
+                  onClick={() => setShowCompararCalendar(true)}
+                  className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-3 py-1.5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--accent)]/20"
+                >
+                  <CalendarDays size={14} className="text-[var(--accent)]" />
+                  {compararInicio && compararFim
+                    ? `${parseLocalDate(compararInicio)?.toLocaleDateString('pt-BR')} → ${parseLocalDate(compararFim)?.toLocaleDateString('pt-BR')}`
+                    : 'Período anterior'}
+                </button>
 
-          {comparar && (
-              <div ref={compararCalendarRef} className="relative">
                 {showCompararCalendar && createPortal(
                   <>
                   <div
@@ -971,7 +912,6 @@ function parseLocalDate(dateString?: string) {
                           <button
                             onClick={() => {
                               setShowCompararCalendar(false)
-                              setCategoriaAberta(null)
                             }}
                             className="rounded-xl bg-[var(--accent)] px-6 py-2.5 text-sm font-semibold text-[var(--background)]"
                           >
@@ -984,12 +924,11 @@ function parseLocalDate(dateString?: string) {
                   </>,
                   document.body
                 )}
-              </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        )}
       </div>
-
     </div>
 </div>
 </div>

@@ -79,6 +79,14 @@ function agruparPorEtapa(detalhes: DetalheItem[] = []) {
   return ORDEM.filter((k) => (g[k] ?? 0) > 0).map((k) => ({ key: k, quantidade: g[k] as number }))
 }
 
+// Ranking em destaque: top 3 com ouro/prata/bronze, resto com o degradê da marca
+const ESTILO_RANK = [
+  { fundo: 'linear-gradient(135deg,#FBBF24,#F59E0B)', brilho: '0 4px 16px rgba(245,158,11,0.5)', texto: '#3B2300' },
+  { fundo: 'linear-gradient(135deg,#E2E8F0,#94A3B8)', brilho: '0 4px 14px rgba(148,163,184,0.45)', texto: '#0F172A' },
+  { fundo: 'linear-gradient(135deg,#FDBA74,#EA580C)', brilho: '0 4px 14px rgba(234,88,12,0.45)', texto: '#3A1500' },
+  { fundo: 'linear-gradient(135deg,#3B82F6,#7C6CF0 60%,#A855F7)', brilho: '0 4px 14px rgba(99,102,241,0.4)', texto: '#FFFFFF' },
+]
+
 const SIGLAS = new Set(['WPP', 'ADV', 'RMKT', 'LP', 'NPS', 'SAL', 'PCT', 'AD'])
 
 // Nome de campanha vem em CAIXA_ALTA_COM_UNDERLINE; no card fica mais
@@ -255,24 +263,23 @@ export function OrigensPrimeiraMensagemCard({
                       aria-expanded={aberto}
                     >
                       <div className="mb-3 flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="mb-1 flex items-center gap-2">
-                            <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[12px] font-bold tabular-nums text-[var(--muted-foreground)]">
-                              #{idx + 1}
-                            </span>
-                            {ganhos > 0 && (
-                              <span
-                                className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-bold uppercase tracking-wide text-[var(--success)]"
-                                style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
-                              >
-                                <Sparkles size={12} />
-                                {ganhos} convertido{ganhos > 1 ? 's' : ''}
-                              </span>
-                            )}
-                          </div>
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span
+                            className={`flex shrink-0 items-center justify-center rounded-xl font-extrabold tabular-nums text-white ${
+                              isApresentacao ? 'h-14 min-w-[56px] px-2 text-[24px]' : 'h-11 min-w-[44px] px-2 text-[18px]'
+                            }`}
+                            style={{
+                              background: ESTILO_RANK[Math.min(idx, 3)].fundo,
+                              boxShadow: ESTILO_RANK[Math.min(idx, 3)].brilho,
+                              color: ESTILO_RANK[Math.min(idx, 3)].texto,
+                            }}
+                            title={`${idx + 1}ª origem com mais leads`}
+                          >
+                            #{idx + 1}
+                          </span>
                           <h4
                             title={item.nome}
-                            className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-2 break-words font-bold leading-snug text-[var(--foreground)]`}
+                            className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-2 min-w-0 break-words pt-0.5 font-bold leading-snug text-[var(--foreground)]`}
                           >
                             {formatarOrigem(item.nome)}
                           </h4>
@@ -297,6 +304,15 @@ export function OrigensPrimeiraMensagemCard({
                             >
                               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
                               {presa} parados na 1ª msg · {Math.round(pctPresa)}%
+                            </span>
+                          )}
+                          {ganhos > 0 && (
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[15px]' : 'text-[13px]'} font-bold text-[var(--success)]`}
+                              style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
+                            >
+                              <Sparkles size={isApresentacao ? 16 : 14} />
+                              {ganhos} convertido{ganhos > 1 ? 's' : ''}
                             </span>
                           )}
                           <span className="flex items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">

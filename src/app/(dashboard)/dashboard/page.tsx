@@ -1079,10 +1079,21 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     : 0
 
 
+  const fatosFundo = [
+    { label: 'Leads recebidos', valor: String(marketing?.totalEntradas ?? 0) },
+    { label: 'Convertidos', valor: String(marketing?.convertidos ?? 0) },
+    { label: 'Faturamento', valor: formatMoneyShort(consolidado?.valorVendas ?? 0) },
+    { label: 'Vendas', valor: String(consolidado?.qtdVendas ?? 0) },
+    { label: 'Ticket médio', valor: formatMoneyShort(consolidado?.ticketMedio ?? 0) },
+    { label: 'Parados na 1ª msg', valor: String(primeiraMensagemTotal) },
+    { label: 'Origens ativas', valor: String(origens.length) },
+    { label: 'Conversão', valor: `${Math.round(marketing?.convertidosPercent ?? 0)}%` },
+  ]
+
   return (
     <div className="relative isolate">
       {/* Fundo vivo, mesma pegada da entrada/login (decorativo). */}
-      <AnimatedBackdrop />
+      <AnimatedBackdrop fatos={fatosFundo} />
 
      <div className="relative space-y-3">
 
