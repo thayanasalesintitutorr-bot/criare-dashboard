@@ -1043,7 +1043,6 @@ export default function DashboardPage() {
   const consolidadoTicketOk = (consolidado?.ticketMedio || 0) >= metaTicket
   const vendasPercent = metaVendas > 0 ? ((consolidado?.valorVendas || 0) / metaVendas) * 100 : 0
   const ticketPercent = metaTicket > 0 ? ((consolidado?.ticketMedio || 0) / metaTicket) * 100 : 0
-  const origensTop = origens.slice(0, 10)
   const origensTotal = origens.reduce((acc, o) => acc + o.quantidade, 0)
   const leadsPorTipo = {
   A: marketing?.leadA || 0,
@@ -1607,7 +1606,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
 
         <OrigensPrimeiraMensagemCard
-          origens={origensTop}
+          origens={origens}
           origensTotal={origensTotal}
           primeiraMensagemOrigens={primeiraMensagemOrigens}
           primeiraMensagemTotal={primeiraMensagemTotal}

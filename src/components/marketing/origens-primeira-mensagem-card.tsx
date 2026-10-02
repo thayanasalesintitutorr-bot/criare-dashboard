@@ -61,7 +61,7 @@ export function OrigensPrimeiraMensagemCard({
           Sem dados no período
         </div>
       ) : (
-        <div className={isApresentacao ? 'space-y-6' : 'space-y-4'}>
+        <div className={`max-h-[520px] overflow-y-auto pr-1 ${isApresentacao ? 'space-y-6' : 'space-y-4'}`}>
           {origens.map((item) => {
             const pctDoMaior = (item.quantidade / maiorQuantidade) * 100
             const presaNaPrimeira = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
