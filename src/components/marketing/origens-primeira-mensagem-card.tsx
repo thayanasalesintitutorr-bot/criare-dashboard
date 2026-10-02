@@ -16,48 +16,74 @@ type OrigemItem = {
   detalhes?: DetalheItem[]
 }
 
-type Categoria = 'andamento' | 'agendado' | 'convertido' | 'perdido'
+type EtapaKey =
+  | 'formulario'
+  | 'contato'
+  | 'nutricao'
+  | 'followup'
+  | 'qualificado'
+  | 'agendado'
+  | 'ganhou'
+  | 'naoQualificado'
+  | 'perdeu'
+  | 'outro'
 
-const ORDEM: Categoria[] = ['andamento', 'agendado', 'convertido', 'perdido']
-
-const COR: Record<Categoria, string> = {
-  andamento: '#3B82F6',
-  agendado: '#A855F7',
-  convertido: 'var(--success)',
-  perdido: 'var(--danger)',
+// Cores iguais às etapas do funil CONSULTA no Kommo (mesma ordem do funil),
+// pra quem olha o painel reconhecer a etapa pela cor.
+const ETAPAS: Record<EtapaKey, { label: string; completo: string; cor: string }> = {
+  formulario: { label: 'Formulário', completo: 'Formulário', cor: '#C4B5FD' },
+  contato: { label: '1º Contato', completo: '1º Contato', cor: '#8CC5F8' },
+  nutricao: { label: 'Nutrição', completo: 'Nutrição', cor: '#FFC9D0' },
+  followup: { label: 'Follow-up', completo: 'Follow-up (sem resposta)', cor: '#FFEB3B' },
+  qualificado: { label: 'Qualificado', completo: 'Lead qualificado', cor: '#7DF2B7' },
+  agendado: { label: 'Agendado', completo: 'Agendado', cor: '#FDFD86' },
+  ganhou: { label: 'Ganhou', completo: 'Ganhou (convertido)', cor: '#C4FF66' },
+  naoQualificado: { label: 'Não qualif.', completo: 'Perdeu (não qualificado)', cor: '#FF7F8A' },
+  perdeu: { label: 'Perdeu', completo: 'Perdeu', cor: '#CDD1D4' },
+  outro: { label: 'Outros', completo: 'Outros', cor: '#94A3B8' },
 }
 
-const LABEL: Record<Categoria, string> = {
-  andamento: 'Em andamento',
-  agendado: 'Agendados',
-  convertido: 'Convertidos',
-  perdido: 'Perdidos',
+const ORDEM: EtapaKey[] = [
+  'formulario',
+  'contato',
+  'nutricao',
+  'followup',
+  'qualificado',
+  'agendado',
+  'ganhou',
+  'naoQualificado',
+  'perdeu',
+  'outro',
+]
+
+function etapaDoStatus(nomeCompleto: string): EtapaKey {
+  const s = nomeCompleto.split('|').pop()?.trim().toUpperCase() ?? ''
+  if (s.includes('GANHOU')) return 'ganhou'
+  if (s.includes('NÃO QUALIFICADO') || s.includes('NAO QUALIFICADO')) return 'naoQualificado'
+  if (s.includes('PERDEU')) return 'perdeu'
+  if (s.includes('AGENDADO')) return 'agendado'
+  if (s.includes('LEAD QUALIFICADO')) return 'qualificado'
+  if (s.includes('FOLLOW')) return 'followup'
+  if (s.includes('NUTRI')) return 'nutricao'
+  if (s.includes('CONTATO')) return 'contato'
+  if (s.includes('FORMUL')) return 'formulario'
+  return 'outro'
 }
 
-// "GANHOU" é a consulta efetivamente convertida (o que a clínica chama de
-// gerar venda), "AGENDADO" ainda não aconteceu, qualquer "PERDEU..." é perda
-// e o resto é lead ainda em trabalho (1º contato, follow-up, qualificado...).
-function categorizarStatus(nomeCompleto: string): Categoria {
-  const status = nomeCompleto.split('|').pop()?.trim().toUpperCase() ?? ''
-  if (status.includes('GANHOU')) return 'convertido'
-  if (status.includes('PERDEU')) return 'perdido'
-  if (status.includes('AGENDADO')) return 'agendado'
-  return 'andamento'
-}
-
-function formatarStatus(nomeCompleto: string) {
-  const status = nomeCompleto.split('|').pop()?.trim() ?? nomeCompleto
-  return status
-    .toLowerCase()
-    .replace(/\[([^\]]+)\]/g, '($1)')
-    .replace(/(^|\s)\S/g, (c) => c.toUpperCase())
+function agruparPorEtapa(detalhes: DetalheItem[] = []) {
+  const g: Partial<Record<EtapaKey, number>> = {}
+  for (const d of detalhes) {
+    const k = etapaDoStatus(d.nome)
+    g[k] = (g[k] ?? 0) + d.quantidade
+  }
+  return ORDEM.filter((k) => (g[k] ?? 0) > 0).map((k) => ({ key: k, quantidade: g[k] as number }))
 }
 
 const SIGLAS = new Set(['WPP', 'ADV', 'RMKT', 'LP', 'NPS', 'SAL', 'PCT', 'AD'])
 
-// Nome de campanha vem em CAIXA_ALTA_COM_UNDERLINE; pro card fica mais
-// legível como "Claudia Conversao Leads WPP ADV". O nome cru continua no
-// title (tooltip) pra quem precisar do valor exato do Kommo.
+// Nome de campanha vem em CAIXA_ALTA_COM_UNDERLINE; no card fica mais
+// legível como "Claudia Conversao Leads WPP ADV". O valor cru do Kommo
+// continua no title (tooltip).
 function formatarOrigem(nome: string) {
   return nome
     .replace(/_/g, ' ')
@@ -72,48 +98,42 @@ function formatarOrigem(nome: string) {
     .join(' ')
 }
 
-function agrupar(detalhes: DetalheItem[] = []) {
-  const g: Record<Categoria, number> = { andamento: 0, agendado: 0, convertido: 0, perdido: 0 }
-  for (const d of detalhes) g[categorizarStatus(d.nome)] += d.quantidade
-  return g
-}
-
 const RAIO = 36
 const CIRC = 2 * Math.PI * RAIO
 
 function Rosca({
-  grupos,
+  etapas,
   total,
   pctConvertido,
   grande,
 }: {
-  grupos: Record<Categoria, number>
+  etapas: { key: EtapaKey; quantidade: number }[]
   total: number
   pctConvertido: number
   grande: boolean
 }) {
-  const ativos = ORDEM.filter((c) => grupos[c] > 0)
-  const folga = ativos.length > 1 ? 2.5 : 0
+  const folga = etapas.length > 1 ? 2.2 : 0
   let acumulado = 0
 
   return (
-    <div className={`relative shrink-0 ${grande ? 'h-[130px] w-[130px]' : 'h-[92px] w-[92px]'}`}>
+    <div className={`relative shrink-0 ${grande ? 'h-[130px] w-[130px]' : 'h-[96px] w-[96px]'}`}>
       <svg viewBox="0 0 88 88" className="h-full w-full -rotate-90">
-        <circle cx="44" cy="44" r={RAIO} fill="none" stroke="var(--progress-bg)" strokeWidth="9" />
-        {ativos.map((cat) => {
-          const len = Math.max((grupos[cat] / total) * CIRC - folga, 1.5)
+        <circle cx="44" cy="44" r={RAIO} fill="none" stroke="var(--progress-bg)" strokeWidth="10" />
+        {etapas.map(({ key, quantidade }) => {
+          const parte = (quantidade / total) * CIRC
+          const len = Math.max(parte - folga, 1.5)
           const offset = -acumulado
-          acumulado += (grupos[cat] / total) * CIRC
+          acumulado += parte
           return (
             <motion.circle
-              key={cat}
+              key={key}
               cx="44"
               cy="44"
               r={RAIO}
               fill="none"
-              strokeWidth="9"
+              strokeWidth="10"
               strokeLinecap="round"
-              style={{ stroke: COR[cat] }}
+              style={{ stroke: ETAPAS[key].cor }}
               strokeDashoffset={offset}
               initial={{ strokeDasharray: `0 ${CIRC}` }}
               animate={{ strokeDasharray: `${len} ${CIRC - len}` }}
@@ -152,19 +172,16 @@ export function OrigensPrimeiraMensagemCard({
   const isApresentacao = viewMode === 'apresentacao'
   const [expandido, setExpandido] = useState<string | null>(null)
 
-  return (
-    <section className="relative overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/70 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
-      {/* Aurora de fundo — mesma paleta azul/roxo/rosa da entrada do login */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.22),transparent_70%)] blur-3xl" />
-        <div className="absolute -right-24 top-1/3 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.18),transparent_70%)] blur-3xl" />
-        <div className="absolute -bottom-32 left-1/3 h-72 w-96 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.12),transparent_70%)] blur-3xl" />
-      </div>
+  // Legenda só com as etapas que existem no período
+  const presentes = new Set<EtapaKey>()
+  for (const o of origens) for (const e of agruparPorEtapa(o.detalhes)) presentes.add(e.key)
 
+  return (
+    <section className="fx-card relative overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/70 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
       <div className="relative mb-5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
-            className={`flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06]  ${
+            className={`flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] ${
               isApresentacao ? 'h-14 w-14' : 'h-10 w-10'
             }`}
           >
@@ -194,11 +211,11 @@ export function OrigensPrimeiraMensagemCard({
         </div>
       </div>
 
-      <div className={`relative mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 ${isApresentacao ? 'text-[15px]' : 'text-[11.5px]'} text-[var(--muted-foreground)]`}>
-        {ORDEM.map((c) => (
-          <span key={c} className="flex items-center gap-1.5 font-medium">
-            <span className="h-2.5 w-2.5 rounded-full" style={{ background: COR[c] }} />
-            {LABEL[c]}
+      <div className={`relative mb-4 flex flex-wrap items-center gap-x-3.5 gap-y-1.5 ${isApresentacao ? 'text-[15px]' : 'text-[11px]'} text-[var(--muted-foreground)]`}>
+        {ORDEM.filter((k) => presentes.has(k)).map((k) => (
+          <span key={k} className="flex items-center gap-1.5 font-medium">
+            <span className="h-2.5 w-2.5 rounded-full" style={{ background: ETAPAS[k].cor }} />
+            {ETAPAS[k].label}
           </span>
         ))}
       </div>
@@ -211,13 +228,13 @@ export function OrigensPrimeiraMensagemCard({
         <div className="relative max-h-[760px] overflow-y-auto pr-1">
           <div className="grid grid-cols-1 items-start gap-4 @lg:grid-cols-2 @4xl:grid-cols-3">
             {origens.map((item, idx) => {
-              const grupos = agrupar(item.detalhes)
+              const etapas = agruparPorEtapa(item.detalhes)
               const total = item.quantidade || 1
-              const pctConvertido = (grupos.convertido / total) * 100
+              const ganhos = etapas.find((e) => e.key === 'ganhou')?.quantidade ?? 0
+              const pctConvertido = (ganhos / total) * 100
               const presa = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
               const pctPresa = (presa / total) * 100
               const aberto = expandido === item.nome
-              const nomeBonito = formatarOrigem(item.nome)
 
               return (
                 <motion.div
@@ -225,22 +242,9 @@ export function OrigensPrimeiraMensagemCard({
                   initial={{ opacity: 0, y: 14 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: Math.min(idx, 12) * 0.04, ease: 'easeOut' }}
-                  className="group relative"
                 >
-                  {/* Borda em gradiente que acende no hover, igual aos
-                      painéis da home/login */}
                   <div
-                    aria-hidden
-                    className="pointer-events-none absolute -inset-px rounded-[22px] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    style={{
-                      background:
-                        'linear-gradient(120deg, rgba(96,165,250,0.7), rgba(192,132,252,0.7), rgba(244,114,182,0.55), rgba(96,165,250,0.7))',
-                      backgroundSize: '300% 300%',
-                      animation: 'gradient-border-move 6s linear infinite',
-                    }}
-                  />
-                  <div
-                    className={`relative rounded-[21px] border bg-[var(--card)] p-4 transition-colors ${
+                    className={`fx-card-mini group rounded-[21px] border bg-[var(--card)] p-4 transition-colors ${
                       aberto ? 'border-white/15' : 'border-white/[0.07]'
                     }`}
                   >
@@ -256,13 +260,13 @@ export function OrigensPrimeiraMensagemCard({
                             <span className="rounded-md bg-white/[0.07] px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-[var(--muted-foreground)]">
                               #{idx + 1}
                             </span>
-                            {grupos.convertido > 0 && (
+                            {ganhos > 0 && (
                               <span
                                 className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--success)]"
                                 style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
                               >
                                 <Sparkles size={10} />
-                                {grupos.convertido} convertido{grupos.convertido > 1 ? 's' : ''}
+                                {ganhos} convertido{ganhos > 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
@@ -270,7 +274,7 @@ export function OrigensPrimeiraMensagemCard({
                             title={item.nome}
                             className={`${isApresentacao ? 'text-[22px]' : 'text-[14px]'} line-clamp-2 break-words font-bold leading-snug text-[var(--foreground)]`}
                           >
-                            {nomeBonito}
+                            {formatarOrigem(item.nome)}
                           </h4>
                         </div>
                         <div className="shrink-0 text-right">
@@ -284,41 +288,42 @@ export function OrigensPrimeiraMensagemCard({
                       </div>
 
                       <div className="flex items-center gap-4">
-                        <Rosca grupos={grupos} total={total} pctConvertido={pctConvertido} grande={isApresentacao} />
-                        <div className="grid min-w-0 flex-1 grid-cols-2 gap-x-3 gap-y-2">
-                          {ORDEM.map((c) => (
-                            <div
-                              key={c}
-                              className={`rounded-xl px-2.5 py-1.5 ${grupos[c] === 0 ? 'opacity-40' : ''}`}
-                              style={{ background: `color-mix(in srgb, ${COR[c]} 11%, transparent)` }}
+                        <Rosca etapas={etapas} total={total} pctConvertido={pctConvertido} grande={isApresentacao} />
+                        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
+                          {presa > 0 && (
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[14px]' : 'text-[10.5px]'} font-semibold leading-tight text-[var(--warning)]`}
+                              style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
                             >
-                              <div className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} font-extrabold leading-none tabular-nums`} style={{ color: COR[c] }}>
-                                {grupos[c]}
-                              </div>
-                              <div className={`${isApresentacao ? 'text-[12px]' : 'text-[9.5px]'} mt-1 font-semibold uppercase tracking-wide text-[var(--muted-foreground)]`}>
-                                {LABEL[c]}
-                              </div>
-                            </div>
-                          ))}
+                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
+                              {presa} parados na 1ª msg · {Math.round(pctPresa)}%
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1 whitespace-nowrap text-[10.5px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
+                            {aberto ? 'Ocultar etapas' : 'Ver etapas'}
+                            <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
+                          </span>
                         </div>
                       </div>
 
-                      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
-                        {presa > 0 ? (
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[14px]' : 'text-[10.5px]'} font-semibold text-[var(--warning)]`}
-                            style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
+                      <div className="mt-3 grid grid-cols-2 gap-1.5">
+                        {etapas.map(({ key, quantidade }) => (
+                          <div
+                            key={key}
+                            className="flex min-w-0 items-center gap-2 rounded-lg py-1.5 pl-2.5 pr-2"
+                            style={{
+                              background: `color-mix(in srgb, ${ETAPAS[key].cor} 15%, transparent)`,
+                              boxShadow: `inset 3px 0 0 ${ETAPAS[key].cor}`,
+                            }}
                           >
-                            <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />
-                            {presa} parados na 1ª msg · {Math.round(pctPresa)}%
-                          </span>
-                        ) : (
-                          <span />
-                        )}
-                        <span className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap text-[10.5px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
-                          {aberto ? 'Ocultar etapas' : 'Ver etapas'}
-                          <ChevronDown size={13} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
-                        </span>
+                            <span className={`${isApresentacao ? 'text-[20px]' : 'text-[16px]'} font-extrabold leading-none tabular-nums text-[var(--foreground)]`}>
+                              {quantidade}
+                            </span>
+                            <span className={`${isApresentacao ? 'text-[12px]' : 'text-[10px]'} min-w-0 truncate font-semibold uppercase leading-none tracking-wide text-[var(--muted-foreground)]`}>
+                              {ETAPAS[key].label}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     </button>
 
@@ -335,34 +340,31 @@ export function OrigensPrimeiraMensagemCard({
                             <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
                               Onde estão no Kommo
                             </p>
-                            {[...item.detalhes]
-                              .sort((a, b) => b.quantidade - a.quantidade)
-                              .map((d) => {
-                                const cat = categorizarStatus(d.nome)
-                                const pct = (d.quantidade / total) * 100
-                                return (
-                                  <div key={d.nome}>
-                                    <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
-                                      <span className="flex min-w-0 items-center gap-2 font-medium text-[var(--foreground)]">
-                                        <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: COR[cat] }} />
-                                        <span className="truncate">{formatarStatus(d.nome)}</span>
+                            {etapas.map(({ key, quantidade }) => {
+                              const pct = (quantidade / total) * 100
+                              return (
+                                <div key={key}>
+                                  <div className="mb-1 flex items-center justify-between gap-2 text-[12px]">
+                                    <span className="flex min-w-0 items-center gap-2 font-medium text-[var(--foreground)]">
+                                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: ETAPAS[key].cor }} />
+                                      <span className="truncate">{ETAPAS[key].completo}</span>
+                                    </span>
+                                    <span className="shrink-0 font-bold tabular-nums text-[var(--foreground)]">
+                                      {quantidade}
+                                      <span className="ml-1.5 text-[10.5px] font-semibold text-[var(--muted-foreground)]">
+                                        {Math.round(pct)}%
                                       </span>
-                                      <span className="shrink-0 font-bold tabular-nums text-[var(--foreground)]">
-                                        {d.quantidade}
-                                        <span className="ml-1.5 text-[10.5px] font-semibold text-[var(--muted-foreground)]">
-                                          {Math.round(pct)}%
-                                        </span>
-                                      </span>
-                                    </div>
-                                    <div className="h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
-                                      <div
-                                        className="h-full rounded-full"
-                                        style={{ width: `${Math.max(pct, 3)}%`, background: COR[cat] }}
-                                      />
-                                    </div>
+                                    </span>
                                   </div>
-                                )
-                              })}
+                                  <div className="h-2.5 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{ width: `${Math.max(pct, 3)}%`, background: ETAPAS[key].cor }}
+                                    />
+                                  </div>
+                                </div>
+                              )
+                            })}
                           </div>
                         </motion.div>
                       )}

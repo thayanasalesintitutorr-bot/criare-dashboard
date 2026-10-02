@@ -273,7 +273,7 @@ function construirInsights(kpis: Kpi[]) {
 // Vidro translúcido reutilizado em todos os blocos deste card — fundo
 // semi-transparente + blur + borda suave, em vez de fundo sólido.
 const VIDRO_CARD =
-  'border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
+  'fx-card border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
 const VIDRO_TILE =
   'border border-[color:var(--border)] bg-[var(--metric-card)]/55 backdrop-blur-lg backdrop-saturate-150'
 

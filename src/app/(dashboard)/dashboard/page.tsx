@@ -15,6 +15,7 @@ import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medic
 import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
 import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-primeira-mensagem-card'
 import { deepEqual } from '@/lib/deep-equal'
+import { AnimatedBackdrop } from '@/components/dashboard/animated-backdrop'
 
 type EvolucaoDiariaItem = {
   data: string
@@ -289,11 +290,11 @@ function textSecondary() {
 function cardBg() {
   // Mesmo padrão de vidro já usado na página /marketing (bg translúcido +
   // blur), aplicado aqui pra Visão Geral ter a mesma cara.
-  return 'rounded-[24px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 shadow-[var(--card-shadow)] transition-colors duration-200 hover:border-[var(--accent)]/30'
+  return 'fx-card rounded-[24px] border border-[color:var(--border)] bg-[var(--card)]/60 backdrop-blur-xl backdrop-saturate-150 shadow-[var(--card-shadow)] transition-colors duration-200'
 }
 
 function metricCardBg() {
-  return 'rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)]/55 backdrop-blur-lg backdrop-saturate-150 px-4 py-2 transition-colors duration-200 hover:border-[var(--accent)]/30'
+  return 'fx-card-mini rounded-[22px] border border-[color:var(--border)] bg-[var(--metric-card)]/55 backdrop-blur-lg backdrop-saturate-150 px-4 py-2 transition-colors duration-200'
 }
 
 function LiveIndicator({ lastUpdated, now }: { lastUpdated: Date | null; now: Date }) {
@@ -1079,16 +1080,9 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 
 
   return (
-    <div className="relative">
-      {/* Aurora de fundo, discreta — mesma linguagem visual do hero/login
-          (azul/violeta/rosa), só que bem mais sutil, pra não brigar com a
-          leitura dos números. Puramente decorativo (-z-10, pointer-events-
-          none), não afeta nada do layout/dados existente. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.16),transparent_70%)] blur-[70px]" />
-        <div className="absolute -right-24 top-[28%] h-[380px] w-[380px] rounded-full bg-[radial-gradient(circle,rgba(168,85,247,0.14),transparent_70%)] blur-[70px]" />
-        <div className="absolute bottom-[-180px] left-1/3 h-[360px] w-[520px] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.1),transparent_70%)] blur-[70px]" />
-      </div>
+    <div className="relative isolate">
+      {/* Fundo vivo, mesma pegada da entrada/login (decorativo). */}
+      <AnimatedBackdrop />
 
      <div className="relative space-y-3">
 
