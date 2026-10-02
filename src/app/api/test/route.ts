@@ -489,7 +489,12 @@ function buildOrigens(
   > = {}
 
   for (const lead of leads) {
-    const origem = origemField(lead, modo, fallbackCampanha) || 'Sem origem'
+    // Maiúsculas pra agrupar junto variações de caixa do mesmo valor vindas
+    // do Kommo (ex: "FACEBOOK" e "Facebook" são a mesma origem, só
+    // digitadas diferente) — sem isso cada grafia virava uma barra própria
+    // no card, fragmentando a contagem de uma origem só em várias menores.
+    const origemBruto = origemField(lead, modo, fallbackCampanha)
+    const origem = origemBruto ? origemBruto.toUpperCase() : 'Sem origem'
 
     const pipeline = lead.pipeline_id || 'SEM PIPELINE'
     const status = lead.status_id || 'SEM STATUS'
