@@ -15,14 +15,14 @@ import { useEffect, useRef, useState } from 'react'
 // referenciado, pra um wrapper em volta reservar esse espaço no fluxo da
 // página. Remede sempre que a escala muda e também quando o conteúdo em
 // si muda de tamanho (ex: expandir uma categoria de filtro).
-export function useScaledHeight(escala: number) {
+export function useScaledHeight(escala: number, ativo = true) {
   const ref = useRef<HTMLDivElement>(null)
   const [altura, setAltura] = useState<number>()
 
   useEffect(() => {
     const el = ref.current
 
-    if (!el || escala === 1) {
+    if (!el || escala === 1 || !ativo) {
       setAltura(undefined)
       return
     }
@@ -35,7 +35,7 @@ export function useScaledHeight(escala: number) {
     observer.observe(el)
 
     return () => observer.disconnect()
-  }, [escala])
+  }, [escala, ativo])
 
   return { ref, altura }
 }

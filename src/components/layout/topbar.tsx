@@ -22,6 +22,7 @@ import {
   X,
   Maximize2,
   Minimize2,
+  ChevronDown,
   ZoomIn,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -140,9 +141,16 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const { role: sessao, fetchRole } = useSessionRole()
   const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
   const zoomEscala = NIVEIS_ZOOM[zoomIndice]
-  const { ref: filtroRef, altura: filtroAltura } = useScaledHeight(zoomEscala)
 
   const [mounted, setMounted] = useState(false)
+  // Com zoom alto (acima de 130%) o filtro ocupa espaço demais e some; fica
+  // só uma dica discreta que aparece quando a pessoa rola pra cima.
+  const zoomAlto = zoomEscala > 1.3
+  const [filtroAbertoEm, setFiltroAbertoEm] = useState<number | null>(null)
+  const [dicaFiltro, setDicaFiltro] = useState(false)
+  if (!zoomAlto && filtroAbertoEm !== null) setFiltroAbertoEm(null)
+  const filtroVisivel = !zoomAlto || filtroAbertoEm !== null
+  const { ref: filtroRef, altura: filtroAltura } = useScaledHeight(zoomEscala, filtroVisivel)
   const [showCalendar, setShowCalendar] = useState(false)
   const [showCompararCalendar, setShowCompararCalendar] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
@@ -290,6 +298,41 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   }
 
   useEffect(() => {
+    if (!zoomAlto || filtroAbertoEm !== null) return
+
+    let ultimo = window.scrollY
+    let timer: ReturnType<typeof setTimeout> | null = null
+
+    function aoRolar() {
+      const y = window.scrollY
+      const subindo = y < ultimo - 2
+      const descendo = y > ultimo + 2
+      ultimo = y
+
+      if (y < 24) {
+        if (timer) clearTimeout(timer)
+        setDicaFiltro(true)
+        return
+      }
+      if (subindo) {
+        if (timer) clearTimeout(timer)
+        setDicaFiltro(true)
+        timer = setTimeout(() => setDicaFiltro(false), 4500)
+      } else if (descendo) {
+        if (timer) clearTimeout(timer)
+        setDicaFiltro(false)
+      }
+    }
+
+    aoRolar()
+    window.addEventListener('scroll', aoRolar, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', aoRolar)
+      if (timer) clearTimeout(timer)
+    }
+  }, [zoomAlto, filtroAbertoEm])
+
+  useEffect(() => {
     function handleClick(e: MouseEvent) {
       const target = e.target as Node
 
@@ -362,7 +405,41 @@ function parseLocalDate(dateString?: string) {
         <div className="flex flex-col items-stretch justify-between gap-3 tablet:flex-row tablet:items-start tablet:gap-6">
 
           <div className="flex-1 space-y-4">
-            <h1 className="text-3xl font-black tracking-[-0.06em] mobile-h:text-4xl laptop:text-5xl">{title}</h1>
+            <motion.p
+              key={`eyebrow-${title}`}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--muted-foreground)]"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-[#A855F7] shadow-[0_0_10px_#A855F7]" />
+              Painel Criare
+            </motion.p>
+            <div className="relative -mt-1">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute -left-6 top-1/2 h-24 w-72 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.28),transparent_70%)]"
+                style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
+              />
+              <motion.h1
+                key={title}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="relative inline-block bg-gradient-to-r from-[#60A5FA] via-[#C084FC] to-[#F472B6] bg-clip-text pb-1 text-3xl font-black tracking-[-0.05em] text-transparent mobile-h:text-4xl laptop:text-5xl"
+                style={{ backgroundSize: '200% 100%', animation: 'text-shimmer 6s ease-in-out infinite' }}
+              >
+                {title}
+              </motion.h1>
+              <motion.span
+                key={`linha-${title}`}
+                aria-hidden
+                initial={{ width: 0 }}
+                animate={{ width: 64 }}
+                transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
+                className="mt-1 block h-[3px] rounded-full bg-gradient-to-r from-[#3B82F6] via-[#A855F7] to-[#EC4899]"
+              />
+            </div>
           </div>
 <div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
             <button
@@ -561,7 +638,7 @@ function parseLocalDate(dateString?: string) {
   {statusIndicator}
 </div>
 
-{!isProtocolosPage && (
+{!isProtocolosPage && filtroVisivel && (
 <div
   style={
     zoomEscala === 1 || !filtroAltura
@@ -583,6 +660,15 @@ function parseLocalDate(dateString?: string) {
   }
 >
     <div className="relative flex flex-wrap items-start gap-x-8 gap-y-4">
+      {zoomAlto && (
+        <button
+          type="button"
+          onClick={() => setFiltroAbertoEm(null)}
+          className="absolute right-0 top-0 flex items-center gap-1 rounded-full border border-[color:var(--border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]"
+        >
+          <X size={12} /> Ocultar filtro
+        </button>
+      )}
       <div className="min-w-0">
         <p className={rotuloFiltro}>
           <CalendarDays size={14} className="text-[var(--accent)]" />
@@ -935,6 +1021,24 @@ function parseLocalDate(dateString?: string) {
 )}
           </div>
 
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-40 flex justify-center">
+        <AnimatePresence>
+          {zoomAlto && filtroAbertoEm === null && dicaFiltro && !isProtocolosPage && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setFiltroAbertoEm(zoomEscala)}
+              className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-white/10 bg-[var(--card)]/80 px-3.5 py-1.5 text-[12px] font-medium text-[var(--muted-foreground)] shadow-lg backdrop-blur-md transition-colors hover:text-[var(--foreground)]"
+            >
+              <ChevronDown size={13} className="animate-bounce" />
+              clique para visualizar o filtro
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
     </header>
   )
 }

@@ -15,7 +15,7 @@ import { PROJECAO_METRICAS, METRICAS_PRINCIPAIS, ICONES_METRICA, FOTOS_MEDICO } 
 import { calcularPercentual } from './utils'
 import { useFilters } from '@/store/use-filters'
 
-type MedicoChave = 'rodolpho' | 'breno' | 'claudia'
+export type MedicoChave = 'rodolpho' | 'breno' | 'claudia'
 
 type ProjecaoMetricas = {
   seguidores: number
@@ -39,7 +39,7 @@ type MesProjecao = {
   atual: Partial<ProjecaoMetricas> | null
 }
 
-type ProjecaoPorMedico = Record<MedicoChave, { nome: string; meses: MesProjecao[] }>
+export type ProjecaoPorMedico = Record<MedicoChave, { nome: string; meses: MesProjecao[] }>
 
 const ORDEM_MES: Record<string, number> = {
   Janeiro: 1,
@@ -56,7 +56,7 @@ const ORDEM_MES: Record<string, number> = {
   Dezembro: 12,
 }
 
-const NOME_MES: Record<number, string> = Object.fromEntries(
+export const NOME_MES: Record<number, string> = Object.fromEntries(
   Object.entries(ORDEM_MES).map(([nome, ordem]) => [ordem, nome])
 )
 
@@ -88,7 +88,7 @@ function parseLocalDate(dateString?: string) {
   return new Date(ano, mes - 1, dia)
 }
 
-function resolverOrdemMes(periodo: string, dataInicio?: string): number {
+export function resolverOrdemMes(periodo: string, dataInicio?: string): number {
   if (periodo === 'personalizado') {
     const data = parseLocalDate(dataInicio)
     if (data) return data.getMonth() + 1
@@ -104,7 +104,7 @@ function resolverOrdemMes(periodo: string, dataInicio?: string): number {
 }
 
 // Escala de status: >=95 excelente · 75-94 bom · 50-74 abaixo da meta · <50 muito abaixo.
-function tierDoPercent(percent: number | null) {
+export function tierDoPercent(percent: number | null) {
   if (percent === null) {
     return { cor: 'var(--muted-foreground)', label: 'Sem dados' }
   }
@@ -120,7 +120,7 @@ function mediaPercentual(valores: (number | null)[]): number | null {
   return validos.reduce((acc, v) => acc + v, 0) / validos.length
 }
 
-type Kpi = {
+export type Kpi = {
   chave: MetricaChave
   label: string
   meta: number
@@ -235,7 +235,7 @@ function InsightTile({
   )
 }
 
-function construirInsights(kpis: Kpi[]) {
+export function construirInsights(kpis: Kpi[]) {
   const comDados = kpis.filter((k) => k.atual !== null && k.percent !== null)
   if (comDados.length === 0) return { desafio: null as string | null, destaque: null as string | null }
 

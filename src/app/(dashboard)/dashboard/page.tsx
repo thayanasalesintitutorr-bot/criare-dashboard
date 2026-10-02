@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 import { useSetPageHeader } from '@/store/use-page-header'
-import { ProjecaoMedicosResumoCard } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
 import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-tile'
 import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-primeira-mensagem-card'
 import { deepEqual } from '@/lib/deep-equal'
@@ -1304,9 +1303,9 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           </div>
         </section>
 
-        {medicosSnapshot.length > 0 && <MedicosPremium medicos={medicosSnapshot} />}
-
-        <ProjecaoMedicosResumoCard periodo={periodo} dataInicio={dataInicio} />
+        {medicosSnapshot.length > 0 && (
+          <MedicosPremium medicos={medicosSnapshot} periodo={periodo} dataInicio={dataInicio} />
+        )}
 
         <OrigensPrimeiraMensagemCard
           origens={origens}

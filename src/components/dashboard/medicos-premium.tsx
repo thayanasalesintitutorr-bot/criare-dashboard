@@ -2,8 +2,11 @@
 
 import { useRef, useState, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, UserRound, TrendingUp, TrendingDown } from 'lucide-react'
+import { ChevronLeft, ChevronRight, UserRound, TrendingUp, TrendingDown, Target, Sparkles } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
+import { useProjecaoMedicos } from '@/components/marketing/projecao-medicos/use-projecao-medicos'
+import { construirInsights, tierDoPercent, type MedicoChave } from '@/components/marketing/projecao-medicos/projecao-medicos-resumo-card'
+import { PROJECAO_METRICAS, ICONES_METRICA } from '@/components/marketing/projecao-medicos/constants'
 
 export type MedicoPremium = {
   nome: string
@@ -26,6 +29,7 @@ export type MedicoPremium = {
   taxaConversao?: number
   propostasEnviadas?: number
   vendasFechadas?: number
+  meta?: number
 }
 
 function formatMoney(v: number) {
@@ -53,6 +57,14 @@ function getAvatar(nome: string) {
   if (n.includes('ALBA')) return '/medicos/alba.png'
   if (n.includes('JOANA')) return '/medicos/joana.jpeg'
   if (n.includes('CATHARINA')) return '/medicos/catharina.jpeg'
+  return null
+}
+
+function chaveMedico(nome: string): MedicoChave | null {
+  const n = nome.toUpperCase()
+  if (n.includes('RODOLPHO')) return 'rodolpho'
+  if (n.includes('BRENO')) return 'breno'
+  if (n.includes('CLAUDIA')) return 'claudia'
   return null
 }
 
@@ -197,8 +209,17 @@ function Tile({
   )
 }
 
-export function MedicosPremium({ medicos }: { medicos: MedicoPremium[] }) {
+export function MedicosPremium({
+  medicos,
+  periodo,
+  dataInicio,
+}: {
+  medicos: MedicoPremium[]
+  periodo: string
+  dataInicio?: string
+}) {
   const { viewMode } = useFilters()
+  const projecoes = useProjecaoMedicos(periodo, dataInicio)
   const apresentacao = viewMode === 'apresentacao'
   const [indice, setIndice] = useState(0)
   const direcao = useRef(1)
@@ -230,6 +251,18 @@ export function MedicosPremium({ medicos }: { medicos: MedicoPremium[] }) {
   const metaOk = metaPct >= 100
   const ocupacao = m.capacidadeAgenda ?? 0
   const conv = m.taxaConversao || 0
+  const fat = m.faturamentoConsolidado || 0
+  const metaValor = m.meta || 0
+  const chave = chaveMedico(m.nome)
+  const proj = chave ? projecoes[chave] : undefined
+  const mediaProj = proj
+    ? (() => {
+        const v = proj.kpis.map((k) => k.percent).filter((x): x is number => x !== null)
+        return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null
+      })()
+    : null
+  const tierProj = tierDoPercent(mediaProj)
+  const insights = proj ? construirInsights(proj.kpis) : null
 
   return (
     <section className="fx-card relative overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/60 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
@@ -318,7 +351,7 @@ export function MedicosPremium({ medicos }: { medicos: MedicoPremium[] }) {
         </div>
       )}
 
-      <div className="relative @3xl:min-h-[400px]">
+      <div className="relative">
         <AnimatePresence mode="wait" initial={false} custom={direcao.current}>
           <motion.div
             key={m.nome}
@@ -377,6 +410,41 @@ export function MedicosPremium({ medicos }: { medicos: MedicoPremium[] }) {
                     {metaOk ? 'Meta batida' : metaPct >= 50 ? 'No caminho' : 'Abaixo da meta'}
                   </p>
                 </div>
+              </div>
+
+              <div className="relative mt-3 w-full rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3 text-left">
+                <p className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+                  <Target size={13} className="text-[var(--accent)]" />
+                  Meta individual
+                </p>
+                {metaValor > 0 ? (
+                  <>
+                    <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3">
+                      <span className={`${apresentacao ? 'text-[30px]' : 'text-[24px]'} font-black tracking-tight text-[var(--foreground)]`}>
+                        {formatMoneyShort(metaValor)}
+                      </span>
+                      <span
+                        className="text-[13px] font-bold"
+                        style={{ color: fat >= metaValor ? 'var(--success)' : 'var(--muted-foreground)' }}
+                      >
+                        {fat >= metaValor
+                          ? `Superou em ${formatMoneyShort(fat - metaValor)}`
+                          : `Faltam ${formatMoneyShort(metaValor - fat)}`}
+                      </span>
+                    </div>
+                    <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: `linear-gradient(90deg, #3B82F6, ${corStatus(metaOk, metaPct >= 50 && !metaOk)})` }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(metaPct, 100)}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <p className="mt-1 text-[14px] font-medium text-[var(--muted-foreground)]">Sem meta definida no período</p>
+                )}
               </div>
             </div>
 
@@ -457,6 +525,76 @@ export function MedicosPremium({ medicos }: { medicos: MedicoPremium[] }) {
                   ))}
                 </div>
               </div>
+
+              {proj && (
+                <div className="rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.05] to-white/[0.015] p-4">
+                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <p className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">
+                      <TrendingUp size={14} className="text-[var(--accent)]" />
+                      Projeção de redes sociais{proj.nomeMes ? ` · ${proj.nomeMes}` : ''}
+                    </p>
+                    <span
+                      className="rounded-full px-3 py-1 text-[12px] font-bold"
+                      style={{ color: tierProj.cor, background: `color-mix(in srgb, ${tierProj.cor} 14%, transparent)` }}
+                    >
+                      {mediaProj !== null ? `${Math.round(mediaProj)}% · ` : ''}
+                      {tierProj.label}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 @xl:grid-cols-3">
+                    {proj.kpis.map((k) => {
+                      const metrica = PROJECAO_METRICAS.find((x) => x.chave === k.chave)!
+                      const Icone = ICONES_METRICA[k.chave]
+                      const tier = tierDoPercent(k.percent)
+                      const largura = k.percent === null ? 0 : Math.min(Math.max(k.percent, 3), 100)
+                      return (
+                        <div key={k.chave} className="min-w-0 rounded-2xl border border-white/[0.07] bg-white/[0.035] px-4 py-3">
+                          <p className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+                            <Icone size={13} />
+                            {metrica.label}
+                          </p>
+                          <p className="mt-1 text-[28px] font-black leading-tight" style={{ color: tier.cor }}>
+                            {k.percent !== null ? `${Math.round(k.percent)}%` : '—'}
+                          </p>
+                          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                            <motion.div
+                              className="h-full rounded-full"
+                              style={{ background: tier.cor }}
+                              initial={{ width: 0 }}
+                              animate={{ width: `${largura}%` }}
+                              transition={{ duration: 0.7, ease: 'easeOut' }}
+                            />
+                          </div>
+                          <p className="mt-2 flex items-baseline justify-between gap-2 text-[13px]">
+                            <span className="font-bold text-[var(--foreground)]">
+                              {k.atual !== null ? metrica.formatar(k.atual) : 'Sem dados'}
+                            </span>
+                            <span className="font-semibold text-[var(--muted-foreground)]">Meta {metrica.formatar(k.meta)}</span>
+                          </p>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {insights && (insights.destaque || insights.desafio) && (
+                    <div className="mt-3 grid gap-2 @xl:grid-cols-2">
+                      {insights.destaque && (
+                        <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--success)]/25 bg-[var(--success)]/10 px-3.5 py-2.5">
+                          <Sparkles size={15} className="mt-0.5 shrink-0 text-[var(--success)]" />
+                          <p className="text-[13px] font-semibold leading-snug text-[var(--foreground)]">{insights.destaque}</p>
+                        </div>
+                      )}
+                      {insights.desafio && (
+                        <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--warning)]/25 bg-[var(--warning)]/10 px-3.5 py-2.5">
+                          <TrendingDown size={15} className="mt-0.5 shrink-0 text-[var(--warning)]" />
+                          <p className="text-[13px] font-semibold leading-snug text-[var(--foreground)]">{insights.desafio}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
