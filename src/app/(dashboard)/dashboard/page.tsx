@@ -27,6 +27,7 @@ type EvolucaoDiariaItem = {
 type OrigemItem = {
   nome: string
   quantidade: number
+  detalhes?: { nome: string; quantidade: number }[]
 }
 
 type DashboardResponse = {
