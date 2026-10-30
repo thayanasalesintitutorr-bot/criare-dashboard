@@ -34,8 +34,8 @@ type Serie = {
 
 const SERIES: Serie[] = [
   { chave: 'atendimentos', titulo: 'Atendimento por dia', legenda: 'consultas atendidas', Icone: Stethoscope, cor: 'var(--accent)', dinheiro: false },
-  { chave: 'faturamento', titulo: 'Evolução de faturamento', legenda: 'faturamento de consultas', Icone: CircleDollarSign, cor: 'var(--success)', dinheiro: true },
-  { chave: 'vendas', titulo: 'Vendas por dia', legenda: 'valor vendido', Icone: Handshake, cor: '#A855F7', dinheiro: true },
+  { chave: 'faturamento', titulo: 'Consulta', legenda: 'faturamento de consultas', Icone: CircleDollarSign, cor: 'var(--success)', dinheiro: true },
+  { chave: 'vendas', titulo: 'Procedimentos', legenda: 'valor vendido', Icone: Handshake, cor: '#A855F7', dinheiro: true },
 ]
 
 // Um único card com os 3 indicadores diários (atendimentos, faturamento de

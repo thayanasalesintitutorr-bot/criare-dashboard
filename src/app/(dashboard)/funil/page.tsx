@@ -473,7 +473,7 @@ const ticketMedioConsultaComReabord =
 
    <div className="min-w-0 overflow-hidden rounded-[24px] border border-[color:var(--border)] bg-[var(--metric-card)] shadow-[var(--card-shadow)] p-4">
   <h3 className={`mb-3 ${isApresentacao ? 'text-[28px]' : 'text-[18px]'} font-black text-[var(--foreground)]`}>
-    Evolução de faturamento
+    Consulta
   </h3>
 
   <div className="mt-4 h-[170px] w-full">
