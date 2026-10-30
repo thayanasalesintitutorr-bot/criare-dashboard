@@ -14,8 +14,7 @@ import { PrimeiraMensagemTile } from '@/components/marketing/primeira-mensagem-t
 import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-primeira-mensagem-card'
 import { deepEqual } from '@/lib/deep-equal'
 import { AnimatedBackdrop } from '@/components/dashboard/animated-backdrop'
-import { MedicosPremium } from '@/components/dashboard/medicos-premium'
-import { montarMedicosSnapshot } from '@/lib/medicos-snapshot'
+import { DesempenhoDiarioCard } from '@/components/dashboard/desempenho-diario-card'
 import { Slide, SlideDeck } from '@/components/dashboard/slides'
 import { PerspectivaMeta } from '@/components/dashboard/perspectiva-meta'
 import { useModoSlides } from '@/store/use-zoom'
@@ -186,6 +185,10 @@ conveniosConsulta?: {
   }
 
   evolucaoDiaria?: EvolucaoDiariaItem[]
+  painelAtendimento?: {
+    atendimentoPorDia?: { data: string; label: string; quantidade: number }[]
+    evolucaoFaturamento?: { data: string; label: string; valor: number }[]
+  }
   origens?: OrigemItem[]
   primeiraMensagem?: {
     total: number
@@ -686,10 +689,22 @@ export default function DashboardPage() {
   const primeiraMensagemOrigens = data?.primeiraMensagem?.origens || []
   const experienciaCliente = data?.kpis?.experienciaCliente
   const comparativo = data?.comparativo
-  const consultaPorMedico = data?.consultaPorMedico || []
-  const vendasPorMedico = data?.vendasPorMedico || []
 
-  const medicosSnapshot = montarMedicosSnapshot(consultaPorMedico, vendasPorMedico)
+  // Atendimento por dia + faturamento de consultas + vendas, no mesmo eixo de
+  // dias — só faz sentido pra períodos com mais de um dia (semana/mês/personalizado).
+  const mostrarDesempenho =
+    periodo === 'semana' ||
+    periodo === 'mes-atual' ||
+    periodo === 'mes-passado' ||
+    (periodo === 'personalizado' && !!dataInicio && !!dataFim && dataInicio !== dataFim)
+
+  const diasDesempenho = (data?.evolucaoDiaria || []).map((dia, i) => ({
+    data: dia.data,
+    label: dia.label,
+    atendimentos: data?.painelAtendimento?.atendimentoPorDia?.[i]?.quantidade ?? 0,
+    faturamento: data?.painelAtendimento?.evolucaoFaturamento?.[i]?.valor ?? 0,
+    vendas: dia.vendasValor || 0,
+  }))
   if (loading) {
     return (
       <div className="grid gap-6 @xl:grid-cols-4">
@@ -1248,9 +1263,9 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
         </section>
         </Slide>
 
-        {medicosSnapshot.length > 0 && (
+        {mostrarDesempenho && (
           <Slide>
-            <MedicosPremium medicos={medicosSnapshot} periodo={periodo} dataInicio={dataInicio} />
+            <DesempenhoDiarioCard dias={diasDesempenho} />
           </Slide>
         )}
 

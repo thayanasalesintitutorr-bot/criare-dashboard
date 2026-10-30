@@ -127,24 +127,10 @@ function Avatar({ nome, tamanho, anel = false }: { nome: string; tamanho: number
     </div>
   )
   if (!anel) return miolo
+  // Moldura simples (sem brilho nem anel girando)
   return (
-    <div className="relative">
-      <div
-        aria-hidden
-        className="absolute -inset-[5px] rounded-full opacity-90 blur-[10px]"
-        style={{ background: 'conic-gradient(from 0deg,#3B82F6,#A855F7,#EC4899,#3B82F6)' }}
-      />
-      <div
-        className="relative rounded-full p-[3px]"
-        style={{
-          background: 'conic-gradient(from 0deg,#60A5FA,#C084FC,#F472B6,#60A5FA)',
-          animation: 'spin-slow 10s linear infinite',
-        }}
-      >
-        <div className="rounded-full bg-[var(--card)] p-[3px]" style={{ animation: 'spin-slow-reverse 10s linear infinite' }}>
-          {miolo}
-        </div>
-      </div>
+    <div className="rounded-full border-[3px] border-[var(--accent)]/40 bg-[var(--card)] p-[3px]">
+      {miolo}
     </div>
   )
 }
@@ -379,11 +365,6 @@ export function MedicosPremium({
           >
             {/* Perfil + meta: no formato vertical vira um cabeçalho compacto */}
             <div className="relative flex flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 @3xl:items-center @3xl:px-5 @3xl:pb-5 @3xl:pt-7 @3xl:text-center">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -top-16 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full opacity-60"
-                style={{ background: 'radial-gradient(circle, rgba(124,108,240,0.45), transparent 70%)' }}
-              />
               <div className="relative flex items-center gap-4 @3xl:flex-col @3xl:gap-0">
                 <div className="shrink-0 @3xl:hidden">
                   <Avatar nome={m.nome} tamanho={apresentacao ? 96 : 80} anel />
