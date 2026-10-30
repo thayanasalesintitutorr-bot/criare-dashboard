@@ -15,6 +15,9 @@ import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-prim
 import { deepEqual } from '@/lib/deep-equal'
 import { AnimatedBackdrop } from '@/components/dashboard/animated-backdrop'
 import { MedicosPremium } from '@/components/dashboard/medicos-premium'
+import { Slide, SlideDeck } from '@/components/dashboard/slides'
+import { PerspectivaMeta } from '@/components/dashboard/perspectiva-meta'
+import { useModoSlides } from '@/store/use-zoom'
 
 type EvolucaoDiariaItem = {
   data: string
@@ -334,6 +337,7 @@ function GroupCard({
   const isApresentacao = viewMode === 'apresentacao'
 
   return (
+    <Slide>
     <section className={`relative z-0 min-w-0 overflow-hidden hover:z-20 ${isApresentacao ? 'p-6' : viewMode === 'iphone' ? 'p-4' : 'px-4 py-2'} ${cardBg()}`}>
       <div className={`${isApresentacao ? 'mb-5' : viewMode === 'iphone' ? 'mb-3' : 'mb-2'} flex items-center gap-3`}>
   <div className={`flex items-center justify-center rounded-2xl bg-[var(--accent)]/12 text-[var(--accent)] ${isApresentacao ? 'h-14 w-14' : viewMode === 'iphone' ? 'h-10 w-10' : 'h-9 w-9'}`}>
@@ -352,6 +356,7 @@ function GroupCard({
       </div>
       <div className={isApresentacao ? 'space-y-7' : viewMode === 'iphone' ? 'space-y-3' : 'space-y-1'}>{children}</div>
     </section>
+    </Slide>
   )
 }
 
@@ -601,6 +606,7 @@ function GoalMetric({
 
 export default function DashboardPage() {
   const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar, compararInicio, compararFim } = useFilters()
+  const modoSlides = useModoSlides()
 
   const [data, setData] = useState<DashboardResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -850,11 +856,14 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
       {/* Fundo vivo, mesma pegada da entrada/login (decorativo). */}
       <AnimatedBackdrop fatos={fatosFundo} />
 
+     <SlideDeck>
      <div className="relative space-y-3">
 
     <div
   className={`grid gap-3 ${
-    viewMode === 'apresentacao' || viewMode === 'iphone'
+    modoSlides
+  ? 'grid-cols-1'
+  : viewMode === 'apresentacao' || viewMode === 'iphone'
   ? 'grid-cols-1'
   : 'grid-cols-1 @md:grid-cols-2 @xl:grid-cols-4'
   }`}
@@ -1178,6 +1187,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
 </GroupCard>
         </div>
 
+        <Slide>
         <section className={`px-4 py-2 ${cardBg()}`}>
           <div className="mb-3 flex items-center gap-3">
   <div
@@ -1204,7 +1214,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   </h3>
 </div>
 
-           <div className="grid grid-cols-1 gap-2">
+           <div className="grid grid-cols-1 gap-2 @3xl:grid-cols-3">
             <div className={`space-y-1 ${metricCardBg()}`}>
   <SimpleMetric
     label="Quantidade total de vendas"
@@ -1311,20 +1321,36 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   </div>
 </div>
           </div>
+
+          {periodo === 'mes-atual' && (
+            <div className="mt-2 pb-2">
+              <PerspectivaMeta
+                meta={metaVendas}
+                realizado={consolidado?.valorVendas || 0}
+                ticketMedio={consolidado?.ticketMedio || 0}
+              />
+            </div>
+          )}
         </section>
+        </Slide>
 
         {medicosSnapshot.length > 0 && (
-          <MedicosPremium medicos={medicosSnapshot} periodo={periodo} dataInicio={dataInicio} />
+          <Slide>
+            <MedicosPremium medicos={medicosSnapshot} periodo={periodo} dataInicio={dataInicio} />
+          </Slide>
         )}
 
+        <Slide>
         <OrigensPrimeiraMensagemCard
           origens={origens}
           origensTotal={origensTotal}
           primeiraMensagemOrigens={primeiraMensagemOrigens}
           primeiraMensagemTotal={primeiraMensagemTotal}
         />
+        </Slide>
 
       </div>
+     </SlideDeck>
     </div>
   )
 }

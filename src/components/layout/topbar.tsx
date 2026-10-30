@@ -30,7 +30,7 @@ import { useTheme } from 'next-themes'
 import { useFilters } from '../../store/use-filters'
 import { useAuth } from '../../store/use-auth'
 import { useSessionRole } from '../../store/use-session-role'
-import { useZoom, NIVEIS_ZOOM } from '../../store/use-zoom'
+import { useZoom, NIVEIS_ZOOM, ZOOM_SLIDES } from '../../store/use-zoom'
 import { useScaledHeight } from '../../store/use-scaled-height'
 import { useRouter, usePathname } from 'next/navigation'
 import { DayPicker } from 'react-day-picker'
@@ -140,12 +140,14 @@ export function Topbar({ title, statusIndicator }: { title: string; statusIndica
   const isProtocolosPage = pathname === '/conversas'
   const { role: sessao, fetchRole } = useSessionRole()
   const { indice: zoomIndice, aumentar: zoomAumentar, diminuir: zoomDiminuir, resetar: zoomResetar } = useZoom()
-  const zoomEscala = NIVEIS_ZOOM[zoomIndice]
+  const zoomReal = NIVEIS_ZOOM[zoomIndice]
+  // No modo "um card por tela" (350%+) o cabeçalho fica no tamanho normal
+  const zoomEscala = zoomReal >= ZOOM_SLIDES ? 1 : zoomReal
 
   const [mounted, setMounted] = useState(false)
   // Com zoom alto (acima de 130%) o filtro ocupa espaço demais e some; fica
   // só uma dica discreta que aparece quando a pessoa rola pra cima.
-  const zoomAlto = zoomEscala > 1.3
+  const zoomAlto = zoomReal > 1.3
   const [filtroAbertoEm, setFiltroAbertoEm] = useState<number | null>(null)
   const [dicaFiltro, setDicaFiltro] = useState(false)
   if (!zoomAlto && filtroAbertoEm !== null) setFiltroAbertoEm(null)

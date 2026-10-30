@@ -490,3 +490,13 @@ body {
     transform: rotate(-360deg);
   }
 }
+
+/* Modo "um card por tela" (zoom 350%+): ao rolar, a tela encaixa suavemente no
+   card mais próximo, sem travar a rolagem livre. */
+html.slides-snap {
+  scroll-snap-type: y proximity;
+}
+html.slides-snap [data-slide] {
+  scroll-snap-align: start;
+  scroll-margin-top: 12px;
+}

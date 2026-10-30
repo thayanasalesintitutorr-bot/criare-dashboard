@@ -376,84 +376,93 @@ export function MedicosPremium({
             }}
             className="grid gap-5 @3xl:grid-cols-[minmax(250px,300px)_1fr]"
           >
-            {/* Perfil + meta */}
-            <div className="relative flex flex-col items-center overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.06] to-white/[0.02] px-5 pb-5 pt-7 text-center">
+            {/* Perfil + meta: no formato vertical vira um cabeçalho compacto */}
+            <div className="relative flex flex-col overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-4 @3xl:items-center @3xl:px-5 @3xl:pb-5 @3xl:pt-7 @3xl:text-center">
               <div
                 aria-hidden
                 className="pointer-events-none absolute -top-16 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full opacity-60"
                 style={{ background: 'radial-gradient(circle, rgba(124,108,240,0.45), transparent 70%)' }}
               />
-              <div className="relative">
-                <Avatar nome={m.nome} tamanho={apresentacao ? 150 : 112} anel />
-              </div>
-              <h4 className={`relative mt-4 font-black tracking-tight text-[var(--foreground)] ${apresentacao ? 'text-[30px]' : 'text-[21px]'}`}>
-                {titulo(m.nome)}
-              </h4>
-              <div className={`relative mt-1.5 flex flex-wrap items-center justify-center gap-2 font-medium text-[var(--muted-foreground)] ${apresentacao ? 'text-[17px]' : 'text-[14px]'}`}>
-                <span>{m.atendimentos ?? 0} atend.</span>
-                <Delta atual={m.atendimentos} anterior={m.atendimentosAnterior} />
-                {m.procedimentos !== undefined && (
-                  <span>· {m.procedimentos} procedimento{m.procedimentos === 1 ? '' : 's'}</span>
-                )}
-              </div>
-
-              <div className="relative mt-5 flex w-full items-center justify-center gap-4 rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3">
-                <Anel valor={metaPct} cor={corMeta} tamanho={apresentacao ? 96 : 76}>
-                  <span
-                    className={`${apresentacao ? 'text-[24px]' : 'text-[19px]'} font-black leading-none`}
-                    style={{ color: corMeta }}
-                  >
-                    {Math.round(metaPct)}%
-                  </span>
-                </Anel>
-                <div className="text-left">
-                  <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Alcance da meta</p>
-                  <p className={`${apresentacao ? 'text-[18px]' : 'text-[15px]'} font-semibold text-[var(--foreground)]`}>
-                    {metaOk ? 'Meta batida' : 'Meta não atingida'}
-                  </p>
+              <div className="relative flex items-center gap-4 @3xl:flex-col @3xl:gap-0">
+                <div className="shrink-0 @3xl:hidden">
+                  <Avatar nome={m.nome} tamanho={apresentacao ? 96 : 80} anel />
+                </div>
+                <div className="hidden shrink-0 @3xl:block">
+                  <Avatar nome={m.nome} tamanho={apresentacao ? 150 : 112} anel />
+                </div>
+                <div className="min-w-0 flex-1 @3xl:flex-none">
+                  <h4 className={`font-black tracking-tight text-[var(--foreground)] @3xl:mt-4 ${apresentacao ? 'text-[30px]' : 'text-[22px]'}`}>
+                    {titulo(m.nome)}
+                  </h4>
+                  <div className={`mt-1 flex flex-wrap items-center gap-2 font-medium text-[var(--muted-foreground)] @3xl:justify-center ${apresentacao ? 'text-[17px]' : 'text-[15px]'}`}>
+                    <span>{m.atendimentos ?? 0} atend.</span>
+                    <Delta atual={m.atendimentos} anterior={m.atendimentosAnterior} />
+                    {m.procedimentos !== undefined && (
+                      <span>· {m.procedimentos} procedimento{m.procedimentos === 1 ? '' : 's'}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="relative mt-3 w-full rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3 text-left">
-                <p className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
-                  <Target size={13} className="text-[var(--accent)]" />
-                  Meta individual
-                </p>
-                {metaValor > 0 ? (
-                  <>
-                    <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3">
-                      <span className={`${apresentacao ? 'text-[32px]' : 'text-[26px]'} font-black tracking-tight text-[var(--foreground)]`}>
-                        {formatMoneyShort(metaValor)}
-                      </span>
-                      <span className={`${apresentacao ? 'text-[20px]' : 'text-[17px]'} font-extrabold`} style={{ color: corMeta }}>
-                        {metaOk
-                          ? `Superou em ${formatMoneyShort(fat - metaValor)}`
-                          : `Faltam ${formatMoneyShort(faltam)}`}
-                      </span>
-                    </div>
-                    <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
-                      <motion.div
-                        className="h-full rounded-full"
-                        style={{ background: corMeta, boxShadow: `0 0 12px ${corMeta}` }}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(metaPct, 100)}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <p className="mt-1 text-[14px] font-medium text-[var(--muted-foreground)]">Sem meta definida no período</p>
-                )}
+              <div className="relative mt-4 grid grid-cols-1 gap-3 @lg:grid-cols-2 @3xl:mt-5 @3xl:w-full @3xl:grid-cols-1">
+                <div className="flex w-full items-center justify-center gap-4 rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3">
+                  <Anel valor={metaPct} cor={corMeta} tamanho={apresentacao ? 96 : 76}>
+                    <span
+                      className={`${apresentacao ? 'text-[24px]' : 'text-[19px]'} font-black leading-none`}
+                      style={{ color: corMeta }}
+                    >
+                      {Math.round(metaPct)}%
+                    </span>
+                  </Anel>
+                  <div className="text-left">
+                    <p className="text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">Alcance da meta</p>
+                    <p className={`${apresentacao ? 'text-[18px]' : 'text-[16px]'} font-semibold text-[var(--foreground)]`}>
+                      {metaOk ? 'Meta batida' : 'Meta não atingida'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="w-full rounded-2xl border border-white/[0.07] bg-black/10 px-4 py-3 text-left">
+                  <p className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-[var(--muted-foreground)]">
+                    <Target size={13} className="text-[var(--accent)]" />
+                    Meta individual
+                  </p>
+                  {metaValor > 0 ? (
+                    <>
+                      <div className="mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                        <span className={`${apresentacao ? 'text-[32px]' : 'text-[28px]'} font-black tracking-tight text-[var(--foreground)]`}>
+                          {formatMoneyShort(metaValor)}
+                        </span>
+                        <span className={`${apresentacao ? 'text-[20px]' : 'text-[18px]'} font-extrabold`} style={{ color: corMeta }}>
+                          {metaOk
+                            ? `Superou em ${formatMoneyShort(fat - metaValor)}`
+                            : `Faltam ${formatMoneyShort(faltam)}`}
+                        </span>
+                      </div>
+                      <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ background: corMeta, boxShadow: `0 0 12px ${corMeta}` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(metaPct, 100)}%` }}
+                          transition={{ duration: 0.8, ease: 'easeOut' }}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <p className="mt-1 text-[14px] font-medium text-[var(--muted-foreground)]">Sem meta definida no período</p>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Números */}
             <div className="min-w-0 space-y-3">
-              <div className="grid grid-cols-1 gap-3 @xl:grid-cols-[1.6fr_1fr]">
+              <div className="grid grid-cols-1 gap-3 @xl:grid-cols-[1.6fr_1fr] @3xl:grid-cols-1 @4xl:grid-cols-[1.6fr_1fr]">
                 <div className="relative overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-r from-[#3B82F6]/12 via-[#7C6CF0]/10 to-[#A855F7]/12 px-5 py-4">
                   <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--muted-foreground)]">Faturamento consolidado</p>
                   <div className="mt-1 flex flex-wrap items-end gap-3">
-                    <span className={`bg-gradient-to-r from-[#93C5FD] via-[#C4B5FD] to-[#F9A8D4] bg-clip-text font-black leading-none tracking-tight text-transparent ${apresentacao ? 'text-[68px]' : 'text-[48px]'}`}>
+                    <span className={`bg-gradient-to-r from-[#93C5FD] via-[#C4B5FD] to-[#F9A8D4] bg-clip-text font-black leading-none tracking-tight text-transparent ${apresentacao ? 'text-[68px]' : 'text-[44px] @4xl:text-[48px]'}`}>
                       {formatMoneyShort(m.faturamentoConsolidado || 0)}
                     </span>
                     <Delta atual={m.faturamentoConsolidado} anterior={m.faturamentoConsolidadoAnterior} />
@@ -468,7 +477,7 @@ export function MedicosPremium({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 @4xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 @xl:grid-cols-4 @3xl:grid-cols-2 @4xl:grid-cols-4">
                 <Tile label="Ocupação da agenda" apresentacao={apresentacao}
                   extra={
                     !m.agendaSemDados ? (
@@ -547,7 +556,7 @@ export function MedicosPremium({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-3 @xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 @xl:grid-cols-3 @3xl:grid-cols-1 @4xl:grid-cols-3">
                     {proj.kpis.map((k) => {
                       const metrica = PROJECAO_METRICAS.find((x) => x.chave === k.chave)!
                       const Icone = ICONES_METRICA[k.chave]
@@ -583,7 +592,7 @@ export function MedicosPremium({
                   </div>
 
                   {insights && (insights.destaque || insights.desafio) && (
-                    <div className="mt-3 grid gap-2 @xl:grid-cols-2">
+                    <div className="mt-3 grid gap-2 @xl:grid-cols-2 @3xl:grid-cols-1 @4xl:grid-cols-2">
                       {insights.destaque && (
                         <div className="flex items-start gap-2.5 rounded-2xl border border-[var(--success)]/25 bg-[var(--success)]/10 px-3.5 py-2.5">
                           <Sparkles size={15} className="mt-0.5 shrink-0 text-[var(--success)]" />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Funnel, Megaphone, Sparkles } from 'lucide-react'
+import { Funnel, Megaphone, Sparkles } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 
 type DetalheItem = {
@@ -160,6 +160,8 @@ function Rosca({
   )
 }
 
+const TOP_ORIGENS = 10
+
 export function OrigensPrimeiraMensagemCard({
   origens,
   origensTotal,
@@ -173,15 +175,20 @@ export function OrigensPrimeiraMensagemCard({
 }) {
   const { viewMode } = useFilters()
   const isApresentacao = viewMode === 'apresentacao'
-  const [expandido, setExpandido] = useState<string | null>(null)
+  // Hover (ou toque/foco) abre o detalhe de uma origem por vez
+  const [aberto, setAberto] = useState<string | null>(null)
 
-  // Legenda só com as etapas que existem no período
+  // Só as 10 maiores (a lista já vem ordenada por quantidade)
+  const principais = origens.slice(0, TOP_ORIGENS)
+  const maior = Math.max(...principais.map((o) => o.quantidade), 1)
+
+  // Legenda só com as etapas que existem nas origens exibidas
   const presentes = new Set<EtapaKey>()
-  for (const o of origens) for (const e of agruparPorEtapa(o.detalhes)) presentes.add(e.key)
+  for (const o of principais) for (const e of agruparPorEtapa(o.detalhes)) presentes.add(e.key)
 
   return (
-    <section className="fx-card relative overflow-hidden rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/70 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
-      <div className="relative mb-5 flex flex-wrap items-center justify-between gap-4">
+    <section className="fx-card relative rounded-[28px] border border-[color:var(--border)] bg-[var(--card)]/70 p-5 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-6">
+      <div className="relative mb-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div
             className={`flex shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] ${
@@ -197,7 +204,9 @@ export function OrigensPrimeiraMensagemCard({
               Origens dos leads
             </h3>
             <p className={`${isApresentacao ? 'text-[16px]' : 'text-[13.5px]'} text-[var(--muted-foreground)]`}>
-              De onde vêm os leads e em que etapa do funil cada um está
+              {origens.length > TOP_ORIGENS
+                ? `As ${TOP_ORIGENS} principais de ${origens.length} origens · passe o mouse para ver as etapas`
+                : 'Passe o mouse sobre uma origem para ver em que etapa do funil cada lead está'}
             </p>
           </div>
         </div>
@@ -223,181 +232,191 @@ export function OrigensPrimeiraMensagemCard({
         ))}
       </div>
 
-      {origens.length === 0 ? (
+      {principais.length === 0 ? (
         <div className={`relative flex h-[42px] items-center rounded-[18px] border border-[color:var(--border)] px-5 ${isApresentacao ? 'text-[20px]' : 'text-sm'} font-semibold text-[var(--muted-foreground)]`}>
           Sem dados no período
         </div>
       ) : (
-        <div className="relative max-h-[760px] overflow-y-auto pr-1">
-          <div className="grid grid-cols-1 items-start gap-4 @lg:grid-cols-2 @6xl:grid-cols-3">
-            {origens.map((item, idx) => {
-              const etapas = agruparPorEtapa(item.detalhes)
-              const total = item.quantidade || 1
-              const ganhos = etapas.find((e) => e.key === 'ganhou')?.quantidade ?? 0
-              const pctConvertido = (ganhos / total) * 100
-              const presa = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
-              const pctPresa = (presa / total) * 100
-              const aberto = expandido === item.nome
+        <div className="relative space-y-2">
+          {principais.map((item, idx) => {
+            const etapas = agruparPorEtapa(item.detalhes)
+            const total = item.quantidade || 1
+            const ganhos = etapas.find((e) => e.key === 'ganhou')?.quantidade ?? 0
+            const pctConvertido = (ganhos / total) * 100
+            const presa = primeiraMensagemOrigens.find((c) => c.nome === item.nome)?.quantidade ?? 0
+            const pctPresa = (presa / total) * 100
+            const aberta = aberto === item.nome
+            // As últimas linhas abrem o detalhe pra cima, pra não sair do card
+            const paraCima = idx >= Math.ceil(principais.length / 2) && principais.length > 4
+            const estilo = ESTILO_RANK[Math.min(idx, 3)]
 
-              return (
-                <motion.div
-                  key={item.nome}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: Math.min(idx, 12) * 0.04, ease: 'easeOut' }}
+            return (
+              <motion.div
+                key={item.nome}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: idx * 0.04, ease: 'easeOut' }}
+                className={`relative ${aberta ? 'z-30' : 'z-0'}`}
+                onMouseEnter={() => setAberto(item.nome)}
+                onMouseLeave={() => setAberto((a) => (a === item.nome ? null : a))}
+              >
+                <button
+                  type="button"
+                  onClick={() => setAberto(aberta ? null : item.nome)}
+                  onFocus={() => setAberto(item.nome)}
+                  className={`block w-full rounded-[18px] border px-4 py-3 text-left transition-colors ${
+                    aberta ? 'border-white/20 bg-white/[0.07]' : 'border-white/[0.07] bg-white/[0.03]'
+                  }`}
+                  aria-expanded={aberta}
                 >
-                  <div
-                    className={`fx-card-mini group rounded-[21px] border bg-[var(--card)] p-5 transition-colors ${
-                      aberto ? 'border-white/15' : 'border-white/[0.07]'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setExpandido(aberto ? null : item.nome)}
-                      className="block w-full text-left"
-                      aria-expanded={aberto}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-10 min-w-[42px] shrink-0 items-center justify-center rounded-xl px-2 text-[17px] font-extrabold tabular-nums"
+                      style={{ background: estilo.fundo, boxShadow: estilo.brilho, color: estilo.texto }}
+                      title={`${idx + 1}ª origem com mais leads`}
                     >
-                      <div className="mb-3 flex items-start justify-between gap-3">
-                        <div className="flex min-w-0 items-start gap-3">
+                      #{idx + 1}
+                    </span>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-center gap-2">
+                        {ehCampanha(item.nome) && (
                           <span
-                            className={`flex shrink-0 items-center justify-center rounded-xl font-extrabold tabular-nums text-white ${
-                              isApresentacao ? 'h-14 min-w-[56px] px-2 text-[24px]' : 'h-11 min-w-[44px] px-2 text-[18px]'
-                            }`}
-                            style={{
-                              background: ESTILO_RANK[Math.min(idx, 3)].fundo,
-                              boxShadow: ESTILO_RANK[Math.min(idx, 3)].brilho,
-                              color: ESTILO_RANK[Math.min(idx, 3)].texto,
-                            }}
-                            title={`${idx + 1}ª origem com mais leads`}
+                            className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#C4B5FD]"
+                            style={{ background: 'color-mix(in srgb, #A855F7 20%, transparent)', boxShadow: 'inset 0 0 0 1px rgba(192,132,252,0.35)' }}
                           >
-                            #{idx + 1}
+                            <Megaphone size={12} />
+                            Campanha
                           </span>
-                          <div className="min-w-0 pt-0.5">
-                            {ehCampanha(item.nome) && (
-                              <span
-                                className={`mb-1 inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-extrabold uppercase tracking-[0.12em] text-[#C4B5FD] ${
-                                  isApresentacao ? 'text-[13px]' : 'text-[11px]'
-                                }`}
-                                style={{ background: 'color-mix(in srgb, #A855F7 20%, transparent)', boxShadow: 'inset 0 0 0 1px rgba(192,132,252,0.35)' }}
-                              >
-                                <Megaphone size={isApresentacao ? 14 : 12} />
-                                Campanha
-                              </span>
-                            )}
-                            <h4
-                              title={item.nome}
-                              className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} line-clamp-3 min-w-0 break-words font-bold uppercase leading-snug text-[var(--foreground)]`}
-                            >
-                              {formatarOrigem(item.nome)}
-                            </h4>
-                          </div>
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <div className={`${isApresentacao ? 'text-[44px]' : 'text-[38px]'} font-extrabold leading-none tracking-tight text-[var(--foreground)] tabular-nums`}>
-                            {item.quantidade}
-                          </div>
-                          <div className="mt-1 text-[12px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-                            leads
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4">
-                        <Rosca etapas={etapas} total={total} pctConvertido={pctConvertido} grande={isApresentacao} />
-                        <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
-                          {presa > 0 && (
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[15px]' : 'text-[13px]'} font-semibold leading-tight text-[var(--warning)]`}
-                              style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
-                            >
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
-                              {presa} parados na 1ª msg · {Math.round(pctPresa)}%
-                            </span>
-                          )}
-                          {ganhos > 0 && (
-                            <span
-                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${isApresentacao ? 'text-[15px]' : 'text-[13px]'} font-bold text-[var(--success)]`}
-                              style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
-                            >
-                              <Sparkles size={isApresentacao ? 16 : 14} />
-                              {ganhos} convertido{ganhos > 1 ? 's' : ''}
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-[var(--muted-foreground)] transition-colors group-hover:text-[var(--foreground)]">
-                            {aberto ? 'Ocultar etapas' : 'Ver etapas'}
-                            <ChevronDown size={15} strokeWidth={2.5} className={`transition-transform duration-200 ${aberto ? 'rotate-180' : ''}`} />
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 grid grid-cols-2 gap-1.5">
-                        {etapas.map(({ key, quantidade }) => (
-                          <div
-                            key={key}
-                            className="flex min-w-0 items-center gap-2.5 rounded-lg py-2 pl-3 pr-2"
-                            style={{
-                              background: `color-mix(in srgb, ${ETAPAS[key].cor} 15%, transparent)`,
-                              boxShadow: `inset 3px 0 0 ${ETAPAS[key].cor}`,
-                            }}
-                          >
-                            <span className={`${isApresentacao ? 'text-[22px]' : 'text-[21px]'} font-bold leading-none tabular-nums text-[var(--foreground)]`}>
-                              {quantidade}
-                            </span>
-                            <span className={`${isApresentacao ? 'text-[14px]' : 'text-[13px]'} min-w-0 truncate font-semibold leading-none text-[var(--muted-foreground)]`}>
-                              {ETAPAS[key].label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </button>
-
-                    <AnimatePresence initial={false}>
-                      {aberto && item.detalhes && item.detalhes.length > 0 && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25, ease: 'easeOut' }}
-                          className="overflow-hidden"
+                        )}
+                        <h4
+                          title={item.nome}
+                          className={`${isApresentacao ? 'text-[22px]' : 'text-[17px]'} min-w-0 truncate font-bold uppercase leading-snug text-[var(--foreground)]`}
                         >
-                          <div className="mt-3.5 space-y-2 border-t border-white/[0.07] pt-3.5">
+                          {formatarOrigem(item.nome)}
+                        </h4>
+                      </div>
+
+                      {/* Barra grossa: comprimento = tamanho da origem, cores = etapa no Kommo */}
+                      <div className="mt-2 h-3.5 w-full overflow-hidden rounded-full bg-[var(--progress-bg)]">
+                        <motion.div
+                          className="flex h-full overflow-hidden rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.max((item.quantidade / maior) * 100, 4)}%` }}
+                          transition={{ duration: 0.7, ease: 'easeOut', delay: idx * 0.04 }}
+                        >
+                          {etapas.map(({ key, quantidade }) => (
+                            <span
+                              key={key}
+                              className="h-full"
+                              style={{ width: `${(quantidade / total) * 100}%`, background: ETAPAS[key].cor }}
+                            />
+                          ))}
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-4">
+                      {presa > 0 && (
+                        <span
+                          className="hidden items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[14px] font-semibold text-[var(--warning)] @2xl:inline-flex"
+                          style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />
+                          {presa} parados na 1ª msg
+                        </span>
+                      )}
+                      <div className="min-w-[76px] text-right">
+                        <div className="text-[32px] font-extrabold leading-none tracking-tight tabular-nums text-[var(--foreground)]">
+                          {item.quantidade}
+                        </div>
+                        <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                          recebidos
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {presa > 0 && (
+                    <span
+                      className="mt-2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1 text-[13px] font-semibold text-[var(--warning)] @2xl:hidden"
+                      style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />
+                      {presa} parados na 1ª msg
+                    </span>
+                  )}
+                </button>
+
+                {/* Detalhe flutuante: não empurra as outras linhas */}
+                <AnimatePresence>
+                  {aberta && item.detalhes && item.detalhes.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: paraCima ? 6 : -6, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: paraCima ? 6 : -6, scale: 0.98 }}
+                      transition={{ duration: 0.16, ease: 'easeOut' }}
+                      className={`absolute inset-x-0 z-40 ${paraCima ? 'bottom-full pb-1.5' : 'top-full pt-1.5'}`}
+                    >
+                      <div className="rounded-[20px] border border-white/15 bg-[#0B1A2B]/95 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md">
+                        <div className="flex flex-wrap items-center gap-4">
+                          <Rosca etapas={etapas} total={total} pctConvertido={pctConvertido} grande={false} />
+                          <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
                             <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
                               Onde estão no Kommo
                             </p>
-                            {etapas.map(({ key, quantidade }) => {
-                              const pct = (quantidade / total) * 100
-                              return (
-                                <div key={key}>
-                                  <div className="mb-1.5 flex items-center justify-between gap-2 text-[14px]">
-                                    <span className="flex min-w-0 items-center gap-2 font-medium text-[var(--foreground)]">
-                                      <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: ETAPAS[key].cor }} />
-                                      <span className="truncate">{ETAPAS[key].completo}</span>
-                                    </span>
-                                    <span className="shrink-0 font-bold tabular-nums text-[var(--foreground)]">
-                                      {quantidade}
-                                      <span className="ml-1.5 text-[12.5px] font-semibold text-[var(--muted-foreground)]">
-                                        {Math.round(pct)}%
-                                      </span>
-                                    </span>
-                                  </div>
-                                  <div className="h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
-                                    <div
-                                      className="h-full rounded-full"
-                                      style={{ width: `${Math.max(pct, 3)}%`, background: ETAPAS[key].cor }}
-                                    />
-                                  </div>
-                                </div>
-                              )
-                            })}
+                            <div className="flex flex-wrap gap-2">
+                              {presa > 0 && (
+                                <span
+                                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[14px] font-semibold text-[var(--warning)]"
+                                  style={{ background: 'color-mix(in srgb, var(--warning) 13%, transparent)' }}
+                                >
+                                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--warning)]" />
+                                  {presa} parados na 1ª msg · {Math.round(pctPresa)}%
+                                </span>
+                              )}
+                              {ganhos > 0 && (
+                                <span
+                                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[14px] font-bold text-[var(--success)]"
+                                  style={{ background: 'color-mix(in srgb, var(--success) 16%, transparent)' }}
+                                >
+                                  <Sparkles size={14} />
+                                  {ganhos} convertido{ganhos > 1 ? 's' : ''}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
+                        </div>
+
+                        <div className="mt-3 grid grid-cols-2 gap-2 @2xl:grid-cols-3 @5xl:grid-cols-4">
+                          {etapas.map(({ key, quantidade }) => (
+                            <div
+                              key={key}
+                              className="flex min-w-0 items-center gap-2.5 rounded-lg py-2.5 pl-3 pr-2"
+                              style={{
+                                background: `color-mix(in srgb, ${ETAPAS[key].cor} 15%, transparent)`,
+                                boxShadow: `inset 3px 0 0 ${ETAPAS[key].cor}`,
+                              }}
+                            >
+                              <span className="text-[24px] font-bold leading-none tabular-nums text-[var(--foreground)]">
+                                {quantidade}
+                              </span>
+                              <span className="min-w-0 flex-1 truncate text-[14px] font-semibold leading-none text-[var(--muted-foreground)]">
+                                {ETAPAS[key].completo}
+                              </span>
+                              <span className="shrink-0 text-[13px] font-bold tabular-nums text-[var(--foreground)]/80">
+                                {Math.round((quantidade / total) * 100)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )
+          })}
         </div>
       )}
     </section>

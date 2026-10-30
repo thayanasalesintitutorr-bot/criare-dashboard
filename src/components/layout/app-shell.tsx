@@ -6,13 +6,16 @@ import { usePathname } from 'next/navigation'
 import { Sidebar, MobileBottomNav } from './sidebar'
 import { Topbar } from './topbar'
 import { usePageHeader } from '@/store/use-page-header'
-import { useZoom, NIVEIS_ZOOM } from '@/store/use-zoom'
+import { useZoom, NIVEIS_ZOOM, ZOOM_SLIDES } from '@/store/use-zoom'
 import { useScaledHeight } from '@/store/use-scaled-height'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { title, statusIndicator } = usePageHeader()
   const pathname = usePathname()
-  const escala = NIVEIS_ZOOM[useZoom((s) => s.indice)]
+  const escalaZoom = NIVEIS_ZOOM[useZoom((s) => s.indice)]
+  // No modo "um card por tela" cada card se encaixa sozinho, então o conteúdo
+  // não recebe a ampliação global.
+  const escala = escalaZoom >= ZOOM_SLIDES ? 1 : escalaZoom
   const { ref: conteudoRef, altura: conteudoAltura } = useScaledHeight(escala)
 
   return (
