@@ -73,30 +73,30 @@ export function PerspectivaMeta({
       ) : (
         <>
           <div className="grid grid-cols-2 gap-2.5 @3xl:grid-cols-4">
-            <div className="rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
-              <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Falta para a meta</p>
-              <p className="mt-1 whitespace-nowrap text-[26px] font-black leading-none text-[var(--danger)]">{brlCurto(falta)}</p>
+            <div className="min-w-0 overflow-hidden rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
+              <p className="truncate text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Falta para a meta</p>
+              <p className="mt-1 break-words text-[19px] @sm:text-[22px] @lg:text-[26px] font-black leading-tight text-[var(--danger)]">{brlCurto(falta)}</p>
             </div>
-            <div className="rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
-              <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Precisa por dia útil</p>
-              <p className="mt-1 whitespace-nowrap text-[26px] font-black leading-none text-[var(--foreground)]">{brlCurto(porDia)}</p>
+            <div className="min-w-0 overflow-hidden rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
+              <p className="truncate text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Precisa por dia útil</p>
+              <p className="mt-1 break-words text-[19px] @sm:text-[22px] @lg:text-[26px] font-black leading-tight text-[var(--foreground)]">{brlCurto(porDia)}</p>
             </div>
-            <div className="rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
-              <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Vendas por dia</p>
-              <p className="mt-1 whitespace-nowrap text-[26px] font-black leading-none text-[var(--foreground)]">
+            <div className="min-w-0 overflow-hidden rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
+              <p className="truncate text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Vendas por dia</p>
+              <p className="mt-1 break-words text-[19px] @sm:text-[22px] @lg:text-[26px] font-black leading-tight text-[var(--foreground)]">
                 {ticket > 0 ? `≈ ${Math.max(Math.ceil(vendasPorDia), 1)}` : '—'}
               </p>
               {ticket > 0 && (
-                <p className="mt-1 text-[12px] font-semibold text-[var(--muted-foreground)]">no ticket de {brlCurto(ticket)}</p>
+                <p className="mt-1 truncate text-[12px] font-semibold text-[var(--muted-foreground)]">no ticket de {brlCurto(ticket)}</p>
               )}
             </div>
-            <div className="rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
-              <p className="text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Ritmo atual</p>
-              <p className="mt-1 whitespace-nowrap text-[26px] font-black leading-none text-[var(--foreground)]">
+            <div className="min-w-0 overflow-hidden rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
+              <p className="truncate text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Ritmo atual</p>
+              <p className="mt-1 break-words text-[19px] @sm:text-[22px] @lg:text-[26px] font-black leading-tight text-[var(--foreground)]">
                 {uteisPassados > 0 ? `${brlCurto(ritmo)}/dia` : '—'}
               </p>
               {uteisPassados > 0 && (
-                <p className="mt-1 text-[12px] font-semibold" style={{ color: ritmo >= porDia ? 'var(--success)' : 'var(--danger)' }}>
+                <p className="mt-1 truncate text-[12px] font-semibold" style={{ color: ritmo >= porDia ? 'var(--success)' : 'var(--danger)' }}>
                   {ritmo >= porDia ? 'acima do necessário' : 'abaixo do necessário'}
                 </p>
               )}
@@ -134,17 +134,17 @@ export function PerspectivaMeta({
                 return (
                   <div
                     key={chave}
-                    className={`rounded-xl px-3 py-2 ${
+                    className={`min-w-0 overflow-hidden rounded-xl px-3 py-2 ${
                       ehHoje ? 'border border-[var(--accent)]/60 bg-[var(--accent)]/15' : 'border border-white/10 bg-white/[0.05]'
                     }`}
                   >
-                    <p className="flex items-center justify-between text-[12px] font-bold uppercase text-[var(--muted-foreground)]">
-                      {rotulo}
-                      {ehHoje && <span className="rounded bg-[var(--accent)] px-1.5 text-[10px] text-white">HOJE</span>}
+                    <p className="flex items-center justify-between gap-1 text-[12px] font-bold uppercase text-[var(--muted-foreground)]">
+                      <span className="truncate">{rotulo}</span>
+                      {ehHoje && <span className="shrink-0 rounded bg-[var(--accent)] px-1.5 text-[10px] text-white">HOJE</span>}
                     </p>
-                    <p className="mt-0.5 whitespace-nowrap text-[19px] font-black leading-tight text-[var(--foreground)]">{brlCurto(porDia)}</p>
+                    <p className="mt-0.5 break-words text-[16px] @sm:text-[19px] font-black leading-tight text-[var(--foreground)]">{brlCurto(porDia)}</p>
                     {ticket > 0 && (
-                      <p className="text-[11.5px] font-semibold text-[var(--muted-foreground)]">
+                      <p className="truncate text-[11.5px] font-semibold text-[var(--muted-foreground)]">
                         ≈ {Math.max(Math.ceil(vendasPorDia), 1)} venda{Math.ceil(vendasPorDia) > 1 ? 's' : ''}
                       </p>
                     )}
