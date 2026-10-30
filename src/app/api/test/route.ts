@@ -2693,8 +2693,18 @@ const painelAtendimento = {
   evolucaoFaturamento: evolucaoDiaria.map((dia) => {
     const diaData = parseLocalDate(dia.data)
 
-    const valor = consultaGanhosLeads
+    const valorConsulta = consultaGanhosLeads
       .filter((lead) => {
+        const data = parseDateLocal(lead.closed_at)
+        return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
+      })
+      .reduce((acc, lead) => acc + toNumber(lead.faturamento), 0)
+
+    // Reabord (reabordagem fechada) soma no mesmo faturamento do dia, igual
+    // ao critério de valorTotalReabord (status FECHADO (GANHO)).
+    const valorReabord = reabordLeads
+      .filter((lead) => {
+        if (!statusIs(lead, 'FECHADO (GANHO)')) return false
         const data = parseDateLocal(lead.closed_at)
         return data && data >= startOfDay(diaData) && data <= endOfDay(diaData)
       })
@@ -2703,7 +2713,7 @@ const painelAtendimento = {
     return {
       data: dia.data,
       label: dia.label,
-      valor,
+      valor: valorConsulta + valorReabord,
     }
   }),
 
