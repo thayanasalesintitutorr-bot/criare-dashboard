@@ -450,7 +450,13 @@ function buildEvolucaoDiaria(
       return d && d >= dayStart && d <= dayEnd
     }).length
 
+    // Mesmo critério de "Valor total de vendas" do Comercial III
+    // (propostasFechadasLeads): só conta quem está com status VENDA GANHA.
+    // Sem esse filtro, um lead com o campo venda preenchido mas perdido ou
+    // em outro status também entrava na soma, inflando o total do dia acima
+    // do valor oficial do card Comercial III.
     const vendasDoDia = vendasLeads.filter((l) => {
+      if (!statusIs(l, 'VENDA GANHA')) return false
       if (!hasVenda(l)) return false
       const d = parseDateLocal(l.closed_at)
       return d && d >= dayStart && d <= dayEnd
