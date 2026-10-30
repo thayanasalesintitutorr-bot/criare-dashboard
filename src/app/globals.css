@@ -38,6 +38,10 @@
   /* Componentes */
   --icon-bg: #132337;
   --progress-bg: #18344F;
+  --glass: rgba(255,255,255,.05);
+  --glass-border: rgba(255,255,255,.1);
+  --pop: #0E1B2A;
+  --pop-shadow: 0 24px 60px rgba(0,0,0,.55);
 
   /* Cor de destaque única */
   --primary: #3B82F6;
@@ -86,6 +90,10 @@
   /* Componentes */
   --icon-bg: #EFF6FF;
   --progress-bg: #EEF3FA;
+  --glass: rgba(15,23,42,.04);
+  --glass-border: rgba(15,23,42,.1);
+  --pop: #FFFFFF;
+  --pop-shadow: 0 16px 40px rgba(15,23,42,.14);
 
   /* Cor de destaque única */
   --primary: #2563EB;
@@ -102,9 +110,9 @@
   --warning: #CA8A04;
 
   /* Sidebar */
-  --sidebar: #081321;
+  --sidebar: #FFFFFF;
   --sidebar-card: #FFFFFF;
-  --sidebar-foreground: #DBE4F0;
+  --sidebar-foreground: #334155;
   --sidebar-active: rgba(37,99,235,.14);
 
   /* Charts (categórico, uso pontual em gráficos com várias séries) */
@@ -499,4 +507,64 @@ html.slides-snap {
 html.slides-snap [data-slide] {
   scroll-snap-align: start;
   scroll-margin-top: 12px;
+}
+
+/* ===== Modo claro: limpo, sem neon, todos os cards brancos =====
+   Os cards/efeitos foram desenhados em cima do fundo escuro (vidro branco
+   translúcido, brilhos coloridos, borda em gradiente animada). No claro isso
+   some ou vira "neon" — aqui tudo vira branco liso com borda e sombra suaves. */
+.light .app-shell .fx-card::before,
+.light .app-shell .fx-card::after,
+.light .app-shell .fx-card-mini::before {
+  display: none;
+}
+
+.light .app-shell .fx-card,
+.light .app-shell .fx-card-mini {
+  background-color: var(--card) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Fundo animado (luzes, grade, dados fantasma) não combina com o claro */
+.light .app-shell .fx-backdrop {
+  display: none;
+}
+
+/* Letras em gradiente/brilho viram texto sólido */
+.light .app-shell .bg-clip-text {
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  color: var(--foreground) !important;
+  animation: none !important;
+}
+
+/* Vidro branco translúcido vira cinza bem claro (senão some no branco) */
+.light .app-shell [class*="bg-white/"] {
+  background-color: var(--glass) !important;
+}
+.light .app-shell [class*="border-white/"] {
+  border-color: var(--glass-border) !important;
+}
+.light .app-shell [class*="from-white/"] {
+  --tw-gradient-from: rgba(15, 23, 42, 0.035) !important;
+}
+.light .app-shell [class*="to-white/"] {
+  --tw-gradient-to: rgba(15, 23, 42, 0.01) !important;
+}
+.light .app-shell [class*="bg-black/10"] {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Sem brilho colorido (neon) em sombras de ícones/botões/barras */
+.light .app-shell [class*="shadow-[0_"] {
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1) !important;
+}
+.light .app-shell [style*="drop-shadow"] {
+  filter: none !important;
+}
+.light .app-shell [style*="box-shadow"]:not([style*="inset"]) {
+  box-shadow: none !important;
 }

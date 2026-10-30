@@ -90,7 +90,7 @@ function DockItem({
 
   return (
     <Link ref={ref} href={item.href} aria-label={item.label} className="group relative flex flex-col items-center">
-      <span className="pointer-events-none absolute -top-11 whitespace-nowrap rounded-xl border border-white/10 bg-[var(--card)]/90 px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground)] opacity-0 shadow-lg backdrop-blur-md transition-all duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
+      <span className="pointer-events-none absolute -top-11 whitespace-nowrap rounded-xl border border-[var(--glass-border)] bg-[var(--card)]/90 px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground)] opacity-0 shadow-lg backdrop-blur-md transition-all duration-200 group-hover:-translate-y-1 group-hover:opacity-100">
         {item.label}
       </span>
 
@@ -98,8 +98,8 @@ function DockItem({
         style={{ width: tamanho, height: tamanho }}
         className={`relative flex items-center justify-center rounded-2xl border transition-colors ${
           ativo
-            ? 'border-white/20 text-white'
-            : 'border-white/[0.07] bg-white/[0.05] text-white/65 group-hover:text-white'
+            ? 'border-[var(--glass-border)] text-white'
+            : 'border-[var(--glass-border)] bg-[var(--glass)] text-[var(--muted-foreground)] group-hover:text-[var(--foreground)]'
         }`}
         whileTap={{ scale: 0.92 }}
       >
@@ -107,7 +107,7 @@ function DockItem({
           <motion.span
             layoutId="dock-ativo"
             transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#3B82F6] via-[#7C6CF0] to-[#A855F7] shadow-[0_8px_24px_rgba(99,102,241,0.55)]"
+            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#3B82F6] via-[#7C6CF0] to-[#A855F7]"
           />
         )}
         <Icon className="relative h-[46%] w-[46%]" strokeWidth={2.2} />
@@ -115,7 +115,7 @@ function DockItem({
 
       <span
         className={`mt-1.5 h-1 w-1 rounded-full transition-all duration-300 ${
-          ativo ? 'bg-[#A855F7] shadow-[0_0_8px_#A855F7]' : 'bg-transparent'
+          ativo ? 'bg-[#A855F7]' : 'bg-transparent'
         }`}
       />
     </Link>
@@ -134,12 +134,12 @@ export function Sidebar() {
         transition={{ type: 'spring', stiffness: 260, damping: 26, delay: 0.2 }}
         onMouseMove={(e) => mouseX.set(e.clientX)}
         onMouseLeave={() => mouseX.set(Infinity)}
-        className="pointer-events-auto flex items-end gap-3 rounded-[28px] border border-white/10 bg-[var(--sidebar)]/70 px-4 pb-2.5 pt-3 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl backdrop-saturate-150"
+        className="pointer-events-auto flex items-end gap-3 rounded-[28px] border border-[var(--glass-border)] bg-[var(--sidebar)]/80 px-4 pb-2.5 pt-3 shadow-[var(--pop-shadow)] backdrop-blur-xl backdrop-saturate-150"
       >
-        <div className="mb-[18px] flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#60A5FA] to-[#C084FC] text-sm font-black text-[#05070D] shadow-[0_6px_18px_rgba(124,108,240,0.5)]">
+        <div className="mb-[18px] flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#60A5FA] to-[#C084FC] text-sm font-black text-[#05070D]">
           C
         </div>
-        <span aria-hidden className="mb-[18px] h-9 w-px shrink-0 bg-white/10" />
+        <span aria-hidden className="mb-[18px] h-9 w-px shrink-0 bg-[var(--glass-border)]" />
 
         {itensVisiveis.map((item) => (
           <DockItem key={item.href} item={item} ativo={pathname === item.href} mouseX={mouseX} />
@@ -180,7 +180,7 @@ export function MobileBottomNav() {
             key={item.href}
             href={item.href}
             className={`flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl py-2 text-[10px] font-semibold transition-colors duration-200 ${
-              active ? 'text-[var(--accent)]' : 'text-white/50'
+              active ? 'text-[var(--accent)]' : 'text-[var(--muted-foreground)]'
             }`}
           >
             <Icon size={19} className="shrink-0" />

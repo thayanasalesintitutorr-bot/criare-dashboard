@@ -15,6 +15,7 @@ import { OrigensPrimeiraMensagemCard } from '@/components/marketing/origens-prim
 import { deepEqual } from '@/lib/deep-equal'
 import { AnimatedBackdrop } from '@/components/dashboard/animated-backdrop'
 import { MedicosPremium } from '@/components/dashboard/medicos-premium'
+import { montarMedicosSnapshot } from '@/lib/medicos-snapshot'
 import { Slide, SlideDeck } from '@/components/dashboard/slides'
 import { PerspectivaMeta } from '@/components/dashboard/perspectiva-meta'
 import { useModoSlides } from '@/store/use-zoom'
@@ -688,94 +689,7 @@ export default function DashboardPage() {
   const consultaPorMedico = data?.consultaPorMedico || []
   const vendasPorMedico = data?.vendasPorMedico || []
 
-  const medicosSnapshotMap = new Map<
-    string,
-    {
-      nome: string
-      atendimentos?: number
-      quantidadeConsulta?: number
-      valorConsulta?: number
-      valorVendas?: number
-      meta?: number
-      procedimentos?: number
-      capacidadeAgenda?: number
-      agendaSemDados?: boolean
-      noShow?: number
-      cancelados?: number
-      reagendados?: number
-      consultasPrimeiraVez?: number
-      retornos?: number
-      tempoEsperaMedio?: number
-      tempoAtendimentoMedio?: number
-      atendimentosAnterior?: number
-      faturamentoConsolidadoAnterior?: number
-      consultasPrimeiraVezAnterior?: number
-      retornosAnterior?: number
-      noShowAnterior?: number
-      canceladosAnterior?: number
-      reagendadosAnterior?: number
-      propostasEnviadas?: number
-      vendasFechadas?: number
-      taxaConversao?: number
-    }
-  >()
-
-  consultaPorMedico.forEach((m) => {
-    medicosSnapshotMap.set(m.medico, {
-      ...medicosSnapshotMap.get(m.medico),
-      nome: m.medico,
-      atendimentos: m.atendimentos,
-      quantidadeConsulta: m.quantidadeConsulta,
-      valorConsulta: m.valorConsulta,
-      capacidadeAgenda: m.capacidadeAgenda,
-      agendaSemDados: m.agendaSemDados,
-      noShow: m.noShow,
-      cancelados: m.cancelados,
-      reagendados: m.reagendados,
-      consultasPrimeiraVez: m.consultasPrimeiraVez,
-      retornos: m.retornos,
-      tempoEsperaMedio: m.tempoEsperaMedio,
-      tempoAtendimentoMedio: m.tempoAtendimentoMedio,
-      atendimentosAnterior: m.atendimentosAnterior,
-      faturamentoConsolidadoAnterior: m.faturamentoConsolidadoAnterior,
-      consultasPrimeiraVezAnterior: m.consultasPrimeiraVezAnterior,
-      retornosAnterior: m.retornosAnterior,
-      noShowAnterior: m.noShowAnterior,
-      canceladosAnterior: m.canceladosAnterior,
-      reagendadosAnterior: m.reagendadosAnterior,
-    })
-  })
-
-  vendasPorMedico.forEach((m) => {
-    const procedimentos = (m.produtos || []).reduce((total, p) => total + (p.qtd || 0), 0)
-
-    medicosSnapshotMap.set(m.nome, {
-      ...medicosSnapshotMap.get(m.nome),
-      nome: m.nome,
-      valorVendas: m.valor,
-      meta: m.meta,
-      procedimentos,
-      propostasEnviadas: m.propostasEnviadas,
-      vendasFechadas: m.vendasFechadas,
-      taxaConversao: m.taxaConversao,
-    })
-  })
-
-  // Ticket médio e alcance da meta são calculados sobre o faturamento consolidado
-  // (consulta + vendas), a mesma base usada no card "Consolidado" — usar apenas
-  // consulta ou apenas vendas subestima os dois indicadores.
-  const medicosSnapshot = Array.from(medicosSnapshotMap.values()).map((m) => {
-    const faturamentoConsolidado = (m.valorConsulta || 0) + (m.valorVendas || 0)
-    const quantidadeConsolidada = (m.quantidadeConsulta || 0) + (m.procedimentos || 0)
-
-    return {
-      ...m,
-      faturamentoConsolidado,
-      ticketConsulta:
-        quantidadeConsolidada > 0 ? faturamentoConsolidado / quantidadeConsolidada : 0,
-      percentualMeta: (m.meta || 0) > 0 ? (faturamentoConsolidado / (m.meta || 0)) * 100 : 0,
-    }
-  })
+  const medicosSnapshot = montarMedicosSnapshot(consultaPorMedico, vendasPorMedico)
   if (loading) {
     return (
       <div className="grid gap-6 @xl:grid-cols-4">

@@ -65,7 +65,7 @@ const BARRAS = [0.35, 0.55, 0.42, 0.7, 0.6, 0.85, 0.75]
 
 export function AnimatedBackdrop({ fatos = [] }: { fatos?: Fato[] }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+    <div aria-hidden className="fx-backdrop pointer-events-none absolute inset-0 -z-10 overflow-hidden">
       {BLOBS.map((b, i) => (
         <div
           key={i}

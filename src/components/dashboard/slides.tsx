@@ -117,13 +117,13 @@ export function SlideDeck({ children }: { children: ReactNode }) {
       <div ref={raiz}>{children}</div>
 
       {ativo && (
-        <div className="fixed right-4 top-1/2 z-[60] flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-white/15 bg-[#0B1A2B]/85 p-2 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-md">
+        <div className="fixed right-4 top-1/2 z-[60] flex -translate-y-1/2 flex-col items-center gap-2 rounded-full border border-[var(--glass-border)] bg-[var(--pop)]/90 p-2 shadow-[var(--pop-shadow)] backdrop-blur-md">
           <button
             type="button"
             onClick={() => irPara(indice - 1)}
             disabled={indice < 0}
             title="Card anterior"
-            className="flex h-12 w-12 items-center justify-center rounded-full text-[var(--foreground)] transition-colors hover:bg-white/10 disabled:opacity-30"
+            className="flex h-12 w-12 items-center justify-center rounded-full text-[var(--foreground)] transition-colors hover:bg-[var(--glass)] disabled:opacity-30"
           >
             <ChevronUp size={26} />
           </button>
@@ -135,7 +135,7 @@ export function SlideDeck({ children }: { children: ReactNode }) {
             onClick={() => irPara(indice + 1)}
             disabled={total > 0 && indice >= total - 1}
             title="Próximo card"
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] to-[#A855F7] text-white shadow-[0_6px_18px_rgba(99,102,241,0.5)] transition-transform hover:scale-105 disabled:opacity-30"
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#3B82F6] to-[#A855F7] text-white transition-transform hover:scale-105 disabled:opacity-30"
           >
             <ChevronDown size={26} />
           </button>

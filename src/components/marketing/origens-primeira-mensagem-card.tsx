@@ -81,10 +81,10 @@ function agruparPorEtapa(detalhes: DetalheItem[] = []) {
 
 // Ranking em destaque: top 3 com ouro/prata/bronze, resto com o degradê da marca
 const ESTILO_RANK = [
-  { fundo: 'linear-gradient(135deg,#FBBF24,#F59E0B)', brilho: '0 4px 16px rgba(245,158,11,0.5)', texto: '#3B2300' },
-  { fundo: 'linear-gradient(135deg,#E2E8F0,#94A3B8)', brilho: '0 4px 14px rgba(148,163,184,0.45)', texto: '#0F172A' },
-  { fundo: 'linear-gradient(135deg,#FDBA74,#EA580C)', brilho: '0 4px 14px rgba(234,88,12,0.45)', texto: '#3A1500' },
-  { fundo: 'linear-gradient(135deg,#3B82F6,#7C6CF0 60%,#A855F7)', brilho: '0 4px 14px rgba(99,102,241,0.4)', texto: '#FFFFFF' },
+  { fundo: 'linear-gradient(135deg,#FBBF24,#F59E0B)', brilho: 'none', texto: '#3B2300' },
+  { fundo: 'linear-gradient(135deg,#E2E8F0,#94A3B8)', brilho: 'none', texto: '#0F172A' },
+  { fundo: 'linear-gradient(135deg,#FDBA74,#EA580C)', brilho: 'none', texto: '#3A1500' },
+  { fundo: 'linear-gradient(135deg,#3B82F6,#7C6CF0 60%,#A855F7)', brilho: 'none', texto: '#FFFFFF' },
 ]
 
 // Nome da origem sempre em CAIXA ALTA (com espaço no lugar do underline pra
@@ -358,7 +358,7 @@ export function OrigensPrimeiraMensagemCard({
                       transition={{ duration: 0.16, ease: 'easeOut' }}
                       className={`absolute inset-x-0 z-40 ${paraCima ? 'bottom-full pb-1.5' : 'top-full pt-1.5'}`}
                     >
-                      <div className="rounded-[20px] border border-white/15 bg-[#0B1A2B]/95 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-md">
+                      <div className="rounded-[20px] border border-[var(--glass-border)] bg-[var(--pop)] p-4 shadow-[var(--pop-shadow)]">
                         <div className="flex flex-wrap items-center gap-4">
                           <Rosca etapas={etapas} total={total} pctConvertido={pctConvertido} grande={false} />
                           <div className="flex min-w-0 flex-1 flex-col items-start gap-2">

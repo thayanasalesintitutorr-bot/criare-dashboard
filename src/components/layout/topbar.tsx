@@ -414,15 +414,10 @@ function parseLocalDate(dateString?: string) {
               transition={{ duration: 0.4 }}
               className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--muted-foreground)]"
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#A855F7] shadow-[0_0_10px_#A855F7]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#A855F7]" />
               Painel Criare
             </motion.p>
             <div className="relative -mt-1">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -left-6 top-1/2 h-24 w-72 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(139,92,246,0.28),transparent_70%)]"
-                style={{ animation: 'halo-pulse 5s ease-in-out infinite' }}
-              />
               <motion.h1
                 key={title}
                 initial={{ opacity: 0, y: 12 }}
@@ -865,7 +860,7 @@ function parseLocalDate(dateString?: string) {
           >
             <span
               className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
-                comparar ? 'bg-gradient-to-r from-[#3B82F6] to-[#A855F7] shadow-[0_0_14px_rgba(99,102,241,0.55)]' : 'bg-[var(--progress-bg)]'
+                comparar ? 'bg-gradient-to-r from-[#3B82F6] to-[#A855F7]' : 'bg-[var(--progress-bg)]'
               }`}
             >
               <motion.span

@@ -638,6 +638,13 @@ async function fetchNps() {
 // agendamento nem tempo de espera/atendimento). Alimenta tudo relacionado
 // a agenda: atendimentos, no-show, cancelados, reagendados, capacidade
 // estimada de cada médico e os tempos médios de espera/atendimento.
+// Paginação sem ORDER BY pode repetir ou pular linhas entre uma página e outra
+// (a tabela é atualizada o tempo todo). Ordenar pela chave do agendamento deixa
+// a leitura estável.
+const AMPLIMED_ORDEM = ['Cód paciente', 'Data e hora Agendada', 'Cód profissional', 'Cód proced']
+  .map(encodeURIComponent)
+  .join(',')
+
 async function fetchAllAmplimed() {
   let amplimedData: any[] = []
   let from = 0
@@ -645,7 +652,7 @@ async function fetchAllAmplimed() {
 
   while (true) {
     const amplimedResponse = await fetch(
-      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/amplimed?select=*&offset=${from}&limit=${pageSize}`,
+      `https://afxgfgvdmgxcvamginjc.supabase.co/rest/v1/amplimed?select=*&order=${AMPLIMED_ORDEM}&offset=${from}&limit=${pageSize}`,
       {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -1848,8 +1855,8 @@ const medicosPermitidos: string[] =
 //    olhando todo o histórico disponível em amplimed).
 // 2) Divide esse pico (em minutos) pela duração média dos atendimentos
 //    dele, pra converter de volta pra uma "quantidade de atendimentos"
-//    comparável com o número real de atendimentos do período (que
-//    continua vindo do noshow, com cobertura histórica maior).
+//    comparável com o número real de atendimentos do período (que também
+//    vem de kommo.amplimed).
 function getCapacidadeDiariaEstimada(med: string) {
   const minutosPorDia: Record<string, number> = {}
   let somaDuracoes = 0
@@ -1927,7 +1934,7 @@ const reagendadosMedico = atendimentosAgendaMedico.filter((item: any) => {
 
   // Tempo médio de espera e de atendimento (em minutos), só dos
   // atendimentos finalizados no período — vem de kommo.amplimed
-  // ("Tempo espera(min)" / "Tempo atend(min)"), dado que o noshow não tinha.
+  // ("Tempo espera(min)" / "Tempo atend(min)").
   const temposEspera = atendimentosFinalizadosMedico
     .map((item: any) => toNumber(item['Tempo espera(min)']))
     .filter((min: number) => min > 0)

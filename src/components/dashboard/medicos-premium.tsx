@@ -174,7 +174,7 @@ function Anel({
           fill="none"
           strokeWidth="9"
           strokeLinecap="round"
-          style={{ stroke: cor, filter: `drop-shadow(0 0 6px ${cor})` }}
+          style={{ stroke: cor }}
           initial={{ strokeDasharray: `0 ${circ}` }}
           animate={{ strokeDasharray: `${len} ${circ - len}` }}
           transition={{ duration: 0.9, ease: 'easeOut' }}
@@ -222,7 +222,7 @@ export function MedicosPremium({
   const projecoes = useProjecaoMedicos(periodo, dataInicio)
   const apresentacao = viewMode === 'apresentacao'
   const [indice, setIndice] = useState(0)
-  const direcao = useRef(1)
+  const [direcao, setDirecao] = useState(1)
   const intencao = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const total = medicos.length
@@ -232,8 +232,9 @@ export function MedicosPremium({
   function ir(novo: number) {
     const alvo = (novo + total) % total
     if (alvo === i) return
-    direcao.current = novo > i || (i === total - 1 && alvo === 0) ? 1 : -1
-    if (i === 0 && alvo === total - 1) direcao.current = -1
+    let d = novo > i || (i === total - 1 && alvo === 0) ? 1 : -1
+    if (i === 0 && alvo === total - 1) d = -1
+    setDirecao(d)
     setIndice(alvo)
   }
 
@@ -354,10 +355,10 @@ export function MedicosPremium({
       )}
 
       <div className="relative">
-        <AnimatePresence mode="wait" initial={false} custom={direcao.current}>
+        <AnimatePresence mode="wait" initial={false} custom={direcao}>
           <motion.div
             key={m.nome}
-            custom={direcao.current}
+            custom={direcao}
             variants={{
               entra: (d: number) => ({ opacity: 0, x: d * 48, scale: 0.985 }),
               centro: { opacity: 1, x: 0, scale: 1 },
@@ -442,7 +443,7 @@ export function MedicosPremium({
                       <div className="mt-2.5 h-3 overflow-hidden rounded-full bg-[var(--progress-bg)]">
                         <motion.div
                           className="h-full rounded-full"
-                          style={{ background: corMeta, boxShadow: `0 0 12px ${corMeta}` }}
+                          style={{ background: corMeta }}
                           initial={{ width: 0 }}
                           animate={{ width: `${Math.min(metaPct, 100)}%` }}
                           transition={{ duration: 0.8, ease: 'easeOut' }}

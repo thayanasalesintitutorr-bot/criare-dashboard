@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { ref: conteudoRef, altura: conteudoAltura } = useScaledHeight(escala)
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <div className="app-shell min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <div className="flex min-h-screen">
         <Sidebar />
 
