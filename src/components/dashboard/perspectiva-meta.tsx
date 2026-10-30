@@ -72,7 +72,7 @@ export function PerspectivaMeta({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-2.5 @3xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-2.5 @xl:grid-cols-2 @4xl:grid-cols-4">
             <div className="min-w-0 overflow-hidden rounded-2xl bg-white/[0.05] px-3.5 py-2.5">
               <p className="truncate text-[12px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Falta para a meta</p>
               <p className="mt-1 break-words text-[19px] @sm:text-[22px] @lg:text-[26px] font-black leading-tight text-[var(--danger)]">{brlCurto(falta)}</p>
