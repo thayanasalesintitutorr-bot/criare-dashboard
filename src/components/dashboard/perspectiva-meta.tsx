@@ -1,6 +1,6 @@
 'use client'
 
-import { CalendarCheck, PartyPopper, Target } from 'lucide-react'
+import { CalendarCheck, PartyPopper, Target, TrendingDown, TrendingUp } from 'lucide-react'
 import { chaveData, diasDoMes } from '@/lib/dias-uteis'
 
 const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
@@ -45,6 +45,13 @@ export function PerspectivaMeta({
   const ritmo = uteisPassados > 0 ? realizado / uteisPassados : 0
   const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'long' })
 
+  const percentMeta = meta > 0 ? Math.min((realizado / meta) * 100, 100) : 0
+  const totalUteisMes = uteisPassados + uteisRestantes.length
+  const projecaoFechamento = ritmo * totalUteisMes
+  const diffProjecao = projecaoFechamento - meta
+  const projecaoOk = diffProjecao >= 0
+  const mostrarProjecao = uteisPassados > 0 && uteisRestantes.length > 0
+
   if (meta <= 0) return null
 
   return (
@@ -62,6 +69,16 @@ export function PerspectivaMeta({
             ` · ${feriadosRestantes.length} ${feriadosRestantes.length === 1 ? 'feriado' : 'feriados'}`}
         </span>
       </div>
+
+      <div className="mb-1 h-2 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${percentMeta}%`, background: metaBatida ? 'var(--success)' : 'var(--accent)' }}
+        />
+      </div>
+      <p className="mb-3 text-[12px] font-semibold text-[var(--muted-foreground)]">
+        {percentMeta.toFixed(0)}% da meta · {brlCurto(realizado)} de {brlCurto(meta)}
+      </p>
 
       {metaBatida ? (
         <div className="flex items-center gap-3 rounded-2xl bg-[var(--success)]/12 px-4 py-3 text-[var(--success)]">
@@ -102,6 +119,24 @@ export function PerspectivaMeta({
               )}
             </div>
           </div>
+
+          {mostrarProjecao && (
+            <div
+              className={`mt-3 flex items-center gap-3 rounded-2xl px-4 py-3 ${
+                projecaoOk ? 'bg-[var(--success)]/12 text-[var(--success)]' : 'bg-[var(--danger)]/12 text-[var(--danger)]'
+              }`}
+            >
+              {projecaoOk ? <TrendingUp size={22} className="shrink-0" /> : <TrendingDown size={22} className="shrink-0" />}
+              <p className="text-[14px] font-bold leading-snug">
+                No ritmo atual ({brlCurto(ritmo)}/dia útil), {nomeMes} deve fechar em{' '}
+                <span className="font-extrabold">{brlCurto(projecaoFechamento)}</span> —{' '}
+                {projecaoOk
+                  ? `${brlCurto(diffProjecao)} acima da meta`
+                  : `${brlCurto(Math.abs(diffProjecao))} abaixo da meta`}
+                .
+              </p>
+            </div>
+          )}
 
           <div className="mt-3 flex items-center gap-2 text-[13px] font-bold uppercase tracking-wider text-[var(--muted-foreground)]">
             <CalendarCheck size={16} />
