@@ -1,9 +1,22 @@
 'use client'
 
-import { useMemo } from 'react'
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
-import { ChartNoAxesCombined, CircleDollarSign, Handshake, Stethoscope } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Bar, BarChart, CartesianGrid, Cell, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import {
+  BarChart3,
+  ChartNoAxesCombined,
+  CircleDollarSign,
+  Handshake,
+  LineChart as LineChartIcon,
+  Stethoscope,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+
+const DIAS_SEMANA = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+
+function diaDaSemana(data: string) {
+  return DIAS_SEMANA[new Date(`${data}T00:00:00`).getDay()]
+}
 
 export type DiaDesempenho = {
   data: string
@@ -52,6 +65,7 @@ export function DesempenhoDiarioCard({ dias }: { dias: DiaDesempenho[] }) {
   )
 
   const mostrarRotulos = dados.length <= 10
+  const [tipoGrafico, setTipoGrafico] = useState<'barra' | 'linha'>('barra')
 
   return (
     <section className="fx-card rounded-[24px] border border-[color:var(--border)] bg-[var(--card)]/60 p-4 shadow-[var(--card-shadow)] backdrop-blur-xl backdrop-saturate-150 sm:p-5">
@@ -60,20 +74,53 @@ export function DesempenhoDiarioCard({ dias }: { dias: DiaDesempenho[] }) {
           <ChartNoAxesCombined className="h-6 w-6 text-[var(--accent)]" />
           <h3 className="text-[20px] font-bold tracking-[-0.02em] text-[var(--foreground)]">Desempenho dia a dia</h3>
         </div>
-        <div className="flex items-center gap-3 text-[12px] font-bold text-[var(--muted-foreground)]">
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[var(--foreground)]" /> Seg a sex
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[var(--muted-foreground)]/40" /> Sáb e dom
-          </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-3 text-[12px] font-bold text-[var(--muted-foreground)]">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[var(--foreground)]" /> Seg a sex
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[var(--muted-foreground)]/40" /> Sáb e dom
+            </span>
+          </div>
+          <div className="flex items-center gap-0.5 rounded-full border border-[color:var(--border)] bg-[var(--metric-card)]/55 p-0.5">
+            <button
+              type="button"
+              onClick={() => setTipoGrafico('barra')}
+              title="Gráfico de barras"
+              className={`flex items-center justify-center rounded-full p-1.5 transition-colors ${
+                tipoGrafico === 'barra' ? 'bg-[var(--accent)] text-white' : 'text-[var(--muted-foreground)]'
+              }`}
+            >
+              <BarChart3 size={15} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setTipoGrafico('linha')}
+              title="Gráfico de linha"
+              className={`flex items-center justify-center rounded-full p-1.5 transition-colors ${
+                tipoGrafico === 'linha' ? 'bg-[var(--accent)] text-white' : 'text-[var(--muted-foreground)]'
+              }`}
+            >
+              <LineChartIcon size={15} />
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="space-y-3">
         {SERIES.map((s) => {
           const total = dados.reduce((a, d) => a + d[s.chave], 0)
-          const melhor = dados.reduce((m, d) => (d[s.chave] > m[s.chave] ? d : m), dados[0])
+          const diasComValor = dados.filter((d) => d[s.chave] > 0)
+          const melhor = diasComValor.reduce<DiaDesempenho & { fimDeSemana: boolean } | null>(
+            (m, d) => (!m || d[s.chave] > m[s.chave] ? d : m),
+            null
+          )
+          const pior = diasComValor.reduce<DiaDesempenho & { fimDeSemana: boolean } | null>(
+            (m, d) => (!m || d[s.chave] < m[s.chave] ? d : m),
+            null
+          )
+          const mostrarPior = pior && melhor && pior.data !== melhor.data
           const fmt = (v: number) => (s.dinheiro ? brlCurto(v) : String(v))
 
           return (
@@ -92,7 +139,14 @@ export function DesempenhoDiarioCard({ dias }: { dias: DiaDesempenho[] }) {
                 <p className="mt-1 text-[12.5px] font-semibold text-[var(--muted-foreground)]">{s.legenda} no período</p>
                 {melhor && melhor[s.chave] > 0 && (
                   <p className="mt-0.5 text-[12.5px] font-semibold text-[var(--muted-foreground)]">
-                    melhor dia: <span className="text-[var(--foreground)]">{melhor.label}</span> · {fmt(melhor[s.chave])}
+                    melhor dia: <span className="text-[var(--foreground)]">{melhor.label} ({diaDaSemana(melhor.data)})</span> ·{' '}
+                    {fmt(melhor[s.chave])}
+                  </p>
+                )}
+                {mostrarPior && pior && (
+                  <p className="mt-0.5 text-[12.5px] font-semibold text-[var(--muted-foreground)]">
+                    pior dia: <span className="text-[var(--foreground)]">{pior.label} ({diaDaSemana(pior.data)})</span> ·{' '}
+                    {fmt(pior[s.chave])}
                   </p>
                 )}
               </div>
@@ -100,49 +154,107 @@ export function DesempenhoDiarioCard({ dias }: { dias: DiaDesempenho[] }) {
               <div className="h-[150px] min-w-0">
                 {dados.some((d) => d[s.chave] > 0) ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={dados} margin={{ top: 16, right: 6, left: 6, bottom: 0 }}>
-                      <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="label"
-                        tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={dados.length > 16 ? 1 : 0}
-                      />
-                      <Tooltip
-                        cursor={{ fill: 'var(--progress-bg)' }}
-                        contentStyle={{
-                          background: 'var(--background)',
-                          border: '1px solid var(--border)',
-                          borderRadius: 12,
-                          fontSize: 12,
-                          fontWeight: 700,
-                          color: 'var(--foreground)',
-                        }}
-                        formatter={(value) => [s.dinheiro ? brl(Number(value || 0)) : value, s.titulo]}
-                      />
-                      <Bar
-                        dataKey={s.chave}
-                        radius={[6, 6, 0, 0]}
-                        maxBarSize={24}
-                        isAnimationActive={false}
-                        label={
-                          mostrarRotulos
-                            ? {
-                                position: 'top',
-                                fontSize: 10.5,
-                                fontWeight: 600,
-                                fill: 'var(--foreground)',
-                                formatter: (v: unknown) => (Number(v) > 0 ? fmt(Number(v)) : ''),
-                              }
-                            : false
-                        }
-                      >
-                        {dados.map((d, i) => (
-                          <Cell key={d.data || i} fill={s.cor} fillOpacity={d.fimDeSemana ? 0.3 : 1} />
-                        ))}
-                      </Bar>
-                    </BarChart>
+                    {tipoGrafico === 'barra' ? (
+                      <BarChart data={dados} margin={{ top: 16, right: 6, left: 6, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
+                          axisLine={false}
+                          tickLine={false}
+                          interval={dados.length > 16 ? 1 : 0}
+                        />
+                        <Tooltip
+                          cursor={{ fill: 'var(--progress-bg)' }}
+                          contentStyle={{
+                            background: 'var(--background)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: 'var(--foreground)',
+                          }}
+                          formatter={(value) => [s.dinheiro ? brl(Number(value || 0)) : value, s.titulo]}
+                        />
+                        <Bar
+                          dataKey={s.chave}
+                          radius={[6, 6, 0, 0]}
+                          maxBarSize={24}
+                          isAnimationActive={false}
+                          label={
+                            mostrarRotulos
+                              ? {
+                                  position: 'top',
+                                  fontSize: 10.5,
+                                  fontWeight: 600,
+                                  fill: 'var(--foreground)',
+                                  formatter: (v: unknown) => (Number(v) > 0 ? fmt(Number(v)) : ''),
+                                }
+                              : false
+                          }
+                        >
+                          {dados.map((d, i) => (
+                            <Cell key={d.data || i} fill={s.cor} fillOpacity={d.fimDeSemana ? 0.3 : 1} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    ) : (
+                      <LineChart data={dados} margin={{ top: 16, right: 6, left: 6, bottom: 0 }}>
+                        <CartesianGrid vertical={false} stroke="var(--border)" strokeOpacity={0.6} strokeDasharray="3 3" />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 11, fontWeight: 700, fill: 'var(--muted-foreground)' }}
+                          axisLine={false}
+                          tickLine={false}
+                          interval={dados.length > 16 ? 1 : 0}
+                        />
+                        <Tooltip
+                          cursor={{ stroke: 'var(--border)', strokeWidth: 1 }}
+                          contentStyle={{
+                            background: 'var(--background)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 12,
+                            fontSize: 12,
+                            fontWeight: 700,
+                            color: 'var(--foreground)',
+                          }}
+                          formatter={(value) => [s.dinheiro ? brl(Number(value || 0)) : value, s.titulo]}
+                        />
+                        <Line
+                          dataKey={s.chave}
+                          stroke={s.cor}
+                          strokeWidth={2.5}
+                          isAnimationActive={false}
+                          dot={(props: { cx?: number; cy?: number; payload?: { fimDeSemana: boolean }; index?: number }) => {
+                            const { cx, cy, payload, index } = props
+                            if (cx == null || cy == null) return <g key={`dot-${index}`} />
+                            return (
+                              <circle
+                                key={`dot-${index}`}
+                                cx={cx}
+                                cy={cy}
+                                r={4}
+                                fill={s.cor}
+                                fillOpacity={payload?.fimDeSemana ? 0.3 : 1}
+                                stroke="none"
+                              />
+                            )
+                          }}
+                          activeDot={{ r: 5.5 }}
+                          label={
+                            mostrarRotulos
+                              ? {
+                                  position: 'top',
+                                  fontSize: 10.5,
+                                  fontWeight: 600,
+                                  fill: 'var(--foreground)',
+                                  formatter: (v: unknown) => (Number(v) > 0 ? fmt(Number(v)) : ''),
+                                }
+                              : false
+                          }
+                        />
+                      </LineChart>
+                    )}
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex h-full items-center justify-center text-[13px] font-semibold text-[var(--muted-foreground)]">
