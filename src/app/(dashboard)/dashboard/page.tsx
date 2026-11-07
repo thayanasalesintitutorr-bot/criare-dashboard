@@ -17,6 +17,7 @@ import { AnimatedBackdrop } from '@/components/dashboard/animated-backdrop'
 import { DesempenhoDiarioCard } from '@/components/dashboard/desempenho-diario-card'
 import { Slide, SlideDeck } from '@/components/dashboard/slides'
 import { PerspectivaMeta } from '@/components/dashboard/perspectiva-meta'
+import { IntegridadeFechamento } from '@/components/dashboard/integridade-fechamento'
 import { useModoSlides } from '@/store/use-zoom'
 
 type EvolucaoDiariaItem = {
@@ -690,6 +691,20 @@ export default function DashboardPage() {
   const experienciaCliente = data?.kpis?.experienciaCliente
   const comparativo = data?.comparativo
 
+  // Mês (YYYY-MM) alvo do card de integridade do fechamento — só faz sentido
+  // pra um mês fechado inteiro (atual ou passado), não pra semana/personalizado.
+  const mesIntegridadeFechamento = (() => {
+    const hoje = new Date()
+    if (periodo === 'mes-atual') {
+      return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
+    }
+    if (periodo === 'mes-passado') {
+      const passado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
+      return `${passado.getFullYear()}-${String(passado.getMonth() + 1).padStart(2, '0')}`
+    }
+    return null
+  })()
+
   // Atendimento por dia + faturamento de consultas + vendas, no mesmo eixo de
   // dias — só faz sentido pra períodos com mais de um dia (semana/mês/personalizado).
   const mostrarDesempenho =
@@ -1260,6 +1275,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
               />
             </div>
           )}
+
+          <IntegridadeFechamento mes={mesIntegridadeFechamento} />
         </section>
         </Slide>
 
