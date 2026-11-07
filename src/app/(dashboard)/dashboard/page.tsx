@@ -692,7 +692,9 @@ export default function DashboardPage() {
   const comparativo = data?.comparativo
 
   // Mês (YYYY-MM) alvo do card de integridade do fechamento — só faz sentido
-  // pra um mês fechado inteiro (atual ou passado), não pra semana/personalizado.
+  // pra um mês fechado inteiro (atual, passado, ou um "personalizado" que
+  // bate exatamente com o 1º e o último dia de um mês), não pra semana ou um
+  // intervalo personalizado qualquer.
   const mesIntegridadeFechamento = (() => {
     const hoje = new Date()
     if (periodo === 'mes-atual') {
@@ -701,6 +703,15 @@ export default function DashboardPage() {
     if (periodo === 'mes-passado') {
       const passado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
       return `${passado.getFullYear()}-${String(passado.getMonth() + 1).padStart(2, '0')}`
+    }
+    if (periodo === 'personalizado' && dataInicio && dataFim) {
+      const inicio = new Date(`${dataInicio}T00:00:00`)
+      const ultimoDiaMes = new Date(inicio.getFullYear(), inicio.getMonth() + 1, 0)
+      const ehMesInteiro = dataInicio === `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, '0')}-01` && dataFim === `${ultimoDiaMes.getFullYear()}-${String(ultimoDiaMes.getMonth() + 1).padStart(2, '0')}-${String(ultimoDiaMes.getDate()).padStart(2, '0')}`
+
+      if (ehMesInteiro) {
+        return `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, '0')}`
+      }
     }
     return null
   })()
