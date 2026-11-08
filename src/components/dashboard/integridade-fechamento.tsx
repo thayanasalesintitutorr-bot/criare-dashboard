@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { AlertTriangle, Lock, ShieldCheck } from 'lucide-react'
+import { AlertTriangle, Eraser, Lock, RotateCcw, ShieldCheck } from 'lucide-react'
 import { useSessionRole } from '@/store/use-session-role'
 
 function brl(v: number) {
@@ -13,7 +13,51 @@ function formatarDataHora(iso: string) {
 }
 
 type Fechamento = { valorTotal: number; qtdVendas: number }
-type Resposta = { ok: boolean; aoVivo?: Fechamento; congelado?: (Fechamento & { congeladoEm: string }) | null; error?: string }
+type Correcao = { leadId: number; nome: string; motivo: 'reembolso' | 'apagado'; valor: number; nota?: string | null }
+type Resposta = {
+  ok: boolean
+  aoVivo?: Fechamento
+  congelado?: (Fechamento & { congeladoEm: string }) | null
+  correcoes?: Correcao[]
+  error?: string
+}
+
+const MOTIVO_ESTILO: Record<Correcao['motivo'], { label: string; Icone: typeof RotateCcw; cor: string }> = {
+  reembolso: { label: 'Reembolso', Icone: RotateCcw, cor: 'var(--warning)' },
+  apagado: { label: 'Apagado', Icone: Eraser, cor: 'var(--muted-foreground)' },
+}
+
+function ListaCorrecoes({ correcoes }: { correcoes: Correcao[] }) {
+  if (correcoes.length === 0) return null
+
+  return (
+    <div className="mt-2 space-y-1.5">
+      {correcoes.map((c) => {
+        const estilo = MOTIVO_ESTILO[c.motivo]
+        return (
+          <div
+            key={c.leadId}
+            className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.04] px-3 py-1.5 text-[12px]"
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <estilo.Icone size={13} className="shrink-0" style={{ color: estilo.cor }} />
+              <span className="truncate font-semibold text-[var(--foreground)]" title={c.nota || undefined}>
+                {c.nome}
+              </span>
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-bold uppercase"
+                style={{ color: estilo.cor, backgroundColor: `color-mix(in srgb, ${estilo.cor} 18%, transparent)` }}
+              >
+                {estilo.label}
+              </span>
+            </div>
+            <span className="shrink-0 font-bold text-[var(--muted-foreground)]">{brl(c.valor)}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 // Compara o faturamento consolidado "ao vivo" (recalculado agora, a partir
 // do estado atual dos leads no Supabase) com o valor congelado manualmente
@@ -78,27 +122,31 @@ export function IntegridadeFechamento({ mes }: { mes: string | null }) {
   if (!mes || !dados?.ok || !dados.aoVivo) return null
 
   const { aoVivo, congelado } = dados
+  const correcoes = dados.correcoes || []
   const nomeMes = new Date(`${mes}-01T00:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 
   if (!congelado) {
     return (
       <div
-        className={`mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-3 transition-opacity ${carregando ? 'opacity-60' : ''}`}
+        className={`mt-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.03] px-4 py-3 transition-opacity ${carregando ? 'opacity-60' : ''}`}
       >
-        <p className="text-[12.5px] font-semibold text-[var(--muted-foreground)]">
-          Fechamento de {nomeMes} ainda não foi congelado — sem baseline pra detectar se algum lead mudar depois.
-        </p>
-        {role === 'admin' && (
-          <button
-            type="button"
-            onClick={congelar}
-            disabled={congelando}
-            className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent)] px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-60"
-          >
-            <Lock size={13} />
-            {congelando ? 'Congelando...' : 'Congelar agora'}
-          </button>
-        )}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-[12.5px] font-semibold text-[var(--muted-foreground)]">
+            Fechamento de {nomeMes} ainda não foi congelado — sem baseline pra detectar se algum lead mudar depois.
+          </p>
+          {role === 'admin' && (
+            <button
+              type="button"
+              onClick={congelar}
+              disabled={congelando}
+              className="flex shrink-0 items-center gap-1.5 rounded-full bg-[var(--accent)] px-3 py-1.5 text-[12px] font-bold text-white disabled:opacity-60"
+            >
+              <Lock size={13} />
+              {congelando ? 'Congelando...' : 'Congelar agora'}
+            </button>
+          )}
+        </div>
+        <ListaCorrecoes correcoes={correcoes} />
       </div>
     )
   }
@@ -108,11 +156,14 @@ export function IntegridadeFechamento({ mes }: { mes: string | null }) {
 
   if (confere) {
     return (
-      <div className="mt-3 flex items-center gap-2.5 rounded-2xl bg-[var(--success)]/10 px-4 py-2.5 text-[var(--success)]">
-        <ShieldCheck size={18} className="shrink-0" />
-        <p className="text-[12.5px] font-semibold">
-          Fechamento de {nomeMes} confere com o congelado em {formatarDataHora(congelado.congeladoEm)} — {brl(congelado.valorTotal)}.
-        </p>
+      <div className="mt-3 rounded-2xl bg-[var(--success)]/10 px-4 py-2.5 text-[var(--success)]">
+        <div className="flex items-center gap-2.5">
+          <ShieldCheck size={18} className="shrink-0" />
+          <p className="text-[12.5px] font-semibold">
+            Fechamento de {nomeMes} confere com o congelado em {formatarDataHora(congelado.congeladoEm)} — {brl(congelado.valorTotal)}.
+          </p>
+        </div>
+        <ListaCorrecoes correcoes={correcoes} />
       </div>
     )
   }
@@ -130,6 +181,7 @@ export function IntegridadeFechamento({ mes }: { mes: string | null }) {
             Algum lead fechado nesse mês provavelmente mudou de status ou teve o valor alterado depois. Confira no Kommo os leads
             desse período.
           </p>
+          <ListaCorrecoes correcoes={correcoes} />
         </div>
         {role === 'admin' && (
           <button

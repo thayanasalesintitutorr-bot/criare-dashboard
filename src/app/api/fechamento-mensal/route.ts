@@ -96,9 +96,16 @@ export async function GET(req: Request) {
   }
 
   try {
-    const [aoVivo, congeladoResp] = await Promise.all([
+    const [aoVivo, congeladoResp, correcoesResp] = await Promise.all([
       calcularFechamentoDoMes(intervalo.inicio, intervalo.fim),
       fetch(`${SUPABASE_URL}/rest/v1/fechamento_mensal?mes=eq.${intervalo.inicio}&select=*`, {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+          'Accept-Profile': 'kommo',
+        },
+      }),
+      fetch(`${SUPABASE_URL}/rest/v1/correcoes_lead?mes=eq.${intervalo.inicio}&select=*&order=valor.desc`, {
         headers: {
           apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
           Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
@@ -108,9 +115,11 @@ export async function GET(req: Request) {
     ])
 
     if (!congeladoResp.ok) throw new Error(await congeladoResp.text())
+    if (!correcoesResp.ok) throw new Error(await correcoesResp.text())
 
     const congeladoRows = await congeladoResp.json()
     const congelado = congeladoRows[0] || null
+    const correcoesRows = await correcoesResp.json()
 
     return Response.json({
       ok: true,
@@ -123,6 +132,13 @@ export async function GET(req: Request) {
             congeladoEm: congelado.congelado_em,
           }
         : null,
+      correcoes: correcoesRows.map((c: Record<string, unknown>) => ({
+        leadId: c.lead_id,
+        nome: c.nome,
+        motivo: c.motivo,
+        valor: toNumber(c.valor),
+        nota: c.nota,
+      })),
     })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao calcular fechamento do mês', details: String(erro) }, { status: 500 })
