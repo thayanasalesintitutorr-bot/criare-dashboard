@@ -133,8 +133,16 @@ async function notificarSlack(valor: number, meta: number, hoje: Date) {
 }
 
 export async function GET(req: Request) {
-  const auth = await requireSession(req)
-  if (!auth.ok) return auth.response
+  // Aceita tanto a sessão logada (painel aberto no navegador) quanto o
+  // CRON_SECRET (chamada agendada pelo n8n), já que agora os dois disparam
+  // essa checagem.
+  const cronHeader = req.headers.get('authorization')
+  const viaCron = process.env.CRON_SECRET && cronHeader === `Bearer ${process.env.CRON_SECRET}`
+
+  if (!viaCron) {
+    const auth = await requireSession(req)
+    if (!auth.ok) return auth.response
+  }
 
   try {
     const hoje = new Date()

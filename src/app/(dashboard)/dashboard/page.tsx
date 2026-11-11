@@ -18,7 +18,6 @@ import { DesempenhoDiarioCard } from '@/components/dashboard/desempenho-diario-c
 import { Slide, SlideDeck } from '@/components/dashboard/slides'
 import { PerspectivaMeta } from '@/components/dashboard/perspectiva-meta'
 import { IntegridadeFechamento } from '@/components/dashboard/integridade-fechamento'
-import { NotificadorMetaDiaria } from '@/components/dashboard/notificador-meta-diaria'
 import { useModoSlides } from '@/store/use-zoom'
 
 type EvolucaoDiariaItem = {
@@ -811,7 +810,6 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
     <div className="relative isolate">
       {/* Fundo vivo, mesma pegada da entrada/login (decorativo). */}
       <AnimatedBackdrop fatos={fatosFundo} />
-      <NotificadorMetaDiaria />
 
      <SlideDeck>
      <div className="relative space-y-3">
