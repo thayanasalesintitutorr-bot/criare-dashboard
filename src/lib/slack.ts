@@ -22,15 +22,20 @@ export function saudacao(hoje: Date = new Date()) {
   return 'Boa noite'
 }
 
-// `construirTexto` recebe o primeiro nome de cada destinatário, pra cada DM
-// sair personalizada (ex: "Boa tarde, Thayana! ...").
-export async function notificarSlack(construirTexto: (nome: string) => string) {
-  const token = process.env.SLACK_BOT_TOKEN
-  if (!token) return
+export type ResultadoEnvioSlack = { destinatario: string; ok: boolean; error?: string }
 
-  await Promise.all(
-    destinatarios().map((d) =>
-      fetch('https://slack.com/api/chat.postMessage', {
+// `construirTexto` recebe o primeiro nome de cada destinatário, pra cada DM
+// sair personalizada (ex: "Boa tarde, Thayana! ..."). A API do Slack responde
+// HTTP 200 mesmo quando falha (ex: sem permissão pra essa DM) — por isso
+// sempre lemos o corpo e devolvemos o resultado de cada envio, em vez de só
+// disparar e torcer.
+export async function notificarSlack(construirTexto: (nome: string) => string): Promise<ResultadoEnvioSlack[]> {
+  const token = process.env.SLACK_BOT_TOKEN
+  if (!token) return []
+
+  return Promise.all(
+    destinatarios().map(async (d) => {
+      const resp = await fetch('https://slack.com/api/chat.postMessage', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -38,6 +43,10 @@ export async function notificarSlack(construirTexto: (nome: string) => string) {
         },
         body: JSON.stringify({ channel: d.id, text: construirTexto(d.nome || 'equipe') }),
       })
-    )
+
+      const json = await resp.json().catch(() => ({ ok: false, error: 'resposta inválida do Slack' }))
+
+      return { destinatario: d.nome || d.id, ok: Boolean(json.ok), error: json.ok ? undefined : json.error }
+    })
   )
 }

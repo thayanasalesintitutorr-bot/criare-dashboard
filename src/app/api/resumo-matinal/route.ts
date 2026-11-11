@@ -120,9 +120,9 @@ export async function GET(req: Request) {
         : `🎉 Meta de ${brl(metaMensal)} já batida neste mês!`) +
       linhaProjecao
 
-    await notificarSlack(construirTexto)
+    const envios = await notificarSlack(construirTexto)
 
-    return Response.json({ ok: true, totalMes, metaMensal, falta, percentual })
+    return Response.json({ ok: true, totalMes, metaMensal, falta, percentual, envios })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao gerar resumo matinal', details: String(erro) }, { status: 500 })
   }
