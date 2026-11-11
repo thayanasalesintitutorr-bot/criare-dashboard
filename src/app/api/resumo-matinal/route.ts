@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { chaveData, diasDoMes } from '@/lib/dias-uteis'
+
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
 function toNumber(value: unknown) {
@@ -116,12 +118,32 @@ export async function GET(req: Request) {
     const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'long' })
     const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
+    // Mesmo cálculo de "projeção de fechamento" do card Perspectiva de venda
+    // (src/components/dashboard/perspectiva-meta.tsx): ritmo médio por dia
+    // útil já passado (considerando feriados) projetado pros dias úteis que
+    // faltam no mês inteiro.
+    const diasMes = diasDoMes(hoje)
+    const hojeChave = chaveData(hoje)
+    const uteisPassados = diasMes.filter((d) => chaveData(d.data) < hojeChave && d.util).length
+    const uteisRestantes = diasMes.filter((d) => chaveData(d.data) >= hojeChave && d.util).length
+    const ritmo = uteisPassados > 0 ? totalMes / uteisPassados : 0
+    const projecaoFechamento = ritmo * (uteisPassados + uteisRestantes)
+    const diffProjecao = projecaoFechamento - metaMensal
+    const mostrarProjecao = uteisPassados > 0 && uteisRestantes > 0
+
+    const linhaProjecao = mostrarProjecao
+      ? `\nNo ritmo atual (${brl(ritmo)}/dia útil), ${nomeMes} deve fechar em *${brl(projecaoFechamento)}* — ${
+          diffProjecao >= 0 ? `${brl(diffProjecao)} acima da meta` : `${brl(Math.abs(diffProjecao))} abaixo da meta`
+        }.`
+      : ''
+
     const texto =
       `☀️ *Bom dia! Resumo de ${nomeMes}* (${dataFormatada})\n` +
       `Faturado até agora: *${brl(totalMes)}* (${percentual}% da meta)\n` +
       (falta > 0
         ? `Falta *${brl(falta)}* para bater a meta de ${brl(metaMensal)} · ${diasUteisMes} dias úteis no mês`
-        : `🎉 Meta de ${brl(metaMensal)} já batida neste mês!`)
+        : `🎉 Meta de ${brl(metaMensal)} já batida neste mês!`) +
+      linhaProjecao
 
     await notificarSlack(texto)
 
