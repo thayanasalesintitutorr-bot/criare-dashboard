@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { chaveData, diasDoMes } from '@/lib/dias-uteis'
-import { notificarSlack } from '@/lib/slack'
+import { notificarSlack, saudacao } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -112,15 +112,15 @@ export async function GET(req: Request) {
         }.`
       : ''
 
-    const texto =
-      `☀️ *Bom dia! Resumo de ${nomeMes}* (${dataFormatada})\n` +
+    const construirTexto = (nome: string) =>
+      `☀️ *${saudacao(hoje)}, ${nome}! Resumo de ${nomeMes}* (${dataFormatada})\n` +
       `Faturado até agora: *${brl(totalMes)}* (${percentual}% da meta)\n` +
       (falta > 0
         ? `Falta *${brl(falta)}* para bater a meta de ${brl(metaMensal)}`
         : `🎉 Meta de ${brl(metaMensal)} já batida neste mês!`) +
       linhaProjecao
 
-    await notificarSlack(texto)
+    await notificarSlack(construirTexto)
 
     return Response.json({ ok: true, totalMes, metaMensal, falta, percentual })
   } catch (erro) {

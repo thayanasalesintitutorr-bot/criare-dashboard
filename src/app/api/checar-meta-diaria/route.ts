@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
-import { notificarSlack } from '@/lib/slack'
+import { notificarSlack, saudacao } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -115,11 +115,11 @@ async function marcarNotificado(diaChave: string, valor: number, meta: number) {
   if (!resp.ok) throw new Error(await resp.text())
 }
 
-function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date) {
+function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date, nome: string) {
   const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
   return (
-    `🎉 *Meta diária batida!* (${dataFormatada})\n` +
+    `🎉 *${saudacao(hoje)}, ${nome}! Meta diária batida!* (${dataFormatada})\n` +
     `Faturamento de hoje: *${brl(valor)}* · meta do dia: ${brl(meta)}\n` +
     `Parabéns, equipe! 🚀`
   )
@@ -157,7 +157,7 @@ export async function GET(req: Request) {
     const atingiu = meta > 0 && valor >= meta
 
     if (atingiu) {
-      await notificarSlack(montarMensagemMetaBatida(valor, meta, hoje))
+      await notificarSlack((nome) => montarMensagemMetaBatida(valor, meta, hoje, nome))
       await marcarNotificado(diaChave, valor, meta)
     }
 

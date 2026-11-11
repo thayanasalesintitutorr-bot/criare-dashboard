@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { notificarSlack } from '@/lib/slack'
+import { notificarSlack, saudacao } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -176,13 +176,13 @@ export async function GET(req: Request) {
     const falta = Math.max(metaHoje - totalHoje, 0)
 
     for (const venda of novasVendas) {
-      const texto =
-        `💰 *Venda fechada!*\n` +
-        `${nomePaciente(venda)} — ${nomeProduto(venda)} — *${brl(toNumber(venda.venda))}*\n` +
-        `Total do dia: ${brl(totalHoje)} · ` +
-        (falta > 0 ? `falta ${brl(falta)} pra meta de hoje (${brl(metaHoje)})` : `meta do dia batida! 🎉`)
-
-      await notificarSlack(texto)
+      await notificarSlack(
+        (nome) =>
+          `💰 *${saudacao(hoje)}, ${nome}! Venda fechada!*\n` +
+          `${nomePaciente(venda)} — ${nomeProduto(venda)} — *${brl(toNumber(venda.venda))}*\n` +
+          `Total do dia: ${brl(totalHoje)} · ` +
+          (falta > 0 ? `falta ${brl(falta)} pra meta de hoje (${brl(metaHoje)})` : `meta do dia batida! 🎉`)
+      )
     }
 
     await marcarNotificados(novasVendas.map((v) => v.id))
