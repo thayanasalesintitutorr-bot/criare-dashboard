@@ -21,6 +21,12 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // Chamadas agendadas pelo n8n (meta diária e resumo matinal) não têm
+  // cookie de sessão — cada rota já valida o CRON_SECRET no próprio código.
+  if (pathname === '/api/checar-meta-diaria' || pathname === '/api/resumo-matinal') {
+    return NextResponse.next()
+  }
+
   // Links curtos de campanha (/l/xxxx) são clicados pelo público a partir de
   // anúncios — são públicos por definição, não passam por login.
   if (pathname.startsWith('/l/')) {
