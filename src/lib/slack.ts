@@ -4,6 +4,7 @@
 const DESTINATARIOS_PADRAO = [
   { id: 'U06E67Z9HHT', nome: 'Thayana' },
   { id: 'U04P493PCAJ', nome: 'Dr. Rodolpho' },
+  { id: 'U04PAT7222W', nome: 'Ana Clara' },
 ]
 
 function destinatarios() {
