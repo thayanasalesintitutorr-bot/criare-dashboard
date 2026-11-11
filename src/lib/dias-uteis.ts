@@ -54,7 +54,8 @@ export function feriadosDoAno(ano: number): DiaEspecial[] {
     { data: dia(ano, 11, 2), nome: 'Finados', tipo: 'feriado' },
     { data: dia(ano, 11, 15), nome: 'Proclamação da República', tipo: 'feriado' },
     { data: dia(ano, 11, 20), nome: 'Consciência Negra', tipo: 'feriado' },
-    { data: dia(ano, 11, 30), nome: 'Dia do Evangélico (DF)', tipo: 'feriado' },
+    // Dia do Evangélico (30/11, feriado municipal do DF) não é observado pela
+    // clínica — abre normal nesse dia (confirmado na reunião de 06/11/2026).
     { data: dia(ano, 12, 24), nome: 'Véspera de Natal', tipo: 'facultativo' },
     { data: dia(ano, 12, 25), nome: 'Natal', tipo: 'feriado' },
     { data: dia(ano, 12, 31), nome: 'Véspera de Ano Novo', tipo: 'facultativo' },
