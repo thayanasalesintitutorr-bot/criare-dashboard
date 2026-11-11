@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { chaveData, diasDoMes } from '@/lib/dias-uteis'
+import { notificarSlack } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -69,17 +70,6 @@ function getMetaMensal(ano: number, mes: number) {
 
 function brl(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
-}
-
-async function notificarSlack(texto: string) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL
-  if (!webhookUrl) return
-
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: texto }),
-  })
 }
 
 export async function GET(req: Request) {

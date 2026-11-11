@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
+import { notificarSlack } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -114,22 +115,14 @@ async function marcarNotificado(diaChave: string, valor: number, meta: number) {
   if (!resp.ok) throw new Error(await resp.text())
 }
 
-async function notificarSlack(valor: number, meta: number, hoje: Date) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL
-  if (!webhookUrl) return
-
+function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date) {
   const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text:
-        `🎉 *Meta diária batida!* (${dataFormatada})\n` +
-        `Faturamento de hoje: *${brl(valor)}* · meta do dia: ${brl(meta)}\n` +
-        `Parabéns, equipe! 🚀`,
-    }),
-  })
+  return (
+    `🎉 *Meta diária batida!* (${dataFormatada})\n` +
+    `Faturamento de hoje: *${brl(valor)}* · meta do dia: ${brl(meta)}\n` +
+    `Parabéns, equipe! 🚀`
+  )
 }
 
 export async function GET(req: Request) {
@@ -164,7 +157,7 @@ export async function GET(req: Request) {
     const atingiu = meta > 0 && valor >= meta
 
     if (atingiu) {
-      await notificarSlack(valor, meta, hoje)
+      await notificarSlack(montarMensagemMetaBatida(valor, meta, hoje))
       await marcarNotificado(diaChave, valor, meta)
     }
 

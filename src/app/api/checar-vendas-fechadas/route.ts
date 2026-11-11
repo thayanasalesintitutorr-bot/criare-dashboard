@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { notificarSlack } from '@/lib/slack'
+
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
 function toNumber(value: unknown) {
@@ -146,17 +148,6 @@ async function marcarNotificados(leadIds: number[]) {
   })
 
   if (!resp.ok) throw new Error(await resp.text())
-}
-
-async function notificarSlack(texto: string) {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL
-  if (!webhookUrl) return
-
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: texto }),
-  })
 }
 
 export async function GET(req: Request) {
