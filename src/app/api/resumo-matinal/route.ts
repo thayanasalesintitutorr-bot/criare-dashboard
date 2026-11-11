@@ -67,20 +67,6 @@ function getMetaMensal(ano: number, mes: number) {
   return 750000
 }
 
-function isDiaUtil(date: Date) {
-  const day = date.getDay()
-  return day >= 1 && day <= 5
-}
-
-function getBusinessDaysInMonth(ano: number, mes: number) {
-  const fim = new Date(ano, mes + 1, 0).getDate()
-  let count = 0
-  for (let d = 1; d <= fim; d++) {
-    if (isDiaUtil(new Date(ano, mes, d))) count++
-  }
-  return count
-}
-
 function brl(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 }
@@ -114,7 +100,6 @@ export async function GET(req: Request) {
 
     const falta = Math.max(metaMensal - totalMes, 0)
     const percentual = metaMensal > 0 ? Math.round((totalMes / metaMensal) * 100) : 0
-    const diasUteisMes = getBusinessDaysInMonth(hoje.getFullYear(), hoje.getMonth())
     const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'long' })
     const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
@@ -141,7 +126,7 @@ export async function GET(req: Request) {
       `☀️ *Bom dia! Resumo de ${nomeMes}* (${dataFormatada})\n` +
       `Faturado até agora: *${brl(totalMes)}* (${percentual}% da meta)\n` +
       (falta > 0
-        ? `Falta *${brl(falta)}* para bater a meta de ${brl(metaMensal)} · ${diasUteisMes} dias úteis no mês`
+        ? `Falta *${brl(falta)}* para bater a meta de ${brl(metaMensal)}`
         : `🎉 Meta de ${brl(metaMensal)} já batida neste mês!`) +
       linhaProjecao
 
