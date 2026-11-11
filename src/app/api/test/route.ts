@@ -296,10 +296,18 @@ const META_TICKET_MEDIO = 2800
 const META_MENSAL_NPS = 25
 
 // Meta mensal de vendas: R$ 750.000 até agosto/2026 (inclusive), R$ 1.000.000
-// a partir de setembro/2026 (inclusive) — a meta subiu só a partir desse mês,
+// de setembro a outubro/2026 (inclusive) — a meta subiu só a partir desse mês,
 // meses anteriores continuam valendo pela meta antiga. `mes` é 0-indexado
 // (padrão JS Date: janeiro = 0).
+//
+// Novembro e dezembro/2026 usam a meta combinada de R$ 1,5 milhão definida na
+// reunião de equipe de 06/11/2026 ("Meta Novembro + Dezembro"), dividida entre
+// os dois meses na proporção de dias úteis de cada um: R$ 839 mil em novembro
+// e R$ 661 mil em dezembro (839 + 661 = 1.500).
 function getMetaMensalVendas(ano: number, mes: number) {
+  if (ano === 2026 && mes === 10) return 839000 // novembro
+  if (ano === 2026 && mes === 11) return 661000 // dezembro
+
   const CORTE_ANO = 2026
   const CORTE_MES = 8 // setembro
 
