@@ -308,6 +308,14 @@ const META_MENSAL_NPS = 25
 // (ver GET, logo após o Promise.all) e usado aqui.
 let metaDezembroAjustada = 500000
 
+// Meta dinâmica de "hoje" (igual à do card Perspectiva de venda e dos avisos
+// do Slack): o que falta pra meta do mês dividido pelos dias úteis que ainda
+// restam nele, já contando o que foi vendido até agora — recalculada a cada
+// requisição (ver GET, logo após o Promise.all). Fora da janela nov/dez-2026
+// fica null e o filtro "Hoje"/"Ontem" cai na meta estática de sempre (mês ÷
+// dias úteis do mês).
+let metaDiariaHojeDinamica: number | null = null
+
 function getMetaMensalVendas(ano: number, mes: number) {
   if (ano === 2026 && mes === 10) return 1000000 // novembro
   if (ano === 2026 && mes === 11) return metaDezembroAjustada // dezembro
@@ -421,7 +429,11 @@ function getGoalForPeriod(startDate: Date, endDate: Date, periodType: string) {
     return getMetaMensalVendas(startDay.getFullYear(), startDay.getMonth())
   }
 
-  if (periodType === 'hoje' || periodType === 'ontem') {
+  if (periodType === 'hoje') {
+    return metaDiariaHojeDinamica ?? getDailyGoalForMonth(startDay)
+  }
+
+  if (periodType === 'ontem') {
     return getDailyGoalForMonth(startDay)
   }
 
@@ -770,6 +782,7 @@ async function fetchAllAmplimed() {
     ])
 
     metaDezembroAjustada = Math.max(500000 + (1000000 - realizadoNovembro), 0)
+    metaDiariaHojeDinamica = agora >= inicioNovembro && agora <= new Date(2026, 11, 18) ? campanhaMeta.metaDiaria : null
 
     const consultaLeads = filterBySegmento(
       consultaBase.filter((l) => normalize(l.pipeline_id) === 'CONSULTA'),
