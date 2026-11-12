@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { requireSession } from '@/lib/require-session'
 import { saudacao } from '@/lib/slack'
 import { agoraBrasilia } from '@/lib/date-range'
+import { diasDoMes } from '@/lib/dias-uteis'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -69,18 +70,10 @@ function getMetaMensal(ano: number, mes: number) {
   return 750000
 }
 
-function isDiaUtil(date: Date) {
-  const day = date.getDay()
-  return day >= 1 && day <= 5
-}
-
+// Mesma contagem de dias úteis do card Perspectiva de venda (desconta
+// feriados e pontos facultativos, não só fim de semana) — ver dias-uteis.ts.
 function getBusinessDaysInMonth(ano: number, mes: number) {
-  const fim = new Date(ano, mes + 1, 0).getDate()
-  let count = 0
-  for (let d = 1; d <= fim; d++) {
-    if (isDiaUtil(new Date(ano, mes, d))) count++
-  }
-  return count
+  return diasDoMes(new Date(ano, mes, 1)).filter((d) => d.util).length
 }
 
 function getMetaDiaria(hoje: Date) {

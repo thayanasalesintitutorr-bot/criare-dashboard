@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { saudacao } from '@/lib/slack'
 import { agoraBrasilia } from '@/lib/date-range'
+import { diasDoMes } from '@/lib/dias-uteis'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -26,28 +27,35 @@ function supabaseHeaders() {
   }
 }
 
-type LeadVenda = {
+type LeadEvento = {
   id: number
   name?: string | null
   contact_name?: string | null
   venda?: number | string | null
+  faturamento?: number | string | null
   Produto?: string | string[] | null
   closed_at?: string | null
+  tipo: 'venda' | 'consulta'
 }
 
 // O nome do lead no Kommo vem como "PRODUTO - Nome do Paciente" — contact_name
 // quase sempre vem vazio na prática, então o nome do paciente sai da última
 // parte depois do " - " (ou do nome inteiro, se não tiver esse separador).
-function nomePaciente(lead: LeadVenda) {
+function nomePaciente(lead: LeadEvento) {
   if (lead.contact_name?.trim()) return lead.contact_name.trim()
 
   const partes = String(lead.name || '').split(' - ')
   return (partes[partes.length - 1] || lead.name || 'Paciente').trim()
 }
 
-function nomeProduto(lead: LeadVenda) {
+function nomeProduto(lead: LeadEvento) {
+  if (lead.tipo === 'consulta') return 'Consulta'
   if (Array.isArray(lead.Produto)) return lead.Produto.filter(Boolean).join(', ') || 'Produto não informado'
   return String(lead.Produto || '').trim() || 'Produto não informado'
+}
+
+function valorLead(lead: LeadEvento) {
+  return lead.tipo === 'venda' ? toNumber(lead.venda) : toNumber(lead.faturamento)
 }
 
 function brl(v: number) {
@@ -93,18 +101,10 @@ function getMetaMensal(ano: number, mes: number) {
   return 750000
 }
 
-function isDiaUtil(date: Date) {
-  const day = date.getDay()
-  return day >= 1 && day <= 5
-}
-
+// Mesma contagem de dias úteis do card Perspectiva de venda (desconta
+// feriados e pontos facultativos, não só fim de semana) — ver dias-uteis.ts.
 function getBusinessDaysInMonth(ano: number, mes: number) {
-  const fim = new Date(ano, mes + 1, 0).getDate()
-  let count = 0
-  for (let d = 1; d <= fim; d++) {
-    if (isDiaUtil(new Date(ano, mes, d))) count++
-  }
-  return count
+  return diasDoMes(new Date(ano, mes, 1)).filter((d) => d.util).length
 }
 
 function getMetaDiaria(hoje: Date) {
@@ -113,25 +113,38 @@ function getMetaDiaria(hoje: Date) {
   return diasUteis > 0 ? metaMensal / diasUteis : 0
 }
 
-async function buscarVendasDoDiaAindaNaoNotificadas(inicio: string, fim: string): Promise<LeadVenda[]> {
-  const [vendasResp, notificadasResp] = await Promise.all([
+// Busca tanto vendas fechadas (pipeline VENDAS, Venda ganha) quanto consultas
+// recebidas (pipeline CONSULTA, GANHOU) do dia que ainda não geraram aviso —
+// as duas contam como "venda fechada" pro aviso no Slack.
+async function buscarEventosDoDiaAindaNaoNotificados(inicio: string, fim: string): Promise<LeadEvento[]> {
+  const [vendasResp, consultasResp, notificadasResp] = await Promise.all([
     fetch(
       `${SUPABASE_URL}/rest/v1/leads?pipeline_id=eq.VENDAS&status_id=eq.${encodeURIComponent('Venda ganha')}` +
         `&closed_at=gte.${inicio}&closed_at=lt.${fim}&is_deleted=is.false` +
         `&select=id,name,contact_name,venda,Produto,closed_at&order=closed_at.asc`,
       { headers: supabaseHeaders() }
     ),
+    fetch(
+      `${SUPABASE_URL}/rest/v1/leads?pipeline_id=eq.CONSULTA&status_id=eq.${encodeURIComponent('GANHOU')}` +
+        `&closed_at=gte.${inicio}&closed_at=lt.${fim}&is_deleted=is.false` +
+        `&select=id,name,contact_name,faturamento,closed_at&order=closed_at.asc`,
+      { headers: supabaseHeaders() }
+    ),
     fetch(`${SUPABASE_URL}/rest/v1/vendas_notificadas?select=lead_id`, { headers: supabaseHeaders() }),
   ])
 
   if (!vendasResp.ok) throw new Error(await vendasResp.text())
+  if (!consultasResp.ok) throw new Error(await consultasResp.text())
   if (!notificadasResp.ok) throw new Error(await notificadasResp.text())
 
-  const vendas: LeadVenda[] = await vendasResp.json()
+  const vendas: LeadEvento[] = (await vendasResp.json()).map((l: LeadEvento) => ({ ...l, tipo: 'venda' as const }))
+  const consultas: LeadEvento[] = (await consultasResp.json()).map((l: LeadEvento) => ({ ...l, tipo: 'consulta' as const }))
   const notificadas: { lead_id: number }[] = await notificadasResp.json()
   const jaNotificados = new Set(notificadas.map((n) => n.lead_id))
 
-  return vendas.filter((l) => toNumber(l.venda) > 0 && !jaNotificados.has(l.id))
+  return [...vendas, ...consultas]
+    .filter((l) => valorLead(l) > 0 && !jaNotificados.has(l.id))
+    .sort((a, b) => String(a.closed_at).localeCompare(String(b.closed_at)))
 }
 
 async function marcarNotificados(leadIds: number[]) {
@@ -163,10 +176,10 @@ export async function GET(req: Request) {
     const inicioAmanha = new Date(inicioHoje)
     inicioAmanha.setDate(inicioAmanha.getDate() + 1)
 
-    const novasVendas = await buscarVendasDoDiaAindaNaoNotificadas(inicioHoje.toISOString(), inicioAmanha.toISOString())
+    const novosEventos = await buscarEventosDoDiaAindaNaoNotificados(inicioHoje.toISOString(), inicioAmanha.toISOString())
 
-    if (novasVendas.length === 0) {
-      return Response.json({ ok: true, novasVendas: 0 })
+    if (novosEventos.length === 0) {
+      return Response.json({ ok: true, novosEventos: 0 })
     }
 
     const [totalHoje, metaHoje] = await Promise.all([
@@ -176,18 +189,22 @@ export async function GET(req: Request) {
 
     const falta = Math.max(metaHoje - totalHoje, 0)
 
-    const mensagens = novasVendas.map(
-      (venda) =>
-        `💰 *${saudacao(hoje)}, equipe! Venda fechada!*\n` +
-        `${nomePaciente(venda)} — ${nomeProduto(venda)} — *${brl(toNumber(venda.venda))}*\n` +
+    const mensagens = novosEventos.map((evento) => {
+      const titulo = evento.tipo === 'venda' ? 'Venda fechada!' : 'Consulta recebida!'
+      const emoji = evento.tipo === 'venda' ? '💰' : '🩺'
+
+      return (
+        `${emoji} *${saudacao(hoje)}, equipe! ${titulo}*\n` +
+        `${nomePaciente(evento)} — ${nomeProduto(evento)} — *${brl(valorLead(evento))}*\n` +
         `Total do dia: ${brl(totalHoje)} · ` +
         (falta > 0 ? `falta ${brl(falta)} pra meta de hoje (${brl(metaHoje)})` : `meta do dia batida! 🎉`)
-    )
+      )
+    })
 
-    await marcarNotificados(novasVendas.map((v) => v.id))
+    await marcarNotificados(novosEventos.map((e) => e.id))
 
-    return Response.json({ ok: true, novasVendas: novasVendas.length, totalHoje, metaHoje, falta, mensagens })
+    return Response.json({ ok: true, novosEventos: novosEventos.length, totalHoje, metaHoje, falta, mensagens })
   } catch (erro) {
-    return Response.json({ ok: false, error: 'Falha ao checar vendas fechadas', details: String(erro) }, { status: 500 })
+    return Response.json({ ok: false, error: 'Falha ao checar eventos fechados', details: String(erro) }, { status: 500 })
   }
 }
