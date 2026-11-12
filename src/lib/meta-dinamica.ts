@@ -70,10 +70,10 @@ export function getMetaMensal(ano: number, mes: number) {
 // combinado nos dois meses (R$1.000.000 + R$500.000). Em vez de uma meta
 // fixa por mês, o valor por dia útil é recalculado todo dia: pega tudo que
 // já foi faturado desde 01/11 e divide o que falta pros R$1,5 milhão pelos
-// dias úteis que restam até 31/12 — se as vendas atrasam, o valor diário
-// sobe; se adiantam, desce.
+// dias úteis que restam até 18/12 (último dia trabalhado em dezembro) — se
+// as vendas atrasam, o valor diário sobe; se adiantam, desce.
 const INICIO_CAMPANHA = new Date(2026, 10, 1) // 01/11/2026
-const FIM_CAMPANHA = new Date(2026, 11, 31) // 31/12/2026
+const FIM_CAMPANHA = new Date(2026, 11, 18) // 18/12/2026
 const META_CAMPANHA = 1500000
 
 function dentroDaCampanha(hoje: Date) {

@@ -9,7 +9,7 @@ const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 // nessa janela, os dias úteis considerados abrangem os dois meses juntos
 // (não só o mês corrente) — mesma janela usada em src/lib/meta-dinamica.ts.
 const INICIO_CAMPANHA = new Date(2026, 10, 1)
-const FIM_CAMPANHA = new Date(2026, 11, 31)
+const FIM_CAMPANHA = new Date(2026, 11, 18) // último dia trabalhado em dezembro
 
 function brl(v: number) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
