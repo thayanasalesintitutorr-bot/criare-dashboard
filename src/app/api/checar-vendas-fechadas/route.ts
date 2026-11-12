@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { notificarSlack, saudacao } from '@/lib/slack'
+import { saudacao } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -175,19 +175,17 @@ export async function GET(req: Request) {
 
     const falta = Math.max(metaHoje - totalHoje, 0)
 
-    for (const venda of novasVendas) {
-      await notificarSlack(
-        (nome) =>
-          `💰 *${saudacao(hoje)}, ${nome}! Venda fechada!*\n` +
-          `${nomePaciente(venda)} — ${nomeProduto(venda)} — *${brl(toNumber(venda.venda))}*\n` +
-          `Total do dia: ${brl(totalHoje)} · ` +
-          (falta > 0 ? `falta ${brl(falta)} pra meta de hoje (${brl(metaHoje)})` : `meta do dia batida! 🎉`)
-      )
-    }
+    const mensagens = novasVendas.map(
+      (venda) =>
+        `💰 *${saudacao(hoje)}, equipe! Venda fechada!*\n` +
+        `${nomePaciente(venda)} — ${nomeProduto(venda)} — *${brl(toNumber(venda.venda))}*\n` +
+        `Total do dia: ${brl(totalHoje)} · ` +
+        (falta > 0 ? `falta ${brl(falta)} pra meta de hoje (${brl(metaHoje)})` : `meta do dia batida! 🎉`)
+    )
 
     await marcarNotificados(novasVendas.map((v) => v.id))
 
-    return Response.json({ ok: true, novasVendas: novasVendas.length, totalHoje, metaHoje, falta })
+    return Response.json({ ok: true, novasVendas: novasVendas.length, totalHoje, metaHoje, falta, mensagens })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao checar vendas fechadas', details: String(erro) }, { status: 500 })
   }

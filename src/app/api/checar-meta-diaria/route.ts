@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
-import { notificarSlack, saudacao } from '@/lib/slack'
+import { saudacao } from '@/lib/slack'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -115,11 +115,11 @@ async function marcarNotificado(diaChave: string, valor: number, meta: number) {
   if (!resp.ok) throw new Error(await resp.text())
 }
 
-function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date, nome: string) {
+function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date) {
   const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
   return (
-    `🎉 *${saudacao(hoje)}, ${nome}! Meta diária batida!* (${dataFormatada})\n` +
+    `🎉 *${saudacao(hoje)}, equipe! Meta diária batida!* (${dataFormatada})\n` +
     `Faturamento de hoje: *${brl(valor)}* · meta do dia: ${brl(meta)}\n` +
     `Parabéns, equipe! 🚀`
   )
@@ -155,13 +155,14 @@ export async function GET(req: Request) {
     ])
 
     const atingiu = meta > 0 && valor >= meta
+    let mensagem: string | null = null
 
     if (atingiu) {
-      await notificarSlack((nome) => montarMensagemMetaBatida(valor, meta, hoje, nome))
+      mensagem = montarMensagemMetaBatida(valor, meta, hoje)
       await marcarNotificado(diaChave, valor, meta)
     }
 
-    return Response.json({ ok: true, atingiu, jaNotificado: false, valor, meta })
+    return Response.json({ ok: true, atingiu, jaNotificado: false, valor, meta, mensagem })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao checar meta diária', details: String(erro) }, { status: 500 })
   }
