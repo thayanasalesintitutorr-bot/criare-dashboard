@@ -3,22 +3,9 @@ export const dynamic = 'force-dynamic'
 import { requireSession } from '@/lib/require-session'
 import { saudacao } from '@/lib/slack'
 import { agoraBrasilia } from '@/lib/date-range'
-import { diasDoMes } from '@/lib/dias-uteis'
+import { calcularFaturamento, calcularMetaDinamica } from '@/lib/meta-dinamica'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
-
-function toNumber(value: unknown) {
-  if (value === null || value === undefined || value === '') return 0
-  if (typeof value === 'number') return value
-
-  const raw = String(value).trim()
-  if (!raw) return 0
-
-  const normalized = raw.replace(/\s/g, '').replace(/\./g, '').replace(',', '.')
-  const parsed = Number(normalized)
-
-  return Number.isFinite(parsed) ? parsed : 0
-}
 
 function supabaseHeaders() {
   return {
@@ -26,60 +13,6 @@ function supabaseHeaders() {
     Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
     'Accept-Profile': 'kommo',
   }
-}
-
-type LeadResumo = { venda?: number | string | null; faturamento?: number | string | null }
-
-async function buscarLeadsFechados(pipelineId: string, status: string, inicio: string, fim: string): Promise<LeadResumo[]> {
-  const url =
-    `${SUPABASE_URL}/rest/v1/leads?pipeline_id=eq.${pipelineId}&status_id=eq.${encodeURIComponent(status)}` +
-    `&closed_at=gte.${inicio}&closed_at=lt.${fim}&is_deleted=is.false&select=venda,faturamento`
-
-  const response = await fetch(url, { headers: supabaseHeaders() })
-  if (!response.ok) throw new Error(await response.text())
-
-  return response.json()
-}
-
-// Mesmo critério do consolidadoValorVendas em src/app/api/test/route.ts:
-// soma faturamento de Consulta (GANHOU) + Reabord (FECHADO (GANHO)) + venda
-// de Vendas (VENDA GANHA, venda > 0).
-async function calcularFaturamentoDoDia(inicio: string, fim: string) {
-  const [consulta, reabord, vendas] = await Promise.all([
-    buscarLeadsFechados('CONSULTA', 'GANHOU', inicio, fim),
-    buscarLeadsFechados('REABORD', 'FECHADO (GANHO)', inicio, fim),
-    buscarLeadsFechados('VENDAS', 'Venda ganha', inicio, fim),
-  ])
-
-  const vendasValidas = vendas.filter((l) => toNumber(l.venda) > 0)
-  const valorConsulta = consulta.reduce((acc, l) => acc + toNumber(l.faturamento), 0)
-  const valorReabord = reabord.reduce((acc, l) => acc + toNumber(l.faturamento), 0)
-  const valorVendas = vendasValidas.reduce((acc, l) => acc + toNumber(l.venda), 0)
-
-  return valorConsulta + valorReabord + valorVendas
-}
-
-// Mesma meta mensal usada em getMetaMensalVendas (src/app/api/test/route.ts) —
-// mantém os dois sincronizados manualmente se a meta mudar de novo.
-function getMetaMensal(ano: number, mes: number) {
-  if (ano === 2026 && mes === 10) return 839000 // novembro
-  if (ano === 2026 && mes === 11) return 661000 // dezembro
-
-  if (ano > 2026 || (ano === 2026 && mes >= 8)) return 1000000
-
-  return 750000
-}
-
-// Mesma contagem de dias úteis do card Perspectiva de venda (desconta
-// feriados e pontos facultativos, não só fim de semana) — ver dias-uteis.ts.
-function getBusinessDaysInMonth(ano: number, mes: number) {
-  return diasDoMes(new Date(ano, mes, 1)).filter((d) => d.util).length
-}
-
-function getMetaDiaria(hoje: Date) {
-  const diasUteis = getBusinessDaysInMonth(hoje.getFullYear(), hoje.getMonth())
-  const metaMensal = getMetaMensal(hoje.getFullYear(), hoje.getMonth())
-  return diasUteis > 0 ? metaMensal / diasUteis : 0
 }
 
 function brl(v: number) {
@@ -147,11 +80,12 @@ export async function GET(req: Request) {
       return Response.json({ ok: true, atingiu: true, jaNotificado: true })
     }
 
-    const [valor, meta] = await Promise.all([
-      calcularFaturamentoDoDia(inicioHoje.toISOString(), inicioAmanha.toISOString()),
-      Promise.resolve(getMetaDiaria(hoje)),
+    const [valor, metaInfo] = await Promise.all([
+      calcularFaturamento(inicioHoje.toISOString(), inicioAmanha.toISOString()),
+      calcularMetaDinamica(hoje),
     ])
 
+    const meta = metaInfo.metaDiaria
     const atingiu = meta > 0 && valor >= meta
     let mensagem: string | null = null
 
@@ -160,7 +94,7 @@ export async function GET(req: Request) {
       await marcarNotificado(diaChave, valor, meta)
     }
 
-    return Response.json({ ok: true, atingiu, jaNotificado: false, valor, meta, mensagem })
+    return Response.json({ ok: true, atingiu, jaNotificado: false, valor, meta, mensagem, metaInfo })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao checar meta diária', details: String(erro) }, { status: 500 })
   }
