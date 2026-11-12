@@ -115,13 +115,17 @@ async function marcarNotificado(diaChave: string, valor: number, meta: number) {
   if (!resp.ok) throw new Error(await resp.text())
 }
 
+// {{NOME}} é substituído pelo n8n pelo primeiro nome de cada pessoa do Slack
+// antes de enviar — assim cada um recebe a mensagem personalizada.
 function montarMensagemMetaBatida(valor: number, meta: number, hoje: Date) {
   const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
   return (
-    `🎉 *${saudacao(hoje)}, equipe! Meta diária batida!* (${dataFormatada})\n` +
-    `Faturamento de hoje: *${brl(valor)}* · meta do dia: ${brl(meta)}\n` +
-    `Parabéns, equipe! 🚀`
+    `🎉🔥 *META DIÁRIA BATIDA!* 🔥🎉\n` +
+    `${saudacao(hoje)}, {{NOME}}! (${dataFormatada})\n\n` +
+    `💰 Faturamento de hoje: *${brl(valor)}*\n` +
+    `🎯 Meta do dia: ${brl(meta)}\n\n` +
+    `🚀🙌 Parabéns pelo esforço, time! Bora continuar nesse ritmo! 🏆✨`
   )
 }
 
