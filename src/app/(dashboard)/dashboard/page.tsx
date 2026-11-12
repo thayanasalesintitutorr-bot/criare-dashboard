@@ -111,6 +111,14 @@ conveniosConsulta?: {
     metaValorVendas: number
     metaTicketMedio: number
   }
+  campanhaMeta?: {
+    metaDiaria: number
+    realizado: number
+    falta: number
+    diasUteisRestantes: number
+    diasUteisPassados: number
+    totalMeta: number
+  }
 
   comparativo?: {
     marketing?: {
@@ -1280,8 +1288,8 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
           {periodo === 'mes-atual' && (
             <div className="mt-2 pb-2">
               <PerspectivaMeta
-                meta={metaVendas}
-                realizado={consolidado?.valorVendas || 0}
+                meta={data?.campanhaMeta?.totalMeta || metaVendas}
+                realizado={data?.campanhaMeta?.realizado ?? consolidado?.valorVendas ?? 0}
                 ticketMedio={consolidado?.ticketMedio || 0}
               />
             </div>

@@ -1,7 +1,8 @@
 export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
-import { getGlobalRange, parseLocalDate, startOfDay, endOfDay } from '@/lib/date-range'
+import { getGlobalRange, parseLocalDate, startOfDay, endOfDay, agoraBrasilia } from '@/lib/date-range'
+import { calcularMetaDinamica } from '@/lib/meta-dinamica'
 
 // Cache em memória de curta duração: evita recomputar a mesma combinação de filtros
 // quando o Topbar e a página ativa pedem os mesmos dados quase ao mesmo tempo, ou
@@ -746,12 +747,15 @@ async function fetchAllAmplimed() {
     const janelaSegura = buildJanelaSegura([range, previousRange, nextWeekRange])
     const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
 
-    const [consultaBase, vendasBase, reabordBase, npsData, amplimedData] = await Promise.all([
+    const [consultaBase, vendasBase, reabordBase, npsData, amplimedData, campanhaMeta] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA', janelaFiltro),
       fetchAllLeadsByPipeline('VENDAS', janelaFiltro),
       fetchAllLeadsByPipeline('REABORD'),
       fetchNps(),
       fetchAllAmplimed(),
+      // Pote único da campanha Nov+Dez/2026 (R$1,5mi), recalculado a cada
+      // chamada — mesma lógica usada nos avisos do Slack (ver meta-dinamica.ts).
+      calcularMetaDinamica(agoraBrasilia()),
     ])
 
     const consultaLeads = filterBySegmento(
@@ -2827,8 +2831,9 @@ painelAtendimento,
         ticketMedio: consolidadoTicketMedio,
         metaValorVendas: metaValorTotalVendas,
         metaTicketMedio: metaTicketMedioConsolidado,
-    
+
       },
+      campanhaMeta,
       comparativo: {
       atendimento: {
       totalPrimeiraVezAnterior,
