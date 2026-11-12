@@ -35,7 +35,7 @@ type LeadEvento = {
   faturamento?: number | string | null
   Produto?: string | string[] | null
   closed_at?: string | null
-  tipo: 'venda' | 'consulta'
+  tipo: 'venda' | 'consulta' | 'reabord'
 }
 
 // O nome do lead no Kommo vem como "PRODUTO - Nome do Paciente" — contact_name
@@ -50,6 +50,7 @@ function nomePaciente(lead: LeadEvento) {
 
 function nomeProduto(lead: LeadEvento) {
   if (lead.tipo === 'consulta') return 'Consulta'
+  if (lead.tipo === 'reabord') return 'Reabordagem'
   if (Array.isArray(lead.Produto)) return lead.Produto.filter(Boolean).join(', ') || 'Produto não informado'
   return String(lead.Produto || '').trim() || 'Produto não informado'
 }
@@ -113,11 +114,12 @@ function getMetaDiaria(hoje: Date) {
   return diasUteis > 0 ? metaMensal / diasUteis : 0
 }
 
-// Busca tanto vendas fechadas (pipeline VENDAS, Venda ganha) quanto consultas
-// recebidas (pipeline CONSULTA, GANHOU) do dia que ainda não geraram aviso —
-// as duas contam como "venda fechada" pro aviso no Slack.
+// Busca vendas fechadas (pipeline VENDAS, Venda ganha), consultas recebidas
+// (pipeline CONSULTA, GANHOU) e reabordagens fechadas (pipeline REABORD,
+// FECHADO (GANHO)) do dia que ainda não geraram aviso — as três contam como
+// "venda fechada" pro aviso no Slack.
 async function buscarEventosDoDiaAindaNaoNotificados(inicio: string, fim: string): Promise<LeadEvento[]> {
-  const [vendasResp, consultasResp, notificadasResp] = await Promise.all([
+  const [vendasResp, consultasResp, reabordResp, notificadasResp] = await Promise.all([
     fetch(
       `${SUPABASE_URL}/rest/v1/leads?pipeline_id=eq.VENDAS&status_id=eq.${encodeURIComponent('Venda ganha')}` +
         `&closed_at=gte.${inicio}&closed_at=lt.${fim}&is_deleted=is.false` +
@@ -130,19 +132,27 @@ async function buscarEventosDoDiaAindaNaoNotificados(inicio: string, fim: string
         `&select=id,name,contact_name,faturamento,closed_at&order=closed_at.asc`,
       { headers: supabaseHeaders() }
     ),
+    fetch(
+      `${SUPABASE_URL}/rest/v1/leads?pipeline_id=eq.REABORD&status_id=eq.${encodeURIComponent('FECHADO (GANHO)')}` +
+        `&closed_at=gte.${inicio}&closed_at=lt.${fim}&is_deleted=is.false` +
+        `&select=id,name,contact_name,faturamento,closed_at&order=closed_at.asc`,
+      { headers: supabaseHeaders() }
+    ),
     fetch(`${SUPABASE_URL}/rest/v1/vendas_notificadas?select=lead_id`, { headers: supabaseHeaders() }),
   ])
 
   if (!vendasResp.ok) throw new Error(await vendasResp.text())
   if (!consultasResp.ok) throw new Error(await consultasResp.text())
+  if (!reabordResp.ok) throw new Error(await reabordResp.text())
   if (!notificadasResp.ok) throw new Error(await notificadasResp.text())
 
   const vendas: LeadEvento[] = (await vendasResp.json()).map((l: LeadEvento) => ({ ...l, tipo: 'venda' as const }))
   const consultas: LeadEvento[] = (await consultasResp.json()).map((l: LeadEvento) => ({ ...l, tipo: 'consulta' as const }))
+  const reabord: LeadEvento[] = (await reabordResp.json()).map((l: LeadEvento) => ({ ...l, tipo: 'reabord' as const }))
   const notificadas: { lead_id: number }[] = await notificadasResp.json()
   const jaNotificados = new Set(notificadas.map((n) => n.lead_id))
 
-  return [...vendas, ...consultas]
+  return [...vendas, ...consultas, ...reabord]
     .filter((l) => valorLead(l) > 0 && !jaNotificados.has(l.id))
     .sort((a, b) => String(a.closed_at).localeCompare(String(b.closed_at)))
 }
@@ -190,8 +200,9 @@ export async function GET(req: Request) {
     const falta = Math.max(metaHoje - totalHoje, 0)
 
     const mensagens = novosEventos.map((evento) => {
-      const titulo = evento.tipo === 'venda' ? 'Venda fechada!' : 'Consulta recebida!'
-      const emoji = evento.tipo === 'venda' ? '💰' : '🩺'
+      const titulo =
+        evento.tipo === 'venda' ? 'Venda fechada!' : evento.tipo === 'reabord' ? 'Reabordagem fechada!' : 'Consulta recebida!'
+      const emoji = evento.tipo === 'venda' ? '💰' : evento.tipo === 'reabord' ? '🔁' : '🩺'
 
       return (
         `${emoji} *${saudacao(hoje)}, equipe! ${titulo}*\n` +
