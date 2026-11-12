@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
 import { getGlobalRange, parseLocalDate, startOfDay, endOfDay, agoraBrasilia } from '@/lib/date-range'
-import { calcularMetaDinamica } from '@/lib/meta-dinamica'
+import { calcularFaturamento, calcularMetaDinamica } from '@/lib/meta-dinamica'
 
 // Cache em memória de curta duração: evita recomputar a mesma combinação de filtros
 // quando o Topbar e a página ativa pedem os mesmos dados quase ao mesmo tempo, ou
@@ -301,13 +301,16 @@ const META_MENSAL_NPS = 25
 // meses anteriores continuam valendo pela meta antiga. `mes` é 0-indexado
 // (padrão JS Date: janeiro = 0).
 //
-// Novembro e dezembro/2026 usam a meta combinada de R$ 1,5 milhão definida na
-// reunião de equipe de 06/11/2026 ("Meta Novembro + Dezembro"), dividida entre
-// os dois meses na proporção de dias úteis de cada um: R$ 839 mil em novembro
-// e R$ 661 mil em dezembro (839 + 661 = 1.500).
+// Novembro/2026 tem meta própria fixa de R$ 1.000.000. Dezembro/2026 começa
+// em R$ 500.000 e é ajustado pelo resultado de novembro (sobra ou falta
+// "rola" pra frente) — ver calcularMetaDinamica em src/lib/meta-dinamica.ts,
+// mesma regra. `metaDezembroAjustada` é calculado uma vez por requisição
+// (ver GET, logo após o Promise.all) e usado aqui.
+let metaDezembroAjustada = 500000
+
 function getMetaMensalVendas(ano: number, mes: number) {
-  if (ano === 2026 && mes === 10) return 839000 // novembro
-  if (ano === 2026 && mes === 11) return 661000 // dezembro
+  if (ano === 2026 && mes === 10) return 1000000 // novembro
+  if (ano === 2026 && mes === 11) return metaDezembroAjustada // dezembro
 
   const CORTE_ANO = 2026
   const CORTE_MES = 8 // setembro
@@ -747,16 +750,26 @@ async function fetchAllAmplimed() {
     const janelaSegura = buildJanelaSegura([range, previousRange, nextWeekRange])
     const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
 
-    const [consultaBase, vendasBase, reabordBase, npsData, amplimedData, campanhaMeta] = await Promise.all([
+    const agora = agoraBrasilia()
+    const inicioNovembro = new Date(2026, 10, 1)
+    const limiteNovembro = new Date(Math.min(new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1).getTime(), new Date(2026, 11, 1).getTime()))
+
+    const [consultaBase, vendasBase, reabordBase, npsData, amplimedData, campanhaMeta, realizadoNovembro] = await Promise.all([
       fetchAllLeadsByPipeline('CONSULTA', janelaFiltro),
       fetchAllLeadsByPipeline('VENDAS', janelaFiltro),
       fetchAllLeadsByPipeline('REABORD'),
       fetchNps(),
       fetchAllAmplimed(),
-      // Pote único da campanha Nov+Dez/2026 (R$1,5mi), recalculado a cada
-      // chamada — mesma lógica usada nos avisos do Slack (ver meta-dinamica.ts).
-      calcularMetaDinamica(agoraBrasilia()),
+      // Meta de novembro (fixa) ou dezembro (ajustada pelo rollover de
+      // novembro) do mês atual — mesma lógica usada nos avisos do Slack
+      // (ver meta-dinamica.ts).
+      calcularMetaDinamica(agora),
+      // Faturado em novembro/2026 até agora (ou fechado, se já virou dezembro)
+      // — usado só para ajustar a meta de dezembro em getMetaMensalVendas.
+      calcularFaturamento(inicioNovembro.toISOString(), limiteNovembro.toISOString()),
     ])
+
+    metaDezembroAjustada = Math.max(500000 + (1000000 - realizadoNovembro), 0)
 
     const consultaLeads = filterBySegmento(
       consultaBase.filter((l) => normalize(l.pipeline_id) === 'CONSULTA'),
