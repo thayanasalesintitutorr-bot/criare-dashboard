@@ -112,8 +112,10 @@ export async function GET(req: Request) {
         }.`
       : ''
 
+    // {{NOME}} é substituído pelo n8n pelo primeiro nome de cada pessoa do
+    // Slack antes de enviar — assim cada um recebe a mensagem personalizada.
     const mensagem =
-      `☀️ *${saudacao(hoje)}, equipe! Resumo de ${nomeMes}* (${dataFormatada})\n` +
+      `☀️ *${saudacao(hoje)}, {{NOME}}! Resumo de ${nomeMes}* (${dataFormatada})\n` +
       `Faturado até agora: *${brl(totalMes)}* (${percentual}% da meta)\n` +
       (falta > 0
         ? `Falta *${brl(falta)}* para bater a meta de ${brl(metaMensal)}`
