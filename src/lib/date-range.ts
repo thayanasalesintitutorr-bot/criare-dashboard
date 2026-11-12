@@ -3,6 +3,13 @@
 // extraído de api/test/route.ts pra ser reaproveitado por qualquer rota que
 // precise respeitar o mesmo filtro de período da barra superior.
 
+// O servidor (Vercel) roda em UTC — isso dá a hora/data correspondente ao
+// horário de Brasília agora, pra qualquer código que precise saber "que dia
+// é hoje" ou "que horas são" de verdade (ex: saudação, fechamento do dia).
+export function agoraBrasilia() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }))
+}
+
 export function parseLocalDate(value: string, end = false) {
   const [year, month, day] = value.split('-').map(Number)
 

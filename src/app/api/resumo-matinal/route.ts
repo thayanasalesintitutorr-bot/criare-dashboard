@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { chaveData, diasDoMes } from '@/lib/dias-uteis'
 import { saudacao } from '@/lib/slack'
+import { agoraBrasilia } from '@/lib/date-range'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -79,7 +80,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const hoje = new Date()
+    const hoje = agoraBrasilia()
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1)
     const agora = new Date()
 

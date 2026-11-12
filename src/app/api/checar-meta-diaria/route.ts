@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { requireSession } from '@/lib/require-session'
 import { saudacao } from '@/lib/slack'
+import { agoraBrasilia } from '@/lib/date-range'
 
 const SUPABASE_URL = 'https://afxgfgvdmgxcvamginjc.supabase.co'
 
@@ -142,7 +143,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const hoje = new Date()
+    const hoje = agoraBrasilia()
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
     const inicioAmanha = new Date(inicioHoje)
     inicioAmanha.setDate(inicioAmanha.getDate() + 1)
