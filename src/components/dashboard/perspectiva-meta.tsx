@@ -5,9 +5,10 @@ import { chaveData, diasDoMes } from '@/lib/dias-uteis'
 
 const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
-// Campanha "Novembro + Dezembro" (reunião de 06/11/2026): enquanto hoje cai
-// nessa janela, os dias úteis considerados abrangem os dois meses juntos
-// (não só o mês corrente) — mesma janela usada em src/lib/meta-dinamica.ts.
+// Campanha "Novembro + Dezembro" (ajuste de 12/11/2026): cada mês tem sua
+// própria meta (novembro R$1mi, dezembro R$500mil + rollover do resultado de
+// novembro — ver src/lib/meta-dinamica.ts), então aqui só precisa limitar os
+// dias úteis de dezembro até o último dia trabalhado (18/12).
 const INICIO_CAMPANHA = new Date(2026, 10, 1)
 const FIM_CAMPANHA = new Date(2026, 11, 18) // último dia trabalhado em dezembro
 
@@ -36,7 +37,7 @@ export function PerspectivaMeta({
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
   const emCampanha = hoje >= INICIO_CAMPANHA && hoje <= FIM_CAMPANHA
-  const dias = emCampanha ? [...diasDoMes(INICIO_CAMPANHA), ...diasDoMes(new Date(2026, 11, 1))] : diasDoMes(hoje)
+  const dias = diasDoMes(hoje)
   const hojeChave = chaveData(hoje)
   const fimChave = emCampanha ? chaveData(FIM_CAMPANHA) : null
 
@@ -52,7 +53,7 @@ export function PerspectivaMeta({
   const vendasPorDia = ticket > 0 ? porDia / ticket : 0
   const ritmo = uteisPassados > 0 ? realizado / uteisPassados : 0
   const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'long' })
-  const nomePeriodo = emCampanha ? 'Nov+Dez' : nomeMes
+  const nomePeriodo = nomeMes
 
   const percentMeta = meta > 0 ? Math.min((realizado / meta) * 100, 100) : 0
   const totalUteisMes = uteisPassados + uteisRestantes.length

@@ -26,19 +26,19 @@ export async function GET(req: Request) {
       calcularMetaDinamica(hoje),
     ])
 
-    const { realizado, falta, totalMeta, diasUteisRestantes, diasUteisPassados } = metaInfo
-    const percentualCampanha = totalMeta > 0 ? Math.round((realizado / totalMeta) * 100) : 0
+    const { falta, totalMeta, diasUteisRestantes, diasUteisPassados } = metaInfo
+    const percentualMeta = totalMeta > 0 ? Math.round((totalMes / totalMeta) * 100) : 0
 
-    // Ritmo médio por dia útil desde o início da campanha (01/11), projetado
-    // pros dias úteis que faltam até o fim dela (31/12) — mesmo raciocínio do
-    // card Perspectiva de venda, só que somando os dois meses como um pote só.
-    const ritmo = diasUteisPassados > 0 ? realizado / diasUteisPassados : 0
+    // Ritmo médio por dia útil desde o início do mês, projetado pros dias
+    // úteis que faltam até o fim dele (18/12 em dezembro) — mesmo raciocínio
+    // do card Perspectiva de venda.
+    const ritmo = diasUteisPassados > 0 ? totalMes / diasUteisPassados : 0
     const projecaoFechamento = ritmo * (diasUteisPassados + diasUteisRestantes)
     const diffProjecao = projecaoFechamento - totalMeta
     const mostrarProjecao = diasUteisPassados > 0 && diasUteisRestantes > 0
 
     const linhaProjecao = mostrarProjecao
-      ? `\nNo ritmo atual (${brl(ritmo)}/dia útil), a campanha deve fechar em *${brl(projecaoFechamento)}* — ${
+      ? `\nNo ritmo atual (${brl(ritmo)}/dia útil), ${nomeMes} deve fechar em *${brl(projecaoFechamento)}* — ${
           diffProjecao >= 0 ? `${brl(diffProjecao)} acima da meta` : `${brl(Math.abs(diffProjecao))} abaixo da meta`
         }.`
       : ''
@@ -48,14 +48,13 @@ export async function GET(req: Request) {
     const mensagem =
       `☀️ *${saudacao(hoje)}, {{NOME}}!* (${dataFormatada})\n` +
       `Faturado em ${nomeMes} até agora: *${brl(totalMes)}*\n\n` +
-      `🎯 *Meta Nov+Dez: ${brl(totalMeta)}*\n` +
-      `Faturado desde 01/11: *${brl(realizado)}* (${percentualCampanha}%)\n` +
+      `🎯 *Meta de ${nomeMes}: ${brl(totalMeta)}* (${percentualMeta}%)\n` +
       (falta > 0
-        ? `Falta *${brl(falta)}* para o total — ${brl(metaInfo.metaDiaria)}/dia útil nos ${diasUteisRestantes} dias úteis restantes`
-        : `🎉 Meta combinada de ${brl(totalMeta)} já batida!`) +
+        ? `Falta *${brl(falta)}* para a meta — ${brl(metaInfo.metaDiaria)}/dia útil nos ${diasUteisRestantes} dias úteis restantes`
+        : `🎉 Meta de ${nomeMes} já batida!`) +
       linhaProjecao
 
-    return Response.json({ ok: true, totalMes, ...metaInfo, percentualCampanha, mensagem })
+    return Response.json({ ok: true, totalMes, ...metaInfo, percentualMeta, mensagem })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao gerar resumo matinal', details: String(erro) }, { status: 500 })
   }

@@ -66,39 +66,45 @@ export function getMetaMensal(ano: number, mes: number) {
   return 750000
 }
 
-// Campanha "Novembro + Dezembro" da reunião de 06/11/2026: R$1,5 milhão
-// combinado nos dois meses (R$1.000.000 + R$500.000). Em vez de uma meta
-// fixa por mês, o valor por dia útil é recalculado todo dia: pega tudo que
-// já foi faturado desde 01/11 e divide o que falta pros R$1,5 milhão pelos
-// dias úteis que restam até 18/12 (último dia trabalhado em dezembro) — se
-// as vendas atrasam, o valor diário sobe; se adiantam, desce.
+// Campanha "Novembro + Dezembro" (reunião de 06/11 e ajuste de 12/11/2026):
+// novembro tem meta própria de R$1.000.000, cobrada normalmente ao longo do
+// mês. Dezembro começa com R$500.000 — e só quando novembro FECHA (vira
+// dezembro) essa meta é ajustada pelo resultado real de novembro: o que
+// faltou (ou passou) da meta de R$1.000.000 soma (ou desconta) na meta de
+// dezembro. Ou seja, dezembro = R$500.000 + (R$1.000.000 − faturado em
+// novembro), nunca abaixo de zero. O valor por dia útil é recalculado todo
+// dia dentro do mês corrente (sem misturar com o outro mês).
 const INICIO_CAMPANHA = new Date(2026, 10, 1) // 01/11/2026
-const FIM_CAMPANHA = new Date(2026, 11, 18) // 18/12/2026
-const META_CAMPANHA = 1500000
+const FIM_NOVEMBRO = new Date(2026, 10, 30) // 30/11/2026
+const INICIO_DEZEMBRO = new Date(2026, 11, 1) // 01/12/2026
+const FIM_CAMPANHA = new Date(2026, 11, 18) // 18/12/2026 (último dia trabalhado)
+const META_NOVEMBRO = 1000000
+const META_DEZEMBRO_BASE = 500000
 
 function dentroDaCampanha(hoje: Date) {
   return hoje >= INICIO_CAMPANHA && hoje <= FIM_CAMPANHA
 }
 
-function diasDaCampanha() {
-  return [...diasDoMes(INICIO_CAMPANHA), ...diasDoMes(new Date(2026, 11, 1))]
-}
-
-function diasUteisRestantesNaCampanha(hoje: Date) {
+function diasUteisNoIntervalo(refMes: Date, hoje: Date, inicio: Date, fim: Date) {
   const hojeChave = chaveData(hoje)
-  return diasDaCampanha().filter((d) => d.util && chaveData(d.data) >= hojeChave && chaveData(d.data) <= chaveData(FIM_CAMPANHA))
-    .length
-}
+  const inicioChave = chaveData(inicio)
+  const fimChave = chaveData(fim)
 
-function diasUteisPassadosNaCampanha(hoje: Date) {
-  const hojeChave = chaveData(hoje)
-  return diasDaCampanha().filter((d) => d.util && chaveData(d.data) < hojeChave).length
+  const dias = diasDoMes(refMes).filter((d) => {
+    const chave = chaveData(d.data)
+    return chave >= inicioChave && chave <= fimChave
+  })
+
+  return {
+    restantes: dias.filter((d) => d.util && chaveData(d.data) >= hojeChave).length,
+    passados: dias.filter((d) => d.util && chaveData(d.data) < hojeChave).length,
+  }
 }
 
 export async function calcularMetaDinamica(hoje: Date) {
   if (!dentroDaCampanha(hoje)) {
     // Fora da janela nov/dez-2026 (passado ou futuro) — cai na meta simples
-    // do mês, sem o "pote" combinado.
+    // do mês, sem o ajuste de rollover.
     const metaMensal = getMetaMensal(hoje.getFullYear(), hoje.getMonth())
     const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
     const diasUteisMes = diasDoMes(hoje).filter((d) => d.util).length
@@ -115,10 +121,43 @@ export async function calcularMetaDinamica(hoje: Date) {
   }
 
   const amanha = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1)
-  const realizado = await calcularFaturamento(INICIO_CAMPANHA.toISOString(), amanha.toISOString())
-  const falta = Math.max(META_CAMPANHA - realizado, 0)
-  const diasUteisRestantes = diasUteisRestantesNaCampanha(hoje)
-  const diasUteisPassados = diasUteisPassadosNaCampanha(hoje)
+  const emNovembro = hoje <= FIM_NOVEMBRO
+
+  if (emNovembro) {
+    const realizado = await calcularFaturamento(INICIO_CAMPANHA.toISOString(), amanha.toISOString())
+    const falta = Math.max(META_NOVEMBRO - realizado, 0)
+    const { restantes: diasUteisRestantes, passados: diasUteisPassados } = diasUteisNoIntervalo(
+      INICIO_CAMPANHA,
+      hoje,
+      INICIO_CAMPANHA,
+      FIM_NOVEMBRO
+    )
+
+    return {
+      metaDiaria: diasUteisRestantes > 0 ? falta / diasUteisRestantes : falta,
+      realizado,
+      falta,
+      diasUteisRestantes,
+      diasUteisPassados,
+      totalMeta: META_NOVEMBRO,
+      fimPeriodo: FIM_NOVEMBRO,
+      inicioPeriodo: INICIO_CAMPANHA,
+    }
+  }
+
+  // Dezembro: novembro já fechou — pega o resultado final dele pra ajustar
+  // a meta de dezembro (sobra ou falta de novembro passa pra frente).
+  const realizadoNovembro = await calcularFaturamento(INICIO_CAMPANHA.toISOString(), INICIO_DEZEMBRO.toISOString())
+  const metaDezembro = Math.max(META_DEZEMBRO_BASE + (META_NOVEMBRO - realizadoNovembro), 0)
+
+  const realizado = await calcularFaturamento(INICIO_DEZEMBRO.toISOString(), amanha.toISOString())
+  const falta = Math.max(metaDezembro - realizado, 0)
+  const { restantes: diasUteisRestantes, passados: diasUteisPassados } = diasUteisNoIntervalo(
+    INICIO_DEZEMBRO,
+    hoje,
+    INICIO_DEZEMBRO,
+    FIM_CAMPANHA
+  )
 
   return {
     metaDiaria: diasUteisRestantes > 0 ? falta / diasUteisRestantes : falta,
@@ -126,8 +165,8 @@ export async function calcularMetaDinamica(hoje: Date) {
     falta,
     diasUteisRestantes,
     diasUteisPassados,
-    totalMeta: META_CAMPANHA,
+    totalMeta: metaDezembro,
     fimPeriodo: FIM_CAMPANHA,
-    inicioPeriodo: INICIO_CAMPANHA,
+    inicioPeriodo: INICIO_DEZEMBRO,
   }
 }
