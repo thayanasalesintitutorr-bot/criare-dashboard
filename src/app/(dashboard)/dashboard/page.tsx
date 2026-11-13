@@ -7,6 +7,7 @@ import {
   Stethoscope,
   Users,
   ChartNoAxesCombined,
+  Gauge,
 } from 'lucide-react'
 import { useFilters } from '@/store/use-filters'
 import { useSetPageHeader } from '@/store/use-page-header'
@@ -626,6 +627,29 @@ function GoalMetric({
 
 }
 
+// Destaque pequeno (não é um número "grande" como os outros, é só um selo)
+// pro ritmo de venda por dia útil — fica junto do Ticket Médio, sem competir
+// com os números principais do card.
+function RitmoBadge({ valor, empty = false }: { valor: number; empty?: boolean }) {
+  const { viewMode } = useFilters()
+  if (empty) return null
+
+  const isApresentacao = viewMode === 'apresentacao'
+
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)]/25 bg-[var(--accent)]/10 ${
+        isApresentacao ? 'px-3 py-1.5' : 'px-2.5 py-1'
+      }`}
+    >
+      <Gauge size={isApresentacao ? 18 : 13} className="shrink-0 text-[var(--accent)]" />
+      <span className={`font-semibold text-[var(--accent)] ${isApresentacao ? 'text-[16px]' : 'text-[11.5px]'}`}>
+        Ritmo: {formatMoney(valor)}/dia útil
+      </span>
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const { periodo, tipoData, segmento, dataInicio, dataFim, viewMode, comparar, compararInicio, compararFim } = useFilters()
   const modoSlides = useModoSlides()
@@ -990,11 +1014,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   empty={!comercialConsulta?.quantidadeConsulta}
 />
 
-<SimpleMetric
-  label="Ritmo"
-  value={`${formatMoney(comercialConsulta?.ritmoConsulta || 0)}/dia útil`}
-  empty={!comercialConsulta?.quantidadeConsulta}
-/>
+<RitmoBadge valor={comercialConsulta?.ritmoConsulta || 0} empty={!comercialConsulta?.quantidadeConsulta} />
     </div>
 
     {temReabord && (
@@ -1099,11 +1119,7 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   empty={!comercialVendas?.propostasFechadas}
 />
 
-<SimpleMetric
-  label="Ritmo"
-  value={`${formatMoney(comercialVendas?.ritmoVendas || 0)}/dia útil`}
-  empty={!comercialVendas?.propostasFechadas}
-/>
+<RitmoBadge valor={comercialVendas?.ritmoVendas || 0} empty={!comercialVendas?.propostasFechadas} />
 
 <SimpleMetric
   label="Ciclo de venda"
