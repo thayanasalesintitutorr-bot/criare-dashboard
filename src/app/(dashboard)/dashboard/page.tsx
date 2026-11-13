@@ -58,6 +58,8 @@ type DashboardResponse = {
   quantidadeConsulta: number
   valorTotalConsulta: number
   ticketMedioConsulta: number
+  ritmoConsulta: number
+  diasUteisRitmoPeriodo: number
 
   quantidadeReabord: number
   valorTotalReabord: number
@@ -73,6 +75,7 @@ type DashboardResponse = {
       propostasFechadasPercent: number
       valorTotalVendas: number
       ticketMedioVendas: number
+      ritmoVendas: number
       cicloVendaDias: number
       metaPropostasFechadasPercent: number
       metaValorTotalVendas: number
@@ -497,8 +500,13 @@ function GoalMetric({
   const base = Number(previousValue || 0)
   const numericValue = typeof value === 'number' ? value : Number(value) || 0
   const diff = base > 0 ? Math.round(((numericValue - base) / base) * 100) : 0
-  const positivo = diff > 0
-  const negativo = diff < 0
+  const subiu = diff > 0
+  const caiu = diff < 0
+  // mode="max" é métrica de "quanto menos melhor" (No Show, Reagendados,
+  // Cancelados) — nessas, subir é piorar e cair é melhorar; é o inverso de
+  // mode="min".
+  const melhorou = mode === 'max' ? caiu : subiu
+  const piorou = mode === 'max' ? subiu : caiu
 
   if (empty) {
     return (
@@ -548,14 +556,15 @@ function GoalMetric({
         <div className={`flex items-center gap-2 ${isApresentacao ? 'text-[22px]' : viewMode === 'iphone' ? 'text-[12px]' : 'text-[12px]'} font-medium`}>
           <span
             className={
-              positivo
+              melhorou
                 ? 'text-[var(--success)]'
-                : negativo
+                : piorou
                 ? 'text-[var(--danger)]'
                 : 'text-[var(--muted-foreground)]'
             }
           >
-            {positivo ? '▲' : negativo ? '▼' : '＝'} {Math.abs(diff)}%
+            {subiu ? '▲' : caiu ? '▼' : '＝'} {Math.abs(diff)}%
+            {melhorou ? ' · melhorando' : piorou ? ' · piorando' : ''}
           </span>
 
           <span className={textSecondary()}>ant. {base}</span>
@@ -980,6 +989,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   showCompare={comparar}
   empty={!comercialConsulta?.quantidadeConsulta}
 />
+
+<SimpleMetric
+  label="Ritmo"
+  value={`${formatMoney(comercialConsulta?.ritmoConsulta || 0)}/dia útil`}
+  empty={!comercialConsulta?.quantidadeConsulta}
+/>
     </div>
 
     {temReabord && (
@@ -1081,6 +1096,12 @@ const quantidadeLeadSelecionado = leadsSelecionados.reduce(
   value={formatMoney(comercialVendas?.ticketMedioVendas || 0)}
   previousValue={comparativo?.comercialVendas?.ticketMedioVendasAnterior}
   showCompare={comparar}
+  empty={!comercialVendas?.propostasFechadas}
+/>
+
+<SimpleMetric
+  label="Ritmo"
+  value={`${formatMoney(comercialVendas?.ritmoVendas || 0)}/dia útil`}
   empty={!comercialVendas?.propostasFechadas}
 />
 

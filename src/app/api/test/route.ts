@@ -348,6 +348,17 @@ function countDiasUteis(start: Date, end: Date) {
   return count
 }
 
+// Dias úteis já "decorridos" dentro de um período: do início até hoje, ou
+// até o fim do período se ele já tiver terminado por completo. Usado pro
+// "Ritmo" (R$ por dia útil) dos cards Comercial — um período que ainda não
+// acabou (ex: mês atual) não pode dividir pelos dias úteis inteiros dele,
+// senão o ritmo fica artificialmente baixo nos primeiros dias.
+function countDiasUteisDecorridos(start: Date, end: Date, hoje: Date) {
+  const fimDecorrido = new Date(Math.min(end.getTime(), startOfDay(hoje).getTime()))
+  if (fimDecorrido < start) return 0
+  return countDiasUteis(start, fimDecorrido)
+}
+
 // Quantidade de dias úteis (segunda a sexta) de um mês específico.
 // Não desconta feriados.
 function getBusinessDaysInMonth(ano: number, mes: number) {
@@ -763,6 +774,9 @@ async function fetchAllAmplimed() {
     const janelaFiltro = buildFiltroJanelaOr(janelaSegura.min, janelaSegura.max)
 
     const agora = agoraBrasilia()
+    // Dias úteis decorridos no período selecionado (filtro do dashboard) —
+    // base do "Ritmo" (R$/dia útil) dos cards Comercial I/II e III.
+    const diasUteisRitmoPeriodo = countDiasUteisDecorridos(range.start, range.end, agora)
     const inicioNovembro = new Date(2026, 10, 1)
     const limiteNovembro = new Date(Math.min(new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1).getTime(), new Date(2026, 11, 1).getTime()))
 
@@ -1036,6 +1050,9 @@ const agendadosFunil = agendadosLeadsPeriodo.length
 
     const ticketMedioConsulta =
       quantidadeConsulta > 0 ? valorTotalConsulta / quantidadeConsulta : 0
+
+    const ritmoConsulta =
+      diasUteisRitmoPeriodo > 0 ? valorTotalConsulta / diasUteisRitmoPeriodo : 0
 
    const campanhasConsultaMap: Record<
   string,
@@ -1450,6 +1467,9 @@ const campanhasVendidas = Object.entries(campanhasMap)
 
     const ticketMedioVendas =
       propostasFechadas > 0 ? valorTotalVendas / propostasFechadas : 0
+
+    const ritmoVendas =
+      diasUteisRitmoPeriodo > 0 ? valorTotalVendas / diasUteisRitmoPeriodo : 0
 
       const consultaGanhosAnterior = consultaLeads.filter((l) => {
   return (
@@ -2792,6 +2812,8 @@ const painelAtendimento = {
       quantidadeConsulta,
       valorTotalConsulta,
       ticketMedioConsulta,
+      ritmoConsulta,
+      diasUteisRitmoPeriodo,
       quantidadeReabord,
       valorTotalReabord,
       ticketMedioReabord,
@@ -2817,6 +2839,7 @@ const painelAtendimento = {
   propostasFechadasPercent,
   valorTotalVendas,
   ticketMedioVendas,
+  ritmoVendas,
   leadsParadosVendas,
   cicloVendaDias,
   metaPropostasFechadasPercent: 70,
