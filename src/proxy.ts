@@ -22,13 +22,14 @@ export async function proxy(req: NextRequest) {
   }
 
   // Chamadas agendadas pelo n8n (meta diária, resumo matinal, vendas
-  // fechadas e fechamento do dia) não têm cookie de sessão — cada rota já
-  // valida o CRON_SECRET no próprio código.
+  // fechadas, fechamento do dia e fluxo de leads) não têm cookie de sessão
+  // — cada rota já valida o CRON_SECRET no próprio código.
   if (
     pathname === '/api/checar-meta-diaria' ||
     pathname === '/api/resumo-matinal' ||
     pathname === '/api/checar-vendas-fechadas' ||
-    pathname === '/api/resumo-noturno'
+    pathname === '/api/resumo-noturno' ||
+    pathname === '/api/checar-fluxo-leads'
   ) {
     return NextResponse.next()
   }
