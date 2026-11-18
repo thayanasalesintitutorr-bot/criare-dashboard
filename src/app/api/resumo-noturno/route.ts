@@ -51,8 +51,10 @@ function montarMensagemFechamento(
 }
 
 // Quando a meta do dia não foi batida: avisa o resultado do dia mesmo assim
-// e já adianta a meta diária recalculada pra amanhã (o que faltou hoje entra
-// na conta de quanto falta dividir pelos dias úteis que restam).
+// e já adianta a meta diária recalculada pra amanhã — não é a meta de hoje
+// mais o que faltou (isso só puxaria o déficit todo pro dia seguinte); é o
+// total que falta pra meta do mês redistribuído pelos dias úteis que ainda
+// restam, por isso a mensagem mostra essa conta (falta ÷ dias) explícita.
 function montarMensagemMetaNaoBatida(
   valorHoje: number,
   metaHoje: number,
@@ -61,6 +63,8 @@ function montarMensagemMetaNaoBatida(
   percentualMeta: number,
   nomeMes: string,
   dataFormatada: string,
+  faltaAmanha: number,
+  diasUteisRestantesAmanha: number,
   metaAmanha: number
 ) {
   const faltouHoje = Math.max(metaHoje - valorHoje, 0)
@@ -69,7 +73,7 @@ function montarMensagemMetaNaoBatida(
     `📊 *Fechamos o dia, {{NOME}}.* (${dataFormatada})\n` +
     `Faturamos *${brl(valorHoje)}* hoje — ficou *${brl(faltouHoje)}* abaixo da meta do dia (${brl(metaHoje)}).\n\n` +
     `No mês de ${nomeMes}, somamos *${brl(totalMes)}* (${percentualMeta}% da meta de ${brl(metaMes)})\n` +
-    `Pra amanhã, a meta ajusta pra *${brl(metaAmanha)}/dia útil*. Vamos com tudo! 💪🚀`
+    `Falta *${brl(faltaAmanha)}* pra meta do mês, dividido nos *${diasUteisRestantesAmanha} dias úteis* que restam a partir de amanhã → meta ajusta pra *${brl(metaAmanha)}/dia útil*. Vamos com tudo! 💪🚀`
   )
 }
 
@@ -110,6 +114,8 @@ export async function GET(req: Request) {
           percentualMeta,
           nomeMes,
           dataFormatada,
+          metaInfoAmanha.falta,
+          metaInfoAmanha.diasUteisRestantes,
           metaInfoAmanha.metaDiaria
         )
 
