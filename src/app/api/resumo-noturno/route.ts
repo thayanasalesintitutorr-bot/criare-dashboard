@@ -27,10 +27,9 @@ async function metaBatidaHoje(diaChave: string) {
 }
 
 // {{NOME}} é substituído pelo n8n pelo primeiro nome de cada pessoa do Slack
-// antes de enviar — assim cada um recebe a mensagem personalizada. Só manda
-// essa mensagem nos dias em que a meta diária foi batida (ver
-// meta_diaria_notificada) — é o "fechamento" comemorativo do dia, não um
-// resumo de todo dia.
+// antes de enviar — assim cada um recebe a mensagem personalizada. É o
+// "fechamento" do dia, comemorativo quando a meta diária foi batida (ver
+// meta_diaria_notificada).
 function montarMensagemFechamento(
   valorHoje: number,
   totalMes: number,
@@ -51,6 +50,29 @@ function montarMensagemFechamento(
   )
 }
 
+// Quando a meta do dia não foi batida: avisa o resultado do dia mesmo assim
+// e já adianta a meta diária recalculada pra amanhã (o que faltou hoje entra
+// na conta de quanto falta dividir pelos dias úteis que restam).
+function montarMensagemMetaNaoBatida(
+  valorHoje: number,
+  metaHoje: number,
+  totalMes: number,
+  metaMes: number,
+  percentualMeta: number,
+  nomeMes: string,
+  dataFormatada: string,
+  metaAmanha: number
+) {
+  const faltouHoje = Math.max(metaHoje - valorHoje, 0)
+
+  return (
+    `📊 *Fechamos o dia, {{NOME}}.* (${dataFormatada})\n` +
+    `Faturamos *${brl(valorHoje)}* hoje — ficou *${brl(faltouHoje)}* abaixo da meta do dia (${brl(metaHoje)}).\n\n` +
+    `No mês de ${nomeMes}, somamos *${brl(totalMes)}* (${percentualMeta}% da meta de ${brl(metaMes)})\n` +
+    `Pra amanhã, a meta ajusta pra *${brl(metaAmanha)}/dia útil*. Vamos com tudo! 💪🚀`
+  )
+}
+
 export async function GET(req: Request) {
   const auth = req.headers.get('authorization')
   if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -67,23 +89,41 @@ export async function GET(req: Request) {
     const dataFormatada = hoje.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
     const nomeMes = hoje.toLocaleDateString('pt-BR', { month: 'long' })
 
-    const bateuHoje = await metaBatidaHoje(diaChave)
-    if (!bateuHoje) {
-      return Response.json({ ok: true, enviar: false })
-    }
-
-    const [valorHoje, totalMes, metaInfo] = await Promise.all([
+    const [bateuHoje, valorHoje, totalMes, metaInfo, metaInfoAmanha] = await Promise.all([
+      metaBatidaHoje(diaChave),
       calcularFaturamento(inicioHoje.toISOString(), inicioAmanha.toISOString()),
       calcularFaturamento(inicioMes.toISOString(), inicioAmanha.toISOString()),
       calcularMetaDinamica(hoje),
+      calcularMetaDinamica(inicioAmanha),
     ])
 
-    const { falta, totalMeta } = metaInfo
+    const { falta, totalMeta, metaDiaria: metaHoje } = metaInfo
     const percentualMeta = totalMeta > 0 ? Math.round((totalMes / totalMeta) * 100) : 0
 
-    const mensagem = montarMensagemFechamento(valorHoje, totalMes, totalMeta, falta, percentualMeta, nomeMes, dataFormatada)
+    const mensagem = bateuHoje
+      ? montarMensagemFechamento(valorHoje, totalMes, totalMeta, falta, percentualMeta, nomeMes, dataFormatada)
+      : montarMensagemMetaNaoBatida(
+          valorHoje,
+          metaHoje,
+          totalMes,
+          totalMeta,
+          percentualMeta,
+          nomeMes,
+          dataFormatada,
+          metaInfoAmanha.metaDiaria
+        )
 
-    return Response.json({ ok: true, enviar: true, valorHoje, totalMes, ...metaInfo, percentualMeta, mensagem })
+    return Response.json({
+      ok: true,
+      enviar: true,
+      bateuHoje,
+      valorHoje,
+      totalMes,
+      ...metaInfo,
+      percentualMeta,
+      metaAmanha: metaInfoAmanha.metaDiaria,
+      mensagem,
+    })
   } catch (erro) {
     return Response.json({ ok: false, error: 'Falha ao gerar fechamento do dia', details: String(erro) }, { status: 500 })
   }
